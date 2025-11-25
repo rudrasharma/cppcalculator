@@ -145,12 +145,17 @@
             };
 
             const toggleMax = (year, isMax) => {
+                // If it IS currently max, clicking it acts as a "Clear" or "Reset" to let user start over
                 if (isMax) {
-                    setEarnings(prev => ({ ...prev, [year]: 'MAX' }));
-                } else {
-                    const newEarnings = { ...prev };
+                    const newEarnings = { ...earnings };
                     delete newEarnings[year];
                     setEarnings(newEarnings);
+                } else {
+                    // Set it to the actual numeric Max value (YAMPE if available, else YMPE)
+                    const ympe = getYMPE(year);
+                    const yampe = getYAMPE(year);
+                    const maxVal = yampe > 0 ? yampe : ympe;
+                    setEarnings(prev => ({ ...prev, [year]: maxVal }));
                 }
             };
 
@@ -158,7 +163,12 @@
                 const newEarnings = { ...earnings };
                 years.forEach(y => {
                     if (y >= CURRENT_YEAR) {
-                        if (type === 'max') newEarnings[y] = 'MAX';
+                        if (type === 'max') {
+                            const ympe = getYMPE(y);
+                            const yampe = getYAMPE(y);
+                            // Pre-fill the actual number so it remains editable
+                            newEarnings[y] = yampe > 0 ? yampe : ympe;
+                        }
                         if (type === 'clear') delete newEarnings[y];
                     }
                 });
@@ -169,7 +179,12 @@
                 const newEarnings = { ...earnings };
                 years.forEach(y => {
                     if (y < CURRENT_YEAR) {
-                        if (type === 'max') newEarnings[y] = 'MAX';
+                        if (type === 'max') {
+                            const ympe = getYMPE(y);
+                            const yampe = getYAMPE(y);
+                            // Pre-fill the actual number
+                            newEarnings[y] = yampe > 0 ? yampe : ympe;
+                        }
                     }
                 });
                 setEarnings(newEarnings);
@@ -184,7 +199,7 @@
                     const yampe = getYAMPE(year);
                     let rawIncome = earnings[year];
                     
-                    if (rawIncome === 'MAX') rawIncome = ympe + (yampe > 0 ? (yampe - ympe) : 0);
+                    // Legacy check removed, but we safeguard parsing
                     if (!rawIncome) rawIncome = 0;
                     rawIncome = parseFloat(rawIncome);
 
@@ -357,8 +372,13 @@
                                 {years.map(year => {
                                     const isFuture = year > CURRENT_YEAR;
                                     const ympe = getYMPE(year);
-                                    const isMax = earnings[year] === 'MAX';
-                                    const val = earnings[year] === 'MAX' ? ympe : (earnings[year] || '');
+                                    const yampe = getYAMPE(year);
+                                    // Calculate what the "Max" value would be for this year
+                                    const maxVal = yampe > 0 ? yampe : ympe;
+
+                                    const val = earnings[year] || '';
+                                    // Check if current value matches the calculated max (loose equality for string/number)
+                                    const isMax = val == maxVal && val !== '';
 
                                     return (
                                     <div key={year} className={`grid grid-cols-12 p-3 border-b last:border-0 items-center hover:bg-gray-50 transition ${isFuture ? 'bg-blue-50/30' : ''}`}>
@@ -370,15 +390,14 @@
                                             <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 text-xs">$</span>
                                             <input 
                                             type="number" 
-                                            disabled={isMax}
-                                            value={isMax ? ympe : val}
+                                            value={val}
                                             onChange={(e) => handleEarningChange(year, e.target.value)}
-                                            className={`w-full pl-5 pr-2 py-1.5 text-sm border rounded focus:ring-1 focus:ring-blue-500 outline-none ${isMax ? 'bg-gray-100 text-gray-400' : 'bg-white'}`}
+                                            className={`w-full pl-5 pr-2 py-1.5 text-sm border rounded focus:ring-1 focus:ring-blue-500 outline-none ${isMax ? 'bg-green-50 text-green-700 font-semibold' : 'bg-white'}`}
                                             placeholder="0"
                                             />
                                         </div>
                                         <button 
-                                            onClick={() => toggleMax(year, !isMax)}
+                                            onClick={() => toggleMax(year, isMax)}
                                             className={`px-2 py-1 text-xs font-bold rounded border transition-colors ${isMax ? 'bg-green-100 text-green-700 border-green-200' : 'bg-gray-100 text-gray-400 border-gray-200'}`}
                                         >
                                             MAX
