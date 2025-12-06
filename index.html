@@ -3,20 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CPP & OAS Estimator</title>
     
-    <!-- Tailwind CSS (via CDN) -->
+    <title>2025 CPP & OAS Calculator | Canadian Retirement Income Estimator</title>
+    <meta name="description" content="Calculate your 2025 Canada Pension Plan (CPP) and Old Age Security (OAS) benefits. Includes Enhanced CPP tiers, dropout provisions, and inflation indexing. Free online tool.">
+    <meta name="keywords" content="CPP calculator 2025, OAS estimator, Canada Pension Plan, Enhanced CPP Tier 2, Retirement Income Canada, CPP dropout calculation">
+    <meta name="author" content="Canadian Retirement Tools">
+    <link rel="canonical" href="https://your-website-url.com/cpp-calculator" />
+    
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="2025 CPP & OAS Calculator">
+    <meta property="og:description" content="Estimate your future CPP and OAS payments instantly. Handles the new Tier 2 Enhanced CPP rules.">
+    <meta property="og:image" content="https://your-website-url.com/preview-image.jpg">
+
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:title" content="2025 CPP & OAS Calculator">
+    <meta property="twitter:description" content="Free tool to estimate Canadian retirement benefits including Enhanced CPP.">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "CPP & OAS Estimator",
+      "applicationCategory": "FinanceApplication",
+      "operatingSystem": "Web",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "CAD"
+      },
+      "description": "A free calculator for estimating Canada Pension Plan (CPP) and Old Age Security (OAS) benefits, including Enhanced CPP Tier 1 and Tier 2 calculations.",
+      "featureList": "CPP Dropout Calculation, Enhanced CPP Tier 1 & 2, OAS Deferral Bonus, Actuarial Age Adjustments",
+      "author": {
+        "@type": "Organization",
+        "name": "Canadian Retirement Tools"
+      }
+    }
+    </script>
+    
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [{
+        "@type": "Question",
+        "name": "How is Enhanced CPP calculated in 2025?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Enhanced CPP is calculated in two phases. Phase 1 increased the replacement rate to 33.33% on earnings up to the YMPE. Phase 2 (started 2024) introduces a second earnings ceiling (YAMPE) approx 14% higher than the first, allowing for additional Tier 2 contributions."
+        }
+      }, {
+        "@type": "Question",
+        "name": "How much does OAS increase if I defer it?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "For every month you defer receiving Old Age Security (OAS) after age 65, your payment increases by 0.6%, up to a maximum increase of 36% at age 70."
+        }
+      }]
+    }
+    </script>
+
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- React & ReactDOM (via CDN) -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     
-    <!-- Babel (to compile JSX in browser) -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
     <style>
-        /* Custom animation for fading in tabs */
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(5px); }
             to { opacity: 1; transform: translateY(0); }
@@ -24,74 +77,53 @@
         .animate-fade-in {
             animation: fadeIn 0.3s ease-out forwards;
         }
+        .btn-tooltip:hover:after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 110%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #333;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            white-space: nowrap;
+            z-index: 50;
+            opacity: 1;
+        }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800 font-sans">
+    
+    <noscript>
+        <div class="p-4 bg-white border-b">
+            <h1>Canadian CPP and OAS Calculator 2025</h1>
+            <p>Calculate your retirement income including <strong>Enhanced CPP</strong>, <strong>Old Age Security (OAS)</strong>, and <strong>GIS</strong> eligibility. 
+            This estimator handles the new <strong>YMPE</strong> and <strong>YAMPE</strong> limits for Tier 2 CPP contributions.</p>
+        </div>
+    </noscript>
+
     <div id="root"></div>
 
     <script type="text/babel">
         const { useState, useEffect, useMemo } = React;
 
-        // --- ICON COMPONENTS (Inline SVGs to replace Lucide dependency) ---
+        // --- ICONS ---
         const IconBase = ({ size = 24, className = "", children }) => (
-            <svg 
-                xmlns="http://www.w3.org/2000/svg" 
-                width={size} 
-                height={size} 
-                viewBox="0 0 24 24" 
-                fill="none" 
-                stroke="currentColor" 
-                strokeWidth="2" 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                className={className}
-            >
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
                 {children}
             </svg>
         );
-
-        const CalculatorIcon = (props) => (
-            <IconBase {...props}>
-                <rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="16" x2="16" y1="14" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/>
-            </IconBase>
-        );
-        const CalendarIcon = (props) => (
-            <IconBase {...props}>
-                <path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/>
-            </IconBase>
-        );
-        const DollarSignIcon = (props) => (
-            <IconBase {...props}>
-                <line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-            </IconBase>
-        );
-        const TrendingUpIcon = (props) => (
-            <IconBase {...props}>
-                <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/>
-            </IconBase>
-        );
-        const CheckCircleIcon = (props) => (
-            <IconBase {...props}>
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4 12 14.01l-3-3"/>
-            </IconBase>
-        );
-        const RotateCcwIcon = (props) => (
-            <IconBase {...props}>
-                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>
-            </IconBase>
-        );
-        const InfoIcon = (props) => (
-            <IconBase {...props}>
-                <circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>
-            </IconBase>
-        );
-        const HomeIcon = (props) => (
-            <IconBase {...props}>
-                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-                <polyline points="9 22 9 12 15 12 15 22"/>
-            </IconBase>
-        );
-
+        const CalculatorIcon = (props) => (<IconBase {...props}><rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="16" x2="16" y1="14" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/></IconBase>);
+        const TrendingUpIcon = (props) => (<IconBase {...props}><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></IconBase>);
+        const CheckCircleIcon = (props) => (<IconBase {...props}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4 12 14.01l-3-3"/></IconBase>);
+        const RotateCcwIcon = (props) => (<IconBase {...props}><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></IconBase>);
+        const InfoIcon = (props) => (<IconBase {...props}><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></IconBase>);
+        const HomeIcon = (props) => (<IconBase {...props}><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></IconBase>);
+        const DollarSignIcon = (props) => (<IconBase {...props}><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></IconBase>);
+        const BookOpenIcon = (props) => (<IconBase {...props}><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></IconBase>);
+        const HelpCircleIcon = (props) => (<IconBase {...props}><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></IconBase>);
 
         // --- CONSTANTS & DATA ---
         const YMPE_DATA = {
@@ -118,7 +150,7 @@
 
         const CURRENT_YEAR = new Date().getFullYear();
         const MAX_BASE_CPP_2025 = 1364.60;
-        const MAX_OAS_2025 = 727.67; // Max OAS for age 65-74 (Jan 2025)
+        const MAX_OAS_2025 = 727.67; 
 
         const getYMPE = (year) => {
             if (YMPE_DATA[year]) return YMPE_DATA[year];
@@ -128,13 +160,27 @@
             return 5000;
         };
 
-        // --- MAIN COMPONENT ---
+        const Tooltip = ({ text }) => {
+            return (
+                <div className="group relative inline-flex items-center ml-2">
+                    <button className="text-gray-400 hover:text-blue-500 transition-colors" aria-label="More info">
+                        <HelpCircleIcon size={16} />
+                    </button>
+                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-gray-800 text-white text-xs rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 text-center leading-tight">
+                        {text}
+                        <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
+                    </div>
+                </div>
+            );
+        };
+
         const App = () => {
             const [dob, setDob] = useState('1985-01-01');
             const [retirementAge, setRetirementAge] = useState(65);
             const [yearsInCanada, setYearsInCanada] = useState(40);
             const [earnings, setEarnings] = useState({}); 
             const [activeTab, setActiveTab] = useState('input');
+            const [avgSalaryInput, setAvgSalaryInput] = useState('');
 
             const birthYear = parseInt(dob.split('-')[0]);
             const startYear = birthYear + 18;
@@ -143,7 +189,7 @@
             const years = useMemo(() => {
                 const list = [];
                 for (let y = startYear; y < endYear; y++) {
-                list.push(y);
+                  list.push(y);
                 }
                 return list;
             }, [startYear, endYear]);
@@ -153,13 +199,11 @@
             };
 
             const toggleMax = (year, isMax) => {
-                // If it IS currently max, clicking it acts as a "Clear" or "Reset" to let user start over
                 if (isMax) {
                     const newEarnings = { ...earnings };
                     delete newEarnings[year];
                     setEarnings(newEarnings);
                 } else {
-                    // Set it to the actual numeric Max value (YAMPE if available, else YMPE)
                     const ympe = getYMPE(year);
                     const yampe = getYAMPE(year);
                     const maxVal = yampe > 0 ? yampe : ympe;
@@ -196,15 +240,25 @@
                 setEarnings(newEarnings);
             };
 
-            const calculateBenefits = () => {
-                // --- CPP CALCULATION ---
+            const applyAverageSalary = () => {
+                if (!avgSalaryInput || avgSalaryInput <= 0) return;
                 const currentYMPE = getYMPE(CURRENT_YEAR);
-                
+                const ratio = parseFloat(avgSalaryInput) / currentYMPE;
+                const newEarnings = {};
+                years.forEach(y => {
+                    const yYMPE = getYMPE(y);
+                    let theoreticalEarning = Math.round(yYMPE * ratio);
+                    newEarnings[y] = theoreticalEarning;
+                });
+                setEarnings(newEarnings);
+            };
+
+            const calculateBenefits = () => {
+                const currentYMPE = getYMPE(CURRENT_YEAR);
                 const yearData = years.map(year => {
                     const ympe = getYMPE(year);
                     const yampe = getYAMPE(year);
                     let rawIncome = earnings[year];
-                    
                     if (!rawIncome) rawIncome = 0;
                     rawIncome = parseFloat(rawIncome);
 
@@ -215,19 +269,9 @@
                     const tier1Income = baseIncome; 
                     const tier2Income = Math.max(0, Math.min(rawIncome, yampe) - ympe);
 
-                    return {
-                        year,
-                        ratio,
-                        adjustedEarnings,
-                        isEnhancedYear,
-                        tier1Income,
-                        tier2Income,
-                        ympe,
-                        yampe
-                    };
+                    return { year, ratio, adjustedEarnings, isEnhancedYear, tier1Income, tier2Income, ympe, yampe };
                 });
 
-                // Dropout Logic
                 const sortedByRatio = [...yearData].sort((a, b) => a.ratio - b.ratio);
                 const totalMonths = years.length * 12;
                 const monthsToDrop = Math.floor(totalMonths * 0.17);
@@ -235,10 +279,9 @@
                 const numYearsToDrop = Math.floor(yearsToDrop);
                 const retainedYears = sortedByRatio.slice(numYearsToDrop);
                 
-                const avgRatio = retainedYears.reduce((sum, y) => sum + y.ratio, 0) / retainedYears.length;
+                const avgRatio = retainedYears.length > 0 ? retainedYears.reduce((sum, y) => sum + y.ratio, 0) / retainedYears.length : 0;
                 const baseBenefit = MAX_BASE_CPP_2025 * avgRatio;
 
-                // Enhancement Logic
                 let enhancedTier1Total = 0;
                 let enhancedTier2Total = 0;
 
@@ -246,7 +289,6 @@
                     if (d.isEnhancedYear) {
                         const t1Credit = (d.tier1Income / d.ympe) * (0.0833 / 40) * currentYMPE;
                         enhancedTier1Total += t1Credit;
-
                         if (d.year >= 2024) {
                             const spread = d.yampe - d.ympe;
                             if (spread > 0) {
@@ -259,9 +301,7 @@
                 });
 
                 const enhancedBenefit = (enhancedTier1Total / 12) + (enhancedTier2Total / 12);
-
                 const monthsDiff = (retirementAge - 65) * 12;
-                let cppAdjustmentFactor = 1;
                 let cppAdjustmentPercent = 0;
 
                 if (monthsDiff < 0) {
@@ -271,13 +311,11 @@
                     cppAdjustmentPercent = cappedMonths * 0.7; 
                 }
                 
-                cppAdjustmentFactor = 1 + (cppAdjustmentPercent / 100);
+                const cppAdjustmentFactor = 1 + (cppAdjustmentPercent / 100);
                 const finalCPP = (baseBenefit + enhancedBenefit) * cppAdjustmentFactor;
 
-                // --- OAS CALCULATION ---
                 const validYears = Math.min(Math.max(0, yearsInCanada), 40);
                 let baseOAS = MAX_OAS_2025 * (validYears / 40);
-                
                 let oasAmount = 0;
                 let oasNote = "";
 
@@ -309,13 +347,13 @@
             const results = calculateBenefits();
 
             return (
-                <div className="min-h-screen bg-gray-50 text-gray-800 font-sans pb-12">
-                    {/* Header */}
-                    <header className="bg-blue-700 text-white p-4 shadow-lg sticky top-0 z-10">
+                <div className="min-h-screen bg-gray-50 text-gray-800 font-sans pb-12 flex flex-col">
+                    <header className="bg-blue-700 text-white p-4 shadow-lg sticky top-0 z-20">
                         <div className="max-w-4xl mx-auto flex items-center justify-between">
                         <div className="flex items-center gap-2">
                             <CalculatorIcon size={24} />
-                            <h1 className="text-xl font-bold">CPP & OAS Estimator</h1>
+                            {/* SEO: Use H1 here for the main title */}
+                            <h1 className="text-xl font-bold">CPP & OAS Estimator 2025</h1>
                         </div>
                         <div className="text-sm opacity-90 hidden sm:block">
                             Estimated in 2025 Dollars
@@ -323,131 +361,88 @@
                         </div>
                     </header>
 
-                    <main className="max-w-4xl mx-auto p-4 md:p-6">
-                        
-                        {/* Top Controls */}
-                        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6 grid grid-cols-1 md:grid-cols-3 gap-6">
-                            
-                            <div>
-                                <label className="block text-sm font-semibold text-gray-600 mb-2">Date of Birth</label>
-                                <input 
-                                type="date" 
-                                value={dob} 
-                                onChange={(e) => setDob(e.target.value)}
-                                className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-semibold text-gray-600 mb-2">
-                                Retirement Age: <span className="text-blue-600 font-bold text-lg">{retirementAge}</span>
-                                </label>
-                                <input 
-                                type="range" 
-                                min="60" 
-                                max="70" 
-                                step="1"
-                                value={retirementAge} 
-                                onChange={(e) => setRetirementAge(parseInt(e.target.value))}
-                                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
-                                />
-                                <div className="flex justify-between text-xs text-gray-400 mt-1">
-                                <span>60</span>
-                                <span>65</span>
-                                <span>70</span>
+                    <main className="max-w-4xl mx-auto p-4 md:p-6 w-full flex-grow">
+                        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-600 mb-1">Date of Birth</label>
+                                    <input type="date" value={dob} onChange={(e) => setDob(e.target.value)} className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-600 mb-1">
+                                        Retirement Age: <span className="text-blue-600 font-bold">{retirementAge}</span>
+                                    </label>
+                                    <input type="range" min="60" max="70" step="1" value={retirementAge} onChange={(e) => setRetirementAge(parseInt(e.target.value))} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600" />
+                                    <div className="flex justify-between text-xs text-gray-400 mt-1"><span>60</span><span>65</span><span>70</span></div>
                                 </div>
                             </div>
-
-                            <div>
-                                <label className="block text-sm font-semibold text-gray-600 mb-2">
-                                Years in Canada (since 18): <span className="text-blue-600 font-bold text-lg">{yearsInCanada}</span>
-                                </label>
-                                <div className="flex items-center gap-2">
-                                    <input 
-                                    type="number"
-                                    min="0"
-                                    max="80"
-                                    value={yearsInCanada} 
-                                    onChange={(e) => setYearsInCanada(parseInt(e.target.value) || 0)}
-                                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                                    />
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-600 mb-1">Years in Canada (since 18)</label>
+                                    <input type="number" min="0" max="80" value={yearsInCanada} onChange={(e) => setYearsInCanada(parseInt(e.target.value) || 0)} className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
                                 </div>
-                                <div className="text-xs text-gray-400 mt-1">
-                                Max 40 years count for OAS.
+                                <div>
+                                    <label className="block text-sm font-semibold text-gray-600 mb-1">Est. Annual Salary (Current $)</label>
+                                    <div className="flex gap-2">
+                                        <div className="relative flex-grow">
+                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+                                            <input type="number" placeholder="e.g. 65000" value={avgSalaryInput} onChange={(e) => setAvgSalaryInput(e.target.value)} className="w-full pl-7 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
+                                        </div>
+                                        <button onClick={applyAverageSalary} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition">Apply</button>
+                                    </div>
+                                    <p className="text-xs text-gray-400 mt-1">Auto-populates history based on this salary relative to YMPE.</p>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Tab Navigation */}
                         <div className="flex gap-4 mb-6 border-b border-gray-200">
-                        <button 
-                            onClick={() => setActiveTab('input')}
-                            className={`pb-2 px-1 font-medium transition-colors ${activeTab === 'input' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
-                        >
-                            Contribution History
-                        </button>
-                        <button 
-                            onClick={() => setActiveTab('results')}
-                            className={`pb-2 px-1 font-medium transition-colors ${activeTab === 'results' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
-                        >
-                            Estimate Results
-                        </button>
+                            <button onClick={() => setActiveTab('input')} className={`pb-2 px-1 font-medium transition-colors ${activeTab === 'input' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'}`}>Earnings History</button>
+                            <button onClick={() => setActiveTab('results')} className={`pb-2 px-1 font-medium transition-colors ${activeTab === 'results' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'}`}>Estimate Results</button>
                         </div>
 
-                        {/* --- INPUT TAB --- */}
                         {activeTab === 'input' && (
                         <div className="animate-fade-in">
-                            <div className="flex flex-wrap gap-2 mb-4">
-                                <button onClick={() => fillPast('max')} className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1 rounded-full border border-gray-300 transition">
-                                Set Past to MAX
-                                </button>
-                                <button onClick={() => fillRemaining('max')} className="text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 px-3 py-1 rounded-full border border-blue-200 transition">
-                                Set Future to MAX
-                                </button>
-                                <button onClick={() => setEarnings({})} className="text-xs bg-red-50 hover:bg-red-100 text-red-600 px-3 py-1 rounded-full border border-red-200 transition ml-auto flex items-center gap-1">
-                                <RotateCcwIcon size={12} /> Reset
-                                </button>
+                            <div className="flex flex-wrap gap-2 mb-4 justify-between items-center">
+                                <div className="space-x-2 flex items-center">
+                                    <div className="flex items-center bg-gray-100 rounded-full border border-gray-300 px-3 py-1 transition">
+                                        <button onClick={() => fillPast('max')} className="text-xs text-gray-700 font-medium">Set Past to Max</button>
+                                        <Tooltip text="Sets all recorded years from age 18 until today to the YMPE (Yearly Maximum Pensionable Earnings)." />
+                                    </div>
+                                    <div className="flex items-center bg-blue-50 rounded-full border border-blue-200 px-3 py-1 transition">
+                                        <button onClick={() => fillRemaining('max')} className="text-xs text-blue-700 font-medium">Set Future to Max</button>
+                                        <Tooltip text="Sets all future years (from today until retirement) to the estimated maximum pensionable earnings." />
+                                    </div>
+                                </div>
+                                <button onClick={() => setEarnings({})} className="text-xs text-red-600 hover:text-red-800 flex items-center gap-1 transition"><RotateCcwIcon size={12} /> Clear All</button>
                             </div>
 
-                            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
                                 <div className="grid grid-cols-12 bg-gray-50 p-3 text-xs font-bold text-gray-500 uppercase tracking-wider border-b">
-                                <div className="col-span-2">Year</div>
-                                <div className="col-span-2">Age</div>
-                                <div className="col-span-3 text-right pr-4">YMPE</div>
-                                <div className="col-span-5">Earnings</div>
+                                    <div className="col-span-2">Year</div>
+                                    <div className="col-span-2">Age</div>
+                                    <div className="col-span-3 text-right pr-4">YMPE</div>
+                                    <div className="col-span-5">Earnings</div>
                                 </div>
-                                <div className="max-h-[500px] overflow-y-auto">
+                                <div className="max-h-[400px] overflow-y-auto">
                                 {years.map(year => {
                                     const isFuture = year > CURRENT_YEAR;
                                     const ympe = getYMPE(year);
                                     const yampe = getYAMPE(year);
                                     const maxVal = yampe > 0 ? yampe : ympe;
-
                                     const val = earnings[year] || '';
-                                    const isMax = val == maxVal && val !== '';
+                                    const isMax = val >= maxVal && val !== '';
 
                                     return (
-                                    <div key={year} className={`grid grid-cols-12 p-3 border-b last:border-0 items-center hover:bg-gray-50 transition ${isFuture ? 'bg-blue-50/30' : ''}`}>
+                                    <div key={year} className={`grid grid-cols-12 p-2 border-b last:border-0 items-center hover:bg-gray-50 transition ${isFuture ? 'bg-blue-50/30' : ''}`}>
                                         <div className="col-span-2 text-sm font-medium text-gray-700">{year}</div>
                                         <div className="col-span-2 text-sm text-gray-500">{year - birthYear}</div>
                                         <div className="col-span-3 text-right pr-4 text-sm text-gray-400 font-mono">${ympe.toLocaleString()}</div>
                                         <div className="col-span-5 flex items-center gap-2">
-                                        <div className="relative flex-1">
-                                            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 text-xs">$</span>
-                                            <input 
-                                            type="number" 
-                                            value={val}
-                                            onChange={(e) => handleEarningChange(year, e.target.value)}
-                                            className={`w-full pl-5 pr-2 py-1.5 text-sm border rounded focus:ring-1 focus:ring-blue-500 outline-none ${isMax ? 'bg-green-50 text-green-700 font-semibold' : 'bg-white'}`}
-                                            placeholder="0"
-                                            />
-                                        </div>
-                                        <button 
-                                            onClick={() => toggleMax(year, isMax)}
-                                            className={`px-2 py-1 text-xs font-bold rounded border transition-colors ${isMax ? 'bg-green-100 text-green-700 border-green-200' : 'bg-gray-100 text-gray-400 border-gray-200'}`}
-                                        >
-                                            MAX
-                                        </button>
+                                            <div className="relative flex-1">
+                                                <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 text-xs">$</span>
+                                                <input type="number" value={val} onChange={(e) => handleEarningChange(year, e.target.value)} className={`w-full pl-5 pr-2 py-1 text-sm border rounded focus:ring-1 focus:ring-blue-500 outline-none ${isMax ? 'text-green-700 font-semibold' : ''}`} placeholder="0" />
+                                            </div>
+                                            <button onClick={() => toggleMax(year, isMax)} className={`px-2 py-1 text-xs font-bold rounded border transition-colors ${isMax ? 'bg-green-100 text-green-700 border-green-200' : 'bg-gray-100 text-gray-400 border-gray-200'}`}>MAX</button>
                                         </div>
                                     </div>
                                     );
@@ -457,131 +452,86 @@
                         </div>
                         )}
 
-                        {/* --- RESULTS TAB --- */}
                         {activeTab === 'results' && (
                         <div className="space-y-6 animate-fade-in">
-                            
-                            {/* Main Result Card */}
                             <div className="bg-gradient-to-br from-blue-600 to-blue-800 rounded-2xl shadow-xl p-8 text-white relative overflow-hidden">
-                                <div className="absolute top-0 right-0 p-4 opacity-10">
-                                    <DollarSignIcon size={150} />
-                                </div>
-                                
+                                <div className="absolute top-0 right-0 p-4 opacity-10"><DollarSignIcon size={150} /></div>
                                 <div className="relative z-10">
                                     <h2 className="text-blue-100 text-sm font-semibold uppercase tracking-widest mb-1">Total Estimated Monthly Payout</h2>
-                                    <div className="flex items-baseline gap-2">
-                                    <span className="text-5xl font-bold">${results.grandTotal.toLocaleString('en-CA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                                    <span className="text-blue-200">/ mo</span>
-                                    </div>
+                                    <div className="flex items-baseline gap-2"><span className="text-5xl font-bold">${results.grandTotal.toLocaleString('en-CA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span><span className="text-blue-200">/ mo</span></div>
                                     <div className="mt-4 flex gap-4 text-sm">
-                                        <div className="flex items-center gap-1 bg-white/10 px-3 py-1 rounded-full">
-                                            <span className="opacity-75">CPP:</span>
-                                            <span className="font-bold">${results.cpp.total.toLocaleString(undefined, {minimumFractionDigits:0, maximumFractionDigits:0})}</span>
-                                        </div>
-                                        <div className="flex items-center gap-1 bg-white/10 px-3 py-1 rounded-full">
-                                            <span className="opacity-75">OAS:</span>
-                                            <span className="font-bold">${results.oas.amount.toLocaleString(undefined, {minimumFractionDigits:0, maximumFractionDigits:0})}</span>
-                                        </div>
+                                        <div className="flex items-center gap-1 bg-white/10 px-3 py-1 rounded-full"><span className="opacity-75">CPP:</span><span className="font-bold">${results.cpp.total.toLocaleString(undefined, {minimumFractionDigits:0, maximumFractionDigits:0})}</span></div>
+                                        <div className="flex items-center gap-1 bg-white/10 px-3 py-1 rounded-full"><span className="opacity-75">OAS:</span><span className="font-bold">${results.oas.amount.toLocaleString(undefined, {minimumFractionDigits:0, maximumFractionDigits:0})}</span></div>
                                     </div>
                                 </div>
                             </div>
 
-                            {/* Breakdown Grid */}
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                {/* Base CPP */}
                                 <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-200">
-                                    <div className="flex items-center gap-2 mb-4 text-gray-700">
-                                        <TrendingUpIcon size={20} className="text-blue-600"/>
-                                        <h3 className="font-bold">Base CPP</h3>
-                                    </div>
-                                    <div className="space-y-3">
-                                        <div className="flex justify-between text-sm">
-                                        <span className="text-gray-500">Base Entitlement</span>
-                                        <span className="font-medium">${results.cpp.base.toFixed(2)}</span>
-                                        </div>
-                                        <div className="h-px bg-gray-100 my-2"></div>
-                                        <p className="text-xs text-gray-400">
-                                        Based on your average career earnings (with 17% dropout).
-                                        </p>
-                                    </div>
+                                    <div className="flex items-center gap-2 mb-4 text-gray-700"><TrendingUpIcon size={20} className="text-blue-600"/><h3 className="font-bold">Base CPP</h3></div>
+                                    <div className="space-y-3"><div className="flex justify-between text-sm"><span className="text-gray-500">Base Entitlement</span><span className="font-medium">${results.cpp.base.toFixed(2)}</span></div></div>
                                 </div>
-
-                                {/* Enhanced CPP */}
                                 <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-200">
-                                    <div className="flex items-center gap-2 mb-4 text-gray-700">
-                                        <CheckCircleIcon size={20} className="text-green-600"/>
-                                        <h3 className="font-bold">Enhanced CPP</h3>
-                                    </div>
-                                    <div className="space-y-3">
-                                        <div className="flex justify-between text-sm">
-                                        <span className="text-gray-500">Enhancement</span>
-                                        <span className="font-medium text-green-600">+${results.cpp.enhanced.toFixed(2)}</span>
-                                        </div>
-                                        <div className="h-px bg-gray-100 my-2"></div>
-                                        <p className="text-xs text-gray-400">
-                                        Extra benefit from contributions made 2019 onwards.
-                                        </p>
-                                    </div>
+                                    <div className="flex items-center gap-2 mb-4 text-gray-700"><CheckCircleIcon size={20} className="text-green-600"/><h3 className="font-bold">Enhanced CPP</h3></div>
+                                    <div className="space-y-3"><div className="flex justify-between text-sm"><span className="text-gray-500">Enhancement</span><span className="font-medium text-green-600">+${results.cpp.enhanced.toFixed(2)}</span></div></div>
                                 </div>
-
-                                {/* OAS Card */}
                                 <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-200">
-                                    <div className="flex items-center gap-2 mb-4 text-gray-700">
-                                        <HomeIcon size={20} className="text-orange-500"/>
-                                        <h3 className="font-bold">Old Age Security</h3>
-                                    </div>
+                                    <div className="flex items-center gap-2 mb-4 text-gray-700"><HomeIcon size={20} className="text-orange-500"/><h3 className="font-bold">OAS</h3></div>
                                     <div className="space-y-3">
-                                        <div className="flex justify-between text-sm">
-                                            <span className="text-gray-500">Amount</span>
-                                            <span className="font-medium text-orange-600">${results.oas.amount.toFixed(2)}</span>
-                                        </div>
-                                        {results.oas.note && (
-                                            <div className="text-xs text-red-500 font-medium">
-                                                {results.oas.note}
-                                            </div>
-                                        )}
-                                        <div className="flex justify-between text-sm text-gray-500 italic">
-                                            <span>Years Counted</span>
-                                            <span>{results.oas.yearsUsed} / 40</span>
-                                        </div>
-                                        <div className="h-px bg-gray-100 my-2"></div>
-                                        <p className="text-xs text-gray-400">
-                                            Based on residency. {retirementAge > 65 ? "Includes deferral bonus." : ""}
-                                        </p>
+                                        <div className="flex justify-between text-sm"><span className="text-gray-500">Amount</span><span className="font-medium text-orange-600">${results.oas.amount.toFixed(2)}</span></div>
+                                        {results.oas.note && (<div className="text-xs text-red-500 font-medium">{results.oas.note}</div>)}
                                     </div>
                                 </div>
                             </div>
 
-                            {/* Adjustment Info */}
                             <div className="bg-amber-50 border border-amber-100 p-5 rounded-xl flex gap-4">
                                 <InfoIcon className="text-amber-500 shrink-0 mt-1" size={24} />
                                 <div>
                                     <h4 className="font-bold text-amber-800 mb-1">Age Adjustments Applied</h4>
                                     <ul className="text-sm text-amber-700 space-y-1 list-disc list-inside">
-                                        <li>
-                                            CPP: 
-                                            <span className="font-semibold"> {results.cpp.adjustmentPercent > 0 ? '+' : ''}{results.cpp.adjustmentPercent.toFixed(1)}% </span>
-                                            for retiring at {retirementAge}.
-                                        </li>
-                                        {retirementAge > 65 && (
-                                            <li>
-                                                OAS: 
-                                                <span className="font-semibold"> +{Math.min((retirementAge - 65) * 12 * 0.6, 36).toFixed(1)}% </span>
-                                                deferral bonus.
-                                            </li>
-                                        )}
-                                        {retirementAge < 65 && (
-                                            <li>
-                                                OAS: Not eligible until 65 (shown as $0).
-                                            </li>
-                                        )}
+                                        <li>CPP: <span className="font-semibold">{results.cpp.adjustmentPercent > 0 ? '+' : ''}{results.cpp.adjustmentPercent.toFixed(1)}%</span> for retiring at {retirementAge}.</li>
+                                        {retirementAge > 65 && (<li>OAS: <span className="font-semibold">+{Math.min((retirementAge - 65) * 12 * 0.6, 36).toFixed(1)}%</span> deferral bonus.</li>)}
                                     </ul>
                                 </div>
                             </div>
-
                         </div>
                         )}
                     </main>
+
+                    <footer className="max-w-4xl mx-auto w-full px-4 md:px-6 pt-8 border-t border-gray-200 mt-8">
+                        <div className="bg-gray-100 rounded-xl p-6 mb-8">
+                            <div className="flex items-center gap-2 mb-4 text-gray-800"><BookOpenIcon size={20} /><h3 className="text-lg font-bold">How Calculations Are Done</h3></div>
+                            <div className="grid md:grid-cols-2 gap-6 text-sm text-gray-600">
+                                <div>
+                                    <h4 className="font-bold text-gray-700 mb-2">1. Contribution Period & Dropout</h4>
+                                    <p className="mb-2">Your contributory period starts at age 18 and ends when you start receiving CPP (or age 70).</p>
+                                    <p>The <strong>General Drop-out Provision</strong> automatically removes the lowest 17% of your earning months (up to 8 years) from the calculation. This calculator automatically sorts your earnings ratio and drops the worst years to maximize your base benefit.</p>
+                                </div>
+                                <div>
+                                    <h4 className="font-bold text-gray-700 mb-2">2. YMPE & Indexing</h4>
+                                    <p className="mb-2">Your earnings are not used directly; they are converted into a ratio relative to the <strong>Yearly Maximum Pensionable Earnings (YMPE)</strong> of that year.</p>
+                                    <p>Past earnings are updated to "current dollars" using the average YMPE of the last 5 years. This ensures your pension reflects the cost of living at the time of retirement.</p>
+                                </div>
+                                <div>
+                                    <h4 className="font-bold text-gray-700 mb-2">3. Enhanced CPP (Tier 1 & 2)</h4>
+                                    <p className="mb-2">Enhanced CPP is a two-step increase designed to replace 33.33% of your income (up from the original 25%).</p>
+                                    <ul className="list-disc list-inside space-y-2 pl-2">
+                                        <li><strong>Phase 1 (2019-2023):</strong> The replacement rate on earnings <em>up to the YMPE</em> gradually increased from 25% to 33.33%.</li>
+                                        <li><strong>Phase 2 (2024+):</strong> A second earnings ceiling was introduced called the <strong>YAMPE</strong> (Yearly Additional Maximum Pensionable Earnings), which is ~14% higher than the YMPE. Earnings falling in this "Tier 2" zone (between YMPE and YAMPE) are also pensionable at the 33.33% rate.</li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <h4 className="font-bold text-gray-700 mb-2">4. Actuarial Adjustments</h4>
+                                    <ul className="list-disc list-inside space-y-1">
+                                        <li><strong>Before 65:</strong> Your CPP is reduced by 0.6% for every month before age 65 (max -36%).</li>
+                                        <li><strong>After 65:</strong> Your CPP increases by 0.7% for every month after age 65 (max +42%).</li>
+                                        <li><strong>OAS Deferral:</strong> OAS increases by 0.6% per month if deferred after 65 (max +36%).</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="text-center text-xs text-gray-400 pb-4">Disclaimer: This tool is for estimation purposes only. It is not financial advice. Calculations assume the current legislation remains in effect and utilizes a 2.5% annual projection for future YMPE growth.</div>
+                    </footer>
                 </div>
             );
         };
