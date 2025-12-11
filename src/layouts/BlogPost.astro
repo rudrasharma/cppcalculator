@@ -1,0 +1,67 @@
+---
+// src/layouts/BlogPost.astro
+const { frontmatter } = Astro.props;
+---
+
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>{frontmatter.title} | CPP Forecast</title>
+    <meta name="description" content={frontmatter.description} />
+  </head>
+  <body class="bg-gray-50 text-gray-800 font-sans min-h-screen">
+    
+    {/* Navigation Bar */}
+    <nav class="w-full bg-white border-b border-gray-200 sticky top-0 z-10">
+      <div class="max-w-3xl mx-auto px-6 h-16 flex items-center justify-between">
+        <a href="/" class="text-blue-600 font-bold hover:text-blue-800 transition-colors flex items-center gap-2">
+          ← Back to Calculator
+        </a>
+        <a href="/blog" class="text-sm font-medium text-gray-500 hover:text-gray-900">
+          Blog Index
+        </a>
+      </div>
+    </nav>
+
+    <main class="max-w-3xl mx-auto px-6 py-12">
+      <article class="bg-white p-8 md:p-12 rounded-2xl shadow-sm border border-gray-100">
+        
+        {/* Blog Header */}
+        <header class="mb-10 border-b border-gray-100 pb-10">
+          <div class="flex items-center gap-3 text-sm text-gray-500 mb-4">
+            <time datetime={frontmatter.pubDate}>{new Date(frontmatter.pubDate).toLocaleDateString('en-CA', { year: 'numeric', month: 'long', day: 'numeric' })}</time>
+            <span>•</span>
+            <span class="bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full font-medium text-xs uppercase tracking-wide">Guide</span>
+          </div>
+          <h1 class="text-3xl md:text-4xl font-extrabold text-gray-900 leading-tight mb-4">
+            {frontmatter.title}
+          </h1>
+          <p class="text-xl text-gray-600 leading-relaxed">
+            {frontmatter.description}
+          </p>
+        </header>
+
+        {/* Content Area 
+            The 'prose' class activates @tailwindcss/typography 
+        */}
+        <div class="prose prose-lg prose-blue max-w-none 
+          prose-img:rounded-xl prose-img:shadow-lg prose-img:border prose-img:border-gray-100
+          prose-headings:font-bold prose-headings:text-gray-900
+          prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline">
+          <slot />
+        </div>
+
+      </article>
+
+      {/* Footer / CTA */}
+      <div class="mt-12 text-center">
+        <p class="text-gray-500 mb-4">Ready to run your own numbers?</p>
+        <a href="/" class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-full text-white bg-blue-600 hover:bg-blue-700 shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5">
+          Open Free Calculator
+        </a>
+      </div>
+    </main>
+
+  </body>
+</html>

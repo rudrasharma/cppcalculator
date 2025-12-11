@@ -1,0 +1,108 @@
+---
+// src/pages/blog/index.astro
+
+// 1. Fetch all markdown files in this folder
+const posts = await Astro.glob('./*.md');
+
+// 2. Sort them by date (Newest first)
+const sortedPosts = posts.sort((a, b) => 
+  new Date(b.frontmatter.pubDate).valueOf() - new Date(a.frontmatter.pubDate).valueOf()
+);
+---
+
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Retirement Planning Guides | CPP Forecast</title>
+    <meta name="description" content="Guides and tutorials on Canadian CPP, OAS, and retirement planning strategies." />
+  </head>
+  <body class="bg-gray-50 text-gray-800 font-sans min-h-screen flex flex-col">
+    
+    {/* Navigation */}
+    <nav class="w-full bg-white border-b border-gray-200 sticky top-0 z-10">
+      <div class="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
+        <a href="/" class="text-blue-600 font-bold hover:text-blue-800 transition-colors flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          Back to Calculator
+        </a>
+      </div>
+    </nav>
+
+    {/* Hero Section */}
+    <header class="bg-white border-b border-gray-100 py-16">
+      <div class="max-w-5xl mx-auto px-6 text-center">
+        <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 mb-4 tracking-tight">
+          Retirement Insights
+        </h1>
+        <p class="text-xl text-gray-500 max-w-2xl mx-auto">
+          Deep dives into the math behind your pension, tax strategies, and how to optimize your CPP & OAS.
+        </p>
+      </div>
+    </header>
+
+    {/* Blog Grid */}
+    <main class="max-w-5xl mx-auto px-6 py-12 flex-grow w-full">
+      
+      {sortedPosts.length === 0 ? (
+        <div class="text-center py-20 text-gray-500">
+          <p>No posts found yet. Check back soon!</p>
+        </div>
+      ) : (
+        <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+          {sortedPosts.map((post) => (
+            <article class="bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-xl transition-shadow duration-300 flex flex-col overflow-hidden group h-full">
+              <a href={post.url} class="flex flex-col h-full">
+                
+                {/* Content */}
+                <div class="p-6 flex flex-col flex-grow">
+                  {/* Date & Tag */}
+                  <div class="flex items-center gap-3 text-xs font-medium text-gray-400 mb-3 uppercase tracking-wider">
+                    <time datetime={post.frontmatter.pubDate}>
+                      {new Date(post.frontmatter.pubDate).toLocaleDateString('en-CA', { 
+                        year: 'numeric', 
+                        month: 'short', 
+                        day: 'numeric' 
+                      })}
+                    </time>
+                    {post.frontmatter.tags && (
+                      <>
+                        <span>•</span>
+                        <span class="text-blue-600">{post.frontmatter.tags[0]}</span>
+                      </>
+                    )}
+                  </div>
+
+                  {/* Title */}
+                  <h2 class="text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors leading-snug">
+                    {post.frontmatter.title}
+                  </h2>
+
+                  {/* Description */}
+                  <p class="text-gray-600 text-sm leading-relaxed mb-6 line-clamp-3">
+                    {post.frontmatter.description}
+                  </p>
+
+                  {/* Read More Link (Pushed to bottom) */}
+                  <div class="mt-auto pt-4 border-t border-gray-50 flex items-center text-blue-600 font-semibold text-sm group-hover:translate-x-1 transition-transform">
+                    Read Article 
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                  </div>
+                </div>
+              </a>
+            </article>
+          ))}
+        </div>
+      )}
+
+    </main>
+
+    {/* Simple Footer */}
+    <footer class="bg-white border-t border-gray-200 mt-auto">
+      <div class="max-w-5xl mx-auto px-6 py-8 text-center">
+        <p class="text-sm text-gray-400">© {new Date().getFullYear()} Canadian Retirement Tools. All rights reserved.</p>
+      </div>
+    </footer>
+
+  </body>
+</html>
