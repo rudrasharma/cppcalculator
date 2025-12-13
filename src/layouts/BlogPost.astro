@@ -5,11 +5,39 @@ const { frontmatter } = Astro.props;
 
 <html lang="en">
   <head>
+    <link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"
+  integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV"
+  crossorigin="anonymous"
+>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
     <title>{frontmatter.title} | CPP Forecast</title>
     <meta name="description" content={frontmatter.description} />
-  </head>
+<style is:global>
+  /* Fixes the "Math Overflow" issue.
+     This targets the container created by KaTeX and forces it 
+     to scroll sideways if the equation is too long.
+  */
+  .katex-display {
+    overflow-x: auto;       /* Allow horizontal scrolling */
+    overflow-y: hidden;     /* Hide vertical scrollbars */
+    max-width: 100%;        /* Force it to fit in the box */
+    padding-top: 0.5em;     /* Little bit of breathing room */
+    padding-bottom: 0.5em;
+  }
+  
+  /* Optional: Makes the scrollbar look nicer on generic browsers */
+  .katex-display::-webkit-scrollbar {
+    height: 6px;
+  }
+  .katex-display::-webkit-scrollbar-thumb {
+    background-color: #cbd5e1; /* Light gray scrollbar */
+    border-radius: 4px;
+  }
+</style>  
+</head>
   <body class="bg-gray-50 text-gray-800 font-sans min-h-screen">
     
     {/* Navigation Bar */}
