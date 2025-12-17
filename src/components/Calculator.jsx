@@ -1,5 +1,6 @@
 // src/components/Calculator.jsx
 import React, { useState, useMemo } from 'react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer, ReferenceLine, ReferenceDot } from 'recharts';
 
 // --- ICONS ---
 const IconBase = ({ size = 20, className = "", children }) => (
@@ -23,7 +24,8 @@ const ChevronDownIcon = (props) => (<IconBase {...props}><polyline points="6 9 1
 const LightbulbIcon = (props) => (<IconBase {...props}><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-1 1.5-2 1.5-3.5 0-2.2-1.8-4-4-4a4 4 0 0 0-4 4c0 1.5.5 2.5 1.5 3.5.8.8 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></IconBase>);
 const HeartHandshakeIcon = (props) => (<IconBase {...props}><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></IconBase>);
 const WandIcon = (props) => (<IconBase {...props}><path d="M15 4V2"/><path d="M15 16v-2"/><path d="M8 9h2"/><path d="M20 9h2"/><path d="M17.8 11.8 19 13"/><path d="M15 9h0"/><path d="M17.8 6.2 19 5"/><path d="m3 21 9-9"/><path d="M12.2 6.2 11 5"/></IconBase>);
-
+const BarChartIcon = (props) => (<IconBase {...props}><line x1="12" x2="12" y1="20" y2="10"/><line x1="18" x2="18" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="16"/></IconBase>);
+const MousePointerIcon = (props) => (<IconBase {...props}><path d="m3 3 7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/><path d="m13 13 6 6"/></IconBase>);
 
 // --- CONSTANTS ---
 const YMPE_DATA = {
@@ -96,6 +98,9 @@ export default function Calculator() {
     const [avgSalaryInput, setAvgSalaryInput] = useState('');
     const [otherIncome, setOtherIncome] = useState('');
     const [showAbout, setShowAbout] = useState(false);
+    
+    // --- INTERACTIVE CHART STATE ---
+    const [chartSelection, setChartSelection] = useState(null);
     
     // --- MARITAL STATUS STATES ---
     const [isMarried, setIsMarried] = useState(false);
@@ -189,21 +194,109 @@ export default function Calculator() {
         });
 
         const enhancedBenefit = (enhancedTier1Total / 12) + (enhancedTier2Total / 12);
+        
+        // --- CPP VARIATIONS (For Breakeven Chart) ---
+        // Base benefit (at 65) is:
+        const baseCppAt65 = baseBenefit + enhancedBenefit;
+        
+        // Calculate Adjustment for Current Selection
         const monthsDiff = (retirementAge - 65) * 12;
         let cppAdjustmentPercent = 0;
         if (monthsDiff < 0) cppAdjustmentPercent = monthsDiff * 0.6;
         else if (monthsDiff > 0) cppAdjustmentPercent = Math.min(monthsDiff, 60) * 0.7;
-
-        const finalCPP = (baseBenefit + enhancedBenefit) * (1 + (cppAdjustmentPercent / 100));
+        const finalCPP = baseCppAt65 * (1 + (cppAdjustmentPercent / 100));
 
         // --- 2. OAS CALCULATION ---
         const validYears = Math.min(Math.max(0, yearsInCanada), 40);
-        let baseOAS = MAX_OAS_2025 * (validYears / 40);
+        let baseOASAt65 = MAX_OAS_2025 * (validYears / 40);
+        
         let oasGross = 0;
         if (retirementAge >= 65) {
             const oasMonthsDeferred = Math.min((retirementAge - 65) * 12, 60);
-            oasGross = baseOAS * (1 + (oasMonthsDeferred * 0.6 / 100));
+            oasGross = baseOASAt65 * (1 + (oasMonthsDeferred * 0.6 / 100));
         }
+        
+        // --- BREAKEVEN DATA GENERATION ---
+        const breakevenData = [];
+        let cum60 = 0; 
+        let cum65 = 0; 
+        let cum70 = 0; 
+        let cumSelected = 0;
+
+        // Monthly Amounts for scenarios
+        const cpp60 = baseCppAt65 * 0.64; // -36%
+        const cpp65 = baseCppAt65;
+        const cpp70 = baseCppAt65 * 1.42; // +42%
+        
+        const oasStandard = baseOASAt65;
+        const oas70 = baseOASAt65 * 1.36; // +36%
+
+        // Calculate User Selected Scenario Monthly (If distinct)
+        const userIsDistinct = retirementAge !== 60 && retirementAge !== 65 && retirementAge !== 70;
+        let cppSelected = 0;
+        let oasSelected = baseOASAt65; // Default floor
+        
+        if (userIsDistinct) {
+            // CPP
+            const userMonthsDiff = (retirementAge - 65) * 12;
+            let userCppAdj = 0;
+            if (userMonthsDiff < 0) userCppAdj = userMonthsDiff * 0.006;
+            else userCppAdj = Math.min(userMonthsDiff, 60) * 0.007;
+            cppSelected = baseCppAt65 * (1 + userCppAdj);
+
+            // OAS (Can't start before 65)
+            if (retirementAge > 65) {
+                const oasDelayMonths = Math.min((retirementAge - 65) * 12, 60);
+                oasSelected = baseOASAt65 * (1 + (oasDelayMonths * 0.006));
+            }
+        }
+
+        let crossover65 = null;
+        let crossover70 = null;
+
+        for (let age = 60; age <= 95; age++) {
+            // Path 60: CPP starts 60, OAS starts 65
+            let annual60 = 0;
+            if (age >= 60) annual60 += cpp60 * 12;
+            if (age >= 65) annual60 += oasStandard * 12;
+            cum60 += annual60;
+
+            // Path 65: Both at 65
+            let annual65 = 0;
+            if (age >= 65) annual65 += (cpp65 * 12) + (oasStandard * 12);
+            cum65 += annual65;
+
+            // Path 70: Both at 70
+            let annual70 = 0;
+            if (age >= 70) annual70 += (cpp70 * 12) + (oas70 * 12);
+            cum70 += annual70;
+
+            // Path Selected
+            let annualSelected = 0;
+            if (userIsDistinct) {
+                if (age >= retirementAge) annualSelected += cppSelected * 12;
+                // OAS starts at 65 or retirementAge, whichever is later
+                const oasStart = Math.max(65, retirementAge);
+                if (age >= oasStart) annualSelected += oasSelected * 12;
+                cumSelected += annualSelected;
+            }
+
+            // Detect Crossovers
+            if (!crossover65 && cum65 > cum60 && age > 65) crossover65 = age;
+            if (!crossover70 && cum70 > cum65 && age > 70) crossover70 = age;
+
+            const dataPoint = {
+                age,
+                Early: Math.round(cum60),
+                Standard: Math.round(cum65),
+                Deferred: Math.round(cum70)
+            };
+            if (userIsDistinct) {
+                dataPoint.Selected = Math.round(cumSelected);
+            }
+            breakevenData.push(dataPoint);
+        }
+
 
         // --- 3. CLAWBACK & GIS LOGIC ---
         const annualCPP = finalCPP * 12;
@@ -294,6 +387,10 @@ export default function Calculator() {
             gis: { amount: gisAmount, note: gisNote },
             grandTotal: (finalCPP || 0) + finalOAS + gisAmount,
             insights: generateInsights(),
+            breakevenData,
+            crossovers: { age65: crossover65, age70: crossover70 },
+            userIsDistinct,
+            selectedAge: retirementAge,
             spouseAgeAtRetirement: isMarried ? (birthYear + retirementAge - parseInt(spouseDob.split('-')[0])) : null
         };
     };
@@ -422,7 +519,6 @@ export default function Calculator() {
                                                         </div>
                                                     </div>
                                                     
-                                                    {/* Conditional Checkbox: Only if Spouse Age at Retirement is 60-64 */}
                                                     {(() => {
                                                         const spouseAge = birthYear + retirementAge - parseInt(spouseDob.split('-')[0]);
                                                         if (spouseAge >= 60 && spouseAge < 65) {
@@ -590,7 +686,6 @@ export default function Calculator() {
                                 
                                 {/* HERO CARD */}
                                 <div className="bg-slate-900 rounded-2xl shadow-2xl p-8 text-white relative overflow-hidden isolate">
-                                    {/* Abstract shapes for visual flair */}
                                     <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-indigo-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20"></div>
                                     <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-64 h-64 bg-emerald-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20"></div>
                                     
@@ -621,6 +716,101 @@ export default function Calculator() {
                                             }
                                         </div>
                                     </div>
+                                </div>
+
+                                {/* BREAKEVEN CHART */}
+                                
+                                <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                                    <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-6">
+                                        <div className="flex items-center gap-3">
+                                            <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg"><BarChartIcon size={20}/></div>
+                                            <div>
+                                                <h3 className="font-bold text-slate-800">Breakeven Analysis: When to Start?</h3>
+                                                <p className="text-xs text-slate-500">Cumulative payouts by start age. <span className="font-semibold text-indigo-600">Click graph for details.</span></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="h-[300px] w-full cursor-pointer relative group">
+                                        {/* CLICK INSTRUCTION OVERLAY (Fades out on hover) */}
+                                        <div className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <div className="bg-slate-900/10 p-4 rounded-full"><MousePointerIcon size={32} className="text-slate-400"/></div>
+                                        </div>
+
+                                        <ResponsiveContainer width="100%" height="100%">
+                                            <LineChart 
+                                                data={results.breakevenData} 
+                                                margin={{ top: 5, right: 30, left: 10, bottom: 5 }}
+                                                onClick={(e) => { if(e && e.activeLabel) setChartSelection(e.activeLabel) }}
+                                            >
+                                                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                                                <XAxis dataKey="age" stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} />
+                                                <YAxis 
+                                                    stroke="#94a3b8" 
+                                                    fontSize={11} 
+                                                    tickLine={false} 
+                                                    axisLine={false}
+                                                    tickFormatter={(value) => `$${value/1000}k`} 
+                                                />
+                                                <RechartsTooltip 
+                                                    cursor={{ stroke: '#6366f1', strokeWidth: 1, strokeDasharray: '4 4' }}
+                                                    contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '12px', color: '#f8fafc', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }}
+                                                    itemStyle={{ color: '#f8fafc', fontSize: '12px', padding: '2px 0' }}
+                                                    formatter={(value, name) => [`$${value.toLocaleString()}`, name]}
+                                                    labelFormatter={(label) => <span className="font-bold text-slate-300 mb-2 block border-b border-slate-700 pb-1">At Age {label}</span>}
+                                                />
+                                                <Legend wrapperStyle={{ paddingTop: '15px', fontSize: '12px' }} iconType="circle" />
+                                                
+                                                {/* THREE COMPARISON LINES */}
+                                                <Line type="monotone" dataKey="Early" name="Start at 60" stroke="#10b981" strokeWidth={2} dot={false} activeDot={{ r: 6 }} />
+                                                <Line type="monotone" dataKey="Standard" name="Start at 65" stroke="#3b82f6" strokeWidth={2} dot={false} activeDot={{ r: 6 }} />
+                                                <Line type="monotone" dataKey="Deferred" name="Start at 70" stroke="#f59e0b" strokeWidth={2} dot={false} activeDot={{ r: 6 }} />
+                                                
+                                                {/* CONDITIONAL USER LINE */}
+                                                {results.userIsDistinct && (
+                                                    <Line type="monotone" dataKey="Selected" name={`Start at ${results.selectedAge} (Selected)`} stroke="#8b5cf6" strokeWidth={3} strokeDasharray="5 5" dot={false} activeDot={{ r: 8 }} />
+                                                )}
+
+                                                {/* DYNAMIC BREAKEVEN LINES */}
+                                                {results.crossovers.age65 && <ReferenceLine x={results.crossovers.age65} stroke="#3b82f6" strokeDasharray="3 3" label={{ position: 'top', value: '65 beats 60', fill: '#3b82f6', fontSize: 10, fontWeight: 'bold' }} />}
+                                                {results.crossovers.age70 && <ReferenceLine x={results.crossovers.age70} stroke="#f59e0b" strokeDasharray="3 3" label={{ position: 'top', value: '70 beats 65', fill: '#f59e0b', fontSize: 10, fontWeight: 'bold' }} />}
+                                            </LineChart>
+                                        </ResponsiveContainer>
+                                    </div>
+
+                                    {/* CLICK DETAIL PANEL */}
+                                    {chartSelection && (
+                                        <div className="mt-4 bg-slate-50 border border-slate-200 rounded-xl p-4 animate-fade-in">
+                                            <div className="flex justify-between items-center mb-3">
+                                                <h4 className="font-bold text-slate-800 flex items-center gap-2"><MousePointerIcon size={16} className="text-indigo-500"/> Deep Dive: Age {chartSelection}</h4>
+                                                <button onClick={() => setChartSelection(null)} className="text-xs text-slate-400 hover:text-slate-600">Close</button>
+                                            </div>
+                                            <div className={`grid gap-2 text-center ${results.userIsDistinct ? 'grid-cols-2 md:grid-cols-4' : 'grid-cols-3'}`}>
+                                                {results.breakevenData.filter(d => d.age === chartSelection).map(d => (
+                                                    <React.Fragment key={d.age}>
+                                                    <div className="bg-emerald-50 border border-emerald-100 p-2 rounded-lg">
+                                                        <div className="text-[10px] text-emerald-600 font-bold uppercase">Start 60</div>
+                                                        <div className="font-bold text-emerald-800">${d.Early.toLocaleString()}</div>
+                                                    </div>
+                                                    <div className="bg-blue-50 border border-blue-100 p-2 rounded-lg">
+                                                        <div className="text-[10px] text-blue-600 font-bold uppercase">Start 65</div>
+                                                        <div className="font-bold text-blue-800">${d.Standard.toLocaleString()}</div>
+                                                    </div>
+                                                    <div className="bg-amber-50 border border-amber-100 p-2 rounded-lg">
+                                                        <div className="text-[10px] text-amber-600 font-bold uppercase">Start 70</div>
+                                                        <div className="font-bold text-amber-800">${d.Deferred.toLocaleString()}</div>
+                                                    </div>
+                                                    {results.userIsDistinct && (
+                                                        <div className="bg-violet-50 border border-violet-100 p-2 rounded-lg">
+                                                            <div className="text-[10px] text-violet-600 font-bold uppercase">Start {results.selectedAge}</div>
+                                                            <div className="font-bold text-violet-800">${d.Selected.toLocaleString()}</div>
+                                                        </div>
+                                                    )}
+                                                    </React.Fragment>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
 
                                 {/* INSIGHTS */}
