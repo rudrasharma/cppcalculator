@@ -1,6 +1,6 @@
 // src/components/Calculator.jsx
 import React, { useState, useMemo } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer, ReferenceLine, ReferenceDot } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer, ReferenceLine } from 'recharts';
 
 // --- ICONS ---
 const IconBase = ({ size = 20, className = "", children }) => (
@@ -101,6 +101,12 @@ export default function Calculator() {
     
     // --- INTERACTIVE CHART STATE ---
     const [chartSelection, setChartSelection] = useState(null);
+    const [lineVisibility, setLineVisibility] = useState({
+        Early: true,
+        Standard: true,
+        Deferred: true,
+        Selected: true
+    });
     
     // --- MARITAL STATUS STATES ---
     const [isMarried, setIsMarried] = useState(false);
@@ -155,6 +161,11 @@ export default function Calculator() {
         setEarnings(newEarnings);
     };
 
+    const handleLegendClick = (e) => {
+        const { dataKey } = e;
+        setLineVisibility(prev => ({ ...prev, [dataKey]: !prev[dataKey] }));
+    };
+
     const calculateBenefits = () => {
         // --- 1. CPP CALCULATION ---
         const currentYMPE = getYMPE(CURRENT_YEAR);
@@ -195,18 +206,17 @@ export default function Calculator() {
 
         const enhancedBenefit = (enhancedTier1Total / 12) + (enhancedTier2Total / 12);
         
-        // --- CPP VARIATIONS (For Breakeven Chart) ---
-        // Base benefit (at 65) is:
+        // Base benefit (at 65)
         const baseCppAt65 = baseBenefit + enhancedBenefit;
         
-        // Calculate Adjustment for Current Selection
+        // Adjustment for Current Selection
         const monthsDiff = (retirementAge - 65) * 12;
         let cppAdjustmentPercent = 0;
         if (monthsDiff < 0) cppAdjustmentPercent = monthsDiff * 0.6;
         else if (monthsDiff > 0) cppAdjustmentPercent = Math.min(monthsDiff, 60) * 0.7;
         const finalCPP = baseCppAt65 * (1 + (cppAdjustmentPercent / 100));
 
-        // --- 2. OAS CALCULATION ---
+        // 2. OAS
         const validYears = Math.min(Math.max(0, yearsInCanada), 40);
         let baseOASAt65 = MAX_OAS_2025 * (validYears / 40);
         
@@ -216,35 +226,28 @@ export default function Calculator() {
             oasGross = baseOASAt65 * (1 + (oasMonthsDeferred * 0.6 / 100));
         }
         
-        // --- BREAKEVEN DATA GENERATION ---
+        // --- BREAKEVEN DATA ---
         const breakevenData = [];
-        let cum60 = 0; 
-        let cum65 = 0; 
-        let cum70 = 0; 
-        let cumSelected = 0;
+        let cum60 = 0, cum65 = 0, cum70 = 0, cumSelected = 0;
 
-        // Monthly Amounts for scenarios
-        const cpp60 = baseCppAt65 * 0.64; // -36%
+        const cpp60 = baseCppAt65 * 0.64; 
         const cpp65 = baseCppAt65;
-        const cpp70 = baseCppAt65 * 1.42; // +42%
+        const cpp70 = baseCppAt65 * 1.42; 
         
         const oasStandard = baseOASAt65;
-        const oas70 = baseOASAt65 * 1.36; // +36%
+        const oas70 = baseOASAt65 * 1.36;
 
-        // Calculate User Selected Scenario Monthly (If distinct)
         const userIsDistinct = retirementAge !== 60 && retirementAge !== 65 && retirementAge !== 70;
         let cppSelected = 0;
-        let oasSelected = baseOASAt65; // Default floor
+        let oasSelected = baseOASAt65; 
         
         if (userIsDistinct) {
-            // CPP
             const userMonthsDiff = (retirementAge - 65) * 12;
             let userCppAdj = 0;
             if (userMonthsDiff < 0) userCppAdj = userMonthsDiff * 0.006;
             else userCppAdj = Math.min(userMonthsDiff, 60) * 0.007;
             cppSelected = baseCppAt65 * (1 + userCppAdj);
 
-            // OAS (Can't start before 65)
             if (retirementAge > 65) {
                 const oasDelayMonths = Math.min((retirementAge - 65) * 12, 60);
                 oasSelected = baseOASAt65 * (1 + (oasDelayMonths * 0.006));
@@ -255,33 +258,27 @@ export default function Calculator() {
         let crossover70 = null;
 
         for (let age = 60; age <= 95; age++) {
-            // Path 60: CPP starts 60, OAS starts 65
             let annual60 = 0;
             if (age >= 60) annual60 += cpp60 * 12;
             if (age >= 65) annual60 += oasStandard * 12;
             cum60 += annual60;
 
-            // Path 65: Both at 65
             let annual65 = 0;
             if (age >= 65) annual65 += (cpp65 * 12) + (oasStandard * 12);
             cum65 += annual65;
 
-            // Path 70: Both at 70
             let annual70 = 0;
             if (age >= 70) annual70 += (cpp70 * 12) + (oas70 * 12);
             cum70 += annual70;
 
-            // Path Selected
             let annualSelected = 0;
             if (userIsDistinct) {
                 if (age >= retirementAge) annualSelected += cppSelected * 12;
-                // OAS starts at 65 or retirementAge, whichever is later
                 const oasStart = Math.max(65, retirementAge);
                 if (age >= oasStart) annualSelected += oasSelected * 12;
                 cumSelected += annualSelected;
             }
 
-            // Detect Crossovers
             if (!crossover65 && cum65 > cum60 && age > 65) crossover65 = age;
             if (!crossover70 && cum70 > cum65 && age > 70) crossover70 = age;
 
@@ -297,8 +294,7 @@ export default function Calculator() {
             breakevenData.push(dataPoint);
         }
 
-
-        // --- 3. CLAWBACK & GIS LOGIC ---
+        // 3. CLAWBACK & GIS
         const annualCPP = finalCPP * 12;
         const annualOAS = oasGross * 12;
         const annualOther = parseFloat(otherIncome) || 0;
@@ -353,6 +349,26 @@ export default function Calculator() {
             gisNote = "GIS starts at age 65";
         }
 
+        // --- 4. ZERO REASON LOGIC ---
+        let cppZeroReason = null;
+        if (finalCPP === 0) {
+             if (retirementAge < 60) cppZeroReason = "Min age 60";
+             else cppZeroReason = "No eligible earnings";
+        }
+
+        let oasZeroReason = null;
+        if (finalOAS === 0) {
+            if (retirementAge < 65) oasZeroReason = "Min age 65";
+            else if (yearsInCanada < 10) oasZeroReason = "Min 10 years residency"; 
+            else if (oasClawbackMonthly >= oasGross) oasZeroReason = "Clawed back by income";
+        }
+
+        let gisZeroReason = null;
+        if (gisAmount === 0) {
+            if (retirementAge < 65) gisZeroReason = "Min age 65";
+            else gisZeroReason = "Income exceeds threshold";
+        }
+
         const generateInsights = () => {
             const insights = [];
             if (retirementAge < 65) {
@@ -382,9 +398,9 @@ export default function Calculator() {
         };
 
         return {
-            cpp: { base: baseBenefit || 0, enhanced: enhancedBenefit || 0, total: finalCPP || 0, adjustmentPercent: cppAdjustmentPercent },
-            oas: { amount: finalOAS, gross: oasGross, clawback: oasClawbackMonthly, yearsUsed: validYears, note: retirementAge < 65 ? "Starts at 65" : "" },
-            gis: { amount: gisAmount, note: gisNote },
+            cpp: { base: baseBenefit || 0, enhanced: enhancedBenefit || 0, total: finalCPP || 0, adjustmentPercent: cppAdjustmentPercent, zeroReason: cppZeroReason },
+            oas: { amount: finalOAS, gross: oasGross, clawback: oasClawbackMonthly, yearsUsed: validYears, note: retirementAge < 65 ? "Starts at 65" : "", zeroReason: oasZeroReason },
+            gis: { amount: gisAmount, note: gisNote, zeroReason: gisZeroReason },
             grandTotal: (finalCPP || 0) + finalOAS + gisAmount,
             insights: generateInsights(),
             breakevenData,
@@ -719,14 +735,13 @@ export default function Calculator() {
                                 </div>
 
                                 {/* BREAKEVEN CHART */}
-                                
                                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
                                     <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-6">
                                         <div className="flex items-center gap-3">
                                             <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg"><BarChartIcon size={20}/></div>
                                             <div>
                                                 <h3 className="font-bold text-slate-800">Breakeven Analysis: When to Start?</h3>
-                                                <p className="text-xs text-slate-500">Cumulative payouts by start age. <span className="font-semibold text-indigo-600">Click graph for details.</span></p>
+                                                <p className="text-xs text-slate-500">Cumulative payouts by start age. <span className="font-semibold text-indigo-600">Click legend to filter. Click graph for details.</span></p>
                                             </div>
                                         </div>
                                     </div>
@@ -759,26 +774,67 @@ export default function Calculator() {
                                                     formatter={(value, name) => [`$${value.toLocaleString()}`, name]}
                                                     labelFormatter={(label) => <span className="font-bold text-slate-300 mb-2 block border-b border-slate-700 pb-1">At Age {label}</span>}
                                                 />
-                                                <Legend wrapperStyle={{ paddingTop: '15px', fontSize: '12px' }} iconType="circle" />
+                                                <Legend 
+                                                    wrapperStyle={{ paddingTop: '15px', fontSize: '12px', cursor: 'pointer' }} 
+                                                    iconType="circle" 
+                                                    onClick={handleLegendClick}
+                                                />
                                                 
-                                                {/* THREE COMPARISON LINES */}
-                                                <Line type="monotone" dataKey="Early" name="Start at 60" stroke="#10b981" strokeWidth={2} dot={false} activeDot={{ r: 6 }} />
-                                                <Line type="monotone" dataKey="Standard" name="Start at 65" stroke="#3b82f6" strokeWidth={2} dot={false} activeDot={{ r: 6 }} />
-                                                <Line type="monotone" dataKey="Deferred" name="Start at 70" stroke="#f59e0b" strokeWidth={2} dot={false} activeDot={{ r: 6 }} />
+                                                {/* THREE COMPARISON LINES WITH TOGGLE */}
+                                                <Line 
+                                                    type="monotone" 
+                                                    dataKey="Early" 
+                                                    name="Start at 60" 
+                                                    stroke="#10b981" 
+                                                    strokeWidth={2} 
+                                                    dot={false} 
+                                                    activeDot={{ r: 6 }} 
+                                                    hide={!lineVisibility.Early}
+                                                />
+                                                <Line 
+                                                    type="monotone" 
+                                                    dataKey="Standard" 
+                                                    name="Start at 65" 
+                                                    stroke="#3b82f6" 
+                                                    strokeWidth={2} 
+                                                    dot={false} 
+                                                    activeDot={{ r: 6 }}
+                                                    hide={!lineVisibility.Standard} 
+                                                />
+                                                <Line 
+                                                    type="monotone" 
+                                                    dataKey="Deferred" 
+                                                    name="Start at 70" 
+                                                    stroke="#f59e0b" 
+                                                    strokeWidth={2} 
+                                                    dot={false} 
+                                                    activeDot={{ r: 6 }} 
+                                                    hide={!lineVisibility.Deferred}
+                                                />
                                                 
                                                 {/* CONDITIONAL USER LINE */}
                                                 {results.userIsDistinct && (
-                                                    <Line type="monotone" dataKey="Selected" name={`Start at ${results.selectedAge} (Selected)`} stroke="#8b5cf6" strokeWidth={3} strokeDasharray="5 5" dot={false} activeDot={{ r: 8 }} />
+                                                    <Line 
+                                                        type="monotone" 
+                                                        dataKey="Selected" 
+                                                        name={`Start at ${results.selectedAge} (Selected)`} 
+                                                        stroke="#8b5cf6" 
+                                                        strokeWidth={3} 
+                                                        strokeDasharray="5 5" 
+                                                        dot={false} 
+                                                        activeDot={{ r: 8 }} 
+                                                        hide={!lineVisibility.Selected}
+                                                    />
                                                 )}
 
-                                                {/* DYNAMIC BREAKEVEN LINES */}
-                                                {results.crossovers.age65 && <ReferenceLine x={results.crossovers.age65} stroke="#3b82f6" strokeDasharray="3 3" label={{ position: 'top', value: '65 beats 60', fill: '#3b82f6', fontSize: 10, fontWeight: 'bold' }} />}
-                                                {results.crossovers.age70 && <ReferenceLine x={results.crossovers.age70} stroke="#f59e0b" strokeDasharray="3 3" label={{ position: 'top', value: '70 beats 65', fill: '#f59e0b', fontSize: 10, fontWeight: 'bold' }} />}
+                                                {/* DYNAMIC BREAKEVEN LINES - Only show if lines are visible */}
+                                                {results.crossovers.age65 && lineVisibility.Early && lineVisibility.Standard && <ReferenceLine x={results.crossovers.age65} stroke="#3b82f6" strokeDasharray="3 3" label={{ position: 'top', value: '65 beats 60', fill: '#3b82f6', fontSize: 10, fontWeight: 'bold' }} />}
+                                                {results.crossovers.age70 && lineVisibility.Standard && lineVisibility.Deferred && <ReferenceLine x={results.crossovers.age70} stroke="#f59e0b" strokeDasharray="3 3" label={{ position: 'top', value: '70 beats 65', fill: '#f59e0b', fontSize: 10, fontWeight: 'bold' }} />}
                                             </LineChart>
                                         </ResponsiveContainer>
                                     </div>
 
-                                    {/* CLICK DETAIL PANEL */}
+                                    {/* CLICK DETAIL PANEL - Conditioned on Visibility */}
                                     {chartSelection && (
                                         <div className="mt-4 bg-slate-50 border border-slate-200 rounded-xl p-4 animate-fade-in">
                                             <div className="flex justify-between items-center mb-3">
@@ -788,24 +844,30 @@ export default function Calculator() {
                                             <div className={`grid gap-2 text-center ${results.userIsDistinct ? 'grid-cols-2 md:grid-cols-4' : 'grid-cols-3'}`}>
                                                 {results.breakevenData.filter(d => d.age === chartSelection).map(d => (
                                                     <React.Fragment key={d.age}>
-                                                    <div className="bg-emerald-50 border border-emerald-100 p-2 rounded-lg">
-                                                        <div className="text-[10px] text-emerald-600 font-bold uppercase">Start 60</div>
-                                                        <div className="font-bold text-emerald-800">${d.Early.toLocaleString()}</div>
-                                                    </div>
-                                                    <div className="bg-blue-50 border border-blue-100 p-2 rounded-lg">
-                                                        <div className="text-[10px] text-blue-600 font-bold uppercase">Start 65</div>
-                                                        <div className="font-bold text-blue-800">${d.Standard.toLocaleString()}</div>
-                                                    </div>
-                                                    <div className="bg-amber-50 border border-amber-100 p-2 rounded-lg">
-                                                        <div className="text-[10px] text-amber-600 font-bold uppercase">Start 70</div>
-                                                        <div className="font-bold text-amber-800">${d.Deferred.toLocaleString()}</div>
-                                                    </div>
-                                                    {results.userIsDistinct && (
-                                                        <div className="bg-violet-50 border border-violet-100 p-2 rounded-lg">
-                                                            <div className="text-[10px] text-violet-600 font-bold uppercase">Start {results.selectedAge}</div>
-                                                            <div className="font-bold text-violet-800">${d.Selected.toLocaleString()}</div>
-                                                        </div>
-                                                    )}
+                                                        {lineVisibility.Early && (
+                                                            <div className="bg-emerald-50 border border-emerald-100 p-2 rounded-lg">
+                                                                <div className="text-[10px] text-emerald-600 font-bold uppercase">Start 60</div>
+                                                                <div className="font-bold text-emerald-800">${d.Early.toLocaleString()}</div>
+                                                            </div>
+                                                        )}
+                                                        {lineVisibility.Standard && (
+                                                            <div className="bg-blue-50 border border-blue-100 p-2 rounded-lg">
+                                                                <div className="text-[10px] text-blue-600 font-bold uppercase">Start 65</div>
+                                                                <div className="font-bold text-blue-800">${d.Standard.toLocaleString()}</div>
+                                                            </div>
+                                                        )}
+                                                        {lineVisibility.Deferred && (
+                                                            <div className="bg-amber-50 border border-amber-100 p-2 rounded-lg">
+                                                                <div className="text-[10px] text-amber-600 font-bold uppercase">Start 70</div>
+                                                                <div className="font-bold text-amber-800">${d.Deferred.toLocaleString()}</div>
+                                                            </div>
+                                                        )}
+                                                        {results.userIsDistinct && lineVisibility.Selected && (
+                                                            <div className="bg-violet-50 border border-violet-100 p-2 rounded-lg">
+                                                                <div className="text-[10px] text-violet-600 font-bold uppercase">Start {results.selectedAge}</div>
+                                                                <div className="font-bold text-violet-800">${d.Selected.toLocaleString()}</div>
+                                                            </div>
+                                                        )}
                                                     </React.Fragment>
                                                 ))}
                                             </div>
@@ -856,6 +918,11 @@ export default function Calculator() {
                                                 <span className="text-slate-800">Total CPP</span>
                                                 <span>${results.cpp.total.toFixed(2)}</span>
                                             </div>
+                                            {results.cpp.zeroReason && (
+                                                <div className="text-xs text-center bg-amber-50 text-amber-700 p-2 rounded border border-amber-100 font-semibold mt-2">
+                                                    {results.cpp.zeroReason}
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
 
@@ -881,6 +948,11 @@ export default function Calculator() {
                                                 <span className="text-slate-800">Net OAS</span>
                                                 <span>${results.oas.amount.toFixed(2)}</span>
                                             </div>
+                                            {results.oas.zeroReason && (
+                                                <div className="text-xs text-center bg-amber-50 text-amber-700 p-2 rounded border border-amber-100 font-semibold mt-2">
+                                                    {results.oas.zeroReason}
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
 
@@ -901,6 +973,11 @@ export default function Calculator() {
                                                 <span className="text-slate-800">Total GIS</span>
                                                 <span>${results.gis.amount.toFixed(2)}</span>
                                             </div>
+                                            {results.gis.zeroReason && (
+                                                <div className="text-xs text-center bg-amber-50 text-amber-700 p-2 rounded border border-amber-100 font-semibold mt-2">
+                                                    {results.gis.zeroReason}
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
