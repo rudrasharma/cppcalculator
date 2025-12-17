@@ -1,8 +1,8 @@
 // src/components/Calculator.jsx
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer, ReferenceLine } from 'recharts';
 
-// --- ICONS ---
+// --- ICONS (Same as before) ---
 const IconBase = ({ size = 20, className = "", children }) => (
     <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>{children}</svg>
 );
@@ -26,6 +26,8 @@ const HeartHandshakeIcon = (props) => (<IconBase {...props}><path d="M19 14c1.49
 const WandIcon = (props) => (<IconBase {...props}><path d="M15 4V2"/><path d="M15 16v-2"/><path d="M8 9h2"/><path d="M20 9h2"/><path d="M17.8 11.8 19 13"/><path d="M15 9h0"/><path d="M17.8 6.2 19 5"/><path d="m3 21 9-9"/><path d="M12.2 6.2 11 5"/></IconBase>);
 const BarChartIcon = (props) => (<IconBase {...props}><line x1="12" x2="12" y1="20" y2="10"/><line x1="18" x2="18" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="16"/></IconBase>);
 const MousePointerIcon = (props) => (<IconBase {...props}><path d="m3 3 7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/><path d="m13 13 6 6"/></IconBase>);
+const LinkIcon = (props) => (<IconBase {...props}><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></IconBase>);
+const CheckIcon = (props) => (<IconBase {...props}><polyline points="20 6 9 17 4 12"/></IconBase>);
 
 // --- CONSTANTS ---
 const YMPE_DATA = {
@@ -59,6 +61,60 @@ const getYMPE = (year) => {
     if (year > 2025) return Math.round(71300 * Math.pow(1.025, year - 2025));
     if (year < 2011) return Math.round(48300 * Math.pow(0.975, 2011 - year));
     return 5000;
+};
+
+// --- COMPRESSION HELPERS (Fixed-Width Base36) ---
+// Strategy: 
+// 1. Calculate offset from Age 18 (based on DOB).
+// 2. Encode offset as 1 char Base36.
+// 3. For each year: val / 100 -> Base36. Pad to 2 chars.
+// 4. Max value 129500 (Base36 'zz').
+const compressEarnings = (earningsObj, birthYear) => {
+    const years = Object.keys(earningsObj).map(Number).sort((a,b) => a-b);
+    if (years.length === 0) return '';
+
+    const startAge18 = birthYear + 18;
+    const firstDataYear = years[0];
+    
+    // Offset from age 18. e.g., if you started working at 25, offset is 7.
+    // If negative (data before 18?), clamp to 0.
+    const offset = Math.max(0, firstDataYear - startAge18);
+    const header = offset.toString(36); // 1 char usually
+
+    const lastYear = years[years.length - 1];
+    let stream = "";
+    
+    for (let y = firstDataYear; y <= lastYear; y++) {
+        let val = earningsObj[y] || 0;
+        // Cap at $129,500 (zz in base36 2-char) to maintain fixed width
+        if (val > 129500) val = 129500;
+        
+        let compressed = Math.floor(val / 100).toString(36);
+        if (compressed.length < 2) compressed = '0' + compressed; // Pad
+        stream += compressed;
+    }
+    return header + stream; 
+};
+
+const decompressEarnings = (str, birthYear) => {
+    if (!str || str.length < 3) return {};
+    
+    const startAge18 = birthYear + 18;
+    const offsetChar = str.charAt(0);
+    const offset = parseInt(offsetChar, 36);
+    
+    const startYear = startAge18 + offset;
+    const dataString = str.slice(1);
+    const result = {};
+    
+    for (let i = 0; i < dataString.length; i += 2) {
+        const chunk = dataString.substr(i, 2);
+        const val = parseInt(chunk, 36);
+        if (val > 0) {
+            result[startYear + (i / 2)] = val * 100;
+        }
+    }
+    return result;
 };
 
 // --- COMPONENTS ---
@@ -114,7 +170,72 @@ export default function Calculator() {
     const [spouseIncome, setSpouseIncome] = useState('');
     const [forceAllowance, setForceAllowance] = useState(false);
 
+    // --- SHARE LINK STATE ---
+    const [copySuccess, setCopySuccess] = useState(false);
+
     const birthYear = parseInt(dob.split('-')[0]);
+
+    // --- LOAD FROM URL ON MOUNT ---
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        if (params.toString()) {
+            // Short codes: d=dob, r=retAge, y=yic, s=sal, o=other, m=married, sd=spouseDob, si=spouseInc, fa=forceAllow, e=earnings
+            if (params.get('d')) setDob(params.get('d').replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3')); // Expand YYYYMMDD if needed, but YYYY-MM-DD works in URL too
+            if (params.get('r')) setRetirementAge(parseInt(params.get('r')));
+            if (params.get('y')) setYearsInCanada(parseInt(params.get('y')));
+            
+            // Base36 Decoding for Numbers
+            if (params.get('s')) setAvgSalaryInput(parseInt(params.get('s'), 36).toString());
+            if (params.get('o')) setOtherIncome(parseInt(params.get('o'), 36).toString());
+            
+            if (params.get('m') === '1') setIsMarried(true);
+            if (params.get('sd')) setSpouseDob(params.get('sd').replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3'));
+            if (params.get('si')) setSpouseIncome(parseInt(params.get('si'), 36).toString());
+            if (params.get('fa') === '1') setForceAllowance(true);
+
+            // Earnings Decompression
+            const earningsStr = params.get('e');
+            const dobParam = params.get('d');
+            if (earningsStr && dobParam) {
+                const bYear = parseInt(dobParam.substring(0, 4));
+                setEarnings(decompressEarnings(earningsStr, bYear));
+            }
+        }
+    }, []);
+
+    // --- SHARE FUNCTION (HIGHLY COMPRESSED) ---
+    const copyLink = () => {
+        const params = new URLSearchParams();
+        // Date: YYYY-MM-DD -> YYYY-MM-DD (Standard is fine, or strip hyphens to save 2 chars)
+        params.set('d', dob); 
+        params.set('r', retirementAge);
+        params.set('y', yearsInCanada);
+        
+        // Base36 encode large numbers to save space
+        if (avgSalaryInput) params.set('s', parseInt(avgSalaryInput).toString(36));
+        if (otherIncome) params.set('o', parseInt(otherIncome).toString(36));
+        
+        if (isMarried) {
+            params.set('m', '1');
+            params.set('sd', spouseDob);
+            if (spouseIncome) params.set('si', parseInt(spouseIncome).toString(36));
+            if (forceAllowance) params.set('fa', '1');
+        }
+
+        // Fixed-Width Base36 Earnings
+        const compressedEarn = compressEarnings(earnings, birthYear);
+        if (compressedEarn) {
+            params.set('e', compressedEarn);
+        }
+
+        const url = `${window.location.origin}${window.location.pathname}?${params.toString()}`;
+        
+        navigator.clipboard.writeText(url).then(() => {
+            setCopySuccess(true);
+            setTimeout(() => setCopySuccess(false), 2000);
+        });
+    };
+
     const startYear = birthYear + 18;
     const endYear = birthYear + retirementAge;
     const years = useMemo(() => {
@@ -454,8 +575,15 @@ export default function Calculator() {
                             <div className="text-xs font-medium text-slate-500 tracking-wide uppercase">2025 Ruleset</div>
                         </div>
                     </div>
-                    <div className="hidden sm:flex gap-4">
-                        <button onClick={() => setShowAbout(true)} className="text-sm font-medium text-slate-500 hover:text-indigo-600 transition-colors">About</button>
+                    <div className="flex gap-4 items-center">
+                        <button 
+                            onClick={copyLink} 
+                            className="text-sm font-bold text-indigo-600 hover:bg-indigo-50 px-3 py-2 rounded-lg transition-all flex items-center gap-2 border border-transparent hover:border-indigo-100"
+                        >
+                            {copySuccess ? <CheckIcon size={16} /> : <LinkIcon size={16} />}
+                            {copySuccess ? "Copied!" : "Copy Link"}
+                        </button>
+                        <button onClick={() => setShowAbout(true)} className="text-sm font-medium text-slate-500 hover:text-indigo-600 transition-colors hidden sm:block">About</button>
                     </div>
                 </div>
             </header>
