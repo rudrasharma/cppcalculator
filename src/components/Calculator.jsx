@@ -22,6 +22,7 @@ const UserGroupIcon = (props) => (<IconBase {...props}><path d="M17 21v-2a4 4 0 
 const ChevronDownIcon = (props) => (<IconBase {...props}><polyline points="6 9 12 15 18 9"/></IconBase>);
 const LightbulbIcon = (props) => (<IconBase {...props}><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-1 1.5-2 1.5-3.5 0-2.2-1.8-4-4-4a4 4 0 0 0-4 4c0 1.5.5 2.5 1.5 3.5.8.8 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></IconBase>);
 const HeartHandshakeIcon = (props) => (<IconBase {...props}><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></IconBase>);
+const CalendarIcon = (props) => (<IconBase {...props}><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></IconBase>);
 
 
 // --- CONSTANTS ---
@@ -96,9 +97,11 @@ export default function Calculator() {
     const [otherIncome, setOtherIncome] = useState('');
     const [showAbout, setShowAbout] = useState(false);
     
-    // --- MARITAL STATUS STATES ---
-    const [maritalStatus, setMaritalStatus] = useState('single');
+    // --- UPDATED MARITAL STATUS LOGIC ---
+    const [isMarried, setIsMarried] = useState(false);
+    const [spouseDob, setSpouseDob] = useState('1985-01-01');
     const [spouseIncome, setSpouseIncome] = useState('');
+    const [forceAllowance, setForceAllowance] = useState(false);
 
     const birthYear = parseInt(dob.split('-')[0]);
     const startYear = birthYear + 18;
@@ -217,6 +220,7 @@ export default function Calculator() {
         }
         const finalOAS = Math.max(0, oasGross - oasClawbackMonthly);
 
+        // --- SMART GIS CALCULATION ---
         let gisAmount = 0;
         let gisNote = "";
         
@@ -224,20 +228,40 @@ export default function Calculator() {
             let params = GIS_PARAMS.SINGLE;
             let combinedIncome = annualCPP + annualOther; 
             
-            if (maritalStatus !== 'single') {
+            if (isMarried) {
                 const spouseAnnual = parseFloat(spouseIncome) || 0;
                 combinedIncome += spouseAnnual;
                 
-                if (maritalStatus === 'married_spouse_oas') params = GIS_PARAMS.MARRIED_SPOUSE_OAS;
-                else if (maritalStatus === 'married_spouse_no_oas') params = GIS_PARAMS.MARRIED_SPOUSE_NO_OAS;
-                else if (maritalStatus === 'married_spouse_allowance') params = GIS_PARAMS.MARRIED_SPOUSE_ALLOWANCE;
+                // Calculate Spouse Age at time of retirement
+                const retireYear = birthYear + retirementAge;
+                const spBirthYear = parseInt(spouseDob.split('-')[0]);
+                const spouseAgeAtRetirement = retireYear - spBirthYear;
+
+                // Smart Category Selection
+                if (spouseAgeAtRetirement >= 65) {
+                    params = GIS_PARAMS.MARRIED_SPOUSE_OAS;
+                    gisNote = `Combined income used (Spouse age ${spouseAgeAtRetirement}: receives OAS)`;
+                } else if (spouseAgeAtRetirement >= 60 && spouseAgeAtRetirement < 65) {
+                    if (forceAllowance) {
+                        params = GIS_PARAMS.MARRIED_SPOUSE_ALLOWANCE;
+                        gisNote = `Combined income used (Spouse age ${spouseAgeAtRetirement}: receives Allowance)`;
+                    } else {
+                        // Default to NO OAS if Allowance not checked
+                        params = GIS_PARAMS.MARRIED_SPOUSE_NO_OAS;
+                        gisNote = `Combined income used (Spouse age ${spouseAgeAtRetirement}: No OAS)`;
+                    }
+                } else {
+                    // Under 60
+                    params = GIS_PARAMS.MARRIED_SPOUSE_NO_OAS;
+                    gisNote = `Combined income used (Spouse age ${spouseAgeAtRetirement}: Under 60)`;
+                }
             }
 
             const annualClawback = Math.max(0, combinedIncome) * params.rate;
             gisAmount = Math.max(0, params.max - (annualClawback / 12));
 
         } else {
-            gisNote = "Starts at 65";
+            gisNote = "GIS starts at age 65";
         }
 
         const generateInsights = () => {
@@ -258,17 +282,6 @@ export default function Calculator() {
                     type: 'success',
                     text: `Low Income Support: You qualify for an estimated $${gisAmount.toFixed(0)}/mo in GIS.`
                 });
-            } else if (retirementAge >= 65 && gisAmount === 0) {
-                const threshold = maritalStatus === 'single' ? GIS_PARAMS.SINGLE.limit : 
-                                 (maritalStatus === 'married_spouse_oas' ? GIS_PARAMS.MARRIED_SPOUSE_OAS.limit : 
-                                 (maritalStatus === 'married_spouse_no_oas' ? GIS_PARAMS.MARRIED_SPOUSE_NO_OAS.limit : GIS_PARAMS.MARRIED_SPOUSE_ALLOWANCE.limit));
-                const totalIncome = annualCPP + annualOther + (maritalStatus !== 'single' ? (parseFloat(spouseIncome) || 0) : 0);
-                if(totalIncome < threshold + 10000 && totalIncome > threshold) {
-                    insights.push({
-                        type: 'warning',
-                        text: `GIS is fully clawed back because your ${maritalStatus !== 'single' ? 'combined' : ''} income (excluding OAS) exceeds ~$${(threshold/1000).toFixed(1)}k.`
-                    });
-                }
             }
             if (oasClawbackMonthly > 0) {
                 insights.push({
@@ -284,7 +297,9 @@ export default function Calculator() {
             oas: { amount: finalOAS, gross: oasGross, clawback: oasClawbackMonthly, yearsUsed: validYears, note: retirementAge < 65 ? "Starts at 65" : "" },
             gis: { amount: gisAmount, note: gisNote },
             grandTotal: (finalCPP || 0) + finalOAS + gisAmount,
-            insights: generateInsights()
+            insights: generateInsights(),
+            // Pass spouse age for UI rendering logic if needed
+            spouseAgeAtRetirement: isMarried ? (birthYear + retirementAge - parseInt(spouseDob.split('-')[0])) : null
         };
     };
 
@@ -375,32 +390,59 @@ export default function Calculator() {
                                                 <input type="date" value={dob} onChange={(e) => setDob(e.target.value)} className="w-full p-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all shadow-sm" />
                                             </div>
 
+                                            {/* SIMPLIFIED MARITAL STATUS */}
                                             <div>
                                                 <label className="flex items-center text-sm font-bold text-slate-700 mb-2">
                                                     Marital Status
-                                                    <Tooltip text="Critical for GIS calculations. Married couples have combined income thresholds." />
+                                                    <Tooltip text="Combined income affects GIS eligibility." />
                                                 </label>
-                                                <div className="relative">
-                                                    <select value={maritalStatus} onChange={(e) => setMaritalStatus(e.target.value)} className="w-full p-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all shadow-sm appearance-none">
-                                                        <option value="single">Single / Widowed / Divorced</option>
-                                                        <option value="married_spouse_oas">Married (Spouse gets OAS)</option>
-                                                        <option value="married_spouse_no_oas">Married (Spouse NO OAS)</option>
-                                                        <option value="married_spouse_allowance">Married (Spouse gets Allowance)</option>
-                                                    </select>
-                                                    <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400"><ChevronDownIcon size={16}/></div>
+                                                <div className="flex bg-white p-1 rounded-xl border border-slate-200 shadow-sm">
+                                                    <button onClick={() => setIsMarried(false)} className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${!isMarried ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'}`}>
+                                                        Single
+                                                    </button>
+                                                    <button onClick={() => setIsMarried(true)} className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${isMarried ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'}`}>
+                                                        Married / Partnered
+                                                    </button>
                                                 </div>
                                             </div>
 
-                                            {maritalStatus !== 'single' && (
-                                                <div className="animate-fade-in pl-4 border-l-2 border-indigo-200">
-                                                    <label className="flex items-center text-sm font-bold text-indigo-900 mb-2">
-                                                        Spouse Annual Income
-                                                        <Tooltip text="Total taxable income (CPP, Pension, Investments). Exclude OAS." />
-                                                    </label>
-                                                    <div className="relative">
-                                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">$</span>
-                                                        <input type="number" value={spouseIncome} onChange={(e) => setSpouseIncome(e.target.value)} className="w-full pl-7 p-3 bg-indigo-50/50 border border-indigo-100 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all" placeholder="0" />
+                                            {isMarried && (
+                                                <div className="animate-fade-in space-y-4 pl-4 border-l-2 border-indigo-200">
+                                                    <div>
+                                                        <label className="flex items-center text-sm font-bold text-indigo-900 mb-2">
+                                                            Spouse Date of Birth
+                                                            <Tooltip text="We automatically calculate if your spouse qualifies for OAS or Allowance based on their age when YOU retire." />
+                                                        </label>
+                                                        <input type="date" value={spouseDob} onChange={(e) => setSpouseDob(e.target.value)} className="w-full p-3 bg-indigo-50/50 border border-indigo-100 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all" />
                                                     </div>
+
+                                                    <div>
+                                                        <label className="flex items-center text-sm font-bold text-indigo-900 mb-2">
+                                                            Spouse Annual Income
+                                                            <Tooltip text="Total taxable income (CPP, Pension, Investments). Exclude OAS." />
+                                                        </label>
+                                                        <div className="relative">
+                                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">$</span>
+                                                            <input type="number" value={spouseIncome} onChange={(e) => setSpouseIncome(e.target.value)} className="w-full pl-7 p-3 bg-indigo-50/50 border border-indigo-100 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all" placeholder="0" />
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    {/* Conditional Checkbox: Only if Spouse Age at Retirement is 60-64 */}
+                                                    {(() => {
+                                                        const spouseAge = birthYear + retirementAge - parseInt(spouseDob.split('-')[0]);
+                                                        if (spouseAge >= 60 && spouseAge < 65) {
+                                                            return (
+                                                                <label className="flex items-start gap-3 p-3 bg-indigo-100/50 rounded-xl cursor-pointer hover:bg-indigo-100 transition">
+                                                                    <input type="checkbox" checked={forceAllowance} onChange={(e) => setForceAllowance(e.target.checked)} className="mt-1 w-5 h-5 text-indigo-600 rounded focus:ring-indigo-500" />
+                                                                    <div className="text-xs text-indigo-900">
+                                                                        <strong>Apply for Allowance Benefit?</strong><br/>
+                                                                        Your spouse will be {spouseAge} when you retire. Check this if you expect to qualify for the low-income Allowance.
+                                                                    </div>
+                                                                </label>
+                                                            );
+                                                        }
+                                                        return null;
+                                                    })()}
                                                 </div>
                                             )}
 
