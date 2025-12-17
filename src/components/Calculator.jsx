@@ -22,7 +22,7 @@ const UserGroupIcon = (props) => (<IconBase {...props}><path d="M17 21v-2a4 4 0 
 const ChevronDownIcon = (props) => (<IconBase {...props}><polyline points="6 9 12 15 18 9"/></IconBase>);
 const LightbulbIcon = (props) => (<IconBase {...props}><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-1 1.5-2 1.5-3.5 0-2.2-1.8-4-4-4a4 4 0 0 0-4 4c0 1.5.5 2.5 1.5 3.5.8.8 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></IconBase>);
 const HeartHandshakeIcon = (props) => (<IconBase {...props}><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></IconBase>);
-const CalendarIcon = (props) => (<IconBase {...props}><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></IconBase>);
+const WandIcon = (props) => (<IconBase {...props}><path d="M15 4V2"/><path d="M15 16v-2"/><path d="M8 9h2"/><path d="M20 9h2"/><path d="M17.8 11.8 19 13"/><path d="M15 9h0"/><path d="M17.8 6.2 19 5"/><path d="m3 21 9-9"/><path d="M12.2 6.2 11 5"/></IconBase>);
 
 
 // --- CONSTANTS ---
@@ -97,7 +97,7 @@ export default function Calculator() {
     const [otherIncome, setOtherIncome] = useState('');
     const [showAbout, setShowAbout] = useState(false);
     
-    // --- UPDATED MARITAL STATUS LOGIC ---
+    // --- MARITAL STATUS STATES ---
     const [isMarried, setIsMarried] = useState(false);
     const [spouseDob, setSpouseDob] = useState('1985-01-01');
     const [spouseIncome, setSpouseIncome] = useState('');
@@ -232,12 +232,10 @@ export default function Calculator() {
                 const spouseAnnual = parseFloat(spouseIncome) || 0;
                 combinedIncome += spouseAnnual;
                 
-                // Calculate Spouse Age at time of retirement
                 const retireYear = birthYear + retirementAge;
                 const spBirthYear = parseInt(spouseDob.split('-')[0]);
                 const spouseAgeAtRetirement = retireYear - spBirthYear;
 
-                // Smart Category Selection
                 if (spouseAgeAtRetirement >= 65) {
                     params = GIS_PARAMS.MARRIED_SPOUSE_OAS;
                     gisNote = `Combined income used (Spouse age ${spouseAgeAtRetirement}: receives OAS)`;
@@ -246,12 +244,10 @@ export default function Calculator() {
                         params = GIS_PARAMS.MARRIED_SPOUSE_ALLOWANCE;
                         gisNote = `Combined income used (Spouse age ${spouseAgeAtRetirement}: receives Allowance)`;
                     } else {
-                        // Default to NO OAS if Allowance not checked
                         params = GIS_PARAMS.MARRIED_SPOUSE_NO_OAS;
                         gisNote = `Combined income used (Spouse age ${spouseAgeAtRetirement}: No OAS)`;
                     }
                 } else {
-                    // Under 60
                     params = GIS_PARAMS.MARRIED_SPOUSE_NO_OAS;
                     gisNote = `Combined income used (Spouse age ${spouseAgeAtRetirement}: Under 60)`;
                 }
@@ -298,7 +294,6 @@ export default function Calculator() {
             gis: { amount: gisAmount, note: gisNote },
             grandTotal: (finalCPP || 0) + finalOAS + gisAmount,
             insights: generateInsights(),
-            // Pass spouse age for UI rendering logic if needed
             spouseAgeAtRetirement: isMarried ? (birthYear + retirementAge - parseInt(spouseDob.split('-')[0])) : null
         };
     };
@@ -475,20 +470,6 @@ export default function Calculator() {
                                                 </label>
                                                 <input type="number" min="0" max="47" value={yearsInCanada} onChange={(e) => setYearsInCanada(parseInt(e.target.value) || 0)} className="w-full p-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all shadow-sm" />
                                             </div>
-                                            
-                                            <div>
-                                                <label className="flex items-center text-sm font-bold text-slate-700 mb-2">
-                                                    Current Annual Salary
-                                                    <Tooltip text="Used to auto-fill future earnings." />
-                                                </label>
-                                                <div className="flex gap-2">
-                                                    <div className="relative flex-grow">
-                                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">$</span>
-                                                        <input type="number" placeholder="65000" value={avgSalaryInput} onChange={(e) => setAvgSalaryInput(e.target.value)} className="w-full pl-7 p-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all shadow-sm" />
-                                                    </div>
-                                                    <button onClick={applyAverageSalary} className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-xl text-sm font-bold transition-all shadow-lg shadow-indigo-200">Apply</button>
-                                                </div>
-                                            </div>
 
                                             <div>
                                                 <label className="flex items-center text-sm font-bold text-slate-700 mb-2">
@@ -509,31 +490,57 @@ export default function Calculator() {
 
                                 {/* EARNINGS GRID */}
                                 <div>
-                                    <div className="flex flex-wrap gap-4 mb-6 justify-between items-end">
-                                        <div className="flex items-center gap-2 text-slate-700 mb-2">
+                                    <div className="flex flex-col gap-6 mb-6">
+                                        <div className="flex items-center gap-2 text-slate-700">
                                             <TrendingUpIcon size={20} />
                                             <h3 className="text-sm font-bold uppercase tracking-wider">Earnings History</h3>
                                         </div>
-                                        
-                                        <div className="flex flex-wrap items-center gap-3">
-                                            {/* Past */}
-                                            <div className="flex items-center bg-slate-100 hover:bg-slate-200 rounded-lg transition px-1">
-                                                <button onClick={() => fillAll('max', 'past')} className="text-xs font-bold text-slate-600 px-3 py-2">
-                                                    Fill History (Max)
-                                                </button>
-                                                <div className="pr-2"><Tooltip text="Sets all past years (from age 18 to now) to the historical maximum YMPE." /></div>
+
+                                        {/* NEW QUICK ACTIONS TOOLBAR */}
+                                        <div className="bg-slate-50 border border-slate-200 p-4 rounded-xl flex flex-wrap gap-4 items-end">
+                                            
+                                            {/* SALARY ESTIMATOR */}
+                                            <div className="flex-1 min-w-[240px]">
+                                                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">
+                                                    Quick Fill: Estimate from Salary
+                                                    <Tooltip text="Enter your current salary to automatically project your past and future earnings based on this level of income." />
+                                                </label>
+                                                <div className="flex gap-2">
+                                                    <div className="relative w-full">
+                                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">$</span>
+                                                        <input type="number" placeholder="65000" value={avgSalaryInput} onChange={(e) => setAvgSalaryInput(e.target.value)} className="w-full pl-7 p-2.5 bg-white border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none" />
+                                                    </div>
+                                                    <button onClick={applyAverageSalary} className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-lg text-sm font-bold flex items-center gap-1 transition-all shadow-sm">
+                                                        <WandIcon size={16} /> Apply
+                                                    </button>
+                                                </div>
                                             </div>
 
-                                            {/* Future */}
-                                            <div className="flex items-center bg-indigo-50 hover:bg-indigo-100 rounded-lg transition px-1">
-                                                <button onClick={() => fillAll('max', 'future')} className="text-xs font-bold text-indigo-600 px-3 py-2">
-                                                    Fill Future (Max)
-                                                </button>
-                                                <div className="pr-2"><Tooltip text="Projects maximum pensionable earnings for all future years until your retirement age." /></div>
+                                            <div className="w-px bg-slate-200 self-stretch mx-2 hidden md:block"></div>
+
+                                            {/* MANUAL FILLS */}
+                                            <div className="flex-1 min-w-[240px]">
+                                                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">
+                                                    Quick Fill: Max Limits
+                                                </label>
+                                                <div className="flex flex-wrap gap-2">
+                                                    <div className="flex items-center bg-white border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50 rounded-lg transition px-1">
+                                                        <button onClick={() => fillAll('max', 'past')} className="text-xs font-bold text-slate-700 hover:text-indigo-700 px-3 py-2.5">
+                                                            Fill History (Max)
+                                                        </button>
+                                                        <div className="pr-1"><Tooltip text="Sets all past years (age 18 to now) to the historical maximum YMPE." /></div>
+                                                    </div>
+
+                                                    <div className="flex items-center bg-white border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50 rounded-lg transition px-1">
+                                                        <button onClick={() => fillAll('max', 'future')} className="text-xs font-bold text-slate-700 hover:text-indigo-700 px-3 py-2.5">
+                                                            Fill Future (Max)
+                                                        </button>
+                                                        <div className="pr-1"><Tooltip text="Sets all future years to the projected maximum pensionable earnings." /></div>
+                                                    </div>
+                                                </div>
                                             </div>
-                                            
-                                            {/* Clear */}
-                                            <button onClick={() => setEarnings({})} className="text-xs font-bold text-rose-500 hover:bg-rose-50 px-3 py-2 rounded-lg transition flex items-center gap-1">
+
+                                            <button onClick={() => setEarnings({})} className="text-xs font-bold text-rose-500 hover:bg-rose-50 hover:text-rose-700 px-4 py-2.5 rounded-lg border border-transparent hover:border-rose-200 transition flex items-center gap-1 self-end ml-auto">
                                                 <RotateCcwIcon size={14} /> Reset
                                             </button>
                                         </div>
