@@ -21,7 +21,6 @@ const XIcon = (props) => (<IconBase {...props}><line x1="18" y1="6" x2="6" y2="1
 const UserGroupIcon = (props) => (<IconBase {...props}><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></IconBase>);
 const ChevronDownIcon = (props) => (<IconBase {...props}><polyline points="6 9 12 15 18 9"/></IconBase>);
 const LightbulbIcon = (props) => (<IconBase {...props}><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-1 1.5-2 1.5-3.5 0-2.2-1.8-4-4-4a4 4 0 0 0-4 4c0 1.5.5 2.5 1.5 3.5.8.8 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></IconBase>);
-// --- NEW GIS ICON ---
 const HeartHandshakeIcon = (props) => (<IconBase {...props}><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></IconBase>);
 
 
@@ -38,9 +37,12 @@ const CURRENT_YEAR = new Date().getFullYear();
 const MAX_BASE_CPP_2025 = 1364.60;
 const MAX_OAS_2025 = 727.67;
 const OAS_CLAWBACK_THRESHOLD_2025 = 93454;
-// --- NEW GIS CONSTANTS ---
-const MAX_GIS_SINGLE_2025 = 1085.00; // Estimated 2025 Single rate
-const GIS_CLAWBACK_RATE = 0.50; // 50 cents for every dollar of income
+const GIS_PARAMS = {
+    SINGLE: { max: 1086.88, limit: 22056, rate: 0.50 },
+    MARRIED_SPOUSE_OAS: { max: 665.41, limit: 29136, rate: 0.25 },
+    MARRIED_SPOUSE_NO_OAS: { max: 1086.88, limit: 52848, rate: 0.25 },
+    MARRIED_SPOUSE_ALLOWANCE: { max: 665.41, limit: 40800, rate: 0.25 }
+};
 
 const getYAMPE = (year) => {
     if (year < 2024) return 0;
@@ -59,8 +61,8 @@ const getYMPE = (year) => {
 // --- COMPONENTS ---
 const Tooltip = ({ text }) => (
     <div className="group relative inline-flex items-center ml-2">
-        <button className="text-gray-400 hover:text-blue-500 transition-colors"><HelpCircleIcon size={16} /></button>
-        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-gray-800 text-white text-xs rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 text-center leading-tight">
+        <button type="button" className="text-gray-400 hover:text-blue-500 transition-colors"><HelpCircleIcon size={16} /></button>
+        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 p-2 bg-gray-800 text-white text-xs rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 text-center leading-tight">
             {text}<div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
         </div>
     </div>
@@ -88,11 +90,12 @@ export default function Calculator() {
     const [earnings, setEarnings] = useState({});
     const [activeTab, setActiveTab] = useState('input');
     const [avgSalaryInput, setAvgSalaryInput] = useState('');
-    const [showClawback, setShowClawback] = useState(false);
     const [otherIncome, setOtherIncome] = useState('');
     const [showAbout, setShowAbout] = useState(false);
-    // --- NEW MARITAL STATUS STATE ---
+    
+    // --- MARITAL STATUS STATES ---
     const [maritalStatus, setMaritalStatus] = useState('single');
+    const [spouseIncome, setSpouseIncome] = useState('');
 
     const birthYear = parseInt(dob.split('-')[0]);
     const startYear = birthYear + 18;
@@ -204,31 +207,34 @@ export default function Calculator() {
         // OAS Recovery Tax
         let oasClawbackMonthly = 0;
         const totalNetWorldIncome = annualOther + annualCPP + annualOAS;
-        if (showClawback && retirementAge >= 65) {
+        // Always calculate clawback if age 65+
+        if (retirementAge >= 65) {
             if (totalNetWorldIncome > OAS_CLAWBACK_THRESHOLD_2025) {
                 oasClawbackMonthly = ((totalNetWorldIncome - OAS_CLAWBACK_THRESHOLD_2025) * 0.15) / 12;
             }
         }
         const finalOAS = Math.max(0, oasGross - oasClawbackMonthly);
 
-        // --- NEW GIS CALCULATION ---
+        // --- UPDATED GIS CALCULATION ---
         let gisAmount = 0;
         let gisNote = "";
         
         if (retirementAge >= 65) {
-             // Income definition for GIS excludes OAS, includes CPP + Other
-            const incomeForGIS = annualCPP + annualOther;
+            let params = GIS_PARAMS.SINGLE;
+            let combinedIncome = annualCPP + annualOther; // Base: Your CPP + Private Income (Exclude OAS)
             
-            if (maritalStatus === 'single') {
-                // GIS reduces by 50% of income
-                const gisReduction = Math.max(0, incomeForGIS) * GIS_CLAWBACK_RATE;
-                const monthlyReduction = gisReduction / 12;
-                gisAmount = Math.max(0, MAX_GIS_SINGLE_2025 - monthlyReduction);
-            } else {
-                // Fallback for partnered (too complex for single input)
-                gisNote = "Requires partner income data";
-                gisAmount = 0; 
+            if (maritalStatus !== 'single') {
+                const spouseAnnual = parseFloat(spouseIncome) || 0;
+                combinedIncome += spouseAnnual;
+                
+                if (maritalStatus === 'married_spouse_oas') params = GIS_PARAMS.MARRIED_SPOUSE_OAS;
+                else if (maritalStatus === 'married_spouse_no_oas') params = GIS_PARAMS.MARRIED_SPOUSE_NO_OAS;
+                else if (maritalStatus === 'married_spouse_allowance') params = GIS_PARAMS.MARRIED_SPOUSE_ALLOWANCE;
             }
+
+            const annualClawback = Math.max(0, combinedIncome) * params.rate;
+            gisAmount = Math.max(0, params.max - (annualClawback / 12));
+
         } else {
             gisNote = "Starts at 65";
         }
@@ -254,13 +260,18 @@ export default function Calculator() {
                     type: 'success',
                     text: `Low Income Support: You qualify for an estimated $${gisAmount.toFixed(0)}/mo in GIS.`
                 });
-            } else if (retirementAge >= 65 && maritalStatus === 'single' && (annualCPP + annualOther) > 22000) {
-                 insights.push({
-                    type: 'warning',
-                    text: `GIS is fully clawed back because your annual income (excluding OAS) exceeds ~$22k.`
-                });
+            } else if (retirementAge >= 65 && gisAmount === 0) {
+                const threshold = maritalStatus === 'single' ? GIS_PARAMS.SINGLE.limit : 
+                                 (maritalStatus === 'married_spouse_oas' ? GIS_PARAMS.MARRIED_SPOUSE_OAS.limit : 
+                                 (maritalStatus === 'married_spouse_no_oas' ? GIS_PARAMS.MARRIED_SPOUSE_NO_OAS.limit : GIS_PARAMS.MARRIED_SPOUSE_ALLOWANCE.limit));
+                const totalIncome = annualCPP + annualOther + (maritalStatus !== 'single' ? (parseFloat(spouseIncome) || 0) : 0);
+                if(totalIncome < threshold + 10000 && totalIncome > threshold) {
+                    insights.push({
+                        type: 'warning',
+                        text: `GIS is fully clawed back because your ${maritalStatus !== 'single' ? 'combined' : ''} income (excluding OAS) exceeds ~$${(threshold/1000).toFixed(1)}k.`
+                    });
+                }
             }
-            
             if (oasClawbackMonthly > 0) {
                 insights.push({
                     type: 'danger',
@@ -325,20 +336,45 @@ export default function Calculator() {
                         <div className="space-y-6">
                             <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">1. Personal Details</h3>
                             <div>
-                                <label className="block text-sm font-semibold text-gray-600 mb-1">Date of Birth</label>
+                                <label className="flex items-center text-sm font-semibold text-gray-600 mb-1">
+                                    Date of Birth
+                                    <Tooltip text="We use this to determine your age for CPP/OAS start dates and dropout years." />
+                                </label>
                                 <input type="date" value={dob} onChange={(e) => setDob(e.target.value)} className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
                             </div>
-                            {/* --- NEW MARITAL STATUS INPUT --- */}
+                            
                             <div>
-                                <label className="block text-sm font-semibold text-gray-600 mb-1">Marital Status (For GIS)</label>
-                                <select value={maritalStatus} onChange={(e) => setMaritalStatus(e.target.value)} className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+                                <label className="flex items-center text-sm font-semibold text-gray-600 mb-1">
+                                    Marital Status (For GIS)
+                                    <Tooltip text="Married couples have their income combined for GIS testing. Selecting the correct status ensures accurate thresholds." />
+                                </label>
+                                <select value={maritalStatus} onChange={(e) => setMaritalStatus(e.target.value)} className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white text-sm">
                                     <option value="single">Single / Widowed / Divorced</option>
-                                    <option value="partnered">Married / Common-law</option>
+                                    <option value="married_spouse_oas">Married - Spouse receives OAS</option>
+                                    <option value="married_spouse_no_oas">Married - Spouse does NOT receive OAS</option>
+                                    <option value="married_spouse_allowance">Married - Spouse receives Allowance</option>
                                 </select>
-                                {maritalStatus === 'partnered' && <p className="text-[10px] text-gray-400 mt-1">Note: This tool currently only estimates GIS for single individuals.</p>}
                             </div>
+                            
+                            {maritalStatus !== 'single' && (
+                                <div className="animate-fade-in bg-blue-50 p-3 rounded-lg border border-blue-100">
+                                    <label className="flex items-center text-sm font-semibold text-blue-800 mb-1">
+                                        Spouse's Annual Income
+                                        <Tooltip text="Enter your spouse's total annual taxable income (CPP, Pension, Investments). Do NOT include their OAS." />
+                                    </label>
+                                    <div className="relative">
+                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-400 text-xs">$</span>
+                                        <input type="number" placeholder="e.g. 15000" value={spouseIncome} onChange={(e) => setSpouseIncome(e.target.value)} className="w-full pl-6 p-2 text-sm border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white" />
+                                    </div>
+                                    <p className="text-[10px] text-blue-600 mt-1">Include their CPP, Pension, Investments (Exclude OAS).</p>
+                                </div>
+                            )}
+
                             <div>
-                                <label className="block text-sm font-semibold text-gray-600 mb-1">Retirement Age: <span className="text-blue-600 font-bold">{retirementAge}</span></label>
+                                <label className="flex items-center text-sm font-semibold text-gray-600 mb-1">
+                                    Retirement Age: <span className="text-blue-600 font-bold ml-1">{retirementAge}</span>
+                                    <Tooltip text="The age you plan to start collecting benefits. 60 is the earliest for CPP (reduced amount). 65 is standard. 70 is max (increased amount)." />
+                                </label>
                                 <input type="range" min="60" max="70" step="1" value={retirementAge} onChange={(e) => setRetirementAge(parseInt(e.target.value))} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600" />
                                 <div className="flex justify-between text-xs text-gray-400 mt-1"><span>60</span><span>65</span><span>70</span></div>
                             </div>
@@ -348,11 +384,17 @@ export default function Calculator() {
                         <div className="space-y-6">
                             <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">2. Financial Profile</h3>
                             <div>
-                                <label className="block text-sm font-semibold text-gray-600 mb-1">Estimate of Total Years in Canada (Ages 18 to 65)</label>
+                                <label className="flex items-center text-sm font-semibold text-gray-600 mb-1">
+                                    Years in Canada (Ages 18 to 65)
+                                    <Tooltip text="You need 40 years of residency after age 18 to get the full OAS pension. Fewer years results in a partial pension." />
+                                </label>
                                 <input type="number" min="0" max="47" value={yearsInCanada} onChange={(e) => setYearsInCanada(parseInt(e.target.value) || 0)} className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
                             </div>
                             <div>
-                                <label className="block text-sm font-semibold text-gray-600 mb-1">Est. Annual Salary (Current $)</label>
+                                <label className="flex items-center text-sm font-semibold text-gray-600 mb-1">
+                                    Est. Annual Salary (Current $)
+                                    <Tooltip text="Your current gross annual income. We use this to project your future CPP contributions until you retire." />
+                                </label>
                                 <div className="flex gap-2">
                                     <div className="relative flex-grow">
                                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
@@ -363,21 +405,16 @@ export default function Calculator() {
                                 <p className="text-xs text-gray-400 mt-1">Auto-populates earnings history based on 2025 YMPE.</p>
                             </div>
 
-                            <div className="pt-2 border-t border-gray-100">
-                                <label className="flex items-center gap-2 cursor-pointer mb-2">
-                                    <input type="checkbox" checked={showClawback} onChange={(e) => setShowClawback(e.target.checked)} className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500" />
-                                    <span className="text-sm font-semibold text-gray-600">Include Other Income (OAS/GIS Clawback)</span>
+                            <div>
+                                <label className="flex items-center text-sm font-semibold text-gray-600 mb-1">
+                                    Other Retirement Income (Annual)
+                                    <Tooltip text="Annual taxable income in retirement (Company Pension, RRSP withdrawals, Capital Gains). Exclude CPP and OAS. This determines if your OAS gets clawed back." />
                                 </label>
-                                {showClawback && (
-                                    <div className="animate-fade-in pl-6">
-                                        <label className="block text-xs font-semibold text-gray-500 mb-1">Other Annual Retirement Income (Excluding CPP/OAS)</label>
-                                        <div className="relative">
-                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-xs">$</span>
-                                            <input type="number" placeholder="e.g. Pension, RRIF, Gains" value={otherIncome} onChange={(e) => setOtherIncome(e.target.value)} className="w-full pl-6 p-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-gray-50" />
-                                        </div>
-					<p className="text-[10px] text-gray-400 mt-1">Triggers OAS clawback &gt;$93k and reduces GIS immediately.</p>
-                                    </div>
-                                )}
+                                <div className="relative">
+                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-xs">$</span>
+                                    <input type="number" placeholder="e.g. Pension, RRIF" value={otherIncome} onChange={(e) => setOtherIncome(e.target.value)} className="w-full pl-6 p-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-gray-50" />
+                                </div>
+                                <p className="text-[10px] text-gray-400 mt-1">Required for OAS Clawback & GIS calculation.</p>
                             </div>
                         </div>
                     </div>
@@ -399,7 +436,7 @@ export default function Calculator() {
                                         </div>
                                         <div className="flex items-center bg-blue-50 rounded-full border border-blue-200 px-3 py-1 transition">
                                             <button onClick={() => fillAll('max', 'future')} className="text-xs text-blue-700 font-medium">Set Future to Max</button>
-                                            <Tooltip text="Sets all future years to the estimated maximum." />
+                                            <Tooltip text="Sets all future years to the estimated maximum pensionable earnings." />
                                         </div>
                                     </div>
                                     <button onClick={() => setEarnings({})} className="text-xs text-red-600 hover:text-red-800 flex items-center gap-1 transition"><RotateCcwIcon size={12} /> Clear All</button>
@@ -467,7 +504,6 @@ export default function Calculator() {
                                         <div className="mt-4 flex gap-4 text-sm flex-wrap">
                                             <div className="flex items-center gap-1 bg-white/10 px-3 py-1 rounded-full"><span className="opacity-75">CPP:</span><span className="font-bold">${results.cpp.total.toLocaleString(undefined, {minimumFractionDigits:0, maximumFractionDigits:0})}</span></div>
                                             <div className="flex items-center gap-1 bg-white/10 px-3 py-1 rounded-full"><span className="opacity-75">OAS:</span><span className="font-bold">${results.oas.amount.toLocaleString(undefined, {minimumFractionDigits:0, maximumFractionDigits:0})}</span></div>
-                                            {/* --- GIS DISPLAY --- */}
                                             {results.gis.amount > 0 && <div className="flex items-center gap-1 bg-teal-500/20 px-3 py-1 rounded-full border border-teal-400/30"><span className="opacity-75">GIS:</span><span className="font-bold text-teal-200">${results.gis.amount.toLocaleString(undefined, {minimumFractionDigits:0, maximumFractionDigits:0})}</span></div>}
                                         </div>
                                     </div>
@@ -487,7 +523,6 @@ export default function Calculator() {
                                         {results.oas.clawback > 0 && (<div className="flex justify-between text-xs text-red-500 animate-pulse"><span>Recovery Tax</span><span>-${results.oas.clawback.toFixed(2)}</span></div>)}
                                         {results.oas.note && (<div className="text-xs text-red-500 font-medium">{results.oas.note}</div>)}
                                     </div>
-                                    {/* --- NEW GIS CARD --- */}
                                     <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-200">
                                         <div className="flex items-center gap-2 mb-4 text-gray-700"><HeartHandshakeIcon size={20} className="text-teal-600"/><h3 className="font-bold">GIS</h3></div>
                                         <div className="flex justify-between text-sm"><span className="text-gray-500">Supplement</span><span className="font-medium text-teal-600">${results.gis.amount.toFixed(2)}</span></div>
@@ -545,6 +580,7 @@ export default function Calculator() {
                         <ul className="list-disc pl-5 space-y-2 mb-4">
                             <li>You must be receiving OAS to get GIS (Age 65+).</li>
                             <li>For single individuals, GIS is reduced by <strong>50 cents</strong> for every dollar of income you earn (excluding OAS).</li>
+                            <li>For married couples, income is combined. If your spouse also gets OAS, the reduction rate is roughly <strong>25 cents</strong> per dollar of combined income (excluding OAS).</li>
                             <li>Your CPP payments count as income for GIS calculations. This often means high CPP payments can eliminate your GIS eligibility.</li>
                         </ul>
                    </Accordion>
@@ -560,32 +596,23 @@ export default function Calculator() {
 
             </main>
 
-            {/* FOOTER - FULLY RESTORED */}
+            {/* FOOTER */}
             <footer className="w-full px-4 md:px-6 pt-8 border-t border-gray-200">
                 <div className="text-center mb-8 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6">
-
-                    {/* Blog Link */}
                     <a href="/blog" className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 transition-colors font-medium text-sm">
                         <BookOpenIcon size={16} />
                         Read our Guides
                     </a>
-
                     <span className="hidden sm:block text-gray-300">|</span>
-
-                    {/* About Button */}
                     <button onClick={() => setShowAbout(true)} className="inline-flex items-center gap-2 text-gray-500 hover:text-gray-700 transition-colors font-medium text-sm">
                         <UserGroupIcon size={16} />
                         About This Tool
                     </button>
-
                     <span className="hidden sm:block text-gray-300">|</span>
-
-                    {/* Contact Link */}
                     <a href="mailto:support@cppforecast.ca" className="inline-flex items-center gap-2 text-gray-500 hover:text-blue-600 transition-colors font-medium text-sm">
                         <MailIcon size={16} />
                         Support
                     </a>
-
                 </div>
                 <div className="text-center text-xs text-gray-400 pb-4">
                     Disclaimer: This tool is for estimation purposes only. It is not financial advice.
