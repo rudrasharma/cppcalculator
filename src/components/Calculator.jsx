@@ -60,7 +60,7 @@ const getYMPE = (year) => {
 
 // --- COMPONENTS ---
 const Tooltip = ({ text }) => (
-    <div className="group relative inline-flex items-center ml-2">
+    <div className="group relative inline-flex items-center ml-1">
         <button type="button" className="text-slate-400 hover:text-indigo-600 transition-colors cursor-help">
             <HelpCircleIcon size={16} />
         </button>
@@ -472,10 +472,28 @@ export default function Calculator() {
                                             <TrendingUpIcon size={20} />
                                             <h3 className="text-sm font-bold uppercase tracking-wider">Earnings History</h3>
                                         </div>
-                                        <div className="space-x-2 flex items-center">
-                                            <button onClick={() => fillAll('max', 'past')} className="text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-600 px-3 py-1.5 rounded-lg transition">Max Past</button>
-                                            <button onClick={() => fillAll('max', 'future')} className="text-xs font-semibold bg-indigo-50 hover:bg-indigo-100 text-indigo-600 px-3 py-1.5 rounded-lg transition">Max Future</button>
-                                            <button onClick={() => setEarnings({})} className="text-xs font-semibold text-rose-500 hover:bg-rose-50 px-3 py-1.5 rounded-lg transition flex items-center gap-1"><RotateCcwIcon size={12} /> Clear</button>
+                                        
+                                        <div className="flex flex-wrap items-center gap-3">
+                                            {/* Past */}
+                                            <div className="flex items-center bg-slate-100 hover:bg-slate-200 rounded-lg transition px-1">
+                                                <button onClick={() => fillAll('max', 'past')} className="text-xs font-bold text-slate-600 px-3 py-2">
+                                                    Fill History (Max)
+                                                </button>
+                                                <div className="pr-2"><Tooltip text="Sets all past years (from age 18 to now) to the historical maximum YMPE." /></div>
+                                            </div>
+
+                                            {/* Future */}
+                                            <div className="flex items-center bg-indigo-50 hover:bg-indigo-100 rounded-lg transition px-1">
+                                                <button onClick={() => fillAll('max', 'future')} className="text-xs font-bold text-indigo-600 px-3 py-2">
+                                                    Fill Future (Max)
+                                                </button>
+                                                <div className="pr-2"><Tooltip text="Projects maximum pensionable earnings for all future years until your retirement age." /></div>
+                                            </div>
+                                            
+                                            {/* Clear */}
+                                            <button onClick={() => setEarnings({})} className="text-xs font-bold text-rose-500 hover:bg-rose-50 px-3 py-2 rounded-lg transition flex items-center gap-1">
+                                                <RotateCcwIcon size={14} /> Reset
+                                            </button>
                                         </div>
                                     </div>
 
