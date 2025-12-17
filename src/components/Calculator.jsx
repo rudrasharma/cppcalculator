@@ -2,7 +2,7 @@
 import React, { useState, useMemo } from 'react';
 
 // --- ICONS ---
-const IconBase = ({ size = 24, className = "", children }) => (
+const IconBase = ({ size = 20, className = "", children }) => (
     <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>{children}</svg>
 );
 const CalculatorIcon = (props) => (<IconBase {...props}><rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="16" x2="16" y1="14" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/></IconBase>);
@@ -61,24 +61,27 @@ const getYMPE = (year) => {
 // --- COMPONENTS ---
 const Tooltip = ({ text }) => (
     <div className="group relative inline-flex items-center ml-2">
-        <button type="button" className="text-gray-400 hover:text-blue-500 transition-colors"><HelpCircleIcon size={16} /></button>
-        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 p-2 bg-gray-800 text-white text-xs rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 text-center leading-tight">
-            {text}<div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
+        <button type="button" className="text-slate-400 hover:text-indigo-600 transition-colors cursor-help">
+            <HelpCircleIcon size={16} />
+        </button>
+        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-3 bg-slate-800 text-slate-50 text-xs rounded-xl shadow-xl opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none z-50 text-center leading-relaxed">
+            {text}
+            <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-800"></div>
         </div>
     </div>
 );
 
 const Accordion = ({ title, icon: Icon, children, defaultOpen = false }) => {
     return (
-        <details className="group bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden mb-4" open={defaultOpen}>
-            <summary className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50 transition select-none">
-                <div className="flex items-center gap-3">
-                    <div className="text-blue-600 bg-blue-50 p-2 rounded-lg"><Icon size={20} /></div>
-                    <h3 className="font-bold text-gray-800">{title}</h3>
+        <details className="group bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden mb-4 transition-all duration-300 hover:shadow-md" open={defaultOpen}>
+            <summary className="flex items-center justify-between p-4 cursor-pointer bg-white hover:bg-slate-50 transition select-none">
+                <div className="flex items-center gap-4">
+                    <div className="text-indigo-600 bg-indigo-50 p-2.5 rounded-lg"><Icon size={20} /></div>
+                    <h3 className="font-bold text-slate-800">{title}</h3>
                 </div>
-                <div className="text-gray-400 transition-transform group-open:rotate-180"><ChevronDownIcon size={20} /></div>
+                <div className="text-slate-400 transition-transform duration-300 group-open:rotate-180"><ChevronDownIcon size={20} /></div>
             </summary>
-            <div className="p-4 pt-0 border-t border-gray-100 mt-2 text-sm text-gray-600 leading-relaxed animate-fade-in">{children}</div>
+            <div className="p-6 pt-2 border-t border-slate-100 text-sm text-slate-600 leading-relaxed animate-fade-in">{children}</div>
         </details>
     );
 };
@@ -204,10 +207,9 @@ export default function Calculator() {
         const annualOAS = oasGross * 12;
         const annualOther = parseFloat(otherIncome) || 0;
         
-        // OAS Recovery Tax
         let oasClawbackMonthly = 0;
         const totalNetWorldIncome = annualOther + annualCPP + annualOAS;
-        // Always calculate clawback if age 65+
+        
         if (retirementAge >= 65) {
             if (totalNetWorldIncome > OAS_CLAWBACK_THRESHOLD_2025) {
                 oasClawbackMonthly = ((totalNetWorldIncome - OAS_CLAWBACK_THRESHOLD_2025) * 0.15) / 12;
@@ -215,13 +217,12 @@ export default function Calculator() {
         }
         const finalOAS = Math.max(0, oasGross - oasClawbackMonthly);
 
-        // --- UPDATED GIS CALCULATION ---
         let gisAmount = 0;
         let gisNote = "";
         
         if (retirementAge >= 65) {
             let params = GIS_PARAMS.SINGLE;
-            let combinedIncome = annualCPP + annualOther; // Base: Your CPP + Private Income (Exclude OAS)
+            let combinedIncome = annualCPP + annualOther; 
             
             if (maritalStatus !== 'single') {
                 const spouseAnnual = parseFloat(spouseIncome) || 0;
@@ -239,10 +240,8 @@ export default function Calculator() {
             gisNote = "Starts at 65";
         }
 
-        // --- 4. INSIGHTS ---
         const generateInsights = () => {
             const insights = [];
-            // CPP Insight
             if (retirementAge < 65) {
                 insights.push({
                     type: 'opportunity',
@@ -254,7 +253,6 @@ export default function Calculator() {
                     text: `By delaying to ${retirementAge}, you boosted CPP by ${cppAdjustmentPercent.toFixed(1)}% and OAS by ${(Math.min((retirementAge - 65) * 12, 60) * 0.6).toFixed(1)}%.`
                 });
             }
-            // GIS Insight
             if (gisAmount > 0) {
                  insights.push({
                     type: 'success',
@@ -293,330 +291,423 @@ export default function Calculator() {
     const results = calculateBenefits();
 
     return (
-        <div className="flex flex-col relative">
+        <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-indigo-100 selection:text-indigo-700 pb-16">
+            
             {/* ABOUT MODAL */}
             {showAbout && (
-                <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 animate-fade-in" onClick={() => setShowAbout(false)}>
-                    <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl relative" onClick={e => e.stopPropagation()}>
-                        <button onClick={() => setShowAbout(false)} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition"><XIcon size={24} /></button>
-                        <div className="flex items-center gap-3 mb-4">
-                            <div className="bg-blue-100 p-2 rounded-full text-blue-600"><UserGroupIcon size={24} /></div>
-                            <h2 className="text-2xl font-bold text-gray-800">About CPP Forecast</h2>
+                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in" onClick={() => setShowAbout(false)}>
+                    <div className="bg-white rounded-2xl max-w-lg w-full p-8 shadow-2xl relative border border-slate-100" onClick={e => e.stopPropagation()}>
+                        <button onClick={() => setShowAbout(false)} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition"><XIcon size={24} /></button>
+                        <div className="flex items-center gap-4 mb-6">
+                            <div className="bg-indigo-100 p-3 rounded-xl text-indigo-600"><UserGroupIcon size={28} /></div>
+                            <div>
+                                <h2 className="text-2xl font-bold text-slate-900">About CPP Forecast</h2>
+                                <p className="text-sm text-slate-500">Transparent Financial Planning</p>
+                            </div>
                         </div>
-                        <div className="space-y-4 text-gray-600 text-sm leading-relaxed">
+                        <div className="space-y-4 text-slate-600 leading-relaxed">
                             <p><strong>Born in Canada, Built for Privacy.</strong></p>
-                            <p>We created this tool because existing government calculators can be cumbersome, and many simple online estimators haven't updated to handle the new <strong>Enhanced CPP (Tier 2)</strong> rules introduced in 2024/2025.</p>
-                            <div className="bg-green-50 border border-green-100 p-3 rounded-lg text-green-800 font-medium text-xs">🔒 <strong>Privacy First:</strong> This entire calculator runs in your browser. No data is sent to our servers. Your financial information stays on your device.</div>
-                            <p className="text-xs text-gray-400 mt-4">Built by Canadian financial enthusiasts in Ontario.</p>
+                            <p>Existing government calculators can be cumbersome. This tool handles the new <strong>Enhanced CPP (Tier 2)</strong> rules introduced in 2024/2025 with an easy-to-use interface.</p>
+                            <div className="bg-emerald-50 border border-emerald-100 p-4 rounded-xl text-emerald-800 text-sm flex gap-3">
+                                <span>🔒</span>
+                                <div><strong>Privacy First:</strong> This entire calculator runs in your browser. No data is sent to our servers. Your financial information stays on your device.</div>
+                            </div>
+                            <p className="text-xs text-slate-400 mt-4 text-center">Built by Canadian financial enthusiasts in Ontario.</p>
                         </div>
-                        <button onClick={() => setShowAbout(false)} className="mt-6 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg transition">Close</button>
+                        <button onClick={() => setShowAbout(false)} className="mt-8 w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 rounded-xl transition shadow-lg shadow-slate-900/20">Close</button>
                     </div>
                 </div>
             )}
 
             {/* HEADER */}
-            <header className="bg-blue-700 text-white p-4 shadow-lg sticky top-0 z-20">
-                <div className="max-w-4xl mx-auto flex items-center justify-between">
-                    <div className="flex items-center gap-2"><CalculatorIcon size={24} /><h1 className="text-xl font-bold">CPP & OAS Estimator 2025</h1></div>
-                    <div className="text-sm opacity-90 hidden sm:block">Estimated in 2025 Dollars</div>
+            <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-30 px-6 py-4">
+                <div className="max-w-5xl mx-auto flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <div className="bg-gradient-to-tr from-indigo-600 to-violet-600 text-white p-2 rounded-lg shadow-lg shadow-indigo-500/30">
+                            <CalculatorIcon size={24} />
+                        </div>
+                        <div>
+                            <h1 className="text-xl font-bold tracking-tight text-slate-900">CPP & OAS Estimator</h1>
+                            <div className="text-xs font-medium text-slate-500 tracking-wide uppercase">2025 Ruleset</div>
+                        </div>
+                    </div>
+                    <div className="hidden sm:flex gap-4">
+                        <button onClick={() => setShowAbout(true)} className="text-sm font-medium text-slate-500 hover:text-indigo-600 transition-colors">About</button>
+                    </div>
                 </div>
             </header>
 
             {/* MAIN CONTENT */}
-            <main className="max-w-4xl mx-auto p-4 md:p-6 w-full flex-grow">
+            <main className="max-w-5xl mx-auto p-4 md:p-8 w-full">
 
-                {/* CALCULATOR CARD */}
-                <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden mb-8">
-                    <div className="p-6 border-b border-gray-100 bg-gray-50/50">
-                        <h2 className="text-lg font-bold text-gray-800">Calculator Inputs</h2>
-                    </div>
-
-                    <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
-                        {/* COLUMN 1 */}
-                        <div className="space-y-6">
-                            <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">1. Personal Details</h3>
-                            <div>
-                                <label className="flex items-center text-sm font-semibold text-gray-600 mb-1">
-                                    Date of Birth
-                                    <Tooltip text="We use this to determine your age for CPP/OAS start dates and dropout years." />
-                                </label>
-                                <input type="date" value={dob} onChange={(e) => setDob(e.target.value)} className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
-                            </div>
-                            
-                            <div>
-                                <label className="flex items-center text-sm font-semibold text-gray-600 mb-1">
-                                    Marital Status (For GIS)
-                                    <Tooltip text="Married couples have their income combined for GIS testing. Selecting the correct status ensures accurate thresholds." />
-                                </label>
-                                <select value={maritalStatus} onChange={(e) => setMaritalStatus(e.target.value)} className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white text-sm">
-                                    <option value="single">Single / Widowed / Divorced</option>
-                                    <option value="married_spouse_oas">Married - Spouse receives OAS</option>
-                                    <option value="married_spouse_no_oas">Married - Spouse does NOT receive OAS</option>
-                                    <option value="married_spouse_allowance">Married - Spouse receives Allowance</option>
-                                </select>
-                            </div>
-                            
-                            {maritalStatus !== 'single' && (
-                                <div className="animate-fade-in bg-blue-50 p-3 rounded-lg border border-blue-100">
-                                    <label className="flex items-center text-sm font-semibold text-blue-800 mb-1">
-                                        Spouse's Annual Income
-                                        <Tooltip text="Enter your spouse's total annual taxable income (CPP, Pension, Investments). Do NOT include their OAS." />
-                                    </label>
-                                    <div className="relative">
-                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-400 text-xs">$</span>
-                                        <input type="number" placeholder="e.g. 15000" value={spouseIncome} onChange={(e) => setSpouseIncome(e.target.value)} className="w-full pl-6 p-2 text-sm border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white" />
-                                    </div>
-                                    <p className="text-[10px] text-blue-600 mt-1">Include their CPP, Pension, Investments (Exclude OAS).</p>
-                                </div>
-                            )}
-
-                            <div>
-                                <label className="flex items-center text-sm font-semibold text-gray-600 mb-1">
-                                    Retirement Age: <span className="text-blue-600 font-bold ml-1">{retirementAge}</span>
-                                    <Tooltip text="The age you plan to start collecting benefits. 60 is the earliest for CPP (reduced amount). 65 is standard. 70 is max (increased amount)." />
-                                </label>
-                                <input type="range" min="60" max="70" step="1" value={retirementAge} onChange={(e) => setRetirementAge(parseInt(e.target.value))} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600" />
-                                <div className="flex justify-between text-xs text-gray-400 mt-1"><span>60</span><span>65</span><span>70</span></div>
-                            </div>
-                        </div>
-
-                        {/* COLUMN 2 */}
-                        <div className="space-y-6">
-                            <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">2. Financial Profile</h3>
-                            <div>
-                                <label className="flex items-center text-sm font-semibold text-gray-600 mb-1">
-                                    Years in Canada (Ages 18 to 65)
-                                    <Tooltip text="You need 40 years of residency after age 18 to get the full OAS pension. Fewer years results in a partial pension." />
-                                </label>
-                                <input type="number" min="0" max="47" value={yearsInCanada} onChange={(e) => setYearsInCanada(parseInt(e.target.value) || 0)} className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
-                            </div>
-                            <div>
-                                <label className="flex items-center text-sm font-semibold text-gray-600 mb-1">
-                                    Est. Annual Salary (Current $)
-                                    <Tooltip text="Your current gross annual income. We use this to project your future CPP contributions until you retire." />
-                                </label>
-                                <div className="flex gap-2">
-                                    <div className="relative flex-grow">
-                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
-                                        <input type="number" placeholder="e.g. 65000" value={avgSalaryInput} onChange={(e) => setAvgSalaryInput(e.target.value)} className="w-full pl-7 p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" />
-                                    </div>
-                                    <button onClick={applyAverageSalary} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition">Apply</button>
-                                </div>
-                                <p className="text-xs text-gray-400 mt-1">Auto-populates earnings history based on 2025 YMPE.</p>
-                            </div>
-
-                            <div>
-                                <label className="flex items-center text-sm font-semibold text-gray-600 mb-1">
-                                    Other Retirement Income (Annual)
-                                    <Tooltip text="Annual taxable income in retirement (Company Pension, RRSP withdrawals, Capital Gains). Exclude CPP and OAS. This determines if your OAS gets clawed back." />
-                                </label>
-                                <div className="relative">
-                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-xs">$</span>
-                                    <input type="number" placeholder="e.g. Pension, RRIF" value={otherIncome} onChange={(e) => setOtherIncome(e.target.value)} className="w-full pl-6 p-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-gray-50" />
-                                </div>
-                                <p className="text-[10px] text-gray-400 mt-1">Required for OAS Clawback & GIS calculation.</p>
-                            </div>
+                <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-200 overflow-hidden mb-12">
+                    
+                    {/* TABS HEADER */}
+                    <div className="p-2 bg-slate-50 border-b border-slate-200">
+                        <div className="flex bg-slate-200/50 p-1 rounded-xl">
+                            <button onClick={() => setActiveTab('input')} className={`flex-1 py-2.5 text-sm font-bold text-center rounded-lg transition-all duration-200 ${activeTab === 'input' ? 'bg-white text-indigo-600 shadow-sm ring-1 ring-slate-200' : 'text-slate-500 hover:text-slate-700'}`}>
+                                1. Earnings & Inputs
+                            </button>
+                            <button onClick={() => setActiveTab('results')} className={`flex-1 py-2.5 text-sm font-bold text-center rounded-lg transition-all duration-200 ${activeTab === 'results' ? 'bg-white text-indigo-600 shadow-sm ring-1 ring-slate-200' : 'text-slate-500 hover:text-slate-700'}`}>
+                                2. View Estimate
+                            </button>
                         </div>
                     </div>
 
-                    {/* TABS */}
-                    <div className="flex border-t border-gray-200 bg-gray-50">
-                        <button onClick={() => setActiveTab('input')} className={`flex-1 py-3 text-sm font-bold text-center transition-colors ${activeTab === 'input' ? 'bg-white text-blue-600 border-t-2 border-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>Earnings History</button>
-                        <button onClick={() => setActiveTab('results')} className={`flex-1 py-3 text-sm font-bold text-center transition-colors ${activeTab === 'results' ? 'bg-white text-blue-600 border-t-2 border-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>Estimate Results</button>
-                    </div>
-
-                    <div className="p-6">
+                    <div className="p-6 md:p-8">
                         {activeTab === 'input' && (
-                            <div className="animate-fade-in">
-                                <div className="flex flex-wrap gap-2 mb-4 justify-between items-center">
-                                    <div className="space-x-2 flex items-center">
-                                        <div className="flex items-center bg-gray-100 rounded-full border border-gray-300 px-3 py-1 transition">
-                                            <button onClick={() => fillAll('max', 'past')} className="text-xs text-gray-700 font-medium">Set Past to Max</button>
-                                            <Tooltip text="Sets all recorded years from age 18 until today to the YMPE." />
+                            <div className="animate-fade-in space-y-8">
+                                
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
+                                    {/* COLUMN 1: PERSONAL */}
+                                    <div className="space-y-6">
+                                        <div className="flex items-center gap-2 text-indigo-600 mb-2">
+                                            <UserGroupIcon size={20} />
+                                            <h3 className="text-xs font-bold uppercase tracking-wider">Personal Profile</h3>
                                         </div>
-                                        <div className="flex items-center bg-blue-50 rounded-full border border-blue-200 px-3 py-1 transition">
-                                            <button onClick={() => fillAll('max', 'future')} className="text-xs text-blue-700 font-medium">Set Future to Max</button>
-                                            <Tooltip text="Sets all future years to the estimated maximum pensionable earnings." />
-                                        </div>
-                                    </div>
-                                    <button onClick={() => setEarnings({})} className="text-xs text-red-600 hover:text-red-800 flex items-center gap-1 transition"><RotateCcwIcon size={12} /> Clear All</button>
-                                </div>
+                                        
+                                        <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100 space-y-5">
+                                            <div>
+                                                <label className="flex items-center text-sm font-bold text-slate-700 mb-2">
+                                                    Date of Birth
+                                                    <Tooltip text="Used to calculate your age for dropout years and start dates." />
+                                                </label>
+                                                <input type="date" value={dob} onChange={(e) => setDob(e.target.value)} className="w-full p-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all shadow-sm" />
+                                            </div>
 
-                                <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
-                                    <div className="grid grid-cols-12 bg-gray-50 p-3 text-xs font-bold text-gray-500 uppercase tracking-wider border-b">
-                                        <div className="col-span-2">Year</div><div className="col-span-2">Age</div><div className="col-span-3 text-right pr-4">YMPE</div><div className="col-span-5">Earnings</div>
-                                    </div>
-                                    <div className="max-h-[300px] overflow-y-auto">
-                                    {years.map(year => {
-                                        const isFuture = year > CURRENT_YEAR;
-                                        const ympe = getYMPE(year);
-                                        const yampe = getYAMPE(year);
-                                        const maxVal = yampe > 0 ? yampe : ympe;
-                                        const val = earnings[year] || '';
-                                        const isMax = val >= maxVal && val !== '';
-                                        return (
-                                        <div key={year} className={`grid grid-cols-12 p-2 border-b last:border-0 items-center hover:bg-gray-50 transition ${isFuture ? 'bg-blue-50/30' : ''}`}>
-                                            <div className="col-span-2 text-sm font-medium text-gray-700">{year}</div>
-                                            <div className="col-span-2 text-sm text-gray-500">{year - birthYear}</div>
-                                            <div className="col-span-3 text-right pr-4 text-sm text-gray-400 font-mono">${ympe.toLocaleString()}</div>
-                                            <div className="col-span-5 flex items-center gap-2">
-                                                <div className="relative flex-1"><span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 text-xs">$</span><input type="number" value={val} onChange={(e) => handleEarningChange(year, e.target.value)} className={`w-full pl-5 pr-2 py-1 text-sm border rounded focus:ring-1 focus:ring-blue-500 outline-none ${isMax ? 'text-green-700 font-semibold' : ''}`} placeholder="0" /></div>
-                                                <button onClick={() => toggleMax(year, isMax)} className={`px-2 py-1 text-xs font-bold rounded border transition-colors ${isMax ? 'bg-green-100 text-green-700 border-green-200' : 'bg-gray-100 text-gray-400 border-gray-200'}`}>MAX</button>
+                                            <div>
+                                                <label className="flex items-center text-sm font-bold text-slate-700 mb-2">
+                                                    Marital Status
+                                                    <Tooltip text="Critical for GIS calculations. Married couples have combined income thresholds." />
+                                                </label>
+                                                <div className="relative">
+                                                    <select value={maritalStatus} onChange={(e) => setMaritalStatus(e.target.value)} className="w-full p-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all shadow-sm appearance-none">
+                                                        <option value="single">Single / Widowed / Divorced</option>
+                                                        <option value="married_spouse_oas">Married (Spouse gets OAS)</option>
+                                                        <option value="married_spouse_no_oas">Married (Spouse NO OAS)</option>
+                                                        <option value="married_spouse_allowance">Married (Spouse gets Allowance)</option>
+                                                    </select>
+                                                    <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400"><ChevronDownIcon size={16}/></div>
+                                                </div>
+                                            </div>
+
+                                            {maritalStatus !== 'single' && (
+                                                <div className="animate-fade-in pl-4 border-l-2 border-indigo-200">
+                                                    <label className="flex items-center text-sm font-bold text-indigo-900 mb-2">
+                                                        Spouse Annual Income
+                                                        <Tooltip text="Total taxable income (CPP, Pension, Investments). Exclude OAS." />
+                                                    </label>
+                                                    <div className="relative">
+                                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">$</span>
+                                                        <input type="number" value={spouseIncome} onChange={(e) => setSpouseIncome(e.target.value)} className="w-full pl-7 p-3 bg-indigo-50/50 border border-indigo-100 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all" placeholder="0" />
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            <div>
+                                                <div className="flex justify-between items-center mb-2">
+                                                    <label className="flex items-center text-sm font-bold text-slate-700">
+                                                        Retirement Age
+                                                        <Tooltip text="65 is standard. 60 is min (-36%). 70 is max (+42%)." />
+                                                    </label>
+                                                    <span className="bg-indigo-100 text-indigo-700 text-xs font-bold px-2 py-1 rounded-md">{retirementAge}</span>
+                                                </div>
+                                                <input type="range" min="60" max="70" step="1" value={retirementAge} onChange={(e) => setRetirementAge(parseInt(e.target.value))} className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600" />
+                                                <div className="flex justify-between text-xs text-slate-400 mt-2 font-medium"><span>60</span><span>65</span><span>70</span></div>
                                             </div>
                                         </div>
-                                        );
-                                    })}
+                                    </div>
+
+                                    {/* COLUMN 2: FINANCIAL */}
+                                    <div className="space-y-6">
+                                        <div className="flex items-center gap-2 text-emerald-600 mb-2">
+                                            <DollarSignIcon size={20} />
+                                            <h3 className="text-xs font-bold uppercase tracking-wider">Financial Profile</h3>
+                                        </div>
+
+                                        <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100 space-y-5">
+                                            <div>
+                                                <label className="flex items-center text-sm font-bold text-slate-700 mb-2">
+                                                    Years in Canada (18-65)
+                                                    <Tooltip text="40 years required for full OAS." />
+                                                </label>
+                                                <input type="number" min="0" max="47" value={yearsInCanada} onChange={(e) => setYearsInCanada(parseInt(e.target.value) || 0)} className="w-full p-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all shadow-sm" />
+                                            </div>
+                                            
+                                            <div>
+                                                <label className="flex items-center text-sm font-bold text-slate-700 mb-2">
+                                                    Current Annual Salary
+                                                    <Tooltip text="Used to auto-fill future earnings." />
+                                                </label>
+                                                <div className="flex gap-2">
+                                                    <div className="relative flex-grow">
+                                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">$</span>
+                                                        <input type="number" placeholder="65000" value={avgSalaryInput} onChange={(e) => setAvgSalaryInput(e.target.value)} className="w-full pl-7 p-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all shadow-sm" />
+                                                    </div>
+                                                    <button onClick={applyAverageSalary} className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-xl text-sm font-bold transition-all shadow-lg shadow-indigo-200">Apply</button>
+                                                </div>
+                                            </div>
+
+                                            <div>
+                                                <label className="flex items-center text-sm font-bold text-slate-700 mb-2">
+                                                    Other Retirement Income
+                                                    <Tooltip text="Pension, RRSP, etc. Triggers OAS Clawback." />
+                                                </label>
+                                                <div className="relative">
+                                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">$</span>
+                                                    <input type="number" placeholder="0" value={otherIncome} onChange={(e) => setOtherIncome(e.target.value)} className="w-full pl-7 p-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all shadow-sm" />
+                                                </div>
+                                                <p className="text-xs text-slate-400 mt-2 ml-1">Required for accurate GIS/Clawback results.</p>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                                <div className="mt-6 flex justify-center">
-                                    <button onClick={() => setActiveTab('results')} className="bg-blue-600 hover:bg-blue-700 text-white text-lg font-bold py-3 px-8 rounded-full shadow-lg transform transition hover:scale-105 flex items-center gap-2">Calculate My Estimate <ArrowRightIcon size={20} /></button>
+
+                                <div className="border-t border-slate-100 my-8"></div>
+
+                                {/* EARNINGS GRID */}
+                                <div>
+                                    <div className="flex flex-wrap gap-4 mb-6 justify-between items-end">
+                                        <div className="flex items-center gap-2 text-slate-700 mb-2">
+                                            <TrendingUpIcon size={20} />
+                                            <h3 className="text-sm font-bold uppercase tracking-wider">Earnings History</h3>
+                                        </div>
+                                        <div className="space-x-2 flex items-center">
+                                            <button onClick={() => fillAll('max', 'past')} className="text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-600 px-3 py-1.5 rounded-lg transition">Max Past</button>
+                                            <button onClick={() => fillAll('max', 'future')} className="text-xs font-semibold bg-indigo-50 hover:bg-indigo-100 text-indigo-600 px-3 py-1.5 rounded-lg transition">Max Future</button>
+                                            <button onClick={() => setEarnings({})} className="text-xs font-semibold text-rose-500 hover:bg-rose-50 px-3 py-1.5 rounded-lg transition flex items-center gap-1"><RotateCcwIcon size={12} /> Clear</button>
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                                        <div className="grid grid-cols-12 bg-slate-50/80 backdrop-blur p-3 text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200 sticky top-0 z-10">
+                                            <div className="col-span-2">Year</div><div className="col-span-2">Age</div><div className="col-span-3 text-right pr-6">YMPE</div><div className="col-span-5">Earnings</div>
+                                        </div>
+                                        <div className="max-h-[350px] overflow-y-auto scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
+                                        {years.map(year => {
+                                            const isFuture = year > CURRENT_YEAR;
+                                            const ympe = getYMPE(year);
+                                            const yampe = getYAMPE(year);
+                                            const maxVal = yampe > 0 ? yampe : ympe;
+                                            const val = earnings[year] || '';
+                                            const isMax = val >= maxVal && val !== '';
+                                            return (
+                                            <div key={year} className={`grid grid-cols-12 p-2 border-b border-slate-50 last:border-0 items-center hover:bg-slate-50 transition group ${isFuture ? 'bg-indigo-50/20' : ''}`}>
+                                                <div className="col-span-2 text-sm font-semibold text-slate-700">{year}</div>
+                                                <div className="col-span-2 text-sm text-slate-400 group-hover:text-slate-600">{year - birthYear}</div>
+                                                <div className="col-span-3 text-right pr-6 text-sm text-slate-400 font-mono">${ympe.toLocaleString()}</div>
+                                                <div className="col-span-5 flex items-center gap-2">
+                                                    <div className="relative flex-1">
+                                                        <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs">$</span>
+                                                        <input type="number" value={val} onChange={(e) => handleEarningChange(year, e.target.value)} className={`w-full pl-6 pr-2 py-1.5 text-sm border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition-all ${isMax ? 'text-emerald-600 font-bold border-emerald-200 bg-emerald-50/30' : 'border-slate-200'}`} placeholder="0" />
+                                                    </div>
+                                                    <button onClick={() => toggleMax(year, isMax)} className={`px-2 py-1 text-[10px] font-bold rounded-md border transition-all uppercase tracking-wide ${isMax ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-400 border-slate-200 hover:bg-slate-200'}`}>Max</button>
+                                                </div>
+                                            </div>
+                                            );
+                                        })}
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="mt-8 flex justify-center pb-4">
+                                        <button onClick={() => setActiveTab('results')} className="bg-slate-900 hover:bg-slate-800 text-white text-lg font-bold py-4 px-10 rounded-2xl shadow-xl shadow-slate-900/20 transform transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center gap-3">
+                                            Calculate Estimate <ArrowRightIcon size={20} />
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         )}
 
                         {activeTab === 'results' && (
-                            <div className="space-y-6 animate-fade-in">
-                                {results.insights.length > 0 && (
-                                    <div className="bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-100 p-5 rounded-xl">
-                                        <h3 className="flex items-center gap-2 text-indigo-800 font-bold mb-3">
-                                            <LightbulbIcon size={20} /> Smart Analysis
-                                        </h3>
-                                        <div className="space-y-3">
-                                            {results.insights.map((insight, idx) => (
-                                                <div key={idx} className={`text-sm p-3 rounded-lg border ${
-                                                    insight.type === 'danger' ? 'bg-red-50 border-red-100 text-red-800' :
-                                                    insight.type === 'warning' ? 'bg-orange-50 border-orange-100 text-orange-800' :
-                                                    insight.type === 'success' ? 'bg-green-50 border-green-100 text-green-800' :
-                                                    'bg-white border-indigo-100 text-indigo-700'
-                                                }`}>
-                                                    {insight.text}
-                                                </div>
-                                            ))}
+                            <div className="space-y-8 animate-fade-in">
+                                
+                                {/* HERO CARD */}
+                                <div className="bg-slate-900 rounded-2xl shadow-2xl p-8 text-white relative overflow-hidden isolate">
+                                    {/* Abstract shapes for visual flair */}
+                                    <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-indigo-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20"></div>
+                                    <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-64 h-64 bg-emerald-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20"></div>
+                                    
+                                    <div className="relative z-10 text-center md:text-left md:flex justify-between items-center">
+                                        <div>
+                                            <h2 className="text-slate-400 text-sm font-bold uppercase tracking-widest mb-1">Estimated Monthly Income</h2>
+                                            <div className="flex items-baseline justify-center md:justify-start gap-1">
+                                                <span className="text-5xl md:text-6xl font-bold tracking-tight">${results.grandTotal.toLocaleString('en-CA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                                <span className="text-slate-400 text-lg">/ mo</span>
+                                            </div>
+                                            <p className="text-slate-500 text-xs mt-2">*Values in 2025 dollars, pre-tax.</p>
                                         </div>
+                                        
+                                        <div className="mt-8 md:mt-0 flex gap-3 flex-wrap justify-center">
+                                            <div className="bg-white/10 backdrop-blur-sm px-5 py-3 rounded-xl border border-white/10">
+                                                <div className="text-slate-400 text-xs uppercase font-bold">CPP</div>
+                                                <div className="text-xl font-bold">${results.cpp.total.toLocaleString(undefined, {minimumFractionDigits:0, maximumFractionDigits:0})}</div>
+                                            </div>
+                                            <div className="bg-white/10 backdrop-blur-sm px-5 py-3 rounded-xl border border-white/10">
+                                                <div className="text-slate-400 text-xs uppercase font-bold">OAS</div>
+                                                <div className="text-xl font-bold">${results.oas.amount.toLocaleString(undefined, {minimumFractionDigits:0, maximumFractionDigits:0})}</div>
+                                            </div>
+                                            {results.gis.amount > 0 && 
+                                                <div className="bg-emerald-500/20 backdrop-blur-sm px-5 py-3 rounded-xl border border-emerald-500/30 text-emerald-100">
+                                                    <div className="text-emerald-300 text-xs uppercase font-bold">GIS</div>
+                                                    <div className="text-xl font-bold">${results.gis.amount.toLocaleString(undefined, {minimumFractionDigits:0, maximumFractionDigits:0})}</div>
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* INSIGHTS */}
+                                {results.insights.length > 0 && (
+                                    <div className="grid gap-3">
+                                        {results.insights.map((insight, idx) => (
+                                            <div key={idx} className={`text-sm p-4 rounded-xl border flex items-start gap-3 shadow-sm ${
+                                                insight.type === 'danger' ? 'bg-rose-50 border-rose-100 text-rose-800' :
+                                                insight.type === 'warning' ? 'bg-amber-50 border-amber-100 text-amber-800' :
+                                                insight.type === 'success' ? 'bg-emerald-50 border-emerald-100 text-emerald-800' :
+                                                'bg-indigo-50 border-indigo-100 text-indigo-700'
+                                            }`}>
+                                                <div className="mt-0.5 shrink-0">
+                                                    {insight.type === 'danger' ? <XIcon size={16}/> : 
+                                                     insight.type === 'warning' ? <InfoIcon size={16}/> : 
+                                                     insight.type === 'success' ? <CheckCircleIcon size={16}/> : <LightbulbIcon size={16}/>}
+                                                </div>
+                                                <span className="font-medium">{insight.text}</span>
+                                            </div>
+                                        ))}
                                     </div>
                                 )}
 
-                                <div className="bg-gradient-to-br from-blue-600 to-blue-800 rounded-2xl shadow-xl p-8 text-white relative overflow-hidden">
-                                    <div className="absolute top-0 right-0 p-4 opacity-10"><DollarSignIcon size={150} /></div>
-                                    <div className="relative z-10">
-                                        <h2 className="text-blue-100 text-sm font-semibold uppercase tracking-widest mb-1">Total Estimated Monthly Payout</h2>
-                                        <div className="flex items-baseline gap-2"><span className="text-5xl font-bold">${results.grandTotal.toLocaleString('en-CA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span><span className="text-blue-200">/ mo</span></div>
-                                        <div className="mt-4 flex gap-4 text-sm flex-wrap">
-                                            <div className="flex items-center gap-1 bg-white/10 px-3 py-1 rounded-full"><span className="opacity-75">CPP:</span><span className="font-bold">${results.cpp.total.toLocaleString(undefined, {minimumFractionDigits:0, maximumFractionDigits:0})}</span></div>
-                                            <div className="flex items-center gap-1 bg-white/10 px-3 py-1 rounded-full"><span className="opacity-75">OAS:</span><span className="font-bold">${results.oas.amount.toLocaleString(undefined, {minimumFractionDigits:0, maximumFractionDigits:0})}</span></div>
-                                            {results.gis.amount > 0 && <div className="flex items-center gap-1 bg-teal-500/20 px-3 py-1 rounded-full border border-teal-400/30"><span className="opacity-75">GIS:</span><span className="font-bold text-teal-200">${results.gis.amount.toLocaleString(undefined, {minimumFractionDigits:0, maximumFractionDigits:0})}</span></div>}
+                                {/* DETAIL CARDS */}
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    {/* CPP CARD */}
+                                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 relative overflow-hidden group">
+                                        <div className="absolute top-0 left-0 w-full h-1 bg-indigo-500"></div>
+                                        <div className="flex items-center gap-3 mb-4 text-slate-700">
+                                            <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg"><TrendingUpIcon size={20}/></div>
+                                            <h3 className="font-bold">CPP Details</h3>
+                                        </div>
+                                        <div className="space-y-3">
+                                            <div className="flex justify-between text-sm">
+                                                <span className="text-slate-500">Base</span>
+                                                <span className="font-mono font-medium">${results.cpp.base.toFixed(2)}</span>
+                                            </div>
+                                            <div className="flex justify-between text-sm">
+                                                <span className="text-slate-500">Enhanced</span>
+                                                <span className="font-mono font-medium text-emerald-600">+${results.cpp.enhanced.toFixed(2)}</span>
+                                            </div>
+                                            <div className="pt-3 border-t border-slate-100 flex justify-between text-sm font-bold">
+                                                <span className="text-slate-800">Total CPP</span>
+                                                <span>${results.cpp.total.toFixed(2)}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* OAS CARD */}
+                                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 relative overflow-hidden">
+                                        <div className="absolute top-0 left-0 w-full h-1 bg-amber-500"></div>
+                                        <div className="flex items-center gap-3 mb-4 text-slate-700">
+                                            <div className="p-2 bg-amber-50 text-amber-600 rounded-lg"><HomeIcon size={20}/></div>
+                                            <h3 className="font-bold">OAS Details</h3>
+                                        </div>
+                                        <div className="space-y-3">
+                                            <div className="flex justify-between text-sm">
+                                                <span className="text-slate-500">Gross Amount</span>
+                                                <span className="font-mono font-medium">${results.oas.gross.toFixed(2)}</span>
+                                            </div>
+                                            {results.oas.clawback > 0 && (
+                                                <div className="flex justify-between text-sm text-rose-600 bg-rose-50 px-2 py-1 rounded">
+                                                    <span>Recovery Tax</span>
+                                                    <span className="font-mono">-${results.oas.clawback.toFixed(2)}</span>
+                                                </div>
+                                            )}
+                                            <div className="pt-3 border-t border-slate-100 flex justify-between text-sm font-bold">
+                                                <span className="text-slate-800">Net OAS</span>
+                                                <span>${results.oas.amount.toFixed(2)}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* GIS CARD */}
+                                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 relative overflow-hidden">
+                                        <div className="absolute top-0 left-0 w-full h-1 bg-emerald-500"></div>
+                                        <div className="flex items-center gap-3 mb-4 text-slate-700">
+                                            <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg"><HeartHandshakeIcon size={20}/></div>
+                                            <h3 className="font-bold">GIS Details</h3>
+                                        </div>
+                                        <div className="space-y-3">
+                                            <div className="flex justify-between text-sm">
+                                                <span className="text-slate-500">Supplement</span>
+                                                <span className="font-mono font-medium text-emerald-600">${results.gis.amount.toFixed(2)}</span>
+                                            </div>
+                                            {results.gis.note && (<div className="text-xs text-slate-400 mt-2 bg-slate-50 p-2 rounded">{results.gis.note}</div>)}
+                                            <div className="pt-3 border-t border-slate-100 flex justify-between text-sm font-bold">
+                                                <span className="text-slate-800">Total GIS</span>
+                                                <span>${results.gis.amount.toFixed(2)}</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                                    <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-200">
-                                        <div className="flex items-center gap-2 mb-4 text-gray-700"><TrendingUpIcon size={20} className="text-blue-600"/><h3 className="font-bold">Base CPP</h3></div>
-                                        <div className="flex justify-between text-sm"><span className="text-gray-500">Base Entitlement</span><span className="font-medium">${results.cpp.base.toFixed(2)}</span></div>
-                                    </div>
-                                    <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-200">
-                                        <div className="flex items-center gap-2 mb-4 text-gray-700"><CheckCircleIcon size={20} className="text-green-600"/><h3 className="font-bold">Enhanced CPP</h3></div>
-                                        <div className="flex justify-between text-sm"><span className="text-gray-500">Enhancement</span><span className="font-medium text-green-600">+${results.cpp.enhanced.toFixed(2)}</span></div>
-                                    </div>
-                                    <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-200">
-                                        <div className="flex items-center gap-2 mb-4 text-gray-700"><HomeIcon size={20} className="text-orange-500"/><h3 className="font-bold">OAS</h3></div>
-                                        <div className="flex justify-between text-sm"><span className="text-gray-500">Amount</span><span className="font-medium text-orange-600">${results.oas.amount.toFixed(2)}</span></div>
-                                        {results.oas.clawback > 0 && (<div className="flex justify-between text-xs text-red-500 animate-pulse"><span>Recovery Tax</span><span>-${results.oas.clawback.toFixed(2)}</span></div>)}
-                                        {results.oas.note && (<div className="text-xs text-red-500 font-medium">{results.oas.note}</div>)}
-                                    </div>
-                                    <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-200">
-                                        <div className="flex items-center gap-2 mb-4 text-gray-700"><HeartHandshakeIcon size={20} className="text-teal-600"/><h3 className="font-bold">GIS</h3></div>
-                                        <div className="flex justify-between text-sm"><span className="text-gray-500">Supplement</span><span className="font-medium text-teal-600">${results.gis.amount.toFixed(2)}</span></div>
-                                        {results.gis.note && (<div className="text-xs text-gray-400 font-medium mt-1">{results.gis.note}</div>)}
-                                    </div>
+                                
+                                <div className="flex justify-center pt-8">
+                                    <button onClick={() => setActiveTab('input')} className="text-slate-500 hover:text-indigo-600 text-sm font-semibold flex items-center gap-2 transition-colors">
+                                        <RotateCcwIcon size={16} /> Edit Inputs
+                                    </button>
                                 </div>
-                                <div className="bg-amber-50 border border-amber-100 p-5 rounded-xl flex gap-4">
-                                    <InfoIcon className="text-amber-500 shrink-0 mt-1" size={24} />
-                                    <div>
-                                        <h4 className="font-bold text-amber-800 mb-1">Age Adjustments Applied</h4>
-                                        <ul className="text-sm text-amber-700 space-y-1 list-disc list-inside">
-                                            <li>CPP: <span className="font-semibold">{results.cpp.adjustmentPercent > 0 ? '+' : ''}{results.cpp.adjustmentPercent.toFixed(1)}%</span> for retiring at {retirementAge}.</li>
-                                            {retirementAge > 65 && (<li>OAS: <span className="font-semibold">+{Math.min((retirementAge - 65) * 12 * 0.6, 36).toFixed(1)}%</span> deferral bonus.</li>)}
-                                        </ul>
-                                    </div>
-                                </div>
+
                             </div>
                         )}
                     </div>
                 </div>
 
-                {/* ACCORDION SECTIONS */}
-                <div className="max-w-3xl mx-auto mb-12">
+                {/* INFO SECTION */}
+                <div className="max-w-3xl mx-auto space-y-4">
                     <Accordion title="Guide to 2025 CPP & OAS Changes" icon={BookOpenIcon}>
                         <p className="mb-4">In 2025, the Canada Pension Plan (CPP) completes a major transition into 'Phase 2' of the enhancement strategy. The most visible change is the <strong>Second Earnings Ceiling (YAMPE)</strong>. For decades, there was only one limit (YMPE). Now, there are two.</p>
                         <p className="mb-4">If you earn up to <strong>$71,300</strong> (the 2025 YMPE), you contribute at the base rate. However, if you earn <em>between</em> $71,300 and approximately <strong>$81,200</strong> (the YAMPE), you make additional <strong>Tier 2 contributions</strong>.</p>
                         <p>Simultaneously, Old Age Security (OAS) thresholds have indexed to inflation. The recovery tax (clawback) threshold is projected to rise to approximately <strong>$93,454</strong>.</p>
                     </Accordion>
 
-
                     <Accordion title="How Calculations Are Done" icon={CalculatorIcon}>
-                        <div className="grid md:grid-cols-2 gap-6">
+                         <div className="grid md:grid-cols-2 gap-6">
                             <div>
-                                <h4 className="font-bold text-gray-700 mb-2">1. Contribution Period & Dropout</h4>
-                                <p className="mb-2">Your contributory period starts at age 18 and ends when you start receiving CPP. The <strong>General Drop-out Provision</strong> automatically removes the lowest 17% of your earning months.</p>
+                                <h4 className="font-bold text-slate-800 mb-2">1. Contribution Period</h4>
+                                <p className="mb-2">Your contributory period starts at age 18. The <strong>General Drop-out Provision</strong> automatically removes the lowest 17% of your earning months.</p>
                             </div>
                             <div>
-                                <h4 className="font-bold text-gray-700 mb-2">2. YMPE & Indexing</h4>
-                                <p className="mb-2">Your earnings are converted into a ratio relative to the <strong>Yearly Maximum Pensionable Earnings (YMPE)</strong> of that year to account for inflation.</p>
-                            </div>
-                            <div>
-                                <h4 className="font-bold text-gray-700 mb-2">3. Enhanced CPP (Tier 1 & 2)</h4>
+                                <h4 className="font-bold text-slate-800 mb-2">2. Enhanced CPP</h4>
                                 <p className="mb-2">Calculates Phase 1 (25% to 33.33% replacement rate) and Phase 2 (New YAMPE ceiling) separately and adds them to your base.</p>
-                            </div>
-                            <div>
-                                <h4 className="font-bold text-gray-700 mb-2">4. Actuarial Adjustments</h4>
-                                <p>CPP is reduced by 0.6% per month before 65, or increased by 0.7% after 65. OAS increases by 0.6% per month if deferred after 65.</p>
                             </div>
                         </div>
                     </Accordion>
                     
-                    <Accordion title="Understanding GIS (Guaranteed Income Supplement)" icon={HeartHandshakeIcon}>
-                        <p className="mb-4">GIS is a monthly non-taxable benefit to Old Age Security (OAS) pension recipients who have a low income and are living in Canada.</p>
-                        <p className="mb-4"><strong>Key Rules:</strong></p>
+                    <Accordion title="Understanding GIS" icon={HeartHandshakeIcon}>
+                        <p className="mb-4">GIS is a monthly non-taxable benefit to OAS recipients with low income.</p>
                         <ul className="list-disc pl-5 space-y-2 mb-4">
                             <li>You must be receiving OAS to get GIS (Age 65+).</li>
                             <li>For single individuals, GIS is reduced by <strong>50 cents</strong> for every dollar of income you earn (excluding OAS).</li>
-                            <li>For married couples, income is combined. If your spouse also gets OAS, the reduction rate is roughly <strong>25 cents</strong> per dollar of combined income (excluding OAS).</li>
-                            <li>Your CPP payments count as income for GIS calculations. This often means high CPP payments can eliminate your GIS eligibility.</li>
+                            <li>For married couples, income is combined.</li>
                         </ul>
                    </Accordion>
 
-                    <Accordion title="Official Government Sources" icon={ExternalLinkIcon}>
-                        <ul className="text-sm space-y-2 text-blue-600 pl-4">
-                            <li><a href="https://www.canada.ca/en/services/benefits/publicpensions/cpp/payment-amounts.html" target="_blank" className="hover:underline flex items-center gap-1">CPP Payment Amounts (2025) <ExternalLinkIcon size={10} /></a></li>
-                            <li><a href="https://www.canada.ca/en/services/benefits/publicpensions/old-age-security/payments.html" target="_blank" className="hover:underline flex items-center gap-1">OAS Payments & Clawback Thresholds <ExternalLinkIcon size={10} /></a></li>
-                            <li><a href="https://www.canada.ca/en/revenue-agency/services/tax/businesses/topics/payroll/payroll-deductions-contributions/canada-pension-plan-cpp/cpp-enhancement.html" target="_blank" className="hover:underline flex items-center gap-1">Enhanced CPP & YAMPE Explained <ExternalLinkIcon size={10} /></a></li>
+                    <Accordion title="Government Sources" icon={ExternalLinkIcon}>
+                        <ul className="text-sm space-y-2 text-indigo-600 pl-4 font-medium">
+                            <li><a href="https://www.canada.ca/en/services/benefits/publicpensions/cpp/payment-amounts.html" target="_blank" className="hover:underline flex items-center gap-1">CPP Payment Amounts <ExternalLinkIcon size={12} /></a></li>
+                            <li><a href="https://www.canada.ca/en/services/benefits/publicpensions/old-age-security/payments.html" target="_blank" className="hover:underline flex items-center gap-1">OAS Payments & Thresholds <ExternalLinkIcon size={12} /></a></li>
                         </ul>
                     </Accordion>
                 </div>
 
             </main>
 
-            {/* FOOTER */}
-            <footer className="w-full px-4 md:px-6 pt-8 border-t border-gray-200">
-                <div className="text-center mb-8 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6">
-                    <a href="/blog" className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 transition-colors font-medium text-sm">
-                        <BookOpenIcon size={16} />
-                        Read our Guides
-                    </a>
-                    <span className="hidden sm:block text-gray-300">|</span>
-                    <button onClick={() => setShowAbout(true)} className="inline-flex items-center gap-2 text-gray-500 hover:text-gray-700 transition-colors font-medium text-sm">
-                        <UserGroupIcon size={16} />
-                        About This Tool
-                    </button>
-                    <span className="hidden sm:block text-gray-300">|</span>
-                    <a href="mailto:support@cppforecast.ca" className="inline-flex items-center gap-2 text-gray-500 hover:text-blue-600 transition-colors font-medium text-sm">
-                        <MailIcon size={16} />
-                        Support
-                    </a>
+            <footer className="text-center text-slate-400 text-sm py-8 mt-8 border-t border-slate-200">
+                <div className="flex justify-center gap-6 mb-4 font-medium">
+                    <a href="/blog" className="hover:text-indigo-600 transition">Guides</a>
+                    <span>•</span>
+                    <button onClick={() => setShowAbout(true)} className="hover:text-indigo-600 transition">About</button>
+                    <span>•</span>
+                    <a href="mailto:support@cppforecast.ca" className="hover:text-indigo-600 transition">Contact</a>
                 </div>
-                <div className="text-center text-xs text-gray-400 pb-4">
-                    Disclaimer: This tool is for estimation purposes only. It is not financial advice.
-                </div>
+                <p>Not financial advice. For estimation purposes only.</p>
             </footer>
         </div>
     );
