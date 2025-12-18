@@ -848,7 +848,7 @@ export default function Calculator() {
                                             {isMarried && (
                                                 <div className="pl-3 border-l-2 border-indigo-200 space-y-3">
                                                     <div><label className="text-xs font-bold text-indigo-900 flex items-center gap-1">Spouse DOB <Tooltip text="Affects GIS/Allowance calculations."/></label><input type="date" value={spouseDob} onChange={(e) => setSpouseDob(e.target.value)} className="w-full mt-1 p-2 bg-indigo-50/50 border border-indigo-100 rounded-lg text-sm" /></div>
-                                                    <div><label className="text-xs font-bold text-indigo-900 flex items-center gap-1">Spouse Income <Tooltip text="Excluding OAS. Used for GIS."/></label><input type="number" value={spouseIncome} onChange={(e) => setSpouseIncome(e.target.value)} className="w-full mt-1 p-2 bg-indigo-50/50 border border-indigo-100 rounded-lg text-sm" placeholder="0" /></div>
+                                                    <div><label className="text-xs font-bold text-indigo-900 flex items-center gap-1">Spouse Annual Income in Retirement <Tooltip text="Excluding OAS. Used for GIS."/></label><input type="number" value={spouseIncome} onChange={(e) => setSpouseIncome(e.target.value)} className="w-full mt-1 p-2 bg-indigo-50/50 border border-indigo-100 rounded-lg text-sm" placeholder="0" /></div>
                                                 </div>
                                             )}
                                             <div>
@@ -866,7 +866,7 @@ export default function Calculator() {
                                                 <input type="number" min="0" max="47" value={yearsInCanada} onChange={(e) => setYearsInCanada(parseInt(e.target.value) || 0)} className="w-full mt-1 p-2 bg-white border border-slate-200 rounded-lg" />
                                             </div>
                                             <div>
-                                                <label className="text-sm font-bold text-slate-700 flex items-center gap-1">Other Retirement Income <Tooltip text="Pension, RRSP, RRIF etc. triggers OAS clawback."/></label>
+                                                <label className="text-sm font-bold text-slate-700 flex items-center gap-1">Other Retirement Income (Annual) <Tooltip text="Pension, RRSP, RRIF etc. triggers OAS clawback."/></label>
                                                 <input type="number" placeholder="0" value={otherIncome} onChange={(e) => setOtherIncome(e.target.value)} className="w-full mt-1 p-2 bg-white border border-slate-200 rounded-lg" />
                                             </div>
                                         </div>
