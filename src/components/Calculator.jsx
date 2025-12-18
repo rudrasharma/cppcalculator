@@ -152,6 +152,16 @@ const UploadIcon = (props) => (
         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
     </IconBase>
 );
+const FilterIcon = (props) => (
+    <IconBase {...props}>
+        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+    </IconBase>
+);
+const TrendingDownIcon = (props) => (
+    <IconBase {...props}>
+        <polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/>
+    </IconBase>
+);
 
 // ==========================================
 //              CONSTANTS
@@ -241,7 +251,7 @@ const decompressEarnings = (str, birthYear) => {
 };
 
 // ==========================================
-//           UI COMPONENTS
+//             UI COMPONENTS
 // ==========================================
 
 const Tooltip = ({ text }) => (
@@ -285,6 +295,10 @@ export default function Calculator() {
     const [avgSalaryInput, setAvgSalaryInput] = useState('');
     const [otherIncome, setOtherIncome] = useState('');
     const [showAbout, setShowAbout] = useState(false);
+    
+    // --- UX STATES ---
+    const [compactGrid, setCompactGrid] = useState(false);
+    const [useFutureDollars, setUseFutureDollars] = useState(false); // Inflation toggle
     
     // --- IMPORT MODAL STATE ---
     const [showImport, setShowImport] = useState(false);
@@ -339,7 +353,7 @@ export default function Calculator() {
         }
     }, []);
 
-    // --- PARSE MSCA DATA (ROBUST FUSED-TEXT HANDLER & NOISE FILTER) ---
+    // --- PARSE MSCA DATA ---
     const handleImport = () => {
         setImportError("");
         if (!importText.trim()) return;
@@ -354,11 +368,9 @@ export default function Calculator() {
             let count = 0;
 
             // 2. Tokenize into rows starting with a Year
-            // We split by Lookahead, so the year remains at the start of the chunk
             const rows = cleanText.split(/(?=\b(?:19|20)\d{2}\b)/);
 
             rows.forEach(row => {
-                // SKIP explanatory rows (Context Awareness)
                 const lowerRow = row.toLowerCase();
                 if (
                     lowerRow.includes("date modified") ||
@@ -373,7 +385,6 @@ export default function Calculator() {
 
                 const year = parseInt(yearMatch[0]);
                 
-                // Find all numbers in the row
                 const nums = row.match(/(\d+(\.\d+)?)/g);
                 
                 if (nums) {
@@ -382,7 +393,6 @@ export default function Calculator() {
                         .filter(n => n !== year && n < 200000); // Filter out year & unrealistic numbers
                     
                     if (candidates.length > 0) {
-                        // The Pensionable Earnings is almost always the LARGEST number in the row.
                         let val = Math.max(...candidates);
                         
                         // Special "M" (Max) marker handling
@@ -390,14 +400,11 @@ export default function Calculator() {
                              const ympe = getYMPE(year);
                              const yampe = getYAMPE(year);
                              const limit = year >= 2024 ? yampe : ympe;
-                             
-                             // If parsed value is tiny (e.g. 0 due to parser error) but M is there, use limit.
                              if (val < 1000 || val > (limit * 0.9)) {
                                  val = limit;
                              }
                         }
 
-                        // Filter out trivial numbers (like 0.00 or small percentages that might slip through)
                         if (val > 0) {
                             newEarnings[year] = Math.round(val);
                             count++;
@@ -418,7 +425,7 @@ export default function Calculator() {
         }
     };
 
-    // --- SHARE FUNCTION (COMPRESSED) ---
+    // --- SHARE FUNCTION ---
     const copyLink = () => {
         const params = new URLSearchParams();
         params.set('d', dob.replace(/-/g,'')); 
@@ -467,31 +474,24 @@ export default function Calculator() {
         }
         setEarnings(newEarnings);
     };
-    const fillAll = (type, time) => {
-        const newEarnings = { ...earnings };
-        years.forEach(y => {
-            if ((time === 'future' && y >= CURRENT_YEAR) || (time === 'past' && y < CURRENT_YEAR)) {
-                if (type === 'max') {
-                    const ympe = getYMPE(y);
-                    const yampe = getYAMPE(y);
-                    newEarnings[y] = yampe > 0 ? yampe : ympe;
-                } else if (type === 'clear') {
-                    delete newEarnings[y];
-                }
-            }
-        });
-        setEarnings(newEarnings);
-    };
+    
+    // --- UPDATED AVERAGE SALARY LOGIC (NON-DESTRUCTIVE) ---
     const applyAverageSalary = () => {
         if (!avgSalaryInput || avgSalaryInput <= 0) return;
         const currentYMPE = getYMPE(CURRENT_YEAR);
         const ratio = parseFloat(avgSalaryInput) / currentYMPE;
-        const newEarnings = {};
-        years.forEach(y => {
-            const yYMPE = getYMPE(y);
-            newEarnings[y] = Math.round(yYMPE * ratio);
+        
+        setEarnings(prev => {
+            const newEarnings = { ...prev };
+            years.forEach(y => {
+                // Only overwrite if the year is in the future OR the year has no data yet
+                if (y >= CURRENT_YEAR || newEarnings[y] === undefined) {
+                    const yYMPE = getYMPE(y);
+                    newEarnings[y] = Math.round(yYMPE * ratio);
+                }
+            });
+            return newEarnings;
         });
-        setEarnings(newEarnings);
     };
 
     const handleLegendClick = (e) => {
@@ -499,7 +499,8 @@ export default function Calculator() {
         setLineVisibility(prev => ({ ...prev, [dataKey]: !prev[dataKey] }));
     };
 
-    const calculateBenefits = () => {
+    // --- MEMOIZED CALCULATION LOGIC ---
+    const results = useMemo(() => {
         // --- 1. CPP CALCULATION ---
         const currentYMPE = getYMPE(CURRENT_YEAR);
         const yearData = years.map(year => {
@@ -742,9 +743,14 @@ export default function Calculator() {
             selectedAge: retirementAge,
             spouseAgeAtRetirement: isMarried ? (birthYear + retirementAge - parseInt(spouseDob.split('-')[0])) : null
         };
-    };
+    }, [earnings, retirementAge, yearsInCanada, spouseIncome, spouseDob, isMarried, forceAllowance, otherIncome, dob]);
 
-    const results = calculateBenefits();
+    // --- INFLATION ADJUSTMENT LOGIC ---
+    const inflationFactor = useFutureDollars ? Math.pow(1.025, retirementAge - (CURRENT_YEAR - birthYear)) : 1;
+    const displayTotal = results.grandTotal * inflationFactor;
+    const displayCPP = results.cpp.total * inflationFactor;
+    const displayOAS = results.oas.amount * inflationFactor;
+    const displayGIS = results.gis.amount * inflationFactor;
 
     return (
         <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-indigo-100 selection:text-indigo-700 pb-16">
@@ -997,15 +1003,15 @@ export default function Calculator() {
                                             <div className="flex-1 min-w-[240px]">
                                                 <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">
                                                     Quick Fill: Estimate from Salary
-                                                    <Tooltip text="Enter your current salary to automatically project your past and future earnings based on this level of income." />
+                                                    <Tooltip text="Only fills future or empty years. Does not overwrite imported data." />
                                                 </label>
                                                 <div className="flex gap-2">
                                                     <div className="relative w-full">
                                                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">$</span>
                                                         <input type="number" placeholder="65000" value={avgSalaryInput} onChange={(e) => setAvgSalaryInput(e.target.value)} className="w-full pl-7 p-2.5 bg-white border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none" />
                                                     </div>
-                                                    <button onClick={applyAverageSalary} className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-lg text-sm font-bold flex items-center gap-1 transition-all shadow-sm">
-                                                        <WandIcon size={16} /> Apply
+                                                    <button onClick={applyAverageSalary} className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-lg text-sm font-bold flex items-center gap-1 transition-all shadow-sm whitespace-nowrap">
+                                                        <WandIcon size={16} /> Fill Future
                                                     </button>
                                                 </div>
                                             </div>
@@ -1032,11 +1038,27 @@ export default function Calculator() {
                                     </div>
 
                                     <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
-                                        <div className="grid grid-cols-12 bg-slate-50/80 backdrop-blur p-3 text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200 sticky top-0 z-10">
-                                            <div className="col-span-2">Year</div><div className="col-span-2">Age</div><div className="col-span-3 text-right pr-6">YMPE</div><div className="col-span-5">Earnings</div>
+                                        <div className="flex items-center justify-between bg-slate-50/80 backdrop-blur p-3 border-b border-slate-200">
+                                            <div className="grid grid-cols-12 w-full text-xs font-bold text-slate-500 uppercase tracking-wider">
+                                                <div className="col-span-2">Year</div><div className="col-span-2">Age</div><div className="col-span-3 text-right pr-6">YMPE</div><div className="col-span-5">Earnings</div>
+                                            </div>
+                                            <button 
+                                                onClick={() => setCompactGrid(!compactGrid)} 
+                                                className={`ml-2 p-1.5 rounded hover:bg-slate-200 transition ${compactGrid ? 'text-indigo-600 bg-indigo-50' : 'text-slate-400'}`}
+                                                title={compactGrid ? "Show all years" : "Hide empty past years"}
+                                            >
+                                                <FilterIcon size={16} />
+                                            </button>
                                         </div>
+                                        
                                         <div className="max-h-[350px] overflow-y-auto scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
-                                        {years.map(year => {
+                                        {years
+                                            .filter(year => {
+                                                if (!compactGrid) return true;
+                                                // Always show future years (>= current) and years with data
+                                                return year >= CURRENT_YEAR || (earnings[year] && earnings[year] > 0);
+                                            })
+                                            .map(year => {
                                             const isFuture = year > CURRENT_YEAR;
                                             const ympe = getYMPE(year);
                                             const yampe = getYAMPE(year);
@@ -1058,6 +1080,11 @@ export default function Calculator() {
                                             </div>
                                             );
                                         })}
+                                        {compactGrid && (
+                                            <div className="p-2 text-center text-xs text-slate-400 italic">
+                                                Hidden {years.length - years.filter(y => y >= CURRENT_YEAR || (earnings[y] && earnings[y] > 0)).length} empty past years.
+                                            </div>
+                                        )}
                                         </div>
                                     </div>
                                     
@@ -1082,25 +1109,38 @@ export default function Calculator() {
                                         <div>
                                             <h2 className="text-slate-400 text-sm font-bold uppercase tracking-widest mb-1">Estimated Monthly Income</h2>
                                             <div className="flex items-baseline justify-center md:justify-start gap-1">
-                                                <span className="text-5xl md:text-6xl font-bold tracking-tight">${results.grandTotal.toLocaleString('en-CA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                                <span className="text-5xl md:text-6xl font-bold tracking-tight">${displayTotal.toLocaleString('en-CA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                                 <span className="text-slate-400 text-lg">/ mo</span>
                                             </div>
-                                            <p className="text-slate-500 text-xs mt-2">*Values in 2025 dollars, pre-tax.</p>
+                                            
+                                            <div className="flex items-center gap-2 mt-4 justify-center md:justify-start">
+                                                <div className="flex items-center bg-white/10 rounded-full p-1 pl-3 pr-1">
+                                                    <span className="text-xs text-slate-300 mr-2">
+                                                        {useFutureDollars ? `In Future Dollars (Age ${retirementAge})` : "In Today's Dollars (2025)"}
+                                                    </span>
+                                                    <button 
+                                                        onClick={() => setUseFutureDollars(!useFutureDollars)}
+                                                        className={`px-3 py-1 text-xs font-bold rounded-full transition-all ${useFutureDollars ? 'bg-indigo-500 text-white' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}
+                                                    >
+                                                        {useFutureDollars ? 'Switch to Today\'s $' : 'Switch to Future $'}
+                                                    </button>
+                                                </div>
+                                            </div>
                                         </div>
                                         
                                         <div className="mt-8 md:mt-0 flex gap-3 flex-wrap justify-center">
                                             <div className="bg-white/10 backdrop-blur-sm px-5 py-3 rounded-xl border border-white/10">
                                                 <div className="text-slate-400 text-xs uppercase font-bold">CPP</div>
-                                                <div className="text-xl font-bold">${results.cpp.total.toLocaleString(undefined, {minimumFractionDigits:0, maximumFractionDigits:0})}</div>
+                                                <div className="text-xl font-bold">${displayCPP.toLocaleString(undefined, {minimumFractionDigits:0, maximumFractionDigits:0})}</div>
                                             </div>
                                             <div className="bg-white/10 backdrop-blur-sm px-5 py-3 rounded-xl border border-white/10">
                                                 <div className="text-slate-400 text-xs uppercase font-bold">OAS</div>
-                                                <div className="text-xl font-bold">${results.oas.amount.toLocaleString(undefined, {minimumFractionDigits:0, maximumFractionDigits:0})}</div>
+                                                <div className="text-xl font-bold">${displayOAS.toLocaleString(undefined, {minimumFractionDigits:0, maximumFractionDigits:0})}</div>
                                             </div>
-                                            {results.gis.amount > 0 && 
+                                            {displayGIS > 0 && 
                                                 <div className="bg-emerald-500/20 backdrop-blur-sm px-5 py-3 rounded-xl border border-emerald-500/30 text-emerald-100">
                                                     <div className="text-emerald-300 text-xs uppercase font-bold">GIS</div>
-                                                    <div className="text-xl font-bold">${results.gis.amount.toLocaleString(undefined, {minimumFractionDigits:0, maximumFractionDigits:0})}</div>
+                                                    <div className="text-xl font-bold">${displayGIS.toLocaleString(undefined, {minimumFractionDigits:0, maximumFractionDigits:0})}</div>
                                                 </div>
                                             }
                                         </div>
@@ -1113,8 +1153,17 @@ export default function Calculator() {
                                         <div className="flex items-center gap-3">
                                             <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg"><BarChartIcon size={20}/></div>
                                             <div>
-                                                <h3 className="font-bold text-slate-800">Breakeven Analysis: When to Start?</h3>
-                                                <p className="text-xs text-slate-500">Cumulative payouts by start age. <span className="font-semibold text-indigo-600">Click legend to filter. Click graph for details.</span></p>
+                                                <h3 className="font-bold text-slate-800">Breakeven Analysis</h3>
+                                                {results.crossovers.age70 && (
+                                                    <p className="text-sm text-slate-600 mt-1">
+                                                        Deferring to age 70 pays off if you live past <span className="font-bold text-indigo-700">{results.crossovers.age70}</span>.
+                                                    </p>
+                                                )}
+                                                {!results.crossovers.age70 && results.crossovers.age65 && (
+                                                    <p className="text-sm text-slate-600 mt-1">
+                                                        Waiting until 65 pays off if you live past <span className="font-bold text-indigo-700">{results.crossovers.age65}</span>.
+                                                    </p>
+                                                )}
                                             </div>
                                         </div>
                                     </div>
@@ -1153,7 +1202,6 @@ export default function Calculator() {
                                                     onClick={handleLegendClick}
                                                 />
                                                 
-                                                {/* THREE COMPARISON LINES WITH TOGGLE */}
                                                 <Line 
                                                     type="monotone" 
                                                     dataKey="Early" 
@@ -1171,7 +1219,7 @@ export default function Calculator() {
                                                     stroke="#3b82f6" 
                                                     strokeWidth={2} 
                                                     dot={false} 
-                                                    activeDot={{ r: 6 }}
+                                                    activeDot={{ r: 6 }} 
                                                     hide={!lineVisibility.Standard} 
                                                 />
                                                 <Line 
@@ -1185,7 +1233,6 @@ export default function Calculator() {
                                                     hide={!lineVisibility.Deferred}
                                                 />
                                                 
-                                                {/* CONDITIONAL USER LINE */}
                                                 {results.userIsDistinct && (
                                                     <Line 
                                                         type="monotone" 
@@ -1200,7 +1247,6 @@ export default function Calculator() {
                                                     />
                                                 )}
 
-                                                {/* DYNAMIC BREAKEVEN LINES - Only show if lines are visible */}
                                                 {results.crossovers.age65 && lineVisibility.Early && lineVisibility.Standard && <ReferenceLine x={results.crossovers.age65} stroke="#3b82f6" strokeDasharray="3 3" label={{ position: 'top', value: '65 beats 60', fill: '#3b82f6', fontSize: 10, fontWeight: 'bold' }} />}
                                                 {results.crossovers.age70 && lineVisibility.Standard && lineVisibility.Deferred && <ReferenceLine x={results.crossovers.age70} stroke="#f59e0b" strokeDasharray="3 3" label={{ position: 'top', value: '70 beats 65', fill: '#f59e0b', fontSize: 10, fontWeight: 'bold' }} />}
                                             </LineChart>
@@ -1281,15 +1327,15 @@ export default function Calculator() {
                                         <div className="space-y-3">
                                             <div className="flex justify-between text-sm">
                                                 <span className="text-slate-500">Base</span>
-                                                <span className="font-mono font-medium">${results.cpp.base.toFixed(2)}</span>
+                                                <span className="font-mono font-medium">${(results.cpp.base * inflationFactor).toFixed(2)}</span>
                                             </div>
                                             <div className="flex justify-between text-sm">
                                                 <span className="text-slate-500">Enhanced</span>
-                                                <span className="font-mono font-medium text-emerald-600">+${results.cpp.enhanced.toFixed(2)}</span>
+                                                <span className="font-mono font-medium text-emerald-600">+${(results.cpp.enhanced * inflationFactor).toFixed(2)}</span>
                                             </div>
                                             <div className="pt-3 border-t border-slate-100 flex justify-between text-sm font-bold">
                                                 <span className="text-slate-800">Total CPP</span>
-                                                <span>${results.cpp.total.toFixed(2)}</span>
+                                                <span>${displayCPP.toFixed(2)}</span>
                                             </div>
                                             {results.cpp.zeroReason && (
                                                 <div className="text-xs text-center bg-amber-50 text-amber-700 p-2 rounded border border-amber-100 font-semibold mt-2">
@@ -1309,17 +1355,17 @@ export default function Calculator() {
                                         <div className="space-y-3">
                                             <div className="flex justify-between text-sm">
                                                 <span className="text-slate-500">Gross Amount</span>
-                                                <span className="font-mono font-medium">${results.oas.gross.toFixed(2)}</span>
+                                                <span className="font-mono font-medium">${(results.oas.gross * inflationFactor).toFixed(2)}</span>
                                             </div>
                                             {results.oas.clawback > 0 && (
                                                 <div className="flex justify-between text-sm text-rose-600 bg-rose-50 px-2 py-1 rounded">
                                                     <span>Recovery Tax</span>
-                                                    <span className="font-mono">-${results.oas.clawback.toFixed(2)}</span>
+                                                    <span className="font-mono">-${(results.oas.clawback * inflationFactor).toFixed(2)}</span>
                                                 </div>
                                             )}
                                             <div className="pt-3 border-t border-slate-100 flex justify-between text-sm font-bold">
                                                 <span className="text-slate-800">Net OAS</span>
-                                                <span>${results.oas.amount.toFixed(2)}</span>
+                                                <span>${displayOAS.toFixed(2)}</span>
                                             </div>
                                             {results.oas.zeroReason && (
                                                 <div className="text-xs text-center bg-amber-50 text-amber-700 p-2 rounded border border-amber-100 font-semibold mt-2">
@@ -1339,12 +1385,12 @@ export default function Calculator() {
                                         <div className="space-y-3">
                                             <div className="flex justify-between text-sm">
                                                 <span className="text-slate-500">Supplement</span>
-                                                <span className="font-mono font-medium text-emerald-600">${results.gis.amount.toFixed(2)}</span>
+                                                <span className="font-mono font-medium text-emerald-600">${displayGIS.toFixed(2)}</span>
                                             </div>
                                             {results.gis.note && (<div className="text-xs text-slate-400 mt-2 bg-slate-50 p-2 rounded">{results.gis.note}</div>)}
                                             <div className="pt-3 border-t border-slate-100 flex justify-between text-sm font-bold">
                                                 <span className="text-slate-800">Total GIS</span>
-                                                <span>${results.gis.amount.toFixed(2)}</span>
+                                                <span>${displayGIS.toFixed(2)}</span>
                                             </div>
                                             {results.gis.zeroReason && (
                                                 <div className="text-xs text-center bg-amber-50 text-amber-700 p-2 rounded border border-amber-100 font-semibold mt-2">
