@@ -1,35 +1,162 @@
 // src/components/Calculator.jsx
 import React, { useState, useEffect, useMemo } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer, ReferenceLine } from 'recharts';
+import { 
+    LineChart, 
+    Line, 
+    XAxis, 
+    YAxis, 
+    CartesianGrid, 
+    Tooltip as RechartsTooltip, 
+    Legend, 
+    ResponsiveContainer, 
+    ReferenceLine 
+} from 'recharts';
 
-// --- ICONS (Same as before) ---
+// ==========================================
+//              ICONS
+// ==========================================
 const IconBase = ({ size = 20, className = "", children }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>{children}</svg>
+    <svg 
+        xmlns="http://www.w3.org/2000/svg" 
+        width={size} 
+        height={size} 
+        viewBox="0 0 24 24" 
+        fill="none" 
+        stroke="currentColor" 
+        strokeWidth="2" 
+        strokeLinecap="round" 
+        strokeLinejoin="round" 
+        className={className}
+    >
+        {children}
+    </svg>
 );
-const CalculatorIcon = (props) => (<IconBase {...props}><rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="16" x2="16" y1="14" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/></IconBase>);
-const TrendingUpIcon = (props) => (<IconBase {...props}><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></IconBase>);
-const CheckCircleIcon = (props) => (<IconBase {...props}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4 12 14.01l-3-3"/></IconBase>);
-const RotateCcwIcon = (props) => (<IconBase {...props}><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></IconBase>);
-const InfoIcon = (props) => (<IconBase {...props}><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></IconBase>);
-const HomeIcon = (props) => (<IconBase {...props}><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></IconBase>);
-const DollarSignIcon = (props) => (<IconBase {...props}><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></IconBase>);
-const BookOpenIcon = (props) => (<IconBase {...props}><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></IconBase>);
-const HelpCircleIcon = (props) => (<IconBase {...props}><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></IconBase>);
-const MailIcon = (props) => (<IconBase {...props}><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></IconBase>);
-const ArrowRightIcon = (props) => (<IconBase {...props}><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></IconBase>);
-const ExternalLinkIcon = (props) => (<IconBase {...props}><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></IconBase>);
-const XIcon = (props) => (<IconBase {...props}><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></IconBase>);
-const UserGroupIcon = (props) => (<IconBase {...props}><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></IconBase>);
-const ChevronDownIcon = (props) => (<IconBase {...props}><polyline points="6 9 12 15 18 9"/></IconBase>);
-const LightbulbIcon = (props) => (<IconBase {...props}><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-1 1.5-2 1.5-3.5 0-2.2-1.8-4-4-4a4 4 0 0 0-4 4c0 1.5.5 2.5 1.5 3.5.8.8 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></IconBase>);
-const HeartHandshakeIcon = (props) => (<IconBase {...props}><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></IconBase>);
-const WandIcon = (props) => (<IconBase {...props}><path d="M15 4V2"/><path d="M15 16v-2"/><path d="M8 9h2"/><path d="M20 9h2"/><path d="M17.8 11.8 19 13"/><path d="M15 9h0"/><path d="M17.8 6.2 19 5"/><path d="m3 21 9-9"/><path d="M12.2 6.2 11 5"/></IconBase>);
-const BarChartIcon = (props) => (<IconBase {...props}><line x1="12" x2="12" y1="20" y2="10"/><line x1="18" x2="18" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="16"/></IconBase>);
-const MousePointerIcon = (props) => (<IconBase {...props}><path d="m3 3 7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/><path d="m13 13 6 6"/></IconBase>);
-const LinkIcon = (props) => (<IconBase {...props}><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></IconBase>);
-const CheckIcon = (props) => (<IconBase {...props}><polyline points="20 6 9 17 4 12"/></IconBase>);
 
-// --- CONSTANTS ---
+const CalculatorIcon = (props) => (
+    <IconBase {...props}>
+        <rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="16" x2="16" y1="14" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/>
+    </IconBase>
+);
+const TrendingUpIcon = (props) => (
+    <IconBase {...props}>
+        <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/>
+    </IconBase>
+);
+const CheckCircleIcon = (props) => (
+    <IconBase {...props}>
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4 12 14.01l-3-3"/>
+    </IconBase>
+);
+const RotateCcwIcon = (props) => (
+    <IconBase {...props}>
+        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>
+    </IconBase>
+);
+const InfoIcon = (props) => (
+    <IconBase {...props}>
+        <circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>
+    </IconBase>
+);
+const HomeIcon = (props) => (
+    <IconBase {...props}>
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+    </IconBase>
+);
+const DollarSignIcon = (props) => (
+    <IconBase {...props}>
+        <line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+    </IconBase>
+);
+const BookOpenIcon = (props) => (
+    <IconBase {...props}>
+        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+    </IconBase>
+);
+const HelpCircleIcon = (props) => (
+    <IconBase {...props}>
+        <circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+    </IconBase>
+);
+const MailIcon = (props) => (
+    <IconBase {...props}>
+        <rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+    </IconBase>
+);
+const ArrowRightIcon = (props) => (
+    <IconBase {...props}>
+        <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
+    </IconBase>
+);
+const ExternalLinkIcon = (props) => (
+    <IconBase {...props}>
+        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+    </IconBase>
+);
+const XIcon = (props) => (
+    <IconBase {...props}>
+        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+    </IconBase>
+);
+const UserGroupIcon = (props) => (
+    <IconBase {...props}>
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+    </IconBase>
+);
+const ChevronDownIcon = (props) => (
+    <IconBase {...props}>
+        <polyline points="6 9 12 15 18 9"/>
+    </IconBase>
+);
+const LightbulbIcon = (props) => (
+    <IconBase {...props}>
+        <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-1 1.5-2 1.5-3.5 0-2.2-1.8-4-4-4a4 4 0 0 0-4 4c0 1.5.5 2.5 1.5 3.5.8.8 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/>
+    </IconBase>
+);
+const HeartHandshakeIcon = (props) => (
+    <IconBase {...props}>
+        <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+    </IconBase>
+);
+const WandIcon = (props) => (
+    <IconBase {...props}>
+        <path d="M15 4V2"/><path d="M15 16v-2"/><path d="M8 9h2"/><path d="M20 9h2"/><path d="M17.8 11.8 19 13"/><path d="M15 9h0"/><path d="M17.8 6.2 19 5"/><path d="m3 21 9-9"/><path d="M12.2 6.2 11 5"/>
+    </IconBase>
+);
+const BarChartIcon = (props) => (
+    <IconBase {...props}>
+        <line x1="12" x2="12" y1="20" y2="10"/><line x1="18" x2="18" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="16"/>
+    </IconBase>
+);
+const MousePointerIcon = (props) => (
+    <IconBase {...props}>
+        <path d="m3 3 7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/><path d="m13 13 6 6"/>
+    </IconBase>
+);
+const LinkIcon = (props) => (
+    <IconBase {...props}>
+        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+    </IconBase>
+);
+const CheckIcon = (props) => (
+    <IconBase {...props}>
+        <polyline points="20 6 9 17 4 12"/>
+    </IconBase>
+);
+const FileTextIcon = (props) => (
+    <IconBase {...props}>
+        <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/>
+    </IconBase>
+);
+const UploadIcon = (props) => (
+    <IconBase {...props}>
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+    </IconBase>
+);
+
+// ==========================================
+//              CONSTANTS
+// ==========================================
+
 const YMPE_DATA = {
     2030:80600, 2029:78700, 2028:76800, 2027:74900, 2026:73100,
     2025:71300, 2024:68500, 2023:66600, 2022:64900, 2021:61600,
@@ -63,12 +190,10 @@ const getYMPE = (year) => {
     return 5000;
 };
 
-// --- COMPRESSION HELPERS (Fixed-Width Base36) ---
-// Strategy: 
-// 1. Calculate offset from Age 18 (based on DOB).
-// 2. Encode offset as 1 char Base36.
-// 3. For each year: val / 100 -> Base36. Pad to 2 chars.
-// 4. Max value 129500 (Base36 'zz').
+// ==========================================
+//          COMPRESSION HELPERS
+// ==========================================
+
 const compressEarnings = (earningsObj, birthYear) => {
     const years = Object.keys(earningsObj).map(Number).sort((a,b) => a-b);
     if (years.length === 0) return '';
@@ -76,21 +201,19 @@ const compressEarnings = (earningsObj, birthYear) => {
     const startAge18 = birthYear + 18;
     const firstDataYear = years[0];
     
-    // Offset from age 18. e.g., if you started working at 25, offset is 7.
-    // If negative (data before 18?), clamp to 0.
+    // Offset from age 18.
     const offset = Math.max(0, firstDataYear - startAge18);
-    const header = offset.toString(36); // 1 char usually
+    const header = offset.toString(36); 
 
     const lastYear = years[years.length - 1];
     let stream = "";
     
     for (let y = firstDataYear; y <= lastYear; y++) {
         let val = earningsObj[y] || 0;
-        // Cap at $129,500 (zz in base36 2-char) to maintain fixed width
         if (val > 129500) val = 129500;
         
         let compressed = Math.floor(val / 100).toString(36);
-        if (compressed.length < 2) compressed = '0' + compressed; // Pad
+        if (compressed.length < 2) compressed = '0' + compressed; // Pad to 2 chars
         stream += compressed;
     }
     return header + stream; 
@@ -117,7 +240,10 @@ const decompressEarnings = (str, birthYear) => {
     return result;
 };
 
-// --- COMPONENTS ---
+// ==========================================
+//           UI COMPONENTS
+// ==========================================
+
 const Tooltip = ({ text }) => (
     <div className="group relative inline-flex items-center ml-1">
         <button type="button" className="text-slate-400 hover:text-indigo-600 transition-colors cursor-help">
@@ -145,7 +271,12 @@ const Accordion = ({ title, icon: Icon, children, defaultOpen = false }) => {
     );
 };
 
+// ==========================================
+//          MAIN APPLICATION
+// ==========================================
+
 export default function Calculator() {
+    // --- STATE MANAGEMENT ---
     const [dob, setDob] = useState('1985-01-01');
     const [retirementAge, setRetirementAge] = useState(65);
     const [yearsInCanada, setYearsInCanada] = useState(40);
@@ -155,6 +286,11 @@ export default function Calculator() {
     const [otherIncome, setOtherIncome] = useState('');
     const [showAbout, setShowAbout] = useState(false);
     
+    // --- IMPORT MODAL STATE ---
+    const [showImport, setShowImport] = useState(false);
+    const [importText, setImportText] = useState("");
+    const [importError, setImportError] = useState("");
+
     // --- INTERACTIVE CHART STATE ---
     const [chartSelection, setChartSelection] = useState(null);
     const [lineVisibility, setLineVisibility] = useState({
@@ -179,8 +315,7 @@ export default function Calculator() {
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
         if (params.toString()) {
-            // Short codes: d=dob, r=retAge, y=yic, s=sal, o=other, m=married, sd=spouseDob, si=spouseInc, fa=forceAllow, e=earnings
-            if (params.get('d')) setDob(params.get('d').replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3')); // Expand YYYYMMDD if needed, but YYYY-MM-DD works in URL too
+            if (params.get('d')) setDob(params.get('d').replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3'));
             if (params.get('r')) setRetirementAge(parseInt(params.get('r')));
             if (params.get('y')) setYearsInCanada(parseInt(params.get('y')));
             
@@ -203,26 +338,103 @@ export default function Calculator() {
         }
     }, []);
 
-    // --- SHARE FUNCTION (HIGHLY COMPRESSED) ---
+    // --- PARSE MSCA DATA (ROBUST FUSED-TEXT HANDLER & NOISE FILTER) ---
+    const handleImport = () => {
+        setImportError("");
+        if (!importText.trim()) return;
+
+        try {
+            // 1. Sanitize: Fix fused text (e.g., "4072.002006" -> "4072.00 2006")
+            let cleanText = importText
+                .replace(/[$,]/g, '') // Remove currency chars
+                .replace(/(\d)(19\d{2}|20\d{2})/g, '$1 $2'); // Add space before year if missing
+
+            const newEarnings = { ...earnings };
+            let count = 0;
+
+            // 2. Tokenize into rows starting with a Year
+            // We split by Lookahead, so the year remains at the start of the chunk
+            const rows = cleanText.split(/(?=\b(?:19|20)\d{2}\b)/);
+
+            rows.forEach(row => {
+                // SKIP explanatory rows (Context Awareness)
+                const lowerRow = row.toLowerCase();
+                if (
+                    lowerRow.includes("date modified") ||
+                    lowerRow.includes("contribution rate") ||
+                    lowerRow.includes("calculated") ||
+                    lowerRow.includes("maximum")
+                ) return;
+
+                const yearMatch = row.match(/\b(19|20)\d{2}\b/);
+                if (!yearMatch) return;
+
+                const year = parseInt(yearMatch[0]);
+                
+                // Find all numbers in the row
+                const nums = row.match(/(\d+(\.\d+)?)/g);
+                
+                if (nums) {
+                    const candidates = nums
+                        .map(Number)
+                        .filter(n => n !== year && n < 200000); // Filter out year & unrealistic numbers
+                    
+                    if (candidates.length > 0) {
+                        // The Pensionable Earnings is almost always the LARGEST number in the row.
+                        let val = Math.max(...candidates);
+                        
+                        // Special "M" (Max) marker handling
+                        // If "M" is present, allow using the YMPE limit if the parsed value is suspicious
+                        if (row.toUpperCase().includes('M')) {
+                             const ympe = getYMPE(year);
+                             const yampe = getYAMPE(year);
+                             const limit = year >= 2024 ? yampe : ympe;
+                             
+                             // If parsed value is tiny (e.g. 0 due to parser error) but M is there, use limit.
+                             // Also if value is reasonably close to limit, assume limit.
+                             if (val < 1000 || val > (limit * 0.9)) {
+                                 val = limit;
+                             }
+                        }
+
+                        // Filter out trivial numbers (like 0.00 or small percentages that might slip through)
+                        if (val > 0) {
+                            newEarnings[year] = Math.round(val);
+                            count++;
+                        }
+                    }
+                }
+            });
+
+            if (count > 0) {
+                setEarnings(newEarnings);
+                setShowImport(false);
+                setImportText("");
+            } else {
+                setImportError("No valid earnings data found. Please copy the table rows.");
+            }
+        } catch (e) {
+            setImportError("Parser error. Please enter manually.");
+        }
+    };
+
+    // --- SHARE FUNCTION (COMPRESSED) ---
     const copyLink = () => {
         const params = new URLSearchParams();
-        // Date: YYYY-MM-DD -> YYYY-MM-DD (Standard is fine, or strip hyphens to save 2 chars)
-        params.set('d', dob); 
+        params.set('d', dob.replace(/-/g,'')); 
         params.set('r', retirementAge);
         params.set('y', yearsInCanada);
         
-        // Base36 encode large numbers to save space
         if (avgSalaryInput) params.set('s', parseInt(avgSalaryInput).toString(36));
         if (otherIncome) params.set('o', parseInt(otherIncome).toString(36));
         
         if (isMarried) {
             params.set('m', '1');
-            params.set('sd', spouseDob);
+            params.set('sd', spouseDob.replace(/-/g,''));
             if (spouseIncome) params.set('si', parseInt(spouseIncome).toString(36));
             if (forceAllowance) params.set('fa', '1');
         }
 
-        // Fixed-Width Base36 Earnings
         const compressedEarn = compressEarnings(earnings, birthYear);
         if (compressedEarn) {
             params.set('e', compressedEarn);
@@ -288,7 +500,7 @@ export default function Calculator() {
     };
 
     const calculateBenefits = () => {
-        // --- 1. CPP CALCULATION ---
+        // 1. CPP
         const currentYMPE = getYMPE(CURRENT_YEAR);
         const yearData = years.map(year => {
             const ympe = getYMPE(year);
@@ -326,11 +538,8 @@ export default function Calculator() {
         });
 
         const enhancedBenefit = (enhancedTier1Total / 12) + (enhancedTier2Total / 12);
-        
-        // Base benefit (at 65)
         const baseCppAt65 = baseBenefit + enhancedBenefit;
         
-        // Adjustment for Current Selection
         const monthsDiff = (retirementAge - 65) * 12;
         let cppAdjustmentPercent = 0;
         if (monthsDiff < 0) cppAdjustmentPercent = monthsDiff * 0.6;
@@ -340,7 +549,6 @@ export default function Calculator() {
         // 2. OAS
         const validYears = Math.min(Math.max(0, yearsInCanada), 40);
         let baseOASAt65 = MAX_OAS_2025 * (validYears / 40);
-        
         let oasGross = 0;
         if (retirementAge >= 65) {
             const oasMonthsDeferred = Math.min((retirementAge - 65) * 12, 60);
@@ -535,30 +743,58 @@ export default function Calculator() {
     const results = calculateBenefits();
 
     return (
-        <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-indigo-100 selection:text-indigo-700 pb-16">
+        <div className="min-h-screen bg-slate-50 text-slate-900 font-sans pb-16">
             
             {/* ABOUT MODAL */}
             {showAbout && (
-                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in" onClick={() => setShowAbout(false)}>
-                    <div className="bg-white rounded-2xl max-w-lg w-full p-8 shadow-2xl relative border border-slate-100" onClick={e => e.stopPropagation()}>
-                        <button onClick={() => setShowAbout(false)} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition"><XIcon size={24} /></button>
-                        <div className="flex items-center gap-4 mb-6">
-                            <div className="bg-indigo-100 p-3 rounded-xl text-indigo-600"><UserGroupIcon size={28} /></div>
+                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowAbout(false)}>
+                    <div className="bg-white rounded-2xl max-w-lg w-full p-8 shadow-2xl relative" onClick={e => e.stopPropagation()}>
+                        <button onClick={() => setShowAbout(false)} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600"><XIcon size={24} /></button>
+                        <h2 className="text-2xl font-bold mb-4">About CPP Forecast</h2>
+                        <p className="text-slate-600 mb-4">Private, client-side calculator for Canadian retirement benefits.</p>
+                        <div className="bg-emerald-50 border border-emerald-100 p-4 rounded-xl text-emerald-800 text-sm mb-4">
+                            <strong>Privacy First:</strong> This entire calculator runs in your browser. No data is sent to our servers.
+                        </div>
+                        <button onClick={() => setShowAbout(false)} className="w-full bg-slate-900 text-white font-bold py-3 rounded-xl">Close</button>
+                    </div>
+                </div>
+            )}
+
+            {/* IMPORT MODAL */}
+            {showImport && (
+                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowImport(false)}>
+                    <div className="bg-white rounded-2xl max-w-2xl w-full p-8 shadow-2xl relative" onClick={e => e.stopPropagation()}>
+                        <button onClick={() => setShowImport(false)} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600"><XIcon size={24} /></button>
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className="bg-indigo-100 p-3 rounded-xl text-indigo-600"><UploadIcon size={24} /></div>
                             <div>
-                                <h2 className="text-2xl font-bold text-slate-900">About CPP Forecast</h2>
-                                <p className="text-sm text-slate-500">Transparent Financial Planning</p>
+                                <h2 className="text-xl font-bold text-slate-900">Import from Service Canada</h2>
+                                <p className="text-sm text-slate-500">Paste your "Statement of Contributions" data below.</p>
                             </div>
                         </div>
-                        <div className="space-y-4 text-slate-600 leading-relaxed">
-                            <p><strong>Born in Canada, Built for Privacy.</strong></p>
-                            <p>Existing government calculators can be cumbersome. This tool handles the new <strong>Enhanced CPP (Tier 2)</strong> rules introduced in 2024/2025 with an easy-to-use interface.</p>
-                            <div className="bg-emerald-50 border border-emerald-100 p-4 rounded-xl text-emerald-800 text-sm flex gap-3">
-                                <span>🔒</span>
-                                <div><strong>Privacy First:</strong> This entire calculator runs in your browser. No data is sent to our servers. Your financial information stays on your device.</div>
+                        <div className="space-y-4">
+                            <div className="text-sm text-slate-600 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                                
+                                <p className="font-bold mb-1">How to get your data:</p>
+                                <ol className="list-decimal pl-5 space-y-1">
+                                    <li>Log in to <a href="https://www.canada.ca/en/employment-social-development/services/my-account.html" target="_blank" rel="noreferrer" className="text-indigo-600 hover:underline">My Service Canada Account</a>.</li>
+                                    <li>Go to <strong>CPP</strong> {'>'} <strong>Contributions</strong>.</li>
+                                    <li>Select and Copy the entire table (Ctrl+A, Ctrl+C).</li>
+                                    <li>Paste it below.</li>
+                                </ol>
                             </div>
-                            <p className="text-xs text-slate-400 mt-4 text-center">Built by Canadian financial enthusiasts in Ontario.</p>
+                            <textarea 
+                                value={importText}
+                                onChange={(e) => setImportText(e.target.value)}
+                                placeholder="Paste here (e.g. 2018 $55,900 ...)"
+                                className="w-full h-40 p-4 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none font-mono text-xs resize-none"
+                            />
+                            {importError && <div className="text-rose-600 text-sm font-bold flex items-center gap-2"><XIcon size={16}/> {importError}</div>}
+                            <div className="flex justify-end gap-3 pt-2">
+                                <button onClick={() => setShowImport(false)} className="px-4 py-2 text-slate-500 font-bold hover:bg-slate-100 rounded-lg">Cancel</button>
+                                <button onClick={handleImport} className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg shadow-lg">Parse & Import</button>
+                            </div>
                         </div>
-                        <button onClick={() => setShowAbout(false)} className="mt-8 w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 rounded-xl transition shadow-lg shadow-slate-900/20">Close</button>
                     </div>
                 </div>
             )}
@@ -567,561 +803,169 @@ export default function Calculator() {
             <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-30 px-6 py-4">
                 <div className="max-w-5xl mx-auto flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <div className="bg-gradient-to-tr from-indigo-600 to-violet-600 text-white p-2 rounded-lg shadow-lg shadow-indigo-500/30">
+                        <div className="bg-gradient-to-tr from-indigo-600 to-violet-600 text-white p-2 rounded-lg shadow-lg">
                             <CalculatorIcon size={24} />
                         </div>
-                        <div>
-                            <h1 className="text-xl font-bold tracking-tight text-slate-900">CPP & OAS Estimator</h1>
-                            <div className="text-xs font-medium text-slate-500 tracking-wide uppercase">2025 Ruleset</div>
-                        </div>
+                        <h1 className="text-xl font-bold text-slate-900">CPP Estimator</h1>
                     </div>
-                    <div className="flex gap-4 items-center">
-                        <button 
-                            onClick={copyLink} 
-                            className="text-sm font-bold text-indigo-600 hover:bg-indigo-50 px-3 py-2 rounded-lg transition-all flex items-center gap-2 border border-transparent hover:border-indigo-100"
-                        >
-                            {copySuccess ? <CheckIcon size={16} /> : <LinkIcon size={16} />}
-                            {copySuccess ? "Copied!" : "Copy Link"}
+                    <div className="flex gap-2">
+                        <button onClick={copyLink} className="text-xs font-bold text-indigo-600 hover:bg-indigo-50 px-3 py-2 rounded-lg flex items-center gap-2 border border-transparent hover:border-indigo-100 transition">
+                            {copySuccess ? <CheckIcon size={16} /> : <LinkIcon size={16} />} {copySuccess ? "Copied" : "Share"}
                         </button>
-                        <button onClick={() => setShowAbout(true)} className="text-sm font-medium text-slate-500 hover:text-indigo-600 transition-colors hidden sm:block">About</button>
+                        <button onClick={() => setShowAbout(true)} className="text-xs font-bold text-slate-500 hover:text-indigo-600 px-3 py-2">About</button>
                     </div>
                 </div>
             </header>
 
             {/* MAIN CONTENT */}
             <main className="max-w-5xl mx-auto p-4 md:p-8 w-full">
-
-                <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-200 overflow-hidden mb-12">
-                    
-                    {/* TABS HEADER */}
+                <div className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden mb-12">
                     <div className="p-2 bg-slate-50 border-b border-slate-200">
                         <div className="flex bg-slate-200/50 p-1 rounded-xl">
-                            <button onClick={() => setActiveTab('input')} className={`flex-1 py-2.5 text-sm font-bold text-center rounded-lg transition-all duration-200 ${activeTab === 'input' ? 'bg-white text-indigo-600 shadow-sm ring-1 ring-slate-200' : 'text-slate-500 hover:text-slate-700'}`}>
-                                1. Earnings & Inputs
-                            </button>
-                            <button onClick={() => setActiveTab('results')} className={`flex-1 py-2.5 text-sm font-bold text-center rounded-lg transition-all duration-200 ${activeTab === 'results' ? 'bg-white text-indigo-600 shadow-sm ring-1 ring-slate-200' : 'text-slate-500 hover:text-slate-700'}`}>
-                                2. View Estimate
-                            </button>
+                            <button onClick={() => setActiveTab('input')} className={`flex-1 py-2.5 text-sm font-bold text-center rounded-lg transition-all ${activeTab === 'input' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>1. Inputs</button>
+                            <button onClick={() => setActiveTab('results')} className={`flex-1 py-2.5 text-sm font-bold text-center rounded-lg transition-all ${activeTab === 'results' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>2. Results</button>
                         </div>
                     </div>
 
                     <div className="p-6 md:p-8">
                         {activeTab === 'input' && (
-                            <div className="animate-fade-in space-y-8">
-                                
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
-                                    {/* COLUMN 1: PERSONAL */}
-                                    <div className="space-y-6">
-                                        <div className="flex items-center gap-2 text-indigo-600 mb-2">
-                                            <UserGroupIcon size={20} />
-                                            <h3 className="text-xs font-bold uppercase tracking-wider">Personal Profile</h3>
-                                        </div>
-                                        
-                                        <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100 space-y-5">
+                            <div className="space-y-8 animate-fade-in">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    <div className="space-y-4">
+                                        <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">Personal</h3>
+                                        <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100 space-y-4">
                                             <div>
-                                                <label className="flex items-center text-sm font-bold text-slate-700 mb-2">
-                                                    Date of Birth
-                                                    <Tooltip text="Used to calculate your age for dropout years and start dates." />
-                                                </label>
-                                                <input type="date" value={dob} onChange={(e) => setDob(e.target.value)} className="w-full p-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all shadow-sm" />
+                                                <label className="text-sm font-bold text-slate-700 flex items-center gap-1">Date of Birth <Tooltip text="Your age determines dropout years and eligibility."/></label>
+                                                <input type="date" value={dob} onChange={(e) => setDob(e.target.value)} className="w-full mt-1 p-2 bg-white border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500" />
                                             </div>
-
-                                            {/* SIMPLIFIED MARITAL STATUS */}
                                             <div>
-                                                <label className="flex items-center text-sm font-bold text-slate-700 mb-2">
-                                                    Marital Status
-                                                    <Tooltip text="Combined income affects GIS eligibility." />
-                                                </label>
-                                                <div className="flex bg-white p-1 rounded-xl border border-slate-200 shadow-sm">
-                                                    <button onClick={() => setIsMarried(false)} className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${!isMarried ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'}`}>
-                                                        Single
-                                                    </button>
-                                                    <button onClick={() => setIsMarried(true)} className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${isMarried ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'}`}>
-                                                        Married / Partnered
-                                                    </button>
+                                                <label className="text-sm font-bold text-slate-700 flex items-center gap-1">Marital Status <Tooltip text="Combined family income affects GIS."/></label>
+                                                <div className="flex mt-1 bg-white p-1 rounded-lg border border-slate-200">
+                                                    <button onClick={() => setIsMarried(false)} className={`flex-1 py-1.5 text-xs font-bold rounded-md transition ${!isMarried ? 'bg-indigo-600 text-white' : 'text-slate-500'}`}>Single</button>
+                                                    <button onClick={() => setIsMarried(true)} className={`flex-1 py-1.5 text-xs font-bold rounded-md transition ${isMarried ? 'bg-indigo-600 text-white' : 'text-slate-500'}`}>Married</button>
                                                 </div>
                                             </div>
-
                                             {isMarried && (
-                                                <div className="animate-fade-in space-y-4 pl-4 border-l-2 border-indigo-200">
-                                                    <div>
-                                                        <label className="flex items-center text-sm font-bold text-indigo-900 mb-2">
-                                                            Spouse Date of Birth
-                                                            <Tooltip text="We automatically calculate if your spouse qualifies for OAS or Allowance based on their age when YOU retire." />
-                                                        </label>
-                                                        <input type="date" value={spouseDob} onChange={(e) => setSpouseDob(e.target.value)} className="w-full p-3 bg-indigo-50/50 border border-indigo-100 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all" />
-                                                    </div>
-
-                                                    <div>
-                                                        <label className="flex items-center text-sm font-bold text-indigo-900 mb-2">
-                                                            Spouse Annual Income
-                                                            <Tooltip text="Total taxable income (CPP, Pension, Investments). Exclude OAS." />
-                                                        </label>
-                                                        <div className="relative">
-                                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">$</span>
-                                                            <input type="number" value={spouseIncome} onChange={(e) => setSpouseIncome(e.target.value)} className="w-full pl-7 p-3 bg-indigo-50/50 border border-indigo-100 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all" placeholder="0" />
-                                                        </div>
-                                                    </div>
-                                                    
-                                                    {(() => {
-                                                        const spouseAge = birthYear + retirementAge - parseInt(spouseDob.split('-')[0]);
-                                                        if (spouseAge >= 60 && spouseAge < 65) {
-                                                            return (
-                                                                <label className="flex items-start gap-3 p-3 bg-indigo-100/50 rounded-xl cursor-pointer hover:bg-indigo-100 transition">
-                                                                    <input type="checkbox" checked={forceAllowance} onChange={(e) => setForceAllowance(e.target.checked)} className="mt-1 w-5 h-5 text-indigo-600 rounded focus:ring-indigo-500" />
-                                                                    <div className="text-xs text-indigo-900">
-                                                                        <strong>Apply for Allowance Benefit?</strong><br/>
-                                                                        Your spouse will be {spouseAge} when you retire. Check this if you expect to qualify for the low-income Allowance.
-                                                                    </div>
-                                                                </label>
-                                                            );
-                                                        }
-                                                        return null;
-                                                    })()}
+                                                <div className="pl-3 border-l-2 border-indigo-200 space-y-3">
+                                                    <div><label className="text-xs font-bold text-indigo-900 flex items-center gap-1">Spouse DOB <Tooltip text="Affects GIS/Allowance calculations."/></label><input type="date" value={spouseDob} onChange={(e) => setSpouseDob(e.target.value)} className="w-full mt-1 p-2 bg-indigo-50/50 border border-indigo-100 rounded-lg text-sm" /></div>
+                                                    <div><label className="text-xs font-bold text-indigo-900 flex items-center gap-1">Spouse Income <Tooltip text="Excluding OAS. Used for GIS."/></label><input type="number" value={spouseIncome} onChange={(e) => setSpouseIncome(e.target.value)} className="w-full mt-1 p-2 bg-indigo-50/50 border border-indigo-100 rounded-lg text-sm" placeholder="0" /></div>
                                                 </div>
                                             )}
-
                                             <div>
-                                                <div className="flex justify-between items-center mb-2">
-                                                    <label className="flex items-center text-sm font-bold text-slate-700">
-                                                        Retirement Age
-                                                        <Tooltip text="65 is standard. 60 is min (-36%). 70 is max (+42%)." />
-                                                    </label>
-                                                    <span className="bg-indigo-100 text-indigo-700 text-xs font-bold px-2 py-1 rounded-md">{retirementAge}</span>
-                                                </div>
-                                                <input type="range" min="60" max="70" step="1" value={retirementAge} onChange={(e) => setRetirementAge(parseInt(e.target.value))} className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600" />
-                                                <div className="flex justify-between text-xs text-slate-400 mt-2 font-medium"><span>60</span><span>65</span><span>70</span></div>
+                                                <label className="text-sm font-bold text-slate-700 flex items-center gap-1">Retirement Age: <span className="text-indigo-600">{retirementAge}</span> <Tooltip text="Age you start receiving CPP (60-70)."/></label>
+                                                <input type="range" min="60" max="70" value={retirementAge} onChange={(e) => setRetirementAge(parseInt(e.target.value))} className="w-full mt-2 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600" />
+                                                <div className="flex justify-between text-xs text-slate-400 mt-1"><span>60</span><span>65</span><span>70</span></div>
                                             </div>
                                         </div>
                                     </div>
-
-                                    {/* COLUMN 2: FINANCIAL */}
-                                    <div className="space-y-6">
-                                        <div className="flex items-center gap-2 text-emerald-600 mb-2">
-                                            <DollarSignIcon size={20} />
-                                            <h3 className="text-xs font-bold uppercase tracking-wider">Financial Profile</h3>
-                                        </div>
-
-                                        <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100 space-y-5">
+                                    <div className="space-y-4">
+                                        <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">Financial</h3>
+                                        <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100 space-y-4">
                                             <div>
-                                                <label className="flex items-center text-sm font-bold text-slate-700 mb-2">
-                                                    Years in Canada (18-65)
-                                                    <Tooltip text="40 years required for full OAS." />
-                                                </label>
-                                                <input type="number" min="0" max="47" value={yearsInCanada} onChange={(e) => setYearsInCanada(parseInt(e.target.value) || 0)} className="w-full p-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all shadow-sm" />
+                                                <label className="text-sm font-bold text-slate-700 flex items-center gap-1">Years in Canada (18-65) <Tooltip text="Min 10 years for OAS in Canada, 40 for full OAS."/></label>
+                                                <input type="number" min="0" max="47" value={yearsInCanada} onChange={(e) => setYearsInCanada(parseInt(e.target.value) || 0)} className="w-full mt-1 p-2 bg-white border border-slate-200 rounded-lg" />
                                             </div>
-
                                             <div>
-                                                <label className="flex items-center text-sm font-bold text-slate-700 mb-2">
-                                                    Other Retirement Income
-                                                    <Tooltip text="Pension, RRSP, etc. Triggers OAS Clawback." />
-                                                </label>
-                                                <div className="relative">
-                                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">$</span>
-                                                    <input type="number" placeholder="0" value={otherIncome} onChange={(e) => setOtherIncome(e.target.value)} className="w-full pl-7 p-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all shadow-sm" />
-                                                </div>
-                                                <p className="text-xs text-slate-400 mt-2 ml-1">Required for accurate GIS/Clawback results.</p>
+                                                <label className="text-sm font-bold text-slate-700 flex items-center gap-1">Other Retirement Income <Tooltip text="Pension, RRSP, RRIF etc. triggers OAS clawback."/></label>
+                                                <input type="number" placeholder="0" value={otherIncome} onChange={(e) => setOtherIncome(e.target.value)} className="w-full mt-1 p-2 bg-white border border-slate-200 rounded-lg" />
                                             </div>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="border-t border-slate-100 my-8"></div>
+                                <div className="border-t border-slate-100"></div>
 
-                                {/* EARNINGS GRID */}
-                                <div>
-                                    <div className="flex flex-col gap-6 mb-6">
-                                        <div className="flex items-center gap-2 text-slate-700">
-                                            <TrendingUpIcon size={20} />
-                                            <h3 className="text-sm font-bold uppercase tracking-wider">Earnings History</h3>
-                                        </div>
-
-                                        {/* NEW QUICK ACTIONS TOOLBAR */}
-                                        <div className="bg-slate-50 border border-slate-200 p-4 rounded-xl flex flex-wrap gap-4 items-end">
-                                            
-                                            {/* SALARY ESTIMATOR */}
-                                            <div className="flex-1 min-w-[240px]">
-                                                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">
-                                                    Quick Fill: Estimate from Salary
-                                                    <Tooltip text="Enter your current salary to automatically project your past and future earnings based on this level of income." />
-                                                </label>
-                                                <div className="flex gap-2">
-                                                    <div className="relative w-full">
-                                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">$</span>
-                                                        <input type="number" placeholder="65000" value={avgSalaryInput} onChange={(e) => setAvgSalaryInput(e.target.value)} className="w-full pl-7 p-2.5 bg-white border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none" />
-                                                    </div>
-                                                    <button onClick={applyAverageSalary} className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-lg text-sm font-bold flex items-center gap-1 transition-all shadow-sm">
-                                                        <WandIcon size={16} /> Apply
-                                                    </button>
-                                                </div>
-                                            </div>
-
-                                            <div className="w-px bg-slate-200 self-stretch mx-2 hidden md:block"></div>
-
-                                            {/* MANUAL FILLS */}
-                                            <div className="flex-1 min-w-[240px]">
-                                                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">
-                                                    Quick Fill: Max Limits
-                                                </label>
-                                                <div className="flex flex-wrap gap-2">
-                                                    <div className="flex items-center bg-white border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50 rounded-lg transition px-1">
-                                                        <button onClick={() => fillAll('max', 'past')} className="text-xs font-bold text-slate-700 hover:text-indigo-700 px-3 py-2.5">
-                                                            Fill History (Max)
-                                                        </button>
-                                                        <div className="pr-1"><Tooltip text="Sets all past years (age 18 to now) to the historical maximum YMPE." /></div>
-                                                    </div>
-
-                                                    <div className="flex items-center bg-white border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50 rounded-lg transition px-1">
-                                                        <button onClick={() => fillAll('max', 'future')} className="text-xs font-bold text-slate-700 hover:text-indigo-700 px-3 py-2.5">
-                                                            Fill Future (Max)
-                                                        </button>
-                                                        <div className="pr-1"><Tooltip text="Sets all future years to the projected maximum pensionable earnings." /></div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <button onClick={() => setEarnings({})} className="text-xs font-bold text-rose-500 hover:bg-rose-50 hover:text-rose-700 px-4 py-2.5 rounded-lg border border-transparent hover:border-rose-200 transition flex items-center gap-1 self-end ml-auto">
-                                                <RotateCcwIcon size={14} /> Reset
-                                            </button>
+                                <div className="bg-slate-50 border border-slate-200 p-4 rounded-xl flex flex-wrap gap-4 items-end">
+                                    <div className="flex-1 min-w-[200px]">
+                                        <label className="text-xs font-bold text-slate-500 uppercase flex items-center gap-1">Quick Fill: Salary <Tooltip text="Projects this salary across all future and past years."/></label>
+                                        <div className="flex gap-2 mt-1">
+                                            <input type="number" placeholder="65000" value={avgSalaryInput} onChange={(e) => setAvgSalaryInput(e.target.value)} className="w-full p-2 bg-white border border-slate-300 rounded-lg text-sm" />
+                                            <button onClick={applyAverageSalary} className="bg-indigo-600 text-white px-3 py-2 rounded-lg text-sm font-bold"><WandIcon size={16} /></button>
                                         </div>
                                     </div>
+                                    <button onClick={() => setShowImport(true)} className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-bold transition shadow-sm"><FileTextIcon size={16}/> Import from MSCA</button>
+                                    <button onClick={() => setEarnings({})} className="text-xs font-bold text-rose-500 hover:bg-rose-50 px-3 py-2 rounded-lg ml-auto"><RotateCcwIcon size={14} /> Reset</button>
+                                </div>
 
-                                    <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
-                                        <div className="grid grid-cols-12 bg-slate-50/80 backdrop-blur p-3 text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200 sticky top-0 z-10">
-                                            <div className="col-span-2">Year</div><div className="col-span-2">Age</div><div className="col-span-3 text-right pr-6">YMPE</div><div className="col-span-5">Earnings</div>
-                                        </div>
-                                        <div className="max-h-[350px] overflow-y-auto scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
-                                        {years.map(year => {
-                                            const isFuture = year > CURRENT_YEAR;
-                                            const ympe = getYMPE(year);
-                                            const yampe = getYAMPE(year);
-                                            const maxVal = yampe > 0 ? yampe : ympe;
-                                            const val = earnings[year] || '';
-                                            const isMax = val >= maxVal && val !== '';
-                                            return (
-                                            <div key={year} className={`grid grid-cols-12 p-2 border-b border-slate-50 last:border-0 items-center hover:bg-slate-50 transition group ${isFuture ? 'bg-indigo-50/20' : ''}`}>
-                                                <div className="col-span-2 text-sm font-semibold text-slate-700">{year}</div>
-                                                <div className="col-span-2 text-sm text-slate-400 group-hover:text-slate-600">{year - birthYear}</div>
-                                                <div className="col-span-3 text-right pr-6 text-sm text-slate-400 font-mono">${ympe.toLocaleString()}</div>
-                                                <div className="col-span-5 flex items-center gap-2">
-                                                    <div className="relative flex-1">
-                                                        <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs">$</span>
-                                                        <input type="number" value={val} onChange={(e) => handleEarningChange(year, e.target.value)} className={`w-full pl-6 pr-2 py-1.5 text-sm border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none transition-all ${isMax ? 'text-emerald-600 font-bold border-emerald-200 bg-emerald-50/30' : 'border-slate-200'}`} placeholder="0" />
-                                                    </div>
-                                                    <button onClick={() => toggleMax(year, isMax)} className={`px-2 py-1 text-[10px] font-bold rounded-md border transition-all uppercase tracking-wide ${isMax ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-400 border-slate-200 hover:bg-slate-200'}`}>Max</button>
-                                                </div>
+                                <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm h-80 overflow-y-auto">
+                                    <div className="grid grid-cols-12 bg-slate-50 p-2 text-xs font-bold text-slate-500 sticky top-0 border-b">
+                                        <div className="col-span-2">Year</div><div className="col-span-3 text-right pr-4">YMPE</div><div className="col-span-7">Earnings</div>
+                                    </div>
+                                    {years.map(year => (
+                                        <div key={year} className="grid grid-cols-12 p-2 border-b border-slate-50 last:border-0 items-center hover:bg-slate-50">
+                                            <div className="col-span-2 text-sm text-slate-700">{year}</div>
+                                            <div className="col-span-3 text-right pr-4 text-xs text-slate-400">${getYMPE(year).toLocaleString()}</div>
+                                            <div className="col-span-7 flex gap-2">
+                                                <input type="number" value={earnings[year] || ''} onChange={(e) => handleEarningChange(year, e.target.value)} className="w-full p-1 text-sm border rounded" placeholder="0" />
+                                                <button onClick={() => toggleMax(year, (earnings[year]||0) >= getYAMPE(year))} className="px-2 py-1 text-[10px] font-bold bg-slate-100 rounded text-slate-500">MAX</button>
                                             </div>
-                                            );
-                                        })}
                                         </div>
-                                    </div>
-                                    
-                                    <div className="mt-8 flex justify-center pb-4">
-                                        <button onClick={() => setActiveTab('results')} className="bg-slate-900 hover:bg-slate-800 text-white text-lg font-bold py-4 px-10 rounded-2xl shadow-xl shadow-slate-900/20 transform transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center gap-3">
-                                            Calculate Estimate <ArrowRightIcon size={20} />
-                                        </button>
-                                    </div>
+                                    ))}
+                                </div>
+                                
+                                <div className="flex justify-center mt-8">
+                                    <button onClick={() => setActiveTab('results')} className="bg-slate-900 hover:bg-slate-800 text-white text-lg font-bold py-4 px-10 rounded-2xl shadow-xl transform transition hover:scale-[1.02] flex items-center gap-3">
+                                        Calculate Estimate <ArrowRightIcon size={20} />
+                                    </button>
                                 </div>
                             </div>
                         )}
 
                         {activeTab === 'results' && (
                             <div className="space-y-8 animate-fade-in">
-                                
-                                {/* HERO CARD */}
-                                <div className="bg-slate-900 rounded-2xl shadow-2xl p-8 text-white relative overflow-hidden isolate">
-                                    <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-indigo-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20"></div>
-                                    <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-64 h-64 bg-emerald-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20"></div>
-                                    
-                                    <div className="relative z-10 text-center md:text-left md:flex justify-between items-center">
+                                <div className="bg-slate-900 rounded-2xl shadow-2xl p-8 text-white relative overflow-hidden">
+                                    <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 -mr-16 -mt-16"></div>
+                                    <div className="relative z-10 flex flex-col md:flex-row justify-between items-center text-center md:text-left">
                                         <div>
-                                            <h2 className="text-slate-400 text-sm font-bold uppercase tracking-widest mb-1">Estimated Monthly Income</h2>
-                                            <div className="flex items-baseline justify-center md:justify-start gap-1">
-                                                <span className="text-5xl md:text-6xl font-bold tracking-tight">${results.grandTotal.toLocaleString('en-CA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                                                <span className="text-slate-400 text-lg">/ mo</span>
-                                            </div>
-                                            <p className="text-slate-500 text-xs mt-2">*Values in 2025 dollars, pre-tax.</p>
+                                            <h2 className="text-slate-400 text-xs font-bold uppercase tracking-widest">Monthly Income</h2>
+                                            <div className="text-5xl font-bold tracking-tight">${results.grandTotal.toLocaleString('en-CA', {minimumFractionDigits:2, maximumFractionDigits:2})}<span className="text-lg text-slate-400">/mo</span></div>
                                         </div>
-                                        
-                                        <div className="mt-8 md:mt-0 flex gap-3 flex-wrap justify-center">
-                                            <div className="bg-white/10 backdrop-blur-sm px-5 py-3 rounded-xl border border-white/10">
-                                                <div className="text-slate-400 text-xs uppercase font-bold">CPP</div>
-                                                <div className="text-xl font-bold">${results.cpp.total.toLocaleString(undefined, {minimumFractionDigits:0, maximumFractionDigits:0})}</div>
-                                            </div>
-                                            <div className="bg-white/10 backdrop-blur-sm px-5 py-3 rounded-xl border border-white/10">
-                                                <div className="text-slate-400 text-xs uppercase font-bold">OAS</div>
-                                                <div className="text-xl font-bold">${results.oas.amount.toLocaleString(undefined, {minimumFractionDigits:0, maximumFractionDigits:0})}</div>
-                                            </div>
-                                            {results.gis.amount > 0 && 
-                                                <div className="bg-emerald-500/20 backdrop-blur-sm px-5 py-3 rounded-xl border border-emerald-500/30 text-emerald-100">
-                                                    <div className="text-emerald-300 text-xs uppercase font-bold">GIS</div>
-                                                    <div className="text-xl font-bold">${results.gis.amount.toLocaleString(undefined, {minimumFractionDigits:0, maximumFractionDigits:0})}</div>
-                                                </div>
-                                            }
+                                        <div className="flex gap-4 mt-6 md:mt-0">
+                                            <div className="bg-white/10 px-4 py-2 rounded-xl"><div className="text-xs text-slate-400 font-bold">CPP</div><div className="text-lg font-bold">${results.cpp.total.toLocaleString(undefined, {minimumFractionDigits:0, maximumFractionDigits:0})}</div></div>
+                                            <div className="bg-white/10 px-4 py-2 rounded-xl"><div className="text-xs text-slate-400 font-bold">OAS</div><div className="text-lg font-bold">${results.oas.amount.toLocaleString(undefined, {minimumFractionDigits:0, maximumFractionDigits:0})}</div></div>
+                                            {results.gis.amount > 0 && <div className="bg-emerald-500/20 px-4 py-2 rounded-xl border border-emerald-500/30"><div className="text-xs text-emerald-300 font-bold">GIS</div><div className="text-lg font-bold text-emerald-100">${results.gis.amount.toLocaleString(undefined, {minimumFractionDigits:0, maximumFractionDigits:0})}</div></div>}
                                         </div>
                                     </div>
                                 </div>
 
-                                {/* BREAKEVEN CHART */}
-                                <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                                    <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-6">
-                                        <div className="flex items-center gap-3">
-                                            <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg"><BarChartIcon size={20}/></div>
-                                            <div>
-                                                <h3 className="font-bold text-slate-800">Breakeven Analysis: When to Start?</h3>
-                                                <p className="text-xs text-slate-500">Cumulative payouts by start age. <span className="font-semibold text-indigo-600">Click legend to filter. Click graph for details.</span></p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div className="h-[300px] w-full cursor-pointer relative group">
-                                        {/* CLICK INSTRUCTION OVERLAY (Fades out on hover) */}
-                                        <div className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <div className="bg-slate-900/10 p-4 rounded-full"><MousePointerIcon size={32} className="text-slate-400"/></div>
-                                        </div>
-
-                                        <ResponsiveContainer width="100%" height="100%">
-                                            <LineChart 
-                                                data={results.breakevenData} 
-                                                margin={{ top: 5, right: 30, left: 10, bottom: 5 }}
-                                                onClick={(e) => { if(e && e.activeLabel) setChartSelection(e.activeLabel) }}
-                                            >
-                                                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                                                <XAxis dataKey="age" stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} />
-                                                <YAxis 
-                                                    stroke="#94a3b8" 
-                                                    fontSize={11} 
-                                                    tickLine={false} 
-                                                    axisLine={false}
-                                                    tickFormatter={(value) => `$${value/1000}k`} 
-                                                />
-                                                <RechartsTooltip 
-                                                    cursor={{ stroke: '#6366f1', strokeWidth: 1, strokeDasharray: '4 4' }}
-                                                    contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '12px', color: '#f8fafc', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }}
-                                                    itemStyle={{ color: '#f8fafc', fontSize: '12px', padding: '2px 0' }}
-                                                    formatter={(value, name) => [`$${value.toLocaleString()}`, name]}
-                                                    labelFormatter={(label) => <span className="font-bold text-slate-300 mb-2 block border-b border-slate-700 pb-1">At Age {label}</span>}
-                                                />
-                                                <Legend 
-                                                    wrapperStyle={{ paddingTop: '15px', fontSize: '12px', cursor: 'pointer' }} 
-                                                    iconType="circle" 
-                                                    onClick={handleLegendClick}
-                                                />
-                                                
-                                                {/* THREE COMPARISON LINES WITH TOGGLE */}
-                                                <Line 
-                                                    type="monotone" 
-                                                    dataKey="Early" 
-                                                    name="Start at 60" 
-                                                    stroke="#10b981" 
-                                                    strokeWidth={2} 
-                                                    dot={false} 
-                                                    activeDot={{ r: 6 }} 
-                                                    hide={!lineVisibility.Early}
-                                                />
-                                                <Line 
-                                                    type="monotone" 
-                                                    dataKey="Standard" 
-                                                    name="Start at 65" 
-                                                    stroke="#3b82f6" 
-                                                    strokeWidth={2} 
-                                                    dot={false} 
-                                                    activeDot={{ r: 6 }}
-                                                    hide={!lineVisibility.Standard} 
-                                                />
-                                                <Line 
-                                                    type="monotone" 
-                                                    dataKey="Deferred" 
-                                                    name="Start at 70" 
-                                                    stroke="#f59e0b" 
-                                                    strokeWidth={2} 
-                                                    dot={false} 
-                                                    activeDot={{ r: 6 }} 
-                                                    hide={!lineVisibility.Deferred}
-                                                />
-                                                
-                                                {/* CONDITIONAL USER LINE */}
-                                                {results.userIsDistinct && (
-                                                    <Line 
-                                                        type="monotone" 
-                                                        dataKey="Selected" 
-                                                        name={`Start at ${results.selectedAge} (Selected)`} 
-                                                        stroke="#8b5cf6" 
-                                                        strokeWidth={3} 
-                                                        strokeDasharray="5 5" 
-                                                        dot={false} 
-                                                        activeDot={{ r: 8 }} 
-                                                        hide={!lineVisibility.Selected}
-                                                    />
-                                                )}
-
-                                                {/* DYNAMIC BREAKEVEN LINES - Only show if lines are visible */}
-                                                {results.crossovers.age65 && lineVisibility.Early && lineVisibility.Standard && <ReferenceLine x={results.crossovers.age65} stroke="#3b82f6" strokeDasharray="3 3" label={{ position: 'top', value: '65 beats 60', fill: '#3b82f6', fontSize: 10, fontWeight: 'bold' }} />}
-                                                {results.crossovers.age70 && lineVisibility.Standard && lineVisibility.Deferred && <ReferenceLine x={results.crossovers.age70} stroke="#f59e0b" strokeDasharray="3 3" label={{ position: 'top', value: '70 beats 65', fill: '#f59e0b', fontSize: 10, fontWeight: 'bold' }} />}
-                                            </LineChart>
-                                        </ResponsiveContainer>
-                                    </div>
-
-                                    {/* CLICK DETAIL PANEL - Conditioned on Visibility */}
-                                    {chartSelection && (
-                                        <div className="mt-4 bg-slate-50 border border-slate-200 rounded-xl p-4 animate-fade-in">
-                                            <div className="flex justify-between items-center mb-3">
-                                                <h4 className="font-bold text-slate-800 flex items-center gap-2"><MousePointerIcon size={16} className="text-indigo-500"/> Deep Dive: Age {chartSelection}</h4>
-                                                <button onClick={() => setChartSelection(null)} className="text-xs text-slate-400 hover:text-slate-600">Close</button>
-                                            </div>
-                                            <div className={`grid gap-2 text-center ${results.userIsDistinct ? 'grid-cols-2 md:grid-cols-4' : 'grid-cols-3'}`}>
-                                                {results.breakevenData.filter(d => d.age === chartSelection).map(d => (
-                                                    <React.Fragment key={d.age}>
-                                                        {lineVisibility.Early && (
-                                                            <div className="bg-emerald-50 border border-emerald-100 p-2 rounded-lg">
-                                                                <div className="text-[10px] text-emerald-600 font-bold uppercase">Start 60</div>
-                                                                <div className="font-bold text-emerald-800">${d.Early.toLocaleString()}</div>
-                                                            </div>
-                                                        )}
-                                                        {lineVisibility.Standard && (
-                                                            <div className="bg-blue-50 border border-blue-100 p-2 rounded-lg">
-                                                                <div className="text-[10px] text-blue-600 font-bold uppercase">Start 65</div>
-                                                                <div className="font-bold text-blue-800">${d.Standard.toLocaleString()}</div>
-                                                            </div>
-                                                        )}
-                                                        {lineVisibility.Deferred && (
-                                                            <div className="bg-amber-50 border border-amber-100 p-2 rounded-lg">
-                                                                <div className="text-[10px] text-amber-600 font-bold uppercase">Start 70</div>
-                                                                <div className="font-bold text-amber-800">${d.Deferred.toLocaleString()}</div>
-                                                            </div>
-                                                        )}
-                                                        {results.userIsDistinct && lineVisibility.Selected && (
-                                                            <div className="bg-violet-50 border border-violet-100 p-2 rounded-lg">
-                                                                <div className="text-[10px] text-violet-600 font-bold uppercase">Start {results.selectedAge}</div>
-                                                                <div className="font-bold text-violet-800">${d.Selected.toLocaleString()}</div>
-                                                            </div>
-                                                        )}
-                                                    </React.Fragment>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
+                                <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 h-[320px]">
+                                    <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2"><BarChartIcon size={20} className="text-indigo-600"/> Breakeven Analysis</h3>
+                                    <ResponsiveContainer width="100%" height="85%">
+                                        <LineChart data={results.breakevenData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }} onClick={(e) => { if(e && e.activeLabel) setChartSelection(e.activeLabel) }}>
+                                            <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                                            <XAxis dataKey="age" stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} />
+                                            <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(val)=>`$${val/1000}k`} />
+                                            <RechartsTooltip contentStyle={{backgroundColor:'#1e293b', border:'none', borderRadius:'8px', color:'#fff'}} itemStyle={{fontSize:'12px'}} formatter={(val, name)=>[`$${val.toLocaleString()}`, name]} />
+                                            <Legend wrapperStyle={{paddingTop:'10px', fontSize:'12px', cursor:'pointer'}} onClick={handleLegendClick} />
+                                            <Line type="monotone" dataKey="Early" name="Start 60" stroke="#10b981" strokeWidth={2} dot={false} hide={!lineVisibility.Early} />
+                                            <Line type="monotone" dataKey="Standard" name="Start 65" stroke="#3b82f6" strokeWidth={2} dot={false} hide={!lineVisibility.Standard} />
+                                            <Line type="monotone" dataKey="Deferred" name="Start 70" stroke="#f59e0b" strokeWidth={2} dot={false} hide={!lineVisibility.Deferred} />
+                                            {results.userIsDistinct && <Line type="monotone" dataKey="Selected" name={`Start ${results.selectedAge}`} stroke="#8b5cf6" strokeWidth={3} dot={false} hide={!lineVisibility.Selected} />}
+                                        </LineChart>
+                                    </ResponsiveContainer>
                                 </div>
-
-                                {/* INSIGHTS */}
-                                {results.insights.length > 0 && (
-                                    <div className="grid gap-3">
-                                        {results.insights.map((insight, idx) => (
-                                            <div key={idx} className={`text-sm p-4 rounded-xl border flex items-start gap-3 shadow-sm ${
-                                                insight.type === 'danger' ? 'bg-rose-50 border-rose-100 text-rose-800' :
-                                                insight.type === 'warning' ? 'bg-amber-50 border-amber-100 text-amber-800' :
-                                                insight.type === 'success' ? 'bg-emerald-50 border-emerald-100 text-emerald-800' :
-                                                'bg-indigo-50 border-indigo-100 text-indigo-700'
-                                            }`}>
-                                                <div className="mt-0.5 shrink-0">
-                                                    {insight.type === 'danger' ? <XIcon size={16}/> : 
-                                                     insight.type === 'warning' ? <InfoIcon size={16}/> : 
-                                                     insight.type === 'success' ? <CheckCircleIcon size={16}/> : <LightbulbIcon size={16}/>}
-                                                </div>
-                                                <span className="font-medium">{insight.text}</span>
-                                            </div>
-                                        ))}
+                                {chartSelection && (
+                                    <div className="mt-4 bg-slate-50 border border-slate-200 rounded-xl p-4 animate-fade-in">
+                                        <div className="flex justify-between items-center mb-2"><h4 className="font-bold text-slate-800 text-sm">Age {chartSelection} Snapshot</h4><button onClick={() => setChartSelection(null)} className="text-xs text-slate-400 hover:text-slate-600">Close</button></div>
+                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-center text-xs">
+                                            {results.breakevenData.filter(d => d.age === chartSelection).map(d => (
+                                                <React.Fragment key={d.age}>
+                                                    {lineVisibility.Early && <div className="bg-emerald-50 p-2 rounded border border-emerald-100"><div className="font-bold text-emerald-800">${d.Early.toLocaleString()}</div><div className="text-[10px] text-emerald-600">Start 60</div></div>}
+                                                    {lineVisibility.Standard && <div className="bg-blue-50 p-2 rounded border border-blue-100"><div className="font-bold text-blue-800">${d.Standard.toLocaleString()}</div><div className="text-[10px] text-blue-600">Start 65</div></div>}
+                                                    {lineVisibility.Deferred && <div className="bg-amber-50 p-2 rounded border border-amber-100"><div className="font-bold text-amber-800">${d.Deferred.toLocaleString()}</div><div className="text-[10px] text-amber-600">Start 70</div></div>}
+                                                    {results.userIsDistinct && lineVisibility.Selected && <div className="bg-violet-50 p-2 rounded border border-violet-100"><div className="font-bold text-violet-800">${d.Selected.toLocaleString()}</div><div className="text-[10px] text-violet-600">Start {results.selectedAge}</div></div>}
+                                                </React.Fragment>
+                                            ))}
+                                        </div>
                                     </div>
                                 )}
-
-                                {/* DETAIL CARDS */}
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                    {/* CPP CARD */}
-                                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 relative overflow-hidden group">
-                                        <div className="absolute top-0 left-0 w-full h-1 bg-indigo-500"></div>
-                                        <div className="flex items-center gap-3 mb-4 text-slate-700">
-                                            <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg"><TrendingUpIcon size={20}/></div>
-                                            <h3 className="font-bold">CPP Details</h3>
-                                        </div>
-                                        <div className="space-y-3">
-                                            <div className="flex justify-between text-sm">
-                                                <span className="text-slate-500">Base</span>
-                                                <span className="font-mono font-medium">${results.cpp.base.toFixed(2)}</span>
-                                            </div>
-                                            <div className="flex justify-between text-sm">
-                                                <span className="text-slate-500">Enhanced</span>
-                                                <span className="font-mono font-medium text-emerald-600">+${results.cpp.enhanced.toFixed(2)}</span>
-                                            </div>
-                                            <div className="pt-3 border-t border-slate-100 flex justify-between text-sm font-bold">
-                                                <span className="text-slate-800">Total CPP</span>
-                                                <span>${results.cpp.total.toFixed(2)}</span>
-                                            </div>
-                                            {results.cpp.zeroReason && (
-                                                <div className="text-xs text-center bg-amber-50 text-amber-700 p-2 rounded border border-amber-100 font-semibold mt-2">
-                                                    {results.cpp.zeroReason}
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    {/* OAS CARD */}
-                                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 relative overflow-hidden">
-                                        <div className="absolute top-0 left-0 w-full h-1 bg-amber-500"></div>
-                                        <div className="flex items-center gap-3 mb-4 text-slate-700">
-                                            <div className="p-2 bg-amber-50 text-amber-600 rounded-lg"><HomeIcon size={20}/></div>
-                                            <h3 className="font-bold">OAS Details</h3>
-                                        </div>
-                                        <div className="space-y-3">
-                                            <div className="flex justify-between text-sm">
-                                                <span className="text-slate-500">Gross Amount</span>
-                                                <span className="font-mono font-medium">${results.oas.gross.toFixed(2)}</span>
-                                            </div>
-                                            {results.oas.clawback > 0 && (
-                                                <div className="flex justify-between text-sm text-rose-600 bg-rose-50 px-2 py-1 rounded">
-                                                    <span>Recovery Tax</span>
-                                                    <span className="font-mono">-${results.oas.clawback.toFixed(2)}</span>
-                                                </div>
-                                            )}
-                                            <div className="pt-3 border-t border-slate-100 flex justify-between text-sm font-bold">
-                                                <span className="text-slate-800">Net OAS</span>
-                                                <span>${results.oas.amount.toFixed(2)}</span>
-                                            </div>
-                                            {results.oas.zeroReason && (
-                                                <div className="text-xs text-center bg-amber-50 text-amber-700 p-2 rounded border border-amber-100 font-semibold mt-2">
-                                                    {results.oas.zeroReason}
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    {/* GIS CARD */}
-                                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 relative overflow-hidden">
-                                        <div className="absolute top-0 left-0 w-full h-1 bg-emerald-500"></div>
-                                        <div className="flex items-center gap-3 mb-4 text-slate-700">
-                                            <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg"><HeartHandshakeIcon size={20}/></div>
-                                            <h3 className="font-bold">GIS Details</h3>
-                                        </div>
-                                        <div className="space-y-3">
-                                            <div className="flex justify-between text-sm">
-                                                <span className="text-slate-500">Supplement</span>
-                                                <span className="font-mono font-medium text-emerald-600">${results.gis.amount.toFixed(2)}</span>
-                                            </div>
-                                            {results.gis.note && (<div className="text-xs text-slate-400 mt-2 bg-slate-50 p-2 rounded">{results.gis.note}</div>)}
-                                            <div className="pt-3 border-t border-slate-100 flex justify-between text-sm font-bold">
-                                                <span className="text-slate-800">Total GIS</span>
-                                                <span>${results.gis.amount.toFixed(2)}</span>
-                                            </div>
-                                            {results.gis.zeroReason && (
-                                                <div className="text-xs text-center bg-amber-50 text-amber-700 p-2 rounded border border-amber-100 font-semibold mt-2">
-                                                    {results.gis.zeroReason}
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
                                 
-                                <div className="flex justify-center pt-8">
-                                    <button onClick={() => setActiveTab('input')} className="text-slate-500 hover:text-indigo-600 text-sm font-semibold flex items-center gap-2 transition-colors">
-                                        <RotateCcwIcon size={16} /> Edit Inputs
-                                    </button>
-                                </div>
-
+                                <div className="flex justify-center"><button onClick={() => setActiveTab('input')} className="text-indigo-600 font-bold text-sm hover:underline">Edit Inputs</button></div>
                             </div>
                         )}
                     </div>
                 </div>
 
-                {/* INFO SECTION */}
                 <div className="max-w-3xl mx-auto space-y-4">
                     <Accordion title="Guide to 2025 CPP & OAS Changes" icon={BookOpenIcon}>
                         <p className="mb-4">In 2025, the Canada Pension Plan (CPP) completes a major transition into 'Phase 2' of the enhancement strategy. The most visible change is the <strong>Second Earnings Ceiling (YAMPE)</strong>. For decades, there was only one limit (YMPE). Now, there are two.</p>
