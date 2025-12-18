@@ -1400,6 +1400,7 @@ export default function Calculator() {
                         <ul className="text-sm space-y-2 text-indigo-600 pl-4 font-medium">
                             <li><a href="https://www.canada.ca/en/services/benefits/publicpensions/cpp/payment-amounts.html" target="_blank" className="hover:underline flex items-center gap-1">CPP Payment Amounts <ExternalLinkIcon size={12} /></a></li>
                             <li><a href="https://www.canada.ca/en/services/benefits/publicpensions/old-age-security/payments.html" target="_blank" className="hover:underline flex items-center gap-1">OAS Payments & Thresholds <ExternalLinkIcon size={12} /></a></li>
+                            <li><a href="https://www.canada.ca/en/employment-social-development/services/my-account.html" target="_blank" className="hover:underline flex items-center gap-1">My Service Canada Account (MSCA) <ExternalLinkIcon size={12} /></a></li> 
                         </ul>
                     </Accordion>
                 </div>
