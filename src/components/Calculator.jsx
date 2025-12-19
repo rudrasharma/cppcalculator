@@ -21,11 +21,11 @@ import { compressEarnings, decompressEarnings } from '../utils/compression';
 //              UI HELPERS
 // ==========================================
 const Tooltip = ({ text }) => (
-    <div className="group relative inline-flex items-center ml-1">
+    <div className="group relative inline-flex items-center ml-1 align-middle">
         <button type="button" className="text-slate-400 hover:text-indigo-600 transition-colors cursor-help">
             <HelpCircleIcon size={16} />
         </button>
-        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-3 bg-slate-800 text-slate-50 text-xs rounded-xl shadow-xl opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none z-50 text-center leading-relaxed">
+        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-3 bg-slate-800 text-slate-50 text-xs rounded-xl shadow-xl opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none z-50 text-center leading-relaxed font-normal">
             {text}
             <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-800"></div>
         </div>
@@ -59,10 +59,16 @@ export default function Calculator() {
     const [earnings, setEarnings] = useState({});
     const [activeTab, setActiveTab] = useState('input');
 
-    // --- 2. INPUT STATE ---
+    // --- 2. INPUT STATE & TOGGLES ---
     const [avgSalaryInput, setAvgSalaryInput] = useState('');
     const [otherIncome, setOtherIncome] = useState(''); 
+    
+    // UX Toggles (Progressive Disclosure)
+    const [livedInCanadaAllLife, setLivedInCanadaAllLife] = useState(true); 
     const [isMarried, setIsMarried] = useState(false);
+    const [showChildren, setShowChildren] = useState(false);
+
+    // Spouse Data
     const [spouseDob, setSpouseDob] = useState('1985-01-01');
     const [spouseIncome, setSpouseIncome] = useState('');
     const [forceAllowance, setForceAllowance] = useState(false);
@@ -93,15 +99,34 @@ export default function Calculator() {
 
     // --- 6. HANDLERS ---
     
+    // Auto-calculate Years in Canada based on toggle
+    useEffect(() => {
+        if (livedInCanadaAllLife) setYearsInCanada(40);
+    }, [livedInCanadaAllLife]);
+
+    // Reset Children if toggle off
+    useEffect(() => {
+        if (!showChildren) setChildren([]);
+    }, [showChildren]);
+
     // Load from URL
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
         if (params.toString()) {
             if (params.get('d')) setDob(params.get('d').replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3'));
             if (params.get('r')) setRetirementAge(parseInt(params.get('r')));
-            if (params.get('y')) setYearsInCanada(parseInt(params.get('y')));
+            
+            // Check Residency logic
+            const yic = params.get('y');
+            if (yic) {
+                const yicVal = parseInt(yic);
+                setYearsInCanada(yicVal);
+                if (yicVal < 40) setLivedInCanadaAllLife(false);
+            }
+
             if (params.get('s')) setAvgSalaryInput(parseInt(params.get('s'), 36).toString());
             if (params.get('o')) setOtherIncome(parseInt(params.get('o'), 36).toString());
+            
             if (params.get('m') === '1') setIsMarried(true);
             if (params.get('sd')) setSpouseDob(params.get('sd').replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3'));
             if (params.get('si')) setSpouseIncome(parseInt(params.get('si'), 36).toString());
@@ -165,7 +190,8 @@ export default function Calculator() {
         setEarnings(prev => {
             const newEarnings = { ...prev };
             results.years.forEach(y => {
-                if (y >= CURRENT_YEAR || newEarnings[y] === undefined) {
+                const isEmpty = Object.keys(prev).length === 0;
+                if (isEmpty || y >= CURRENT_YEAR || newEarnings[y] === undefined) {
                     const yYMPE = getYMPE(y);
                     newEarnings[y] = Math.round(yYMPE * ratio);
                 }
@@ -190,52 +216,28 @@ export default function Calculator() {
     
     const clearComparison = () => setComparisonSnapshot(null);
 
-    // Dynamic Crossover Calculation
     let comparisonMsg = null;
-
     if (comparisonSnapshot && comparisonSnapshot.age !== retirementAge) {
         const currentData = results.breakevenData;
         const snapshotData = comparisonSnapshot.breakevenData;
-        
-        // Determine which scenario is "Early" and which is "Late"
         const isCurrentLater = retirementAge > comparisonSnapshot.age;
         const lateAge = isCurrentLater ? retirementAge : comparisonSnapshot.age;
         const earlyAge = isCurrentLater ? comparisonSnapshot.age : retirementAge;
-        
         let foundCrossover = null;
 
         for (let i = 0; i < currentData.length; i++) {
             const age = currentData[i].age;
             if (age <= lateAge) continue; 
-            
             const currentTotal = currentData[i].Selected;
             const snapshotTotal = snapshotData.find(d => d.age === age)?.Selected || 0;
-            
-            if (isCurrentLater) {
-                if (currentTotal > snapshotTotal) {
-                    foundCrossover = age;
-                    break;
-                }
-            } else {
-                if (snapshotTotal > currentTotal) {
-                    foundCrossover = age;
-                    break;
-                }
-            }
+            if (isCurrentLater) { if (currentTotal > snapshotTotal) { foundCrossover = age; break; } } 
+            else { if (snapshotTotal > currentTotal) { foundCrossover = age; break; } }
         }
 
         if (foundCrossover) {
-            comparisonMsg = (
-                <span className="text-slate-700">
-                    <strong>Age {lateAge}</strong> beats <strong>Age {earlyAge}</strong> if you live past <span className="text-lg font-bold text-indigo-700">{foundCrossover}</span>.
-                </span>
-            );
+            comparisonMsg = <span className="text-slate-700"><strong>Age {lateAge}</strong> beats <strong>Age {earlyAge}</strong> if you live past <span className="text-lg font-bold text-indigo-700">{foundCrossover}</span>.</span>;
         } else {
-            comparisonMsg = (
-                <span className="text-slate-400 italic">
-                    <strong>Age {lateAge}</strong> never catches up to <strong>Age {earlyAge}</strong> by age 95.
-                </span>
-            );
+            comparisonMsg = <span className="text-slate-400 italic"><strong>Age {lateAge}</strong> never catches up to <strong>Age {earlyAge}</strong> by age 95.</span>;
         }
     }
 
@@ -246,6 +248,8 @@ export default function Calculator() {
     const displayOAS = results.oas.total * inflationFactor;
     const displayGIS = results.gis.total * inflationFactor;
 
+    const hasEarnings = Object.keys(earnings).length > 0;
+
     return (
         <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-indigo-100 selection:text-indigo-700 pb-16">
             
@@ -254,21 +258,14 @@ export default function Calculator() {
                 <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in" onClick={() => setShowAbout(false)}>
                     <div className="bg-white rounded-2xl max-w-lg w-full p-8 shadow-2xl relative border border-slate-100" onClick={e => e.stopPropagation()}>
                         <button onClick={() => setShowAbout(false)} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition"><XIcon size={24} /></button>
-                        <div className="flex items-center gap-4 mb-6">
-                            <div className="bg-indigo-100 p-3 rounded-xl text-indigo-600"><UserGroupIcon size={28} /></div>
-                            <div>
-                                <h2 className="text-2xl font-bold text-slate-900">About CPP Forecast</h2>
-                                <p className="text-sm text-slate-500">Transparent Financial Planning</p>
-                            </div>
-                        </div>
+                        <h2 className="text-2xl font-bold text-slate-900 mb-6">About CPP Forecast</h2>
                         <div className="space-y-4 text-slate-600 leading-relaxed">
                             <p><strong>Born in Canada, Built for Privacy.</strong></p>
-                            <p>Existing government calculators can be cumbersome. This tool handles the new <strong>Enhanced CPP (Tier 2)</strong> rules introduced in 2024/2025 with an easy-to-use interface.</p>
+                            <p>This tool handles the new <strong>Enhanced CPP (Tier 2)</strong> rules introduced in 2024/2025.</p>
                             <div className="bg-emerald-50 border border-emerald-100 p-4 rounded-xl text-emerald-800 text-sm flex gap-3">
                                 <span>🔒</span>
-                                <div><strong>Privacy First:</strong> This entire calculator runs in your browser. No data is sent to our servers. Your financial information stays on your device.</div>
+                                <div><strong>Privacy First:</strong> No data is sent to servers. Everything runs in your browser.</div>
                             </div>
-                            <p className="text-xs text-slate-400 mt-4 text-center">Built by Canadian financial enthusiasts in Ontario.</p>
                         </div>
                         <button onClick={() => setShowAbout(false)} className="mt-8 w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 rounded-xl transition shadow-lg shadow-slate-900/20">Close</button>
                     </div>
@@ -280,13 +277,7 @@ export default function Calculator() {
                 <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in" onClick={() => setShowImport(false)}>
                     <div className="bg-white rounded-2xl max-w-2xl w-full p-8 shadow-2xl relative border border-slate-100" onClick={e => e.stopPropagation()}>
                         <button onClick={() => setShowImport(false)} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition"><XIcon size={24} /></button>
-                        <div className="flex items-center gap-3 mb-6">
-                            <div className="bg-indigo-100 p-3 rounded-xl text-indigo-600"><UploadIcon size={24} /></div>
-                            <div>
-                                <h2 className="text-xl font-bold text-slate-900">Import from Service Canada</h2>
-                                <p className="text-sm text-slate-500">Paste your "Statement of Contributions" data below.</p>
-                            </div>
-                        </div>
+                        <h2 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2"><UploadIcon className="text-indigo-600"/> Import from Service Canada</h2>
                         <div className="space-y-4">
                             <div className="text-sm text-slate-600 space-y-2 bg-slate-50 p-4 rounded-xl border border-slate-200">
                                 <p><strong>How to get your data:</strong></p>
@@ -336,12 +327,8 @@ export default function Calculator() {
                     {/* TABS HEADER */}
                     <div className="p-2 bg-slate-50 border-b border-slate-200">
                         <div className="flex bg-slate-200/50 p-1 rounded-xl">
-                            <button onClick={() => setActiveTab('input')} className={`flex-1 py-2.5 text-sm font-bold text-center rounded-lg transition-all duration-200 ${activeTab === 'input' ? 'bg-white text-indigo-600 shadow-sm ring-1 ring-slate-200' : 'text-slate-500 hover:text-slate-700'}`}>
-                                1. Earnings & Inputs
-                            </button>
-                            <button onClick={() => setActiveTab('results')} className={`flex-1 py-2.5 text-sm font-bold text-center rounded-lg transition-all duration-200 ${activeTab === 'results' ? 'bg-white text-indigo-600 shadow-sm ring-1 ring-slate-200' : 'text-slate-500 hover:text-slate-700'}`}>
-                                2. View Estimate
-                            </button>
+                            <button onClick={() => setActiveTab('input')} className={`flex-1 py-2.5 text-sm font-bold text-center rounded-lg transition-all duration-200 ${activeTab === 'input' ? 'bg-white text-indigo-600 shadow-sm ring-1 ring-slate-200' : 'text-slate-500 hover:text-slate-700'}`}>1. Earnings & Inputs</button>
+                            <button onClick={() => setActiveTab('results')} className={`flex-1 py-2.5 text-sm font-bold text-center rounded-lg transition-all duration-200 ${activeTab === 'results' ? 'bg-white text-indigo-600 shadow-sm ring-1 ring-slate-200' : 'text-slate-500 hover:text-slate-700'}`}>2. View Estimate</button>
                         </div>
                     </div>
 
@@ -349,142 +336,116 @@ export default function Calculator() {
                         {activeTab === 'input' && (
                             <div className="animate-fade-in space-y-8">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
-                                    {/* COLUMN 1: PERSONAL */}
+                                    
+                                    {/* COLUMN 1: PERSONAL & FAMILY */}
                                     <div className="space-y-6">
                                         <div className="flex items-center gap-2 text-indigo-600 mb-2">
                                             <UserGroupIcon size={20} />
-                                            <h3 className="text-xs font-bold uppercase tracking-wider">Personal Profile</h3>
+                                            <h3 className="text-xs font-bold uppercase tracking-wider">Profile & Family</h3>
                                         </div>
-                                        <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100 space-y-5">
+                                        
+                                        {/* PERSONAL BASICS */}
+                                        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-5">
                                             <div>
-                                                <label className="flex items-center text-sm font-bold text-slate-700 mb-2">
-                                                    Date of Birth <Tooltip text="Used to calculate your age for dropout years and start dates." />
-                                                </label>
-                                                <input type="date" value={dob} onChange={(e) => setDob(e.target.value)} className="w-full p-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all shadow-sm" />
+                                                <label className="flex items-center text-sm font-bold text-slate-700 mb-2">Date of Birth</label>
+                                                <input type="date" value={dob} onChange={(e) => setDob(e.target.value)} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all" />
                                             </div>
-
-                                            <div>
-                                                <label className="flex items-center text-sm font-bold text-slate-700 mb-2">
-                                                    Marital Status <Tooltip text="Combined income affects GIS eligibility." />
-                                                </label>
-                                                <div className="flex bg-white p-1 rounded-xl border border-slate-200 shadow-sm">
-                                                    <button onClick={() => setIsMarried(false)} className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${!isMarried ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'}`}>Single</button>
-                                                    <button onClick={() => setIsMarried(true)} className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${isMarried ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'}`}>Married / Partnered</button>
-                                                </div>
-                                            </div>
-
-                                            {isMarried && (
-                                                <div className="animate-fade-in space-y-4 pl-4 border-l-2 border-indigo-200">
-                                                    <div>
-                                                        <label className="flex items-center text-sm font-bold text-indigo-900 mb-2">
-                                                            Spouse Date of Birth <Tooltip text="We automatically calculate if your spouse qualifies for OAS or Allowance based on their age when YOU retire." />
-                                                        </label>
-                                                        <input type="date" value={spouseDob} onChange={(e) => setSpouseDob(e.target.value)} className="w-full p-3 bg-indigo-50/50 border border-indigo-100 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all" />
-                                                    </div>
-                                                    <div>
-                                                        <label className="flex items-center text-sm font-bold text-indigo-900 mb-2">
-                                                            Spouse Annual Income <Tooltip text="Total taxable income (CPP, Pension, Investments). Exclude OAS." />
-                                                        </label>
-                                                        <div className="relative">
-                                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">$</span>
-                                                            <input type="number" value={spouseIncome} onChange={(e) => setSpouseIncome(e.target.value)} className="w-full pl-7 p-3 bg-indigo-50/50 border border-indigo-100 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all" placeholder="0" />
-                                                        </div>
-                                                    </div>
-                                                    {(() => {
-                                                        const spouseAge = birthYear + retirementAge - parseInt(spouseDob.split('-')[0]);
-                                                        if (spouseAge >= 60 && spouseAge < 65) {
-                                                            return (
-                                                                <label className="flex items-start gap-3 p-3 bg-indigo-100/50 rounded-xl cursor-pointer hover:bg-indigo-100 transition">
-                                                                    <input type="checkbox" checked={forceAllowance} onChange={(e) => setForceAllowance(e.target.checked)} className="mt-1 w-5 h-5 text-indigo-600 rounded focus:ring-indigo-500" />
-                                                                    <div className="text-xs text-indigo-900">
-                                                                        <strong>Apply for Allowance Benefit?</strong><br/>
-                                                                        Your spouse will be {spouseAge} when you retire. Check this if you expect to qualify for the low-income Allowance.
-                                                                    </div>
-                                                                </label>
-                                                            );
-                                                        }
-                                                        return null;
-                                                    })()}
-                                                </div>
-                                            )}
-
-                                            {/* --- CHILD REARING SECTION --- */}
-                                            <div>
-                                                <label className="flex items-center text-sm font-bold text-slate-700 mb-2">
-                                                    Children <Tooltip text="Years raising children under 7 with low income can be dropped from the calculation, boosting your average." />
-                                                </label>
-                                                
-                                                <div className="space-y-3">
-                                                    {children.map((childYear, index) => (
-                                                        <div key={index} className="flex items-center gap-2 animate-fade-in">
-                                                            <span className="text-sm text-slate-500 font-bold w-16">Child {index + 1}:</span>
-                                                            <div className="relative flex-1">
-                                                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs font-bold">Born</span>
-                                                                <input 
-                                                                    type="number" 
-                                                                    value={childYear} 
-                                                                    onChange={(e) => {
-                                                                        const newChildren = [...children];
-                                                                        newChildren[index] = parseInt(e.target.value) || 0;
-                                                                        setChildren(newChildren);
-                                                                    }} 
-                                                                    className="w-full pl-10 p-2 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none" 
-                                                                    placeholder="YYYY"
-                                                                />
-                                                            </div>
-                                                            <button 
-                                                                onClick={() => setChildren(children.filter((_, i) => i !== index))}
-                                                                className="p-2 text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"
-                                                            >
-                                                                <XIcon size={16} />
-                                                            </button>
-                                                        </div>
-                                                    ))}
-
-                                                    <button 
-                                                        onClick={() => setChildren([...children, 2010])} 
-                                                        className="w-full py-2 border-2 border-dashed border-slate-200 text-slate-400 font-bold rounded-xl hover:border-indigo-300 hover:text-indigo-500 hover:bg-indigo-50 transition text-sm flex items-center justify-center gap-2"
-                                                    >
-                                                        <UserGroupIcon size={16} /> Add Child
-                                                    </button>
-                                                </div>
-                                            </div>
-
+                                            
                                             <div>
                                                 <div className="flex justify-between items-center mb-2">
-                                                    <label className="flex items-center text-sm font-bold text-slate-700">
-                                                        Retirement Age <Tooltip text="65 is standard. 60 is min (-36%). 70 is max (+42%)." />
-                                                    </label>
-                                                    <span className="bg-indigo-100 text-indigo-700 text-xs font-bold px-2 py-1 rounded-md">{retirementAge}</span>
+                                                    <label className="flex items-center text-sm font-bold text-slate-700">Target Retirement Age</label>
+                                                    <span className="bg-indigo-100 text-indigo-700 text-xs font-bold px-2 py-1 rounded-md">Age {retirementAge}</span>
                                                 </div>
                                                 <input type="range" min="60" max="70" step="1" value={retirementAge} onChange={(e) => setRetirementAge(parseInt(e.target.value))} className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600" />
                                                 <div className="flex justify-between text-xs text-slate-400 mt-2 font-medium"><span>60</span><span>65</span><span>70</span></div>
                                             </div>
                                         </div>
+
+                                        {/* FAMILY SITUATION (PROGRESSIVE DISCLOSURE) */}
+                                        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                                            <label className="flex items-center gap-3 p-3 border rounded-xl cursor-pointer hover:bg-slate-50 transition">
+                                                <input type="checkbox" checked={isMarried} onChange={(e) => setIsMarried(e.target.checked)} className="w-5 h-5 text-indigo-600 rounded focus:ring-indigo-500" />
+                                                <div className="flex-1">
+                                                    <span className="font-bold text-slate-700 block text-sm">I have a Spouse / Common-law Partner</span>
+                                                    <span className="text-xs text-slate-500">Unlocks combined GIS estimates.</span>
+                                                </div>
+                                            </label>
+
+                                            {isMarried && (
+                                                <div className="animate-fade-in space-y-4 pl-4 border-l-2 border-indigo-100 ml-2">
+                                                    <div>
+                                                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wide">Spouse Date of Birth</label>
+                                                        <input type="date" value={spouseDob} onChange={(e) => setSpouseDob(e.target.value)} className="w-full mt-1 p-2 bg-slate-50 border border-slate-200 rounded-lg text-sm" />
+                                                    </div>
+                                                    <div>
+                                                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wide">Spouse Annual Income</label>
+                                                        <div className="relative mt-1">
+                                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">$</span>
+                                                            <input type="number" value={spouseIncome} onChange={(e) => setSpouseIncome(e.target.value)} className="w-full pl-7 p-2 bg-slate-50 border border-slate-200 rounded-lg text-sm" placeholder="0" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            <label className="flex items-center gap-3 p-3 border rounded-xl cursor-pointer hover:bg-slate-50 transition">
+                                                <input type="checkbox" checked={showChildren} onChange={(e) => setShowChildren(e.target.checked)} className="w-5 h-5 text-indigo-600 rounded focus:ring-indigo-500" />
+                                                <div className="flex-1">
+                                                    <span className="font-bold text-slate-700 block text-sm">I raised children (Child-Rearing Provision)</span>
+                                                    <span className="text-xs text-slate-500">Can drop low-earning years from your average.</span>
+                                                </div>
+                                            </label>
+
+                                            {showChildren && (
+                                                <div className="animate-fade-in space-y-3 pl-4 border-l-2 border-indigo-100 ml-2">
+                                                    {children.map((childYear, index) => (
+                                                        <div key={index} className="flex items-center gap-2">
+                                                            <span className="text-xs text-slate-500 font-bold w-12">Child {index + 1}</span>
+                                                            <input type="number" value={childYear} onChange={(e) => { const newC = [...children]; newC[index] = parseInt(e.target.value)||0; setChildren(newC); }} className="flex-1 p-2 bg-slate-50 border border-slate-200 rounded-lg text-sm" placeholder="Birth Year" />
+                                                            <button onClick={() => setChildren(children.filter((_, i) => i !== index))} className="text-rose-400 hover:text-rose-600"><XIcon size={16}/></button>
+                                                        </div>
+                                                    ))}
+                                                    <button onClick={() => setChildren([...children, 2010])} className="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1">+ Add Child</button>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
 
-                                    {/* COLUMN 2: FINANCIAL */}
+                                    {/* COLUMN 2: FINANCIAL & RESIDENCY */}
                                     <div className="space-y-6">
                                         <div className="flex items-center gap-2 text-emerald-600 mb-2">
                                             <DollarSignIcon size={20} />
-                                            <h3 className="text-xs font-bold uppercase tracking-wider">Financial Profile</h3>
+                                            <h3 className="text-xs font-bold uppercase tracking-wider">Financial & Residency</h3>
                                         </div>
-                                        <div className="bg-slate-50 p-5 rounded-2xl border border-slate-100 space-y-5">
+                                        
+                                        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-5">
+                                            {/* RESIDENCY TOGGLE */}
+                                            <label className="flex items-center justify-between cursor-pointer">
+                                                <span className="text-sm font-bold text-slate-700">Lived in Canada from age 18 to 65?</span>
+                                                <div className={`w-12 h-6 flex items-center rounded-full p-1 transition-colors ${livedInCanadaAllLife ? 'bg-emerald-500' : 'bg-slate-300'}`}>
+                                                    <input type="checkbox" checked={livedInCanadaAllLife} onChange={(e) => setLivedInCanadaAllLife(e.target.checked)} className="hidden" />
+                                                    <div className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform ${livedInCanadaAllLife ? 'translate-x-6' : ''}`}></div>
+                                                </div>
+                                            </label>
+
+                                            {!livedInCanadaAllLife && (
+                                                <div className="animate-fade-in">
+                                                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Years in Canada between age 18 to 65 (Adult)</label>
+                                                    <input type="number" min="0" max="47" value={yearsInCanada} onChange={(e) => setYearsInCanada(parseInt(e.target.value) || 0)} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl" />
+                                                    <p className="text-[10px] text-slate-400 mt-1">40 years required for full OAS.</p>
+                                                </div>
+                                            )}
+
+                                            {/* OTHER INCOME */}
                                             <div>
                                                 <label className="flex items-center text-sm font-bold text-slate-700 mb-2">
-                                                    Years in Canada (18-65) <Tooltip text="40 years required for full OAS." />
-                                                </label>
-                                                <input type="number" min="0" max="47" value={yearsInCanada} onChange={(e) => setYearsInCanada(parseInt(e.target.value) || 0)} className="w-full p-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all shadow-sm" />
-                                            </div>
-                                            <div>
-                                                <label className="flex items-center text-sm font-bold text-slate-700 mb-2">
-                                                    Other Retirement Income <Tooltip text="Pension, RRSP, etc. Triggers OAS Clawback." />
+                                                    Annual Taxable Pension Income
+                                                    <Tooltip text="Used for OAS Clawback & GIS. Include Company Pensions, RRSP/RRIF. Exclude TFSA/OAS." />
                                                 </label>
                                                 <div className="relative">
                                                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">$</span>
-                                                    <input type="number" placeholder="0" value={otherIncome} onChange={(e) => setOtherIncome(e.target.value)} className="w-full pl-7 p-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all shadow-sm" />
+                                                    <input type="number" placeholder="0" value={otherIncome} onChange={(e) => setOtherIncome(e.target.value)} className="w-full pl-7 p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all" />
                                                 </div>
-                                                <p className="text-xs text-slate-400 mt-2 ml-1">Required for accurate GIS/Clawback results.</p>
+                                                <p className="text-xs text-slate-400 mt-2">Exclude TFSA withdrawals and OAS.</p>
                                             </div>
                                         </div>
                                     </div>
@@ -492,102 +453,133 @@ export default function Calculator() {
 
                                 <div className="border-t border-slate-100 my-8"></div>
 
-                                {/* EARNINGS GRID */}
+                                {/* EARNINGS SECTION */}
                                 <div>
                                     <div className="flex flex-col gap-6 mb-6">
                                         <div className="flex items-center gap-2 text-slate-700">
                                             <TrendingUpIcon size={20} />
                                             <h3 className="text-sm font-bold uppercase tracking-wider">Earnings History</h3>
                                         </div>
+
+                                        {/* DATA SOURCE SELECTOR (Empty State) */}
+                                        {!hasEarnings && (
+                                            <div className="grid md:grid-cols-2 gap-4">
+                                                <div className="bg-indigo-50/50 border border-indigo-100 p-6 rounded-2xl hover:border-indigo-300 transition-all cursor-pointer group" onClick={() => document.getElementById('salary-input').focus()}>
+                                                    <div className="bg-white w-10 h-10 rounded-full flex items-center justify-center shadow-sm mb-3 group-hover:scale-110 transition-transform"><WandIcon className="text-indigo-500" size={20}/></div>
+                                                    <h4 className="font-bold text-slate-800">Quick Estimate</h4>
+                                                    <p className="text-xs text-slate-500 mt-1">I'll enter my current salary. We'll project it backward and forward.</p>
+                                                </div>
+                                                <div className="bg-emerald-50/50 border border-emerald-100 p-6 rounded-2xl hover:border-emerald-300 transition-all cursor-pointer group" onClick={() => setShowImport(true)}>
+                                                    <div className="bg-white w-10 h-10 rounded-full flex items-center justify-center shadow-sm mb-3 group-hover:scale-110 transition-transform"><UploadIcon className="text-emerald-500" size={20}/></div>
+                                                    <h4 className="font-bold text-slate-800">Import Data</h4>
+                                                    <p className="text-xs text-slate-500 mt-1">I have my Statement of Contributions from Service Canada.</p>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* TOOLBAR */}
                                         <div className="bg-slate-50 border border-slate-200 p-4 rounded-xl flex flex-wrap gap-4 items-end">
                                             <div className="flex-1 min-w-[240px]">
-                                                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Quick Fill: Estimate from Salary <Tooltip text="Only fills future or empty years. Does not overwrite imported data." /></label>
+                                                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Estimate from Salary</label>
                                                 <div className="flex gap-2">
                                                     <div className="relative w-full">
                                                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">$</span>
-                                                        <input type="number" placeholder="65000" value={avgSalaryInput} onChange={(e) => setAvgSalaryInput(e.target.value)} className="w-full pl-7 p-2.5 bg-white border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none" />
+                                                        <input id="salary-input" type="number" placeholder="65000" value={avgSalaryInput} onChange={(e) => setAvgSalaryInput(e.target.value)} className="w-full pl-7 p-2.5 bg-white border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none" />
                                                     </div>
-                                                    <button onClick={applyAverageSalary} className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-lg text-sm font-bold flex items-center gap-1 transition-all shadow-sm whitespace-nowrap"><WandIcon size={16} /> Fill Future</button>
+                                                    <button onClick={applyAverageSalary} className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-lg text-sm font-bold flex items-center gap-1 transition-all shadow-sm whitespace-nowrap"><WandIcon size={16} /> {hasEarnings ? "Fill Future" : "Generate All"}</button>
                                                 </div>
                                             </div>
                                             <div className="w-px bg-slate-200 self-stretch mx-2 hidden md:block"></div>
                                             <div className="flex-1 min-w-[180px]">
-                                                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Bulk Import</label>
-                                                <button onClick={() => setShowImport(true)} className="w-full bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-lg text-sm font-bold flex items-center justify-center gap-2 transition-all shadow-sm"><FileTextIcon size={16} /> Import from MSCA</button>
+                                                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Actions</label>
+                                                <div className="flex gap-2">
+                                                    <button onClick={() => setShowImport(true)} className="flex-1 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 px-3 py-2.5 rounded-lg text-sm font-bold flex items-center justify-center gap-2 transition-all"><FileTextIcon size={16} /> Import</button>
+                                                    <button onClick={() => setEarnings({})} className="px-3 py-2.5 text-rose-500 hover:bg-rose-50 rounded-lg border border-transparent hover:border-rose-200 transition"><RotateCcwIcon size={16} /></button>
+                                                </div>
                                             </div>
-                                            <button onClick={() => setEarnings({})} className="text-xs font-bold text-rose-500 hover:bg-rose-50 hover:text-rose-700 px-4 py-2.5 rounded-lg border border-transparent hover:border-rose-200 transition flex items-center gap-1 self-end ml-auto"><RotateCcwIcon size={14} /> Reset</button>
                                         </div>
                                     </div>
 
-                                    <div className="flex flex-wrap gap-4 text-xs font-medium text-slate-500 mb-3 px-1">
-                                        <div className="flex items-center gap-2">
-                                            <div className="w-3 h-3 rounded border border-slate-300 bg-white"></div>
-                                            <span>Tier 1 (Base)</span>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <div className="w-3 h-3 rounded border border-purple-400 bg-purple-50"></div>
-                                            <span>Tier 2 (Enhanced)</span>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <div className="w-3 h-3 rounded border border-emerald-500 bg-emerald-100"></div>
-                                            <span>Maxed Out</span>
-                                        </div>
-                                    </div>
-
-                                    <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
-                                        <div className="flex items-center justify-between bg-slate-50/80 backdrop-blur p-3 border-b border-slate-200">
-                                            <div className="grid grid-cols-12 w-full text-xs font-bold text-slate-500 uppercase tracking-wider">
-                                                <div className="col-span-2">Year</div>
-                                                <div className="hidden sm:block col-span-2">Age</div>
-                                                <div className="hidden sm:block col-span-3 text-right pr-6">YMPE</div>
-                                                <div className="col-span-10 sm:col-span-5">Earnings</div>
+                                    {/* GRID (Visible only if data exists or user wants to see it) */}
+                                    {hasEarnings && (
+                                        <div className="animate-fade-in">
+                                            <div className="flex flex-wrap gap-4 text-xs font-medium text-slate-500 mb-3 px-1">
+                                                <div className="flex items-center gap-2"><div className="w-3 h-3 rounded border border-slate-300 bg-white"></div><span>Tier 1 (Base)</span></div>
+                                                <div className="flex items-center gap-2"><div className="w-3 h-3 rounded border border-purple-400 bg-purple-50"></div><span>Tier 2 (Enhanced)</span></div>
+                                                <div className="flex items-center gap-2"><div className="w-3 h-3 rounded border border-emerald-500 bg-emerald-100"></div><span>Maxed Out</span></div>
                                             </div>
-                                            <button onClick={() => setCompactGrid(!compactGrid)} className={`ml-2 p-1.5 rounded hover:bg-slate-200 transition ${compactGrid ? 'text-indigo-600 bg-indigo-50' : 'text-slate-400'}`} title={compactGrid ? "Show all years" : "Hide empty past years"}><FilterIcon size={16} /></button>
-                                        </div>
-                                        
-                                        <div className="max-h-[350px] overflow-y-auto scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
-                                            {results.years
-                                                .filter(year => {
-                                                    if (!compactGrid) return true;
-                                                    return year >= CURRENT_YEAR || (earnings[year] && earnings[year] > 0);
-                                                })
-                                                .map(year => {
-                                                    const isFuture = year > CURRENT_YEAR;
-                                                    const ympe = getYMPE(year);
-                                                    const yampe = getYAMPE(year);
-                                                    const maxVal = yampe > 0 ? yampe : ympe;
-                                                    const val = earnings[year] || '';
-                                                    const valNum = parseFloat(val) || 0;
-                                                    const isMax = valNum >= maxVal && val !== '';
-                                                    let status = 'base';
-                                                    if (isMax) status = 'max';
-                                                    else if (yampe > 0 && valNum > ympe) status = 'tier2';
 
-                                                    let rowBg = isFuture ? 'bg-slate-50/50' : '';
-                                                    let inputClass = "border-slate-200 focus:border-indigo-500 focus:ring-indigo-500"; 
-                                                    if (status === 'tier2') { rowBg = "bg-purple-50/20"; inputClass = "border-purple-300 bg-purple-50 text-purple-700 focus:border-purple-500 focus:ring-purple-500"; }
-                                                    if (status === 'max') { rowBg = "bg-emerald-50/20"; inputClass = "border-emerald-300 bg-emerald-50 text-emerald-700 font-bold focus:border-emerald-500 focus:ring-emerald-500"; }
+                                            <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                                                <div className="flex items-center justify-between bg-slate-50/80 backdrop-blur p-3 border-b border-slate-200">
+                                                    <div className="grid grid-cols-12 w-full text-xs font-bold text-slate-500 uppercase tracking-wider">
+                                                        <div className="col-span-2">Year</div>
+                                                        <div className="hidden md:block col-span-2">Age</div>
+                                                        <div className="hidden md:block col-span-3 text-right pr-6">YMPE</div>
+                                                        <div className="col-span-10 md:col-span-5">Earnings</div>
+                                                    </div>
+                                                    <button onClick={() => setCompactGrid(!compactGrid)} className={`ml-2 p-1.5 rounded hover:bg-slate-200 transition ${compactGrid ? 'text-indigo-600 bg-indigo-50' : 'text-slate-400'}`} title={compactGrid ? "Show all years" : "Hide empty past years"}><FilterIcon size={16} /></button>
+                                                </div>
+                                                
+                                                <div className="max-h-[350px] overflow-y-auto scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
+                                                    {results.years
+                                                        .filter(year => !compactGrid || year >= CURRENT_YEAR || (earnings[year] && earnings[year] > 0))
+                                                        .map(year => {
+                                                            const isFuture = year > CURRENT_YEAR;
+                                                            const ympe = getYMPE(year);
+                                                            const yampe = getYAMPE(year);
+                                                            const maxVal = yampe > 0 ? yampe : ympe;
+                                                            const val = earnings[year] || '';
+                                                            const valNum = parseFloat(val) || 0;
+                                                            const isMax = valNum >= maxVal && val !== '';
+                                                            let status = 'base';
+                                                            if (isMax) status = 'max';
+                                                            else if (yampe > 0 && valNum > ympe) status = 'tier2';
 
-                                                    return (
-                                                        <div key={year} className={`grid grid-cols-12 p-2 border-b border-slate-50 last:border-0 items-center hover:bg-slate-50 transition group ${rowBg}`}>
-                                                            <div className="col-span-2 text-sm font-semibold text-slate-700">{year}</div>
-                                                            <div className="hidden sm:block col-span-2 text-sm text-slate-400 group-hover:text-slate-600">{year - birthYear}</div>
-                                                            <div className="hidden sm:block col-span-3 text-right pr-6 text-sm text-slate-400 font-mono">
-                                                                ${ympe.toLocaleString()}
-                                                                {yampe > 0 && <div className="text-[10px] text-purple-400 leading-none mt-0.5">Tier 2: ${yampe.toLocaleString()}</div>}
-                                                            </div>
-                                                            <div className="col-span-10 sm:col-span-5 flex items-center gap-2">
-                                                                <div className="relative flex-1">
-                                                                    <span className={`absolute left-2.5 top-1/2 -translate-y-1/2 text-xs ${status === 'max' ? 'text-emerald-500' : 'text-slate-400'}`}>$</span>
-                                                                    <input type="number" value={val} onChange={(e) => handleEarningChange(year, e.target.value)} className={`w-full pl-6 pr-2 py-1.5 text-sm border rounded-lg outline-none transition-all ${inputClass}`} placeholder="0" />
+                                                            let rowBg = isFuture ? 'bg-slate-50/50' : '';
+                                                            let inputClass = "border-slate-200 focus:border-indigo-500 focus:ring-indigo-500"; 
+                                                            if (status === 'tier2') { rowBg = "bg-purple-50/20"; inputClass = "border-purple-300 bg-purple-50 text-purple-700 focus:border-purple-500 focus:ring-purple-500"; }
+                                                            if (status === 'max') { rowBg = "bg-emerald-50/20"; inputClass = "border-emerald-300 bg-emerald-50 text-emerald-700 font-bold focus:border-emerald-500 focus:ring-emerald-500"; }
+
+                                                            return (
+                                                                <div key={year} className={`p-2 border-b border-slate-50 last:border-0 hover:bg-slate-50 transition group ${rowBg}`}>
+                                                                    {/* DESKTOP ROW */}
+                                                                    <div className="hidden md:grid grid-cols-12 items-center">
+                                                                        <div className="col-span-2 text-sm font-semibold text-slate-700">{year}</div>
+                                                                        <div className="col-span-2 text-sm text-slate-400 group-hover:text-slate-600">{year - birthYear}</div>
+                                                                        <div className="col-span-3 text-right pr-6 text-sm text-slate-400 font-mono">
+                                                                            ${ympe.toLocaleString()}
+                                                                            {yampe > 0 && <div className="text-[10px] text-purple-400 leading-none mt-0.5">Tier 2: ${yampe.toLocaleString()}</div>}
+                                                                        </div>
+                                                                        <div className="col-span-5 flex items-center gap-2">
+                                                                            <div className="relative flex-1">
+                                                                                <span className={`absolute left-2.5 top-1/2 -translate-y-1/2 text-xs ${status === 'max' ? 'text-emerald-500' : 'text-slate-400'}`}>$</span>
+                                                                                <input type="number" value={val} onChange={(e) => handleEarningChange(year, e.target.value)} className={`w-full pl-6 pr-2 py-1.5 text-sm border rounded-lg outline-none transition-all ${inputClass}`} placeholder="0" />
+                                                                            </div>
+                                                                            <button onClick={() => toggleMax(year, isMax)} className={`px-2 py-1 text-[10px] font-bold rounded-md border transition-all uppercase tracking-wide ${isMax ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-400 border-slate-200 hover:bg-slate-200'}`}>Max</button>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    {/* MOBILE ROW (Flexible Stack) */}
+                                                                    <div className="flex md:hidden justify-between items-center">
+                                                                        <div>
+                                                                            <div className="font-bold text-slate-700 text-sm">{year} <span className="text-xs font-normal text-slate-400 ml-1">(Age {year - birthYear})</span></div>
+                                                                            <div className="text-[10px] text-slate-400 mt-0.5">Max: ${ympe.toLocaleString()}</div>
+                                                                        </div>
+                                                                        <div className="flex items-center gap-2">
+                                                                            <div className="relative w-32">
+                                                                                <span className={`absolute left-2 top-1/2 -translate-y-1/2 text-xs ${status === 'max' ? 'text-emerald-500' : 'text-slate-400'}`}>$</span>
+                                                                                <input type="number" value={val} onChange={(e) => handleEarningChange(year, e.target.value)} className={`w-full pl-5 pr-2 py-1.5 text-sm border rounded-lg outline-none ${inputClass}`} />
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
                                                                 </div>
-                                                                <button onClick={() => toggleMax(year, isMax)} className={`px-2 py-1 text-[10px] font-bold rounded-md border transition-all uppercase tracking-wide ${isMax ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-400 border-slate-200 hover:bg-slate-200'}`}>Max</button>
-                                                            </div>
-                                                        </div>
-                                                    );
-                                                })}
+                                                            );
+                                                        })}
+                                                </div>
+                                            </div>
                                         </div>
-                                    </div>
+                                    )}
+
                                     <div className="mt-8 flex justify-center pb-4">
                                         <button onClick={() => setActiveTab('results')} className="bg-slate-900 hover:bg-slate-800 text-white text-lg font-bold py-4 px-10 rounded-2xl shadow-xl shadow-slate-900/20 transform transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center gap-3">Calculate Estimate <ArrowRightIcon size={20} /></button>
                                     </div>
@@ -598,6 +590,17 @@ export default function Calculator() {
                         {activeTab === 'results' && (
                             <div className="space-y-8 animate-fade-in">
                                 
+                                {/* WARNING IF NO EARNINGS */}
+                                {!hasEarnings && (
+                                    <div className="bg-amber-50 border-l-4 border-amber-400 p-4 rounded-r-xl flex items-start gap-3">
+                                        <InfoIcon className="text-amber-500 mt-0.5" />
+                                        <div>
+                                            <h4 className="font-bold text-amber-900 text-sm">Missing Earnings Data</h4>
+                                            <p className="text-amber-800 text-sm mt-1">Your CPP estimate is $0 because no earnings history was entered. <button onClick={() => setActiveTab('input')} className="underline font-bold hover:text-amber-950">Go back to Inputs</button> to add your salary or import data.</p>
+                                        </div>
+                                    </div>
+                                )}
+
                                 {/* HERO CARD with COMPARE BUTTON */}
                                 <div className="bg-slate-900 rounded-2xl shadow-2xl p-8 text-white relative overflow-hidden isolate transition-all duration-500">
                                     <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-indigo-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20"></div>
@@ -659,7 +662,6 @@ export default function Calculator() {
                                                     </button>
                                                 ) : (
                                                     <div className="space-y-2">
-                                                        {/* INSTRUCTIONAL BADGE */}
                                                         {comparisonSnapshot.age === retirementAge && (
                                                             <div className="text-center text-xs text-emerald-300 font-bold bg-emerald-500/10 py-1.5 rounded animate-pulse border border-emerald-500/20">
                                                                 Snapshot saved! Now move the slider above.
@@ -868,6 +870,8 @@ export default function Calculator() {
                     <Accordion title="Government Sources" icon={ExternalLinkIcon}>
                          <ul className="text-sm space-y-2 text-indigo-600 pl-4 font-medium">
                             <li><a href="https://www.canada.ca/en/services/benefits/publicpensions/cpp/payment-amounts.html" target="_blank" className="hover:underline flex items-center gap-1">CPP Payment Amounts <ExternalLinkIcon size={12} /></a></li>
+                            <li><a href="https://www.canada.ca/en/services/benefits/publicpensions/old-age-security/payments.html" target="_blank" className="hover:underline flex items-center gap-1">OAS Payments & Thresholds <ExternalLinkIcon size={12} /></a></li>
+                            <li><a href="https://www.canada.ca/en/employment-social-development/services/my-account.html" target="_blank" className="hover:underline flex items-center gap-1">My Service Canada Account (MSCA) <ExternalLinkIcon size={12} /></a></li> 
                         </ul>
                     </Accordion>
                 </div>
