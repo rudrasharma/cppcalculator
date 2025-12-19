@@ -1,6 +1,7 @@
 ---
 // src/pages/index.astro
 import CalculatorSuite from '../components/CalculatorSuite';
+import '../styles/global.css';
 ---
 
 <html lang="en">
@@ -10,12 +11,22 @@ import CalculatorSuite from '../components/CalculatorSuite';
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width" />
     <title>LoonieSense | Canadian Financial Calculators (CPP, CCB, Parental Leave)</title>
-    <meta name="description" content="Free calculators for Canada Pension Plan (CPP), Child Benefits (CCB), and Maternity/Parental Leave planning." />  </head>
+    <meta name="description" content="Free calculators for Canada Pension Plan (CPP), Child Benefits (CCB), and Maternity/Parental Leave planning." />  
+  </head>
   <body class="bg-gray-50 text-gray-800 font-sans min-h-screen flex flex-col">
     
+    {/* 1. WE USE CALCULATOR SUITE HERE 
+      This component contains the "LoonieSense" header and the logic 
+      to swap between CPP, CCB, and Parental Leave views.
+    */}
     <CalculatorSuite client:load />
 
-    <footer class="bg-white border-t border-gray-200 mt-auto">
+    {/* 2. GLOBAL FOOTER 
+      Kept the 'pb-32' and inline padding-bottom style.
+      This ensures your Floating Estimate Bar (in the CPP Calculator) 
+      doesn't cover these links.
+    */}
+    <footer class="bg-white border-t border-gray-200 mt-auto pb-32" style="padding-bottom: 140px;">
       <div class="max-w-5xl mx-auto px-6 py-8 text-center">
         
         <div class="flex justify-center items-center gap-4 sm:gap-6 mb-4 font-medium text-sm">

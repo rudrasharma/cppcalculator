@@ -1,5 +1,6 @@
 // src/components/Calculator.jsx
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { 
     LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, 
     Legend, ResponsiveContainer, ReferenceLine 
@@ -10,7 +11,8 @@ import {
     ArrowRightIcon, ExternalLinkIcon, XIcon, UserGroupIcon, 
     ChevronDownIcon, LightbulbIcon, HeartHandshakeIcon, WandIcon, 
     BarChartIcon, MousePointerIcon, LinkIcon, FileTextIcon, 
-    UploadIcon, FilterIcon, CheckCircleIcon, InfoIcon, ScaleIcon 
+    UploadIcon, FilterIcon, CheckCircleIcon, InfoIcon, ScaleIcon
+    // REMOVED PieChartIcon to prevent crash
 } from './Icons'; 
 import { CURRENT_YEAR, getYMPE, getYAMPE } from '../utils/constants';
 import { useRetirementMath } from '../hooks/useRetirementMath';
@@ -58,15 +60,21 @@ export default function Calculator() {
     const [yearsInCanada, setYearsInCanada] = useState(40);
     const [earnings, setEarnings] = useState({});
     const [activeTab, setActiveTab] = useState('input');
+    const [mounted, setMounted] = useState(false); 
 
     // --- 2. INPUT STATE & TOGGLES ---
     const [avgSalaryInput, setAvgSalaryInput] = useState('');
     const [otherIncome, setOtherIncome] = useState(''); 
     
-    // UX Toggles (Progressive Disclosure)
+    // UX Toggles
     const [livedInCanadaAllLife, setLivedInCanadaAllLife] = useState(true); 
     const [isMarried, setIsMarried] = useState(false);
     const [showChildren, setShowChildren] = useState(false);
+    
+    // Feature: Grid & Tax
+    const [showGrid, setShowGrid] = useState(false);
+    const [showNet, setShowNet] = useState(false);
+    const TAX_RATE = 0.15; 
 
     // Spouse Data
     const [spouseDob, setSpouseDob] = useState('1985-01-01');
@@ -98,16 +106,9 @@ export default function Calculator() {
     });
 
     // --- 6. HANDLERS ---
-    
-    // Auto-calculate Years in Canada based on toggle
-    useEffect(() => {
-        if (livedInCanadaAllLife) setYearsInCanada(40);
-    }, [livedInCanadaAllLife]);
-
-    // Reset Children if toggle off
-    useEffect(() => {
-        if (!showChildren) setChildren([]);
-    }, [showChildren]);
+    useEffect(() => { setMounted(true); }, []);
+    useEffect(() => { if (livedInCanadaAllLife) setYearsInCanada(40); }, [livedInCanadaAllLife]);
+    useEffect(() => { if (!showChildren) setChildren([]); }, [showChildren]);
 
     // Load from URL
     useEffect(() => {
@@ -115,23 +116,18 @@ export default function Calculator() {
         if (params.toString()) {
             if (params.get('d')) setDob(params.get('d').replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3'));
             if (params.get('r')) setRetirementAge(parseInt(params.get('r')));
-            
-            // Check Residency logic
             const yic = params.get('y');
             if (yic) {
                 const yicVal = parseInt(yic);
                 setYearsInCanada(yicVal);
                 if (yicVal < 40) setLivedInCanadaAllLife(false);
             }
-
             if (params.get('s')) setAvgSalaryInput(parseInt(params.get('s'), 36).toString());
             if (params.get('o')) setOtherIncome(parseInt(params.get('o'), 36).toString());
-            
             if (params.get('m') === '1') setIsMarried(true);
             if (params.get('sd')) setSpouseDob(params.get('sd').replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3'));
             if (params.get('si')) setSpouseIncome(parseInt(params.get('si'), 36).toString());
             if (params.get('fa') === '1') setForceAllowance(true);
-
             const earningsStr = params.get('e');
             const dobParam = params.get('d');
             if (earningsStr && dobParam) {
@@ -156,7 +152,6 @@ export default function Calculator() {
         }
         const compressedEarn = compressEarnings(earnings, birthYear);
         if (compressedEarn) params.set('e', compressedEarn);
-
         const url = `${window.location.origin}${window.location.pathname}?${params.toString()}`;
         navigator.clipboard.writeText(url).then(() => {
             setCopySuccess(true);
@@ -243,15 +238,26 @@ export default function Calculator() {
 
     // --- 8. RENDER HELPERS ---
     const inflationFactor = useFutureDollars ? Math.pow(1.025, retirementAge - (CURRENT_YEAR - birthYear)) : 1;
-    const displayTotal = results.grandTotal * inflationFactor;
-    const displayCPP = results.cpp.total * inflationFactor;
-    const displayOAS = results.oas.total * inflationFactor;
-    const displayGIS = results.gis.total * inflationFactor;
+    const taxFactor = showNet ? (1 - TAX_RATE) : 1; 
+    
+    const displayTotal = results.grandTotal * inflationFactor * taxFactor;
+    const displayCPP = results.cpp.total * inflationFactor * taxFactor;
+    const displayOAS = results.oas.total * inflationFactor * taxFactor;
+    const displayGIS = results.gis.total * inflationFactor * taxFactor;
+
+    // Percentages for Composition Bar
+    const totalRaw = displayTotal || 1; 
+    const cppPerc = (displayCPP / totalRaw) * 100;
+    const oasPerc = (displayOAS / totalRaw) * 100;
+    const gisPerc = (displayGIS / totalRaw) * 100;
 
     const hasEarnings = Object.keys(earnings).length > 0;
 
     return (
-        <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-indigo-100 selection:text-indigo-700 pb-24">
+        <div 
+            className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-indigo-100 selection:text-indigo-700"
+            style={{ paddingBottom: activeTab === 'input' ? '200px' : '60px' }}
+        > 
             
             {/* ABOUT MODAL */}
             {showAbout && (
@@ -299,28 +305,6 @@ export default function Calculator() {
                 </div>
             )}
 
-            {/* HEADER */}
-            <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-30 px-6 py-4">
-                <div className="max-w-5xl mx-auto flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <div className="bg-gradient-to-tr from-indigo-600 to-violet-600 text-white p-2 rounded-lg shadow-lg shadow-indigo-500/30">
-                            <CalculatorIcon size={24} />
-                        </div>
-                        <div>
-                            <h1 className="text-xl font-bold tracking-tight text-slate-900">CPP & OAS Estimator</h1>
-                            <div className="text-xs font-medium text-slate-500 tracking-wide uppercase">2025 Ruleset</div>
-                        </div>
-                    </div>
-                    <div className="flex gap-4 items-center">
-                        <button onClick={copyLink} className="text-sm font-bold text-indigo-600 hover:bg-indigo-50 px-3 py-2 rounded-lg transition-all flex items-center gap-2 border border-transparent hover:border-indigo-100">
-                            {copySuccess ? <CheckIcon size={16} /> : <LinkIcon size={16} />}
-                            {copySuccess ? "Copied!" : "Copy Link"}
-                        </button>
-                        <button onClick={() => setShowAbout(true)} className="text-sm font-medium text-slate-500 hover:text-indigo-600 transition-colors hidden sm:block">About</button>
-                    </div>
-                </div>
-            </header>
-
             {/* MAIN CONTENT */}
             <main className="max-w-5xl mx-auto p-4 md:p-8 w-full">
                 <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-200 overflow-hidden mb-12">
@@ -361,7 +345,7 @@ export default function Calculator() {
                                             </div>
                                         </div>
 
-                                        {/* FAMILY SITUATION (PROGRESSIVE DISCLOSURE) */}
+                                        {/* FAMILY SITUATION */}
                                         <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
                                             <label className="flex items-center gap-3 p-3 border rounded-xl cursor-pointer hover:bg-slate-50 transition">
                                                 <input type="checkbox" checked={isMarried} onChange={(e) => setIsMarried(e.target.checked)} className="w-5 h-5 text-indigo-600 rounded focus:ring-indigo-500" />
@@ -503,87 +487,93 @@ export default function Calculator() {
                                         </div>
                                     </div>
 
-                                    {/* GRID (Visible only if data exists or user wants to see it) */}
+                                    {/* GRID (COLLAPSED BY DEFAULT) */}
                                     {hasEarnings && (
-                                        <div className="animate-fade-in">
-                                            <div className="flex flex-wrap gap-4 text-xs font-medium text-slate-500 mb-3 px-1">
-                                                <div className="flex items-center gap-2"><div className="w-3 h-3 rounded border border-slate-300 bg-white"></div><span>Tier 1 (Base)</span></div>
-                                                <div className="flex items-center gap-2"><div className="w-3 h-3 rounded border border-purple-400 bg-purple-50"></div><span>Tier 2 (Enhanced)</span></div>
-                                                <div className="flex items-center gap-2"><div className="w-3 h-3 rounded border border-emerald-500 bg-emerald-100"></div><span>Maxed Out</span></div>
+                                        <div className="animate-fade-in bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                                            {/* HEADER / TOGGLE */}
+                                            <div 
+                                                className="flex items-center justify-between p-4 bg-slate-50/80 backdrop-blur border-b border-slate-200 cursor-pointer hover:bg-slate-100 transition select-none"
+                                                onClick={() => setShowGrid(!showGrid)}
+                                            >
+                                                <div className="flex items-center gap-3">
+                                                    <div className="bg-white p-2 rounded border border-slate-200 text-slate-500"><BarChartIcon size={18}/></div>
+                                                    <div>
+                                                        <h4 className="font-bold text-slate-700 text-sm">Detailed Earnings History</h4>
+                                                        <p className="text-xs text-slate-500">Edit individual years or view max/base limits.</p>
+                                                    </div>
+                                                </div>
+                                                <div className={`text-indigo-600 font-bold text-sm flex items-center gap-2 transition-transform duration-300 ${showGrid ? '' : ''}`}>
+                                                    {showGrid ? 'Hide Grid' : 'Show / Edit All Years'}
+                                                    <ChevronDownIcon size={16} className={`transition-transform ${showGrid ? 'rotate-180' : ''}`}/>
+                                                </div>
                                             </div>
 
-                                            <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
-                                                <div className="flex items-center justify-between bg-slate-50/80 backdrop-blur p-3 border-b border-slate-200">
-                                                    <div className="grid grid-cols-12 w-full text-xs font-bold text-slate-500 uppercase tracking-wider">
+                                            {/* GRID CONTENT */}
+                                            {showGrid && (
+                                                <div className="max-h-[500px] overflow-y-auto scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent p-2">
+                                                    <div className="grid grid-cols-12 w-full text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 px-2">
                                                         <div className="col-span-2">Year</div>
                                                         <div className="hidden md:block col-span-2">Age</div>
                                                         <div className="hidden md:block col-span-3 text-right pr-6">YMPE</div>
                                                         <div className="col-span-10 md:col-span-5">Earnings</div>
                                                     </div>
-                                                    <button onClick={() => setCompactGrid(!compactGrid)} className={`ml-2 p-1.5 rounded hover:bg-slate-200 transition ${compactGrid ? 'text-indigo-600 bg-indigo-50' : 'text-slate-400'}`} title={compactGrid ? "Show all years" : "Hide empty past years"}><FilterIcon size={16} /></button>
-                                                </div>
-                                                
-                                                <div className="max-h-[350px] overflow-y-auto scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
-                                                    {results.years
-                                                        .filter(year => !compactGrid || year >= CURRENT_YEAR || (earnings[year] && earnings[year] > 0))
-                                                        .map(year => {
-                                                            const isFuture = year > CURRENT_YEAR;
-                                                            const ympe = getYMPE(year);
-                                                            const yampe = getYAMPE(year);
-                                                            const maxVal = yampe > 0 ? yampe : ympe;
-                                                            const val = earnings[year] || '';
-                                                            const valNum = parseFloat(val) || 0;
-                                                            const isMax = valNum >= maxVal && val !== '';
-                                                            let status = 'base';
-                                                            if (isMax) status = 'max';
-                                                            else if (yampe > 0 && valNum > ympe) status = 'tier2';
+                                                    
+                                                    {results.years.map(year => {
+                                                        const isFuture = year > CURRENT_YEAR;
+                                                        const ympe = getYMPE(year);
+                                                        const yampe = getYAMPE(year);
+                                                        const maxVal = yampe > 0 ? yampe : ympe;
+                                                        const val = earnings[year] || '';
+                                                        const valNum = parseFloat(val) || 0;
+                                                        const isMax = valNum >= maxVal && val !== '';
+                                                        let status = 'base';
+                                                        if (isMax) status = 'max';
+                                                        else if (yampe > 0 && valNum > ympe) status = 'tier2';
 
-                                                            let rowBg = isFuture ? 'bg-slate-50/50' : '';
-                                                            let inputClass = "border-slate-200 focus:border-indigo-500 focus:ring-indigo-500"; 
-                                                            if (status === 'tier2') { rowBg = "bg-purple-50/20"; inputClass = "border-purple-300 bg-purple-50 text-purple-700 focus:border-purple-500 focus:ring-purple-500"; }
-                                                            if (status === 'max') { rowBg = "bg-emerald-50/20"; inputClass = "border-emerald-300 bg-emerald-50 text-emerald-700 font-bold focus:border-emerald-500 focus:ring-emerald-500"; }
+                                                        let rowBg = isFuture ? 'bg-slate-50/50' : '';
+                                                        let inputClass = "border-slate-200 focus:border-indigo-500 focus:ring-indigo-500"; 
+                                                        if (status === 'tier2') { rowBg = "bg-purple-50/20"; inputClass = "border-purple-300 bg-purple-50 text-purple-700 focus:border-purple-500 focus:ring-purple-500"; }
+                                                        if (status === 'max') { rowBg = "bg-emerald-50/20"; inputClass = "border-emerald-300 bg-emerald-50 text-emerald-700 font-bold focus:border-emerald-500 focus:ring-emerald-500"; }
 
-                                                            return (
-                                                                <div key={year} className={`p-2 border-b border-slate-50 last:border-0 hover:bg-slate-50 transition group ${rowBg}`}>
-                                                                    {/* DESKTOP ROW */}
-                                                                    <div className="hidden md:grid grid-cols-12 items-center">
-                                                                        <div className="col-span-2 text-sm font-semibold text-slate-700">{year}</div>
-                                                                        <div className="col-span-2 text-sm text-slate-400 group-hover:text-slate-600">{year - birthYear}</div>
-                                                                        <div className="col-span-3 text-right pr-6 text-sm text-slate-400 font-mono">
-                                                                            ${ympe.toLocaleString()}
-                                                                            {yampe > 0 && <div className="text-[10px] text-purple-400 leading-none mt-0.5">Tier 2: ${yampe.toLocaleString()}</div>}
-                                                                        </div>
-                                                                        <div className="col-span-5 flex items-center gap-2">
-                                                                            <div className="relative flex-1">
-                                                                                <span className={`absolute left-2.5 top-1/2 -translate-y-1/2 text-xs ${status === 'max' ? 'text-emerald-500' : 'text-slate-400'}`}>$</span>
-                                                                                <input type="number" value={val} onChange={(e) => handleEarningChange(year, e.target.value)} className={`w-full pl-6 pr-2 py-1.5 text-sm border rounded-lg outline-none transition-all ${inputClass}`} placeholder="0" />
-                                                                            </div>
-                                                                            <button onClick={() => toggleMax(year, isMax)} className={`px-2 py-1 text-[10px] font-bold rounded-md border transition-all uppercase tracking-wide ${isMax ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-400 border-slate-200 hover:bg-slate-200'}`}>Max</button>
-                                                                        </div>
+                                                        return (
+                                                            <div key={year} className={`p-2 border-b border-slate-50 last:border-0 hover:bg-slate-50 transition group ${rowBg}`}>
+                                                                {/* DESKTOP ROW */}
+                                                                <div className="hidden md:grid grid-cols-12 items-center">
+                                                                    <div className="col-span-2 text-sm font-semibold text-slate-700">{year}</div>
+                                                                    <div className="col-span-2 text-sm text-slate-400 group-hover:text-slate-600">{year - birthYear}</div>
+                                                                    <div className="col-span-3 text-right pr-6 text-sm text-slate-400 font-mono">
+                                                                        ${ympe.toLocaleString()}
+                                                                        {yampe > 0 && <div className="text-[10px] text-purple-400 leading-none mt-0.5">Tier 2: ${yampe.toLocaleString()}</div>}
                                                                     </div>
-
-                                                                    {/* MOBILE ROW (Flexible Stack) */}
-                                                                    <div className="flex md:hidden justify-between items-center">
-                                                                        <div>
-                                                                            <div className="font-bold text-slate-700 text-sm">{year} <span className="text-xs font-normal text-slate-400 ml-1">(Age {year - birthYear})</span></div>
-                                                                            <div className="text-[10px] text-slate-400 mt-0.5">Max: ${ympe.toLocaleString()}</div>
+                                                                    <div className="col-span-5 flex items-center gap-2">
+                                                                        <div className="relative flex-1">
+                                                                            <span className={`absolute left-2.5 top-1/2 -translate-y-1/2 text-xs ${status === 'max' ? 'text-emerald-500' : 'text-slate-400'}`}>$</span>
+                                                                            <input type="number" value={val} onChange={(e) => handleEarningChange(year, e.target.value)} className={`w-full pl-6 pr-2 py-1.5 text-sm border rounded-lg outline-none transition-all ${inputClass}`} placeholder="0" />
                                                                         </div>
-                                                                        <div className="flex items-center gap-2">
-                                                                            <div className="relative w-32">
-                                                                                <span className={`absolute left-2 top-1/2 -translate-y-1/2 text-xs ${status === 'max' ? 'text-emerald-500' : 'text-slate-400'}`}>$</span>
-                                                                                <input type="number" value={val} onChange={(e) => handleEarningChange(year, e.target.value)} className={`w-full pl-5 pr-2 py-1.5 text-sm border rounded-lg outline-none ${inputClass}`} />
-                                                                            </div>
+                                                                        <button onClick={() => toggleMax(year, isMax)} className={`px-2 py-1 text-[10px] font-bold rounded-md border transition-all uppercase tracking-wide ${isMax ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-400 border-slate-200 hover:bg-slate-200'}`}>Max</button>
+                                                                    </div>
+                                                                </div>
+
+                                                                {/* MOBILE ROW */}
+                                                                <div className="flex md:hidden justify-between items-center">
+                                                                    <div>
+                                                                        <div className="font-bold text-slate-700 text-sm">{year} <span className="text-xs font-normal text-slate-400 ml-1">(Age {year - birthYear})</span></div>
+                                                                        <div className="text-[10px] text-slate-400 mt-0.5">Max: ${ympe.toLocaleString()}</div>
+                                                                    </div>
+                                                                    <div className="flex items-center gap-2">
+                                                                        <div className="relative w-32">
+                                                                            <span className={`absolute left-2 top-1/2 -translate-y-1/2 text-xs ${status === 'max' ? 'text-emerald-500' : 'text-slate-400'}`}>$</span>
+                                                                            <input type="number" value={val} onChange={(e) => handleEarningChange(year, e.target.value)} className={`w-full pl-5 pr-2 py-1.5 text-sm border rounded-lg outline-none ${inputClass}`} />
                                                                         </div>
                                                                     </div>
                                                                 </div>
-                                                            );
-                                                        })}
+                                                            </div>
+                                                        );
+                                                    })}
                                                 </div>
-                                            </div>
+                                            )}
                                         </div>
                                     )}
-
-                                    
                                 </div>
                             </div>
                         )}
@@ -602,7 +592,7 @@ export default function Calculator() {
                                     </div>
                                 )}
 
-                                {/* HERO CARD with COMPARE BUTTON */}
+                                {/* HERO CARD */}
                                 <div className="bg-slate-900 rounded-2xl shadow-2xl p-8 text-white relative overflow-hidden isolate transition-all duration-500">
                                     <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-indigo-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20"></div>
                                     <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-64 h-64 bg-emerald-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20"></div>
@@ -613,19 +603,43 @@ export default function Calculator() {
                                             <h2 className="text-slate-400 text-sm font-bold uppercase tracking-widest mb-1">Estimated Monthly Income</h2>
                                             <div className="flex items-baseline gap-1">
                                                 <span className="text-5xl md:text-6xl font-bold tracking-tight">
-                                                    ${displayTotal.toLocaleString('en-CA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                    ${displayTotal.toLocaleString('en-CA', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                                                 </span>
                                                 <span className="text-slate-400 text-lg">/ mo</span>
                                             </div>
                                             
-                                            {/* INFLATION TOGGLE */}
-                                            <div className="flex items-center gap-3 mt-4">
+                                            {/* VISUAL BREAKDOWN */}
+                                            {displayTotal > 0 && (
+                                                <div className="mt-4 mb-4">
+                                                    <div className="flex h-3 w-full rounded-full overflow-hidden bg-white/10">
+                                                        <div style={{ width: `${cppPerc}%` }} className="bg-indigo-500" />
+                                                        <div style={{ width: `${oasPerc}%` }} className="bg-amber-500" />
+                                                        <div style={{ width: `${gisPerc}%` }} className="bg-emerald-500" />
+                                                    </div>
+                                                    <div className="flex gap-4 mt-2 text-[10px] font-bold tracking-wide uppercase text-slate-400">
+                                                        <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-indigo-500"></div> CPP</div>
+                                                        <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-amber-500"></div> OAS</div>
+                                                        {gisPerc > 0 && <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-emerald-500"></div> GIS</div>}
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* TOGGLES */}
+                                            <div className="flex flex-wrap items-center gap-3 mt-4">
                                                 <button 
                                                     onClick={() => setUseFutureDollars(!useFutureDollars)} 
                                                     className={`px-3 py-1 text-xs font-bold rounded-full transition-all border ${useFutureDollars ? 'bg-indigo-500 border-indigo-400 text-white' : 'border-slate-600 text-slate-400 hover:text-white hover:border-slate-400'}`}
                                                 >
                                                     {useFutureDollars ? 'Future Dollars' : "Today's Dollars"}
                                                 </button>
+                                                
+                                                <label className="flex items-center gap-2 cursor-pointer group">
+                                                    <div className={`w-8 h-4 rounded-full p-0.5 transition-colors ${showNet ? 'bg-emerald-500' : 'bg-slate-700 group-hover:bg-slate-600'}`}>
+                                                        <div className={`w-3 h-3 bg-white rounded-full shadow-sm transform transition-transform ${showNet ? 'translate-x-4' : ''}`}></div>
+                                                    </div>
+                                                    <input type="checkbox" checked={showNet} onChange={e => setShowNet(e.target.checked)} className="hidden"/>
+                                                    <span className="text-xs font-bold text-slate-400 group-hover:text-white transition-colors">Show ~Net (After-Tax)</span>
+                                                </label>
                                             </div>
                                         </div>
 
@@ -699,7 +713,7 @@ export default function Calculator() {
                                     </div>
                                 </div>
 
-                                {/* --- COMPARISON TABLE (Only shows if snapshot exists) --- */}
+                                {/* --- COMPARISON TABLE --- */}
                                 {comparisonSnapshot && (
                                     <div className="bg-indigo-50/50 rounded-2xl border border-indigo-100 p-6 animate-fade-in">
                                         <div className="flex items-center gap-2 mb-4 text-indigo-800">
@@ -720,14 +734,14 @@ export default function Calculator() {
                                             {/* Monthly Income Row */}
                                             <div className="font-bold text-slate-700 py-3 border-b border-slate-200">Monthly Income</div>
                                             <div className="bg-white p-3 border-x border-b border-slate-200 text-center font-mono text-slate-600">
-                                                ${(comparisonSnapshot.monthly * inflationFactor).toLocaleString(undefined, {maximumFractionDigits:0})}
+                                                ${(comparisonSnapshot.monthly * inflationFactor * taxFactor).toLocaleString(undefined, {maximumFractionDigits:0})}
                                             </div>
                                             <div className="bg-white p-3 border-x border-b border-slate-200 text-center font-mono font-bold text-indigo-700 shadow-sm relative z-10">
                                                 ${displayTotal.toLocaleString(undefined, {maximumFractionDigits:0})}
                                                 {/* Diff Badge */}
                                                 <div className={`text-[10px] mt-1 font-sans font-bold ${results.grandTotal >= comparisonSnapshot.monthly ? 'text-emerald-600' : 'text-rose-500'}`}>
                                                     {results.grandTotal >= comparisonSnapshot.monthly ? '+' : ''}
-                                                    ${((results.grandTotal - comparisonSnapshot.monthly) * inflationFactor).toFixed(0)}
+                                                    ${((results.grandTotal - comparisonSnapshot.monthly) * inflationFactor * taxFactor).toFixed(0)}
                                                 </div>
                                             </div>
 
@@ -753,8 +767,8 @@ export default function Calculator() {
                                         <div className="absolute top-0 left-0 w-full h-1 bg-indigo-500"></div>
                                         <h3 className="font-bold text-slate-700 mb-4 flex items-center gap-2"><TrendingUpIcon size={20} className="text-indigo-600"/> CPP Details</h3>
                                         <div className="space-y-3">
-                                            <div className="flex justify-between text-sm"><span className="text-slate-500">Base</span><span className="font-mono font-medium">${(results.cpp.base * inflationFactor).toFixed(2)}</span></div>
-                                            <div className="flex justify-between text-sm"><span className="text-slate-500">Enhanced</span><span className="font-mono font-medium text-emerald-600">+${(results.cpp.enhanced * inflationFactor).toFixed(2)}</span></div>
+                                            <div className="flex justify-between text-sm"><span className="text-slate-500">Base</span><span className="font-mono font-medium">${(results.cpp.base * inflationFactor * taxFactor).toFixed(2)}</span></div>
+                                            <div className="flex justify-between text-sm"><span className="text-slate-500">Enhanced</span><span className="font-mono font-medium text-emerald-600">+${(results.cpp.enhanced * inflationFactor * taxFactor).toFixed(2)}</span></div>
                                             <div className="pt-3 border-t border-slate-100 flex justify-between text-sm font-bold"><span className="text-slate-800">Total CPP</span><span>${displayCPP.toFixed(2)}</span></div>
                                         </div>
                                     </div>
@@ -762,8 +776,8 @@ export default function Calculator() {
                                         <div className="absolute top-0 left-0 w-full h-1 bg-amber-500"></div>
                                         <h3 className="font-bold text-slate-700 mb-4 flex items-center gap-2"><HomeIcon size={20} className="text-amber-600"/> OAS Details</h3>
                                         <div className="space-y-3">
-                                            <div className="flex justify-between text-sm"><span className="text-slate-500">Gross</span><span className="font-mono font-medium">${(results.oas.gross * inflationFactor).toFixed(2)}</span></div>
-                                            {results.oas.clawback > 0 && <div className="flex justify-between text-sm text-rose-600 bg-rose-50 px-2 py-1 rounded"><span>Recovery Tax</span><span className="font-mono">-${(results.oas.clawback * inflationFactor).toFixed(2)}</span></div>}
+                                            <div className="flex justify-between text-sm"><span className="text-slate-500">Gross</span><span className="font-mono font-medium">${(results.oas.gross * inflationFactor * taxFactor).toFixed(2)}</span></div>
+                                            {results.oas.clawback > 0 && <div className="flex justify-between text-sm text-rose-600 bg-rose-50 px-2 py-1 rounded"><span>Recovery Tax</span><span className="font-mono">-${(results.oas.clawback * inflationFactor * taxFactor).toFixed(2)}</span></div>}
                                             <div className="pt-3 border-t border-slate-100 flex justify-between text-sm font-bold"><span className="text-slate-800">Net OAS</span><span>${displayOAS.toFixed(2)}</span></div>
                                         </div>
                                     </div>
@@ -862,11 +876,31 @@ export default function Calculator() {
                         )}
                     </div>
                 </div>
+
+                <div className="max-w-3xl mx-auto space-y-4">
+                    <Accordion title="Guide to 2025 CPP & OAS Changes" icon={BookOpenIcon}>
+                        <p className="mb-4">In 2025, the Canada Pension Plan (CPP) completes a major transition into 'Phase 2' of the enhancement strategy.</p>
+                        <p>If you earn up to <strong>$71,300</strong> (the 2025 YMPE), you contribute at the base rate. However, if you earn <em>between</em> $71,300 and approximately <strong>$81,200</strong> (the YAMPE), you make additional <strong>Tier 2 contributions</strong>.</p>
+                    </Accordion>
+                    <Accordion title="Government Sources" icon={ExternalLinkIcon}>
+                         <ul className="text-sm space-y-2 text-indigo-600 pl-4 font-medium">
+                            <li><a href="https://www.canada.ca/en/services/benefits/publicpensions/cpp/payment-amounts.html" target="_blank" className="hover:underline flex items-center gap-1">CPP Payment Amounts <ExternalLinkIcon size={12} /></a></li>
+                            <li><a href="https://www.canada.ca/en/services/benefits/publicpensions/old-age-security/payments.html" target="_blank" className="hover:underline flex items-center gap-1">OAS Payments & Thresholds <ExternalLinkIcon size={12} /></a></li>
+                            <li><a href="https://www.canada.ca/en/employment-social-development/services/my-account.html" target="_blank" className="hover:underline flex items-center gap-1">My Service Canada Account (MSCA) <ExternalLinkIcon size={12} /></a></li> 
+                        </ul>
+                    </Accordion>
+                </div>
+                
+                {/* SPACER DIV TO FORCE CONTENT ABOVE FOOTER */}
+                <div style={{ height: '120px' }}></div> 
             </main>
 
-            {/* === LIVE ESTIMATE FOOTER === */}
-            {activeTab === 'input' && (
-                <div className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-indigo-100 p-4 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)] z-40 animate-slide-up">
+            {/* === LIVE ESTIMATE FOOTER (PORTAL VERSION) === */}
+            {activeTab === 'input' && mounted && createPortal(
+                <div 
+                    className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-indigo-100 p-4 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)] z-[9999] animate-slide-up"
+                    style={{ position: 'fixed', bottom: 0, width: '100%' }} // Inline safety
+                >
                     <div className="max-w-5xl mx-auto flex items-center justify-between">
                         <div className="flex flex-col">
                             <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Live Estimate (Age {retirementAge})</span>
@@ -887,8 +921,10 @@ export default function Calculator() {
                             View Details <ArrowRightIcon size={18} />
                         </button>
                     </div>
-                </div>
+                </div>,
+                document.body 
             )}
+
         </div>
     );
 }
