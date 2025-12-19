@@ -251,7 +251,7 @@ export default function Calculator() {
     const hasEarnings = Object.keys(earnings).length > 0;
 
     return (
-        <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-indigo-100 selection:text-indigo-700 pb-16">
+        <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-indigo-100 selection:text-indigo-700 pb-24">
             
             {/* ABOUT MODAL */}
             {showAbout && (
@@ -583,9 +583,7 @@ export default function Calculator() {
                                         </div>
                                     )}
 
-                                    <div className="mt-8 flex justify-center pb-4">
-                                        <button onClick={() => setActiveTab('results')} className="bg-slate-900 hover:bg-slate-800 text-white text-lg font-bold py-4 px-10 rounded-2xl shadow-xl shadow-slate-900/20 transform transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center gap-3">Calculate Estimate <ArrowRightIcon size={20} /></button>
-                                    </div>
+                                    
                                 </div>
                             </div>
                         )}
@@ -864,21 +862,33 @@ export default function Calculator() {
                         )}
                     </div>
                 </div>
-
-                <div className="max-w-3xl mx-auto space-y-4">
-                    <Accordion title="Guide to 2025 CPP & OAS Changes" icon={BookOpenIcon}>
-                        <p className="mb-4">In 2025, the Canada Pension Plan (CPP) completes a major transition into 'Phase 2' of the enhancement strategy.</p>
-                        <p>If you earn up to <strong>$71,300</strong> (the 2025 YMPE), you contribute at the base rate. However, if you earn <em>between</em> $71,300 and approximately <strong>$81,200</strong> (the YAMPE), you make additional <strong>Tier 2 contributions</strong>.</p>
-                    </Accordion>
-                    <Accordion title="Government Sources" icon={ExternalLinkIcon}>
-                         <ul className="text-sm space-y-2 text-indigo-600 pl-4 font-medium">
-                            <li><a href="https://www.canada.ca/en/services/benefits/publicpensions/cpp/payment-amounts.html" target="_blank" className="hover:underline flex items-center gap-1">CPP Payment Amounts <ExternalLinkIcon size={12} /></a></li>
-                            <li><a href="https://www.canada.ca/en/services/benefits/publicpensions/old-age-security/payments.html" target="_blank" className="hover:underline flex items-center gap-1">OAS Payments & Thresholds <ExternalLinkIcon size={12} /></a></li>
-                            <li><a href="https://www.canada.ca/en/employment-social-development/services/my-account.html" target="_blank" className="hover:underline flex items-center gap-1">My Service Canada Account (MSCA) <ExternalLinkIcon size={12} /></a></li> 
-                        </ul>
-                    </Accordion>
-                </div>
             </main>
+
+            {/* === LIVE ESTIMATE FOOTER === */}
+            {activeTab === 'input' && (
+                <div className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-indigo-100 p-4 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)] z-40 animate-slide-up">
+                    <div className="max-w-5xl mx-auto flex items-center justify-between">
+                        <div className="flex flex-col">
+                            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Live Estimate (Age {retirementAge})</span>
+                            <div className="flex items-baseline gap-1.5">
+                                <span className="text-2xl md:text-3xl font-bold text-slate-800">
+                                    ${displayTotal.toLocaleString('en-CA', { maximumFractionDigits: 0 })}
+                                </span>
+                                <span className="text-sm font-medium text-slate-500">/ mo</span>
+                            </div>
+                        </div>
+                        <button 
+                            onClick={() => {
+                                setActiveTab('results');
+                                window.scrollTo({ top: 0, behavior: 'smooth' });
+                            }} 
+                            className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-indigo-200 transition-all flex items-center gap-2"
+                        >
+                            View Details <ArrowRightIcon size={18} />
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
