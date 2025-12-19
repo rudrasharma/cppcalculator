@@ -1,16 +1,46 @@
 ---
 // src/pages/index.astro
-import Calculator from '../components/Calculator.jsx';
+import CalculatorSuite from '../components/CalculatorSuite';
 ---
 
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
-    <title>2025 CPP & OAS Calculator | Canadian Retirement Income Estimator</title>
-    <meta name="description" content="Calculate your 2025 Canada Pension Plan (CPP) and Old Age Security (OAS) benefits." />
-    </head>
-  <body>
-    <Calculator client:load />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width" />
+    <title>LoonieLens | Canadian Financial Calculators</title>
+    <meta name="description" content="Free calculators for Canada Pension Plan (CPP), Old Age Security (OAS), and Canada Child Benefit (CCB)." />
+  </head>
+  <body class="bg-gray-50 text-gray-800 font-sans min-h-screen flex flex-col">
+    
+    <CalculatorSuite client:load />
+
+    <footer class="bg-white border-t border-gray-200 mt-auto">
+      <div class="max-w-5xl mx-auto px-6 py-8 text-center">
+        
+        <div class="flex justify-center items-center gap-4 sm:gap-6 mb-4 font-medium text-sm">
+            
+            <a href="/blog" class="text-blue-600 hover:text-blue-800 transition-colors flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                Guides & Blog
+            </a>
+
+            <span class="text-gray-300">•</span>
+
+            <span class="text-gray-400 cursor-default" title="Data stays in your browser">Privacy First</span>
+
+            <span class="text-gray-300">•</span>
+
+            <a href="mailto:support@cppforecast.ca" class="text-gray-500 hover:text-blue-600 transition-colors">
+                Contact
+            </a>
+
+        </div>
+
+        <p class="text-sm text-gray-400">© {new Date().getFullYear()} Canadian Benefit Tools. All rights reserved.</p>
+      </div>
+    </footer>
+
   </body>
 </html>

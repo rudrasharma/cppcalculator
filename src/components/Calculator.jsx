@@ -1453,16 +1453,6 @@ export default function Calculator() {
 
             </main>
 
-            <footer className="text-center text-slate-400 text-sm py-8 mt-8 border-t border-slate-200">
-                <div className="flex justify-center gap-6 mb-4 font-medium">
-                    <a href="/blog" className="hover:text-indigo-600 transition">Guides</a>
-                    <span>•</span>
-                    <button onClick={() => setShowAbout(true)} className="hover:text-indigo-600 transition">About</button>
-                    <span>•</span>
-                    <a href="mailto:support@cppforecast.ca" className="hover:text-indigo-600 transition">Contact</a>
-                </div>
-                <p>Not financial advice. For estimation purposes only.</p>
-            </footer>
         </div>
     );
 };
