@@ -1,14 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
-    AreaChart, 
-    Area, 
-    XAxis, 
-    YAxis, 
-    CartesianGrid, 
-    Tooltip as RechartsTooltip, 
-    ResponsiveContainer, 
-    ReferenceLine,
-    Legend
+    AreaChart, Area, XAxis, YAxis, CartesianGrid, 
+    Tooltip as RechartsTooltip, ResponsiveContainer, ReferenceLine, Legend
 } from 'recharts';
 
 // ==========================================
@@ -38,6 +31,7 @@ const RotateCcwIcon = (props) => (<IconBase {...props}><path d="M3 12a9 9 0 1 0 
 const ArrowRightIcon = (props) => (<IconBase {...props}><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></IconBase>);
 const BookOpenIcon = (props) => (<IconBase {...props}><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></IconBase>);
 const ExternalLinkIcon = (props) => (<IconBase {...props}><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></IconBase>);
+const CalendarIcon = (props) => (<IconBase {...props}><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></IconBase>);
 
 // ==========================================
 //              CONSTANTS
@@ -72,12 +66,23 @@ const CWB_PARAMS = {
 const PROV_PARAMS = {
     ON: {
         NAME: "Ontario Child Benefit", MAX_PER_CHILD: 1727, THRESHOLD: 25646, REDUCTION_RATE: 0.08,
-        CAIP: { ADULT: 140, SPOUSE: 70, CHILD: 35 }
+        CAIP: { ADULT: 140, SPOUSE: 70, CHILD: 35 } // Quarterly
     },
     AB: {
         NAME: "Alberta Child & Family Benefit", AMOUNTS: [1469, 735, 735, 735], THRESHOLD: 27024,
         REDUCTION_RATES: [0.0312, 0.0935, 0.1559, 0.2183],
-        CAIP: { ADULT: 225, SPOUSE: 112.5, CHILD: 56.25 }
+        CAIP: { ADULT: 225, SPOUSE: 112.5, CHILD: 56.25 } // Quarterly
+    },
+    BC: {
+        NAME: "BC Family Benefit", 
+        // 2024-2025 Rates (Includes Bonus)
+        AMOUNTS: [2188, 1375, 1125], // 1st, 2nd, 3rd+
+        THRESHOLD: 35902,
+        REDUCTION_RATE: 0.04,
+        // BC Climate Action Tax Credit (Quarterly)
+        CLIMATE: { ADULT: 504/4, SPOUSE: 252/4, CHILD: 126/4 }, // Max annual / 4
+        CLIMATE_THRESHOLD: { SINGLE: 41071, FAMILY: 57288 },
+        CLIMATE_REDUCTION: 0.02
     },
     OTHER: {
         NAME: "Provincial Benefit (Not Calculated)",
@@ -166,7 +171,6 @@ export default function HouseholdBenefits() {
         const copyLink = () => {
             const params = new URLSearchParams();
             params.set('view', 'ccb'); 
-            
             params.set('i', parseInt(grossAfni || 0).toString(36));
             params.set('wi', parseInt(workingIncome || 0).toString(36));
             if (deductions > 0) params.set('d', parseInt(deductions).toString(36));
@@ -176,7 +180,6 @@ export default function HouseholdBenefits() {
             params.set('p', province);
             const childStr = children.map(c => `${c.age}-${c.disability ? 1 : 0}`).join('_');
             params.set('c', childStr);
-            
             const url = `${window.location.origin}${window.location.pathname}?${params.toString()}`;
             navigator.clipboard.writeText(url).then(() => {
                 setCopySuccess(true);
@@ -255,10 +258,33 @@ export default function HouseholdBenefits() {
                 cwb = Math.max(0, baseCWB - reduction);
             }
 
-            // 4. CARBON REBATE
+            // 4. CARBON REBATE (or BC CLIMATE)
             let caip = 0;
-            const validProvs = ['ON', 'AB'];
-            if (validProvs.includes(provCode) && PROV_PARAMS[provCode]?.CAIP) {
+            let bcClimate = 0;
+
+            if (provCode === 'BC' && PROV_PARAMS.BC.CLIMATE) {
+                // BC Climate Action Tax Credit (Replaces Federal CAIP)
+                const rates = PROV_PARAMS.BC.CLIMATE;
+                let quarterly = rates.ADULT;
+                if (status === 'MARRIED') quarterly += rates.SPOUSE;
+                if (status === 'SINGLE' && totalChildren > 0) {
+                    // Single parent first child is spouse amount
+                    quarterly += rates.SPOUSE; 
+                    quarterly += (totalChildren - 1) * rates.CHILD;
+                } else {
+                    quarterly += totalChildren * rates.CHILD;
+                }
+                
+                // Reduction
+                const threshold = (status === 'MARRIED' || totalChildren > 0) ? PROV_PARAMS.BC.CLIMATE_THRESHOLD.FAMILY : PROV_PARAMS.BC.CLIMATE_THRESHOLD.SINGLE;
+                let annual = quarterly * 4;
+                if (netInc > threshold) {
+                    annual -= (netInc - threshold) * PROV_PARAMS.BC.CLIMATE_REDUCTION;
+                }
+                bcClimate = Math.max(0, annual); // Treat as CAIP bucket for simplicity in Total
+                caip = bcClimate; 
+            } else if (['ON', 'AB'].includes(provCode) && PROV_PARAMS[provCode]?.CAIP) {
+                // Federal CAIP
                 const rates = PROV_PARAMS[provCode].CAIP;
                 let quarterly = rates.ADULT;
                 if (status === 'MARRIED') quarterly += rates.SPOUSE;
@@ -272,7 +298,7 @@ export default function HouseholdBenefits() {
                 caip = quarterly * 4; 
             }
 
-            // 5. PROVINCIAL
+            // 5. PROVINCIAL CHILD BENEFIT
             let provNet = 0;
             let provName = "Provincial";
             if (totalChildren > 0) {
@@ -295,6 +321,15 @@ export default function HouseholdBenefits() {
                         provNet = Math.max(0, provMax - provRed);
                     }
                 }
+                else if (provCode === 'BC') {
+                    provName = PROV_PARAMS.BC.NAME;
+                    let provMax = 0;
+                    PROV_PARAMS.BC.AMOUNTS.forEach((amt, idx) => {
+                        if (idx < totalChildren) provMax += amt;
+                    });
+                    const provRed = Math.max(0, (netInc - PROV_PARAMS.BC.THRESHOLD) * PROV_PARAMS.BC.REDUCTION_RATE);
+                    provNet = Math.max(0, provMax - provRed);
+                }
             }
 
             if (isShared && totalChildren > 0) {
@@ -306,7 +341,7 @@ export default function HouseholdBenefits() {
 
             return {
                 federal: federalNet, provincial: provNet, gst: gstTotal, cwb: cwb, caip: caip,
-                provName, total, monthly: total / 12, countUnder6, countOver6
+                provName, total, monthly: total / 12, countUnder6, countOver6, provCode
             };
         };
 
@@ -343,6 +378,29 @@ export default function HouseholdBenefits() {
                 return item.income - array[index - 1].income > 1000 || item.isUser;
             });
         }, [afni, workingIncome, children, sharedCustody, province, maritalStatus, isRural]);
+
+        // --- PAYMENT CALENDAR LOGIC ---
+        const calendar = useMemo(() => {
+            const months = ["Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun"];
+            const monthlyCCB = results.federal / 12;
+            const monthlyProv = results.provincial / 12;
+            const quarterlyGST = results.gst / 4;
+            const quarterlyCAIP = results.caip / 4; // Works for Federal or BC
+
+            return months.map((m, idx) => {
+                const isQuarterly = (m === "Jul" || m === "Oct" || m === "Jan" || m === "Apr");
+                let amt = monthlyCCB + monthlyProv;
+                let breakdown = [`CCB: $${Math.round(monthlyCCB)}`];
+                if (monthlyProv > 0) breakdown.push(`${results.provCode} Child: $${Math.round(monthlyProv)}`);
+                
+                if (isQuarterly) {
+                    amt += quarterlyGST + quarterlyCAIP;
+                    if (quarterlyGST > 0) breakdown.push(`GST: $${Math.round(quarterlyGST)}`);
+                    if (quarterlyCAIP > 0) breakdown.push(`Climate: $${Math.round(quarterlyCAIP)}`);
+                }
+                return { month: m, total: amt, breakdown, isQuarterly };
+            });
+        }, [results]);
 
         return (
             <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-indigo-100 selection:text-indigo-700 pb-16">
@@ -415,12 +473,13 @@ export default function HouseholdBenefits() {
                                                     <div className="col-span-1">
                                                         <label className="text-xs font-bold text-slate-700 block mb-1">
                                                             Province 
-                                                            <Tooltip text="Determines provincial benefits (OCB, ACFB) and Carbon Rebate eligibility." />
+                                                            <Tooltip text="Determines provincial benefits (OCB, ACFB, BCFB) and Carbon Rebate eligibility." />
                                                         </label>
                                                         <div className="relative">
                                                             <select value={province} onChange={(e) => setProvince(e.target.value)} className="w-full p-2 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
-                                                                <option value="ON">ON</option>
-                                                                <option value="AB">AB</option>
+                                                                <option value="ON">Ontario (ON)</option>
+                                                                <option value="AB">Alberta (AB)</option>
+                                                                <option value="BC">British Columbia (BC)</option>
                                                                 <option value="OTHER">Other</option>
                                                             </select>
                                                         </div>
@@ -496,24 +555,52 @@ export default function HouseholdBenefits() {
                                                 </div>
                                             </div>
                                         </div>
-                                        <div className="md:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                                            <div className="flex items-center justify-between mb-6"><div className="flex items-center gap-3"><div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg"><TrendingDownIcon size={20}/></div><div><h3 className="font-bold text-slate-800">Benefits vs. Income</h3><p className="text-xs text-slate-500">How earnings affect your government support</p></div></div></div>
-                                            <div className="h-[250px] w-full">
-                                                <ResponsiveContainer width="100%" height="100%">
-                                                    <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                                                        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                                                        <XAxis dataKey="income" stroke="#94a3b8" fontSize={11} tickFormatter={(val) => `$${val/1000}k`} axisLine={false} tickLine={false} />
-                                                        <YAxis stroke="#94a3b8" fontSize={11} tickFormatter={(val) => `$${val/1000}k`} axisLine={false} tickLine={false} />
-                                                        <RechartsTooltip contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '12px', color: '#f8fafc' }} itemStyle={{ color: '#f8fafc', fontSize: '12px' }} formatter={(value) => [`$${value.toLocaleString()}`, "Benefit"]} />
-                                                        <Legend wrapperStyle={{ paddingTop: '10px', fontSize: '10px' }}/>
-                                                        <Area type="monotone" dataKey="Federal" stackId="1" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.6} name="CCB" />
-                                                        <Area type="monotone" dataKey="Provincial" stackId="1" stroke="#10b981" fill="#10b981" fillOpacity={0.6} name="Provincial" />
-                                                        <Area type="monotone" dataKey="GST" stackId="1" stroke="#8b5cf6" fill="#8b5cf6" fillOpacity={0.6} name="GST" />
-                                                        <Area type="monotone" dataKey="CWB" stackId="1" stroke="#f59e0b" fill="#f59e0b" fillOpacity={0.6} name="Workers Ben" />
-                                                        <Area type="monotone" dataKey="CAIP" stackId="1" stroke="#14b8a6" fill="#14b8a6" fillOpacity={0.6} name="Carbon Rebate" />
-                                                        <ReferenceLine x={afni} stroke="#6366f1" strokeDasharray="3 3" label={{ position: 'top', value: 'You', fill: '#6366f1', fontSize: 12, fontWeight: 'bold' }} />
-                                                    </AreaChart>
-                                                </ResponsiveContainer>
+                                        <div className="md:col-span-2 space-y-6">
+                                            {/* CHART */}
+                                            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                                                <div className="flex items-center justify-between mb-6"><div className="flex items-center gap-3"><div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg"><TrendingDownIcon size={20}/></div><div><h3 className="font-bold text-slate-800">Benefits vs. Income</h3><p className="text-xs text-slate-500">How earnings affect your government support</p></div></div></div>
+                                                <div className="h-[250px] w-full">
+                                                    <ResponsiveContainer width="100%" height="100%">
+                                                        <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                                                            <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                                                            <XAxis dataKey="income" stroke="#94a3b8" fontSize={11} tickFormatter={(val) => `$${val/1000}k`} axisLine={false} tickLine={false} />
+                                                            <YAxis stroke="#94a3b8" fontSize={11} tickFormatter={(val) => `$${val/1000}k`} axisLine={false} tickLine={false} />
+                                                            <RechartsTooltip contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '12px', color: '#f8fafc' }} itemStyle={{ color: '#f8fafc', fontSize: '12px' }} formatter={(value) => [`$${value.toLocaleString()}`, "Benefit"]} />
+                                                            <Legend wrapperStyle={{ paddingTop: '10px', fontSize: '10px' }}/>
+                                                            <Area type="monotone" dataKey="Federal" stackId="1" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.6} name="CCB" />
+                                                            <Area type="monotone" dataKey="Provincial" stackId="1" stroke="#10b981" fill="#10b981" fillOpacity={0.6} name="Provincial" />
+                                                            <Area type="monotone" dataKey="GST" stackId="1" stroke="#8b5cf6" fill="#8b5cf6" fillOpacity={0.6} name="GST" />
+                                                            <Area type="monotone" dataKey="CWB" stackId="1" stroke="#f59e0b" fill="#f59e0b" fillOpacity={0.6} name="Workers Ben" />
+                                                            <Area type="monotone" dataKey="CAIP" stackId="1" stroke="#14b8a6" fill="#14b8a6" fillOpacity={0.6} name="Carbon Rebate" />
+                                                            <ReferenceLine x={afni} stroke="#6366f1" strokeDasharray="3 3" label={{ position: 'top', value: 'You', fill: '#6366f1', fontSize: 12, fontWeight: 'bold' }} />
+                                                        </AreaChart>
+                                                    </ResponsiveContainer>
+                                                </div>
+                                            </div>
+
+                                            {/* PAYMENT CALENDAR */}
+                                            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                                                <div className="flex items-center gap-3 mb-6 text-slate-700">
+                                                    <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg"><CalendarIcon size={20}/></div>
+                                                    <div>
+                                                        <h3 className="font-bold">Estimated Payment Schedule</h3>
+                                                        <p className="text-xs text-slate-500">Based on July 2024 - June 2025 Benefit Year</p>
+                                                    </div>
+                                                </div>
+                                                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
+                                                    {calendar.map((item, i) => (
+                                                        <div key={i} className={`p-3 rounded-xl border flex flex-col justify-between h-24 ${item.isQuarterly ? 'bg-indigo-50 border-indigo-100 ring-1 ring-indigo-200' : 'bg-slate-50 border-slate-100'}`}>
+                                                            <div className="text-xs font-bold text-slate-500 uppercase tracking-wider">{item.month}</div>
+                                                            <div>
+                                                                <div className={`font-bold ${item.isQuarterly ? 'text-indigo-700 text-lg' : 'text-slate-800'}`}>${Math.round(item.total)}</div>
+                                                                {item.isQuarterly && <div className="text-[9px] leading-tight text-indigo-500 mt-1 font-medium">+ GST/Carbon</div>}
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                                <div className="mt-4 text-xs text-slate-400 italic">
+                                                    * Note: Actual payment dates vary. CCB is ~20th, GST/Carbon ~5th.
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
