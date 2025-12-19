@@ -19,11 +19,11 @@ export default function CalculatorSuite() {
       <nav className="bg-slate-900 text-white p-4 sticky top-0 z-50 shadow-md">
         <div className="max-w-5xl mx-auto flex items-center justify-between">
           
-          {/* BRANDING: LoonieLens with Flag */}
+          {/* BRANDING: LoonieSense with Flag */}
           <div className="font-bold text-lg tracking-tight flex items-center gap-2 select-none">
              <span className="text-2xl">🇨🇦</span> 
              <span className="hidden sm:inline bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">
-                LoonieLens
+                LoonieSense
              </span>
           </div>
           
