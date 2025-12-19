@@ -378,7 +378,10 @@ export default function Calculator() {
                                                         <input type="date" value={spouseDob} onChange={(e) => setSpouseDob(e.target.value)} className="w-full mt-1 p-2 bg-slate-50 border border-slate-200 rounded-lg text-sm" />
                                                     </div>
                                                     <div>
-                                                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wide">Spouse Annual Income</label>
+                                                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wide">
+                                                            Spouse Retirement Income
+                                                            <Tooltip text="Estimate their annual taxable income during retirement (e.g. CPP, Pensions, RRIF). Exclude OAS. Used for household GIS calculation." />
+                                                        </label>
                                                         <div className="relative mt-1">
                                                             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">$</span>
                                                             <input type="number" value={spouseIncome} onChange={(e) => setSpouseIncome(e.target.value)} className="w-full pl-7 p-2 bg-slate-50 border border-slate-200 rounded-lg text-sm" placeholder="0" />
@@ -429,7 +432,7 @@ export default function Calculator() {
 
                                             {!livedInCanadaAllLife && (
                                                 <div className="animate-fade-in">
-                                                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Years in Canada between age 18 to 65 (Adult)</label>
+                                                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1">Total Years in Canada (Adult)</label>
                                                     <input type="number" min="0" max="47" value={yearsInCanada} onChange={(e) => setYearsInCanada(parseInt(e.target.value) || 0)} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl" />
                                                     <p className="text-[10px] text-slate-400 mt-1">40 years required for full OAS.</p>
                                                 </div>
