@@ -14,18 +14,14 @@ const IconBase = ({ size = 20, className = "", children }) => (
 );
 
 const BabyIcon = (props) => (<IconBase {...props}><path d="M9 12h.01"/><path d="M15 12h.01"/><path d="M10 16c.5.3 1.2.5 2 .5s1.5-.2 2-.5"/><path d="M19 6.3a9 9 0 0 1 1.8 3.9 2 2 0 0 1 0 3.6 9 9 0 0 1-17.6 0 2 2 0 0 1 0-3.6A9 9 0 0 1 12 3c2 0 4 .7 5.6 1.8"/><path d="M12 3v2"/></IconBase>);
-const UserPlusIcon = (props) => (<IconBase {...props}><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></IconBase>);
 const TrashIcon = (props) => (<IconBase {...props}><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></IconBase>);
-const CalculatorIcon = (props) => (<IconBase {...props}><rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="16" x2="16" y1="14" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/></IconBase>);
 const CheckIcon = (props) => (<IconBase {...props}><polyline points="20 6 9 17 4 12"/></IconBase>);
 const LinkIcon = (props) => (<IconBase {...props}><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></IconBase>);
 const HelpCircleIcon = (props) => (<IconBase {...props}><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></IconBase>);
-const XIcon = (props) => (<IconBase {...props}><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></IconBase>);
 const ChevronDownIcon = (props) => (<IconBase {...props}><polyline points="6 9 12 15 18 9"/></IconBase>);
 const DollarSignIcon = (props) => (<IconBase {...props}><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></IconBase>);
 const TrendingDownIcon = (props) => (<IconBase {...props}><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></IconBase>);
 const UsersIcon = (props) => (<IconBase {...props}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></IconBase>);
-const HomeIcon = (props) => (<IconBase {...props}><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></IconBase>);
 const ArrowRightIcon = (props) => (<IconBase {...props}><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></IconBase>);
 const CalendarIcon = (props) => (<IconBase {...props}><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></IconBase>);
 const ExternalLinkIcon = (props) => (<IconBase {...props}><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></IconBase>);
@@ -65,11 +61,12 @@ const PROV_PARAMS = {
 //              UI HELPERS
 // ==========================================
 const Tooltip = ({ text }) => (
-    <div className="group relative inline-flex items-center ml-1">
+    // FIX: Using 'group/tip' to isolate hover state from parent containers
+    <div className="group/tip relative inline-flex items-center ml-1">
         <button type="button" className="text-slate-400 hover:text-indigo-600 transition-colors cursor-help">
             <HelpCircleIcon size={16} />
         </button>
-        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-4 bg-slate-800 text-slate-50 text-xs rounded-xl shadow-xl opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none z-50 text-center leading-relaxed font-normal border border-slate-700 shadow-indigo-500/10">
+        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-4 bg-slate-800 text-slate-50 text-xs rounded-xl shadow-xl opacity-0 group-hover/tip:opacity-100 transition-all duration-200 pointer-events-none z-50 text-center leading-relaxed font-normal border border-slate-700 shadow-indigo-500/10">
             {text}
             <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-800"></div>
         </div>
@@ -103,8 +100,36 @@ export default function HouseholdBenefits() {
     const [activeTab, setActiveTab] = useState('input');
     const [copySuccess, setCopySuccess] = useState(false);
     const [mounted, setMounted] = useState(false);
+    const [isInputFocused, setIsInputFocused] = useState(false);
 
     useEffect(() => { setMounted(true); }, []);
+
+    // Mobile Keyboard Detection
+    useEffect(() => {
+        const handleFocus = (e) => {
+            const tag = e.target.tagName;
+            const type = e.target.type;
+            if (tag === 'TEXTAREA' || (tag === 'INPUT' && !['checkbox', 'radio', 'range', 'submit', 'button', 'file', 'color'].includes(type))) {
+                setIsInputFocused(true);
+            }
+        };
+        const handleBlur = () => {
+            setTimeout(() => {
+                const active = document.activeElement;
+                const tag = active?.tagName;
+                const type = active?.type;
+                if (!(tag === 'TEXTAREA' || (tag === 'INPUT' && !['checkbox', 'radio', 'range', 'submit', 'button', 'file', 'color'].includes(type)))) {
+                    setIsInputFocused(false);
+                }
+            }, 100);
+        };
+        window.addEventListener('focus', handleFocus, true);
+        window.addEventListener('blur', handleBlur, true);
+        return () => {
+            window.removeEventListener('focus', handleFocus, true);
+            window.removeEventListener('blur', handleBlur, true);
+        };
+    }, []);
 
     const afni = Math.max(0, grossAfni || 0);
 
@@ -241,10 +266,10 @@ export default function HouseholdBenefits() {
                 <div className="max-w-5xl mx-auto flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <div className="bg-indigo-600 text-white p-2 rounded-lg shadow-lg"><BabyIcon size={24} /></div>
-                        <div><h1 className="text-xl font-bold">LoonieSense CCB</h1><div className="text-xs text-slate-500 uppercase font-medium tracking-widest">2024-2025 Estimator</div></div>
+                        <div><h1 className="text-lg md:text-xl font-bold">LoonieSense CCB</h1><div className="text-[10px] md:text-xs text-slate-500 uppercase font-medium tracking-widest">2024-2025 Estimator</div></div>
                     </div>
                     <button onClick={copyLink} className="text-sm font-bold text-indigo-600 flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-indigo-50 transition-all border border-transparent hover:border-indigo-100">
-                        {copySuccess ? <CheckIcon size={16} /> : <LinkIcon size={16} />} {copySuccess ? "Link Copied" : "Share Results"}
+                        {copySuccess ? <CheckIcon size={16} /> : <LinkIcon size={16} />} {copySuccess ? "Copied" : "Share"}
                     </button>
                 </div>
             </header>
@@ -254,17 +279,17 @@ export default function HouseholdBenefits() {
                     <div className="p-2 bg-slate-50 border-b">
                         <div className="flex bg-slate-200/50 p-1 rounded-2xl">
                             <button onClick={() => setActiveTab('input')} className={`flex-1 py-2.5 text-sm font-bold rounded-xl transition-all ${activeTab === 'input' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500'}`}>1. Household Inputs</button>
-                            <button onClick={() => setActiveTab('results')} className={`flex-1 py-2.5 text-sm font-bold rounded-xl transition-all ${activeTab === 'results' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500'}`}>2. Detailed Breakdown</button>
+                            <button onClick={() => setActiveTab('results')} className={`flex-1 py-2.5 text-sm font-bold rounded-xl transition-all ${activeTab === 'results' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500'}`}>2. Breakdown</button>
                         </div>
                     </div>
 
-                    <div className="p-6 md:p-10">
+                    <div className="p-4 md:p-10">
                         {activeTab === 'input' && (
                             <div className="animate-fade-in space-y-10">
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-10">
                                     <div className="space-y-6">
                                         <div className="flex items-center gap-2 text-indigo-600 font-black uppercase text-[10px] tracking-widest"><DollarSignIcon size={16} /> Household Profile</div>
-                                        <div className="bg-slate-50 p-6 rounded-3xl space-y-5 border border-slate-100 shadow-sm">
+                                        <div className="bg-slate-50 p-5 md:p-6 rounded-3xl space-y-5 border border-slate-100 shadow-sm">
                                             <div>
                                                 <label className="text-xs font-black text-slate-700 block mb-1 uppercase tracking-tighter">Province</label>
                                                 <select value={province} onChange={(e) => setProvince(e.target.value)} className="w-full p-3 bg-white border border-slate-200 rounded-2xl text-sm outline-none shadow-sm focus:ring-2 focus:ring-indigo-500 transition-all">
@@ -298,35 +323,35 @@ export default function HouseholdBenefits() {
                                     <div className="md:col-span-2 space-y-6">
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center gap-2 text-emerald-600 font-black uppercase text-[10px] tracking-widest"><UsersIcon size={16} /> Children</div>
-                                            <button onClick={addChild} className="bg-emerald-600 text-white font-black px-6 py-2.5 rounded-2xl hover:bg-emerald-700 transition shadow-lg shadow-emerald-200 text-sm flex items-center gap-2 transform active:scale-95">+ Add Child</button>
+                                            <button onClick={addChild} className="bg-emerald-600 text-white font-black px-4 py-2 md:px-6 md:py-2.5 rounded-2xl hover:bg-emerald-700 transition shadow-lg shadow-emerald-200 text-xs md:text-sm flex items-center gap-2 transform active:scale-95">+ Add Child</button>
                                         </div>
                                         <div className="grid gap-5">
                                             {children.map((child, idx) => (
-                                                <div key={child.id} className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col sm:flex-row gap-8 items-center group hover:border-emerald-300 transition-all relative">
-                                                    <div className="bg-emerald-50 text-emerald-600 w-14 h-14 rounded-full flex items-center justify-center font-black text-xl shrink-0 border-2 border-emerald-100">{idx + 1}</div>
+                                                <div key={child.id} className="bg-white p-5 md:p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col sm:flex-row gap-6 md:gap-8 items-center group hover:border-emerald-300 transition-all relative">
+                                                    <div className="bg-emerald-50 text-emerald-600 w-12 h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center font-black text-lg md:text-xl shrink-0 border-2 border-emerald-100">{idx + 1}</div>
                                                     <div className="flex-1 w-full">
                                                         <div className="flex justify-between mb-4">
                                                             <label className="text-xs font-black text-slate-400 uppercase tracking-widest">Child Age: <span className="text-slate-900 text-xl">{child.age}</span></label>
-                                                            <div className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-600 text-[10px] font-black uppercase tracking-tighter shadow-inner border border-emerald-100">
-                                                                {child.age < 6 ? "Max Support Rate" : "Standard Rate"}
+                                                            <div className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-600 text-[9px] md:text-[10px] font-black uppercase tracking-tighter shadow-inner border border-emerald-100">
+                                                                {child.age < 6 ? "Max Rate" : "Std Rate"}
                                                             </div>
                                                         </div>
                                                         <input type="range" min="0" max="18" value={child.age} onChange={(e) => updateChild(child.id, 'age', parseInt(e.target.value))} className="w-full h-2.5 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-emerald-500" />
                                                     </div>
-                                                    <div className="flex flex-col sm:flex-row items-center gap-4 shrink-0 bg-slate-50/50 p-3 rounded-2xl border border-slate-100">
-                                                        <label className="flex items-center gap-3 cursor-pointer select-none group/dis">
+                                                    <div className="flex flex-col sm:flex-row items-center gap-4 shrink-0 bg-slate-50/50 p-3 rounded-2xl border border-slate-100 w-full sm:w-auto">
+                                                        <label className="flex items-center gap-3 cursor-pointer select-none group/dis w-full sm:w-auto">
                                                             <input type="checkbox" checked={child.disability} onChange={(e) => updateChild(child.id, 'disability', e.target.checked)} className="w-6 h-6 text-emerald-600 rounded-lg border-slate-300" />
                                                             <div className="flex flex-col">
-                                                                <span className="text-xs font-black text-slate-700 group-hover/dis:text-emerald-600 transition-colors">Disability Benefit (DTC)</span>
-                                                                <span className="text-[9px] text-slate-400 font-bold uppercase tracking-tighter">Approved T2201 Required <Tooltip text="Requires an approved Form T2201 (Disability Tax Credit Certificate) on file with the CRA. This adds up to $3,322 per year per child." /></span>
+                                                                <span className="text-xs font-black text-slate-700 group-hover/dis:text-emerald-600 transition-colors">Disability (DTC)</span>
+                                                                <span className="text-[9px] text-slate-400 font-bold uppercase tracking-tighter">Required T2201 <Tooltip text="Requires an approved Form T2201 (Disability Tax Credit Certificate) on file with the CRA. This adds up to $3,322 per year per child." /></span>
                                                             </div>
                                                         </label>
-                                                        <div className="w-px h-8 bg-slate-200 hidden sm:block"></div>
-                                                        <button onClick={() => removeChild(child.id)} className="text-slate-300 hover:text-rose-500 p-2 transition-all transform hover:scale-110 active:scale-90"><TrashIcon size={22}/></button>
+                                                        <div className="w-full h-px sm:w-px sm:h-8 bg-slate-200"></div>
+                                                        <button onClick={() => removeChild(child.id)} className="text-slate-300 hover:text-rose-500 p-2 transition-all transform hover:scale-110 active:scale-90 w-full sm:w-auto flex justify-center"><TrashIcon size={22}/></button>
                                                     </div>
                                                 </div>
                                             ))}
-                                            {children.length === 0 && <div className="text-center p-20 border-2 border-dashed rounded-[2.5rem] text-slate-400 font-black uppercase tracking-widest text-xs bg-slate-50/50">Add a child to begin estimating CCB Support</div>}
+                                            {children.length === 0 && <div className="text-center p-10 md:p-20 border-2 border-dashed rounded-[2.5rem] text-slate-400 font-black uppercase tracking-widest text-xs bg-slate-50/50">Add a child to begin estimating CCB Support</div>}
                                         </div>
                                     </div>
                                 </div>
@@ -334,34 +359,34 @@ export default function HouseholdBenefits() {
                         )}
 
                         {activeTab === 'results' && (
-                            <div className="animate-fade-in space-y-10">
+                            <div className="animate-fade-in space-y-8 md:space-y-10">
                                 {/* Result Hero */}
-                                <div className="bg-slate-900 rounded-[3rem] p-10 text-white relative overflow-hidden shadow-2xl border-4 border-indigo-500/10">
-                                    <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-emerald-500/20 rounded-full blur-[100px]"></div>
-                                    <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-96 h-96 bg-indigo-500/20 rounded-full blur-[100px]"></div>
+                                <div className="bg-slate-900 rounded-[2rem] md:rounded-[3rem] p-6 md:p-10 text-white relative overflow-hidden shadow-2xl border-4 border-indigo-500/10">
+                                    <div className="absolute top-0 right-0 -mr-20 -mt-20 w-60 h-60 md:w-96 md:h-96 bg-emerald-500/20 rounded-full blur-[80px] md:blur-[100px]"></div>
+                                    <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-60 h-60 md:w-96 md:h-96 bg-indigo-500/20 rounded-full blur-[80px] md:blur-[100px]"></div>
                                     
-                                    <div className="relative z-10 grid md:grid-cols-2 gap-12 items-center">
+                                    <div className="relative z-10 grid md:grid-cols-2 gap-8 md:gap-12 items-center">
                                         <div className="text-center md:text-left">
                                             <h2 className="text-emerald-400 text-[10px] font-black uppercase tracking-[0.3em] mb-3">Total Estimated Support</h2>
-                                            <div className="flex items-baseline justify-center md:justify-start gap-2">
-                                                <span className="text-7xl font-black tracking-tighter">${results.total.toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
-                                                <span className="text-slate-400 text-xl font-bold tracking-tight">/ year</span>
+                                            <div className="flex items-baseline justify-center md:justify-start gap-2 flex-wrap">
+                                                <span className="text-5xl md:text-7xl font-black tracking-tighter">${results.total.toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
+                                                <span className="text-slate-400 text-lg md:text-xl font-bold tracking-tight">/ year</span>
                                             </div>
                                             <div className="mt-6 flex flex-col gap-2">
                                                 <p className="text-slate-400 text-sm font-bold tracking-tight flex items-center justify-center md:justify-start gap-2">
                                                     <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
                                                     ~${Math.round(results.monthly).toLocaleString()} Average Monthly Support
                                                 </p>
-                                                <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest pl-4">Non-taxable federal & provincial assistance</p>
+                                                <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest pl-0 md:pl-4">Non-taxable federal & provincial assistance</p>
                                             </div>
                                         </div>
-                                        <div className="bg-white/5 rounded-[2rem] p-8 border border-white/10 backdrop-blur-xl shadow-inner">
-                                            <div className="flex h-6 w-full rounded-full overflow-hidden bg-white/10 p-1 mb-6">
+                                        <div className="bg-white/5 rounded-[1.5rem] md:rounded-[2rem] p-5 md:p-8 border border-white/10 backdrop-blur-xl shadow-inner">
+                                            <div className="flex h-4 md:h-6 w-full rounded-full overflow-hidden bg-white/10 p-1 mb-4 md:mb-6">
                                                 <div style={{ width: `${(results.federal/results.total)*100}%` }} className="bg-blue-500 rounded-full mr-0.5 shadow-lg shadow-blue-500/50"></div>
                                                 <div style={{ width: `${(results.provincial/results.total)*100}%` }} className="bg-emerald-500 rounded-full mr-0.5 shadow-lg shadow-emerald-500/50"></div>
                                                 <div style={{ width: `${((results.gst + results.caip)/results.total)*100}%` }} className="bg-indigo-500 rounded-full"></div>
                                             </div>
-                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
                                                 <div className="flex items-center gap-3 text-[10px] font-black uppercase text-slate-300 tracking-tighter"><div className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-sm"></div> Federal CCB</div>
                                                 <div className="flex items-center gap-3 text-[10px] font-black uppercase text-slate-300 tracking-tighter"><div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm"></div> {results.provName}</div>
                                                 <div className="flex items-center gap-3 text-[10px] font-black uppercase text-slate-300 tracking-tighter"><div className="w-2.5 h-2.5 rounded-full bg-indigo-500 shadow-sm"></div> GST & Carbon Credits</div>
@@ -372,22 +397,20 @@ export default function HouseholdBenefits() {
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                     {/* Phase out Chart */}
-                                    <div className="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm relative overflow-hidden">
-                                        <h3 className="font-black text-slate-800 mb-8 flex items-center gap-2 uppercase tracking-widest text-[10px]"><TrendingDownIcon size={18} className="text-indigo-600"/> Income Phase-out Curve</h3>
-                                        <div className="h-[320px] w-full">
+                                    <div className="bg-white p-4 md:p-8 rounded-[2rem] md:rounded-[2.5rem] border border-slate-200 shadow-sm relative overflow-hidden">
+                                        <h3 className="font-black text-slate-800 mb-6 md:mb-8 flex items-center gap-2 uppercase tracking-widest text-[10px]"><TrendingDownIcon size={18} className="text-indigo-600"/> Income Phase-out Curve</h3>
+                                        <div className="h-[250px] md:h-[320px] w-full -ml-4 md:ml-0">
                                             <ResponsiveContainer width="100%" height="100%">
-                                                <AreaChart data={chartData} margin={{ top: 20, right: 30, left: 10, bottom: 20 }}>
+                                                <AreaChart data={chartData} margin={{ top: 20, right: 10, left: 0, bottom: 20 }}>
                                                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                                                     <XAxis dataKey="income" fontSize={10} tickFormatter={v => `$${v/1000}k`} axisLine={false} tickLine={false}>
-                                                        <Label value="Annual Net Income" offset={-15} position="insideBottom" fontSize={10} fontWeight="900" fill="#94a3b8" />
+                                                        <Label value="Net Income" offset={-15} position="insideBottom" fontSize={10} fontWeight="900" fill="#94a3b8" />
                                                     </XAxis>
-                                                    <YAxis fontSize={10} axisLine={false} tickLine={false} tickFormatter={v => `$${v/1000}k`}>
-                                                        <Label value="Annual Benefit" angle={-90} position="insideLeft" style={{ textAnchor: 'middle' }} fontSize={10} fontWeight="900" fill="#94a3b8" />
-                                                    </YAxis>
+                                                    <YAxis fontSize={10} axisLine={false} tickLine={false} tickFormatter={v => `$${v/1000}k`} />
                                                     <RechartsTooltip 
                                                         contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '15px', color: '#f8fafc', fontWeight: 'bold', fontSize: '11px' }}
                                                         formatter={(v, name) => [`$${v.toLocaleString()}`, name]} 
-                                                        labelFormatter={(l) => `Income Profile: $${l.toLocaleString()}`}
+                                                        labelFormatter={(l) => `Income: $${l.toLocaleString()}`}
                                                     />
                                                     <Legend verticalAlign="top" align="right" height={36} iconType="circle" wrapperStyle={{ fontSize: '9px', fontWeight: '900', textTransform: 'uppercase', paddingBottom: '10px' }} />
                                                     <Area type="monotone" dataKey="CCB" name="Fed CCB" stackId="1" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.6} />
@@ -400,18 +423,18 @@ export default function HouseholdBenefits() {
                                     </div>
 
                                     {/* Monthly Schedule */}
-                                    <div className="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm flex flex-col">
-                                        <h3 className="font-black text-slate-800 mb-8 flex items-center gap-2 uppercase tracking-widest text-[10px]"><CalendarIcon size={18} className="text-indigo-600"/> Estimated Payment Schedule</h3>
-                                        <div className="grid grid-cols-4 sm:grid-cols-4 gap-2 flex-1">
+                                    <div className="bg-white p-5 md:p-8 rounded-[2rem] md:rounded-[2.5rem] border border-slate-200 shadow-sm flex flex-col">
+                                        <h3 className="font-black text-slate-800 mb-6 md:mb-8 flex items-center gap-2 uppercase tracking-widest text-[10px]"><CalendarIcon size={18} className="text-indigo-600"/> Payment Schedule</h3>
+                                        <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 flex-1">
                                             {paymentSchedule.map((item, idx) => (
-                                                <div key={idx} className={`p-4 rounded-[1.5rem] border text-center transition-all flex flex-col justify-center items-center shadow-sm ${item.isQuarterly ? 'bg-indigo-50 border-indigo-100 ring-2 ring-indigo-500/10' : 'bg-slate-50 border-slate-100'}`}>
-                                                    <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">{item.month}</div>
-                                                    <div className={`text-base font-black tracking-tighter ${item.isQuarterly ? 'text-indigo-600' : 'text-slate-800'}`}>${Math.round(item.total)}</div>
-                                                    {item.isQuarterly && <div className="text-[7px] font-black text-indigo-400 uppercase tracking-tighter mt-1">+Bonus</div>}
+                                                <div key={idx} className={`p-3 md:p-4 rounded-[1rem] md:rounded-[1.5rem] border text-center transition-all flex flex-col justify-center items-center shadow-sm ${item.isQuarterly ? 'bg-indigo-50 border-indigo-100 ring-2 ring-indigo-500/10' : 'bg-slate-50 border-slate-100'}`}>
+                                                    <div className="text-[8px] md:text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">{item.month}</div>
+                                                    <div className={`text-sm md:text-base font-black tracking-tighter ${item.isQuarterly ? 'text-indigo-600' : 'text-slate-800'}`}>${Math.round(item.total)}</div>
+                                                    {item.isQuarterly && <div className="text-[6px] md:text-[7px] font-black text-indigo-400 uppercase tracking-tighter mt-1">+Bonus</div>}
                                                 </div>
                                             ))}
                                         </div>
-                                        <div className="mt-8 p-4 bg-slate-900 rounded-2xl flex items-center gap-3 border-2 border-indigo-500/20">
+                                        <div className="mt-6 md:mt-8 p-4 bg-slate-900 rounded-2xl flex items-center gap-3 border-2 border-indigo-500/20">
                                             <div className="p-2 bg-white/10 rounded-lg text-indigo-400"><InfoIcon size={16}/></div>
                                             <p className="text-[9px] text-slate-300 font-bold uppercase tracking-widest leading-relaxed">
                                                 CCB/Provincial: 20th <br/>
@@ -448,14 +471,14 @@ export default function HouseholdBenefits() {
                 </div>
             </main>
 
-            {/* Live Estimate Portal */}
-            {activeTab === 'input' && mounted && createPortal(
-                <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200 p-5 z-[9999] animate-slide-up shadow-[0_-20px_50px_-15px_rgba(0,0,0,0.1)]" style={{ position: 'fixed', bottom: 0, width: '100%' }}>
-                    <div className="max-w-5xl mx-auto flex items-center justify-between gap-6">
+            {/* Live Estimate Portal - Hidden if typing */}
+            {activeTab === 'input' && mounted && !isInputFocused && createPortal(
+                <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200 p-4 md:p-5 z-[9999] animate-slide-up shadow-[0_-20px_50px_-15px_rgba(0,0,0,0.1)]" style={{ position: 'fixed', bottom: 0, width: '100%' }}>
+                    <div className="max-w-5xl mx-auto flex items-center justify-between gap-4 md:gap-6">
                         <div className="flex flex-col">
-                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-1">Est. Total Benefits</span>
+                            <span className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-1">Est. Total Benefits</span>
                             <div className="flex items-baseline gap-1.5">
-                                <span className="text-4xl font-black text-slate-900 tracking-tighter">
+                                <span className="text-3xl md:text-4xl font-black text-slate-900 tracking-tighter">
                                     ${Math.round(results.total).toLocaleString()}
                                 </span>
                                 <span className="text-xs font-black text-slate-400 uppercase">/ yr</span>
@@ -466,7 +489,7 @@ export default function HouseholdBenefits() {
                                 <span>Approx. ${Math.round(results.monthly).toLocaleString()} Monthly</span>
                                 <span className="text-emerald-500">Tax-Free Assistance</span>
                             </div>
-                            <button onClick={() => { setActiveTab('results'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="bg-indigo-600 hover:bg-indigo-700 text-white font-black py-4 px-12 rounded-[1.5rem] shadow-xl shadow-indigo-200 transition-all flex items-center gap-2 transform active:scale-95 whitespace-nowrap uppercase tracking-widest text-[10px]">
+                            <button onClick={() => { setActiveTab('results'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="bg-indigo-600 hover:bg-indigo-700 text-white font-black py-3 px-6 md:py-4 md:px-12 rounded-[1.2rem] md:rounded-[1.5rem] shadow-xl shadow-indigo-200 transition-all flex items-center gap-2 transform active:scale-95 whitespace-nowrap uppercase tracking-widest text-[10px]">
                                 View Full Breakdown <ArrowRightIcon size={18} />
                             </button>
                         </div>
@@ -477,6 +500,3 @@ export default function HouseholdBenefits() {
         </div>
     );
 }
-
-// Fallback logic for missing Icons in the main Icons.js
-const CheckCircleIcon = (props) => (<IconBase {...props}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></IconBase>);
