@@ -1,7 +1,7 @@
 import React from 'react';
 import { 
-    UserGroupIcon, DollarSignIcon, TrendingUpIcon, WandIcon, UploadIcon, FileTextIcon, RotateCcwIcon, BarChartIcon, ChevronDownIcon, XIcon
-} from './Icons'; // Adjust path
+    UserGroupIcon, DollarSignIcon, TrendingUpIcon, WandIcon, UploadIcon, FileTextIcon, RotateCcwIcon, BarChartIcon, ChevronDownIcon, XIcon, CheckIcon
+} from './Icons'; 
 import { Tooltip } from './SharedUI';
 import { CURRENT_YEAR, getYMPE, getYAMPE } from '../../utils/constants';
 
@@ -32,7 +32,6 @@ export default function InputTab({
     return (
         <div className="animate-fade-in space-y-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
-                
                 {/* COLUMN 1: PROFILE & FAMILY */}
                 <div className="space-y-6">
                     <div className="flex items-center gap-2 text-indigo-600 mb-2">
@@ -218,29 +217,102 @@ export default function InputTab({
                                     <div className="col-span-9">Reported Earnings</div>
                                 </div>
                                 {results.years.map(year => {
+                                    // 1. CALCULATE LIMITS
                                     const ympe = getYMPE(year);
                                     const yampe = getYAMPE(year);
-                                    const maxVal = yampe > 0 ? yampe : ympe;
+                                    const hasYampe = yampe > 0;
+                                    const absoluteMax = hasYampe ? yampe : ympe;
+
+                                    // 2. GET CURRENT VALUE
                                     const val = earnings[year] || '';
                                     const valNum = parseFloat(val) || 0;
-                                    const isMax = valNum >= maxVal && val !== '';
-                                    const isTier2 = yampe > 0 && valNum > ympe && !isMax;
+
+                                    // 3. DETERMINE STATE ZONE
+                                    const isMaxed = valNum >= absoluteMax && val !== '';
+                                    const inTier2 = hasYampe && valNum >= ympe && !isMaxed;
                                     
-                                    let inputStyle = "border-slate-200 focus:ring-indigo-500";
-                                    if (isMax) inputStyle = "border-emerald-300 bg-emerald-50/30 text-emerald-800 font-bold focus:ring-emerald-500";
-                                    else if (isTier2) inputStyle = "border-purple-300 bg-purple-50/30 text-purple-800 focus:ring-purple-500";
+                                    // 4. STYLE CONFIGURATION - DESKTOP ONLY PADDING
+                                    // "sm:pr-24" ensures desktop has room for the badge. 
+                                    // No extra padding on mobile so numbers don't get cut off.
+                                    let inputBorder = "border-slate-200 focus:ring-indigo-500 focus:border-indigo-500";
+                                    let desktopBadge = null;
+                                    let mobileBadge = null;
+                                    
+                                    if (isMaxed) {
+                                        inputBorder = "border-emerald-400 bg-emerald-50/30 text-emerald-900 focus:ring-emerald-500 focus:border-emerald-500 sm:pr-24";
+                                        
+                                        // Desktop Badge (Inside)
+                                        desktopBadge = (
+                                            <span className="hidden sm:flex absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-black text-emerald-600 uppercase tracking-wider bg-emerald-100/80 px-2 py-0.5 rounded items-center gap-1 cursor-default pointer-events-none">
+                                                {CheckIcon && <CheckIcon size={10} strokeWidth={4}/>} MAX
+                                            </span>
+                                        );
+
+                                        // Mobile Badge (Below)
+                                        mobileBadge = (
+                                            <div className="sm:hidden absolute -bottom-3 right-0 text-[8px] font-black text-emerald-600 uppercase tracking-wider flex items-center gap-1">
+                                                 MAXED {CheckIcon && <CheckIcon size={8} strokeWidth={4}/>}
+                                            </div>
+                                        );
+                                    } else if (inTier2) {
+                                        inputBorder = "border-purple-300 bg-purple-50/30 text-purple-900 focus:ring-purple-500 focus:border-purple-500 sm:pr-28";
+                                        
+                                        // Desktop Badge (Inside)
+                                        desktopBadge = (
+                                            <span className="hidden sm:flex absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-black text-purple-600 uppercase tracking-wider bg-purple-100/80 px-2 py-0.5 rounded cursor-default pointer-events-none">
+                                                ENHANCED
+                                            </span>
+                                        );
+
+                                        // Mobile Badge (Below)
+                                        mobileBadge = (
+                                            <div className="sm:hidden absolute -bottom-3 right-0 text-[8px] font-black text-purple-600 uppercase tracking-wider">
+                                                 TIER 2
+                                            </div>
+                                        );
+                                    }
 
                                     return (
                                         <div key={year} className="p-3 border-b border-slate-50 last:border-0 hover:bg-slate-50 transition-colors grid grid-cols-12 items-center rounded-xl">
-                                            <div className="col-span-3 text-xs font-bold text-slate-700">
-                                                {year} <span className="text-[10px] text-slate-400 font-medium ml-1">({year - birthYear})</span>
+                                            {/* LEFT COL: Year & Limits */}
+                                            <div className="col-span-3 flex flex-col justify-center">
+                                                <span className="text-xs font-bold text-slate-700">
+                                                    {year} <span className="text-[10px] text-slate-400 font-medium ml-1">({year - birthYear})</span>
+                                                </span>
+                                                
+                                                {/* SMART LIMIT DISPLAY */}
+                                                <div className="flex flex-col gap-0.5 mt-1">
+                                                    {hasYampe ? (
+                                                        <>
+                                                            <span className="text-[9px] text-slate-400 font-medium leading-none whitespace-nowrap">Base: ${ympe.toLocaleString()}</span>
+                                                            <span className="text-[9px] text-slate-400 font-medium leading-none whitespace-nowrap">Max: <span className="font-bold text-slate-500">${yampe.toLocaleString()}</span></span>
+                                                        </>
+                                                    ) : (
+                                                        <span className="text-[9px] text-slate-400 font-medium leading-none whitespace-nowrap">Limit: ${ympe.toLocaleString()}</span>
+                                                    )}
+                                                </div>
                                             </div>
+
+                                            {/* RIGHT COL: Input & Button */}
                                             <div className="col-span-9 flex gap-3">
                                                 <div className="relative flex-1 group">
-                                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs font-mono group-focus-within:text-indigo-500 transition-colors">$</span>
-                                                    <input type="number" value={val} onChange={(e) => handleEarningChange(year, e.target.value)} className={`w-full pl-6 pr-3 py-2 text-sm border rounded-xl outline-none focus:ring-2 transition-all font-mono ${inputStyle}`} placeholder="0" />
+                                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs font-mono group-focus-within:text-indigo-500 transition-colors pointer-events-none">$</span>
+                                                    <input 
+                                                        type="number" 
+                                                        value={val} 
+                                                        onChange={(e) => handleEarningChange(year, e.target.value)} 
+                                                        className={`w-full pl-6 py-2 text-sm border rounded-xl outline-none focus:ring-2 transition-all font-mono shadow-sm ${inputBorder}`} 
+                                                        placeholder="0" 
+                                                    />
+                                                    {desktopBadge}
+                                                    {mobileBadge}
                                                 </div>
-                                                <button onClick={() => toggleMax(year, isMax)} className={`px-3 py-2 text-[10px] font-black rounded-xl border transition-all uppercase tracking-tighter shadow-sm ${isMax ? 'bg-emerald-500 text-white border-emerald-600' : 'bg-white text-slate-400 border-slate-200 hover:border-slate-300 hover:text-slate-600'}`}>Max</button>
+                                                <button 
+                                                    onClick={() => toggleMax(year, isMaxed)} 
+                                                    className={`px-3 py-2 text-[10px] font-black rounded-xl border transition-all uppercase tracking-tighter shadow-sm w-[50px] flex items-center justify-center ${isMaxed ? 'bg-emerald-500 text-white border-emerald-600 hover:bg-emerald-600' : 'bg-white text-slate-400 border-slate-200 hover:border-slate-300 hover:text-slate-600'}`}
+                                                >
+                                                    {isMaxed ? (CheckIcon ? <CheckIcon size={14} strokeWidth={4}/> : "MAX") : "MAX"}
+                                                </button>
                                             </div>
                                         </div>
                                     );
