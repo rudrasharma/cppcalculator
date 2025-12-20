@@ -21,7 +21,7 @@ import { compressEarnings, decompressEarnings } from '../utils/compression';
 //               UI HELPERS
 // ==========================================
 const Tooltip = ({ text }) => (
-    <div className="group relative inline-flex items-center ml-1 align-middle">
+    <div className="group relative inline-flex items-center ml-1 align-middle text-left">
         <button type="button" className="text-slate-400 hover:text-indigo-600 transition-colors cursor-help">
             <HelpCircleIcon size={16} />
         </button>
@@ -81,7 +81,6 @@ export default function Calculator() {
 
     // --- 3. UI STATE ---
     const [showAbout, setShowAbout] = useState(false);
-    const [compactGrid, setCompactGrid] = useState(false);
     const [useFutureDollars, setUseFutureDollars] = useState(false);
     const [showImport, setShowImport] = useState(false);
     const [importText, setImportText] = useState("");
@@ -198,7 +197,6 @@ export default function Calculator() {
         setLineVisibility(prev => ({ ...prev, [dataKey]: !prev[dataKey] }));
     };
 
-    // --- 7. COMPARISON LOGIC ---
     const saveComparison = () => {
         setComparisonSnapshot({
             age: retirementAge,
@@ -234,7 +232,6 @@ export default function Calculator() {
         }
     }
 
-    // --- 8. RENDER HELPERS ---
     const inflationFactor = useFutureDollars ? Math.pow(1.025, retirementAge - (CURRENT_YEAR - birthYear)) : 1;
     const taxFactor = showNet ? (1 - TAX_RATE) : 1; 
     
@@ -479,7 +476,7 @@ export default function Calculator() {
                                                 <div className="flex gap-3">
                                                     <div className="relative w-full">
                                                         <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm font-mono">$</span>
-                                                        <input id="salary-input" type="number" placeholder="65000" value={avgSalaryInput} onChange={(e) => setAvgSalaryInput(e.target.value)} className="w-full pl-8 p-3 bg-white border border-slate-300 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none shadow-inner" />
+                                                        <input id="salary-input" type="number" placeholder="65000" value={avgSalaryInput} onChange={(e) => setAvgSalaryInput(e.target.value)} className="w-full pl-8 p-3 bg-white border border-slate-300 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none shadow-inner font-mono" />
                                                     </div>
                                                     <button onClick={applyAverageSalary} className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-3 rounded-xl text-sm font-bold flex items-center gap-2 transition-all shadow-lg shadow-indigo-100 whitespace-nowrap"><WandIcon size={18} /> {hasEarnings ? "Fill History" : "Generate All"}</button>
                                                 </div>
@@ -512,11 +509,9 @@ export default function Calculator() {
 
                                             {showGrid && (
                                                 <div className="max-h-[600px] overflow-y-auto p-3 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
-                                                    <div className="grid grid-cols-12 w-full text-[10px] font-bold text-slate-400 uppercase tracking-widest px-4 mb-3">
-                                                        <div className="col-span-2">Year</div>
-                                                        <div className="col-span-2 hidden md:block">Age</div>
-                                                        <div className="col-span-3 text-right pr-10 hidden md:block">CPP Limit</div>
-                                                        <div className="col-span-10 md:col-span-5">Reported Earnings</div>
+                                                    <div className="grid grid-cols-12 w-full text-[10px] font-bold text-slate-400 uppercase tracking-widest px-4 mb-3 text-left">
+                                                        <div className="col-span-3">Year <span className="font-normal text-slate-300">(Age)</span></div>
+                                                        <div className="col-span-9">Reported Earnings</div>
                                                     </div>
                                                     {results.years.map(year => {
                                                         const ympe = getYMPE(year);
@@ -533,13 +528,10 @@ export default function Calculator() {
 
                                                         return (
                                                             <div key={year} className="p-3 border-b border-slate-50 last:border-0 hover:bg-slate-50 transition-colors grid grid-cols-12 items-center rounded-xl">
-                                                                <div className="col-span-2 text-sm font-bold text-slate-700">{year}</div>
-                                                                <div className="col-span-2 hidden md:block text-xs font-bold text-slate-400">{year - birthYear}</div>
-                                                                <div className="col-span-3 hidden md:block text-right pr-10">
-                                                                    <div className="text-xs font-mono text-slate-400 font-bold">${ympe.toLocaleString()}</div>
-                                                                    {yampe > 0 && <div className="text-[9px] font-bold text-purple-400 uppercase tracking-tighter">Tier 2: ${yampe.toLocaleString()}</div>}
+                                                                <div className="col-span-3 text-xs font-bold text-slate-700">
+                                                                    {year} <span className="text-[10px] text-slate-400 font-medium ml-1">({year - birthYear})</span>
                                                                 </div>
-                                                                <div className="col-span-10 md:col-span-5 flex gap-3">
+                                                                <div className="col-span-9 flex gap-3">
                                                                     <div className="relative flex-1 group">
                                                                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs font-mono group-focus-within:text-indigo-500 transition-colors">$</span>
                                                                         <input type="number" value={val} onChange={(e) => handleEarningChange(year, e.target.value)} className={`w-full pl-6 pr-3 py-2 text-sm border rounded-xl outline-none focus:ring-2 transition-all font-mono ${inputStyle}`} placeholder="0" />
@@ -563,15 +555,15 @@ export default function Calculator() {
                                     <div className="bg-amber-50 border-l-4 border-amber-400 p-5 rounded-2xl flex items-start gap-4 shadow-sm">
                                         <InfoIcon className="text-amber-500 mt-1 shrink-0" size={24} />
                                         <div>
-                                            <h4 className="font-bold text-amber-900">Earnings Data Missing</h4>
-                                            <p className="text-amber-800 text-sm mt-1 leading-relaxed">Your current estimate is <strong>$0</strong> because you haven't entered an earnings history. <button onClick={() => setActiveTab('input')} className="font-black underline decoration-2 underline-offset-2 hover:text-amber-950 transition-colors">Go back to Step 1</button> to generate a forecast or import data.</p>
+                                            <h4 className="font-bold text-amber-900">Data Missing</h4>
+                                            <p className="text-amber-800 text-sm mt-1 leading-relaxed">Forecast is currently <strong>$0</strong>. <button onClick={() => setActiveTab('input')} className="font-black underline decoration-2 underline-offset-2 hover:text-amber-950 transition-colors">Go to Step 1</button> to add earnings.</p>
                                         </div>
                                     </div>
                                 )}
 
                                 {/* HERO CARD */}
                                 <div className="bg-slate-900 rounded-3xl shadow-2xl p-8 text-white relative overflow-hidden isolate transition-all duration-500 transform border border-slate-800">
-                                    <div className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 bg-indigo-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
+                                    <div className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 bg-indigo-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20"></div>
                                     <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 bg-emerald-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20"></div>
                                     
                                     <div className="relative z-10">
@@ -587,7 +579,7 @@ export default function Calculator() {
 
                                         <div className="grid md:grid-cols-2 gap-12 items-center">
                                             <div>
-                                                <h2 className="text-slate-400 text-xs font-bold uppercase tracking-[0.2em] mb-2 leading-none">Monthly Retirement Income</h2>
+                                                <h2 className="text-slate-400 text-xs font-bold uppercase tracking-[0.2em] mb-2 leading-none">Monthly Forecast</h2>
                                                 <div className="flex items-baseline gap-2">
                                                     <span className="text-6xl md:text-7xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-br from-white via-white to-slate-400">
                                                         ${displayTotal.toLocaleString('en-CA', { maximumFractionDigits: 0 })}
@@ -598,28 +590,28 @@ export default function Calculator() {
                                                 {displayTotal > 0 && (
                                                     <div className="mt-8">
                                                         <div className="flex h-4 w-full rounded-full overflow-hidden bg-white/10 p-0.5 border border-white/5 ring-4 ring-white/5">
-                                                            <div style={{ width: `${cppPerc}%` }} className="bg-gradient-to-r from-indigo-600 to-indigo-400 rounded-l-full transition-all duration-1000 ease-out" />
-                                                            <div style={{ width: `${oasPerc}%` }} className="bg-gradient-to-r from-amber-600 to-amber-400 transition-all duration-1000 ease-out" />
-                                                            <div style={{ width: `${gisPerc}%` }} className="bg-gradient-to-r from-emerald-600 to-emerald-400 rounded-r-full transition-all duration-1000 ease-out" />
+                                                            <div style={{ width: `${cppPerc}%` }} className="bg-gradient-to-r from-indigo-600 to-indigo-400 rounded-l-full transition-all duration-1000 ease-out shadow-[0_0_15px_rgba(99,102,241,0.4)]" />
+                                                            <div style={{ width: `${oasPerc}%` }} className="bg-gradient-to-r from-amber-600 to-amber-400 transition-all duration-1000 shadow-[0_0_15px_rgba(245,158,11,0.4)]" />
+                                                            <div style={{ width: `${gisPerc}%` }} className="bg-gradient-to-r from-emerald-600 to-emerald-400 rounded-r-full transition-all duration-1000 shadow-[0_0_15px_rgba(16,185,129,0.4)]" />
                                                         </div>
                                                         <div className="flex gap-6 mt-4 text-[10px] font-black tracking-[0.1em] uppercase text-slate-400">
-                                                            <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.5)]"></div> CPP</div>
-                                                            <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]"></div> OAS</div>
-                                                            {gisPerc > 0 && <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div> GIS</div>}
+                                                            <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-indigo-500"></div> CPP</div>
+                                                            <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-amber-500"></div> OAS</div>
+                                                            {gisPerc > 0 && <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-emerald-500"></div> GIS</div>}
                                                         </div>
                                                     </div>
                                                 )}
                                             </div>
 
-                                            <div className="bg-white/5 rounded-3xl p-6 border border-white/10 backdrop-blur-md shadow-2xl relative">
+                                            <div className="bg-white/5 rounded-[2rem] p-8 border border-white/10 backdrop-blur-md shadow-2xl">
                                                 <div className="flex justify-between items-center mb-6">
                                                     <label className="text-sm font-bold text-slate-200">Test Scenarios</label>
                                                     <div className="bg-indigo-500 text-white text-[10px] font-black px-2 py-1 rounded-lg uppercase tracking-wider shadow-lg ring-2 ring-indigo-500/20">
-                                                        Target: {retirementAge}
+                                                        Age: {retirementAge}
                                                     </div>
                                                 </div>
                                                 
-                                                <div className="space-y-6">
+                                                <div className="space-y-8">
                                                     <input 
                                                         type="range" 
                                                         min="60" 
@@ -634,15 +626,15 @@ export default function Calculator() {
                                                         {!comparisonSnapshot ? (
                                                             <button 
                                                                 onClick={saveComparison} 
-                                                                className="w-full py-3 text-sm font-bold rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white transition-all flex items-center justify-center gap-2 shadow-xl shadow-indigo-900/40 active:scale-95"
+                                                                className="w-full py-4 text-sm font-black rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white transition-all flex items-center justify-center gap-2 shadow-xl shadow-indigo-900/40 active:scale-95 uppercase tracking-widest"
                                                             >
-                                                                <ScaleIcon size={18} /> Snapshot Age {retirementAge}
+                                                                <ScaleIcon size={20} /> Snapshot Age {retirementAge}
                                                             </button>
                                                         ) : (
-                                                            <div className="grid grid-cols-5 gap-2">
-                                                                <button onClick={clearComparison} className="col-span-1 p-3 bg-rose-500/20 text-rose-300 border border-rose-500/30 rounded-2xl hover:bg-rose-500/30 transition-all flex justify-center items-center" title="Clear Snapshot"><XIcon size={20} /></button>
-                                                                <div className="col-span-4 bg-indigo-500/10 border border-indigo-500/20 p-3 rounded-2xl text-center">
-                                                                    <div className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest leading-none mb-1">Comparing to</div>
+                                                            <div className="grid grid-cols-6 gap-2">
+                                                                <button onClick={clearComparison} className="col-span-1 p-4 bg-rose-500/20 text-rose-300 border border-rose-500/30 rounded-2xl hover:bg-rose-500/30 transition-all flex justify-center items-center" title="Clear Comparison"><XIcon size={24} /></button>
+                                                                <div className="col-span-5 bg-indigo-500/10 border border-indigo-500/20 p-4 rounded-2xl text-center flex flex-col justify-center">
+                                                                    <div className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest leading-none mb-1">Comparing to Baseline</div>
                                                                     <div className="text-sm font-black text-white">Age {comparisonSnapshot.age}</div>
                                                                 </div>
                                                             </div>
@@ -654,36 +646,36 @@ export default function Calculator() {
                                     </div>
                                 </div>
 
-                                {/* SCENARIO COMPARISON TABLE */}
                                 {comparisonSnapshot && (
-                                    <div className="bg-white rounded-3xl border-2 border-indigo-50 overflow-hidden animate-fade-in shadow-xl">
-                                        <div className="bg-indigo-600 p-4 flex items-center gap-3 text-white">
-                                            <ScaleIcon size={20} />
-                                            <h3 className="font-black text-sm uppercase tracking-widest">Scenario Crossover Analysis</h3>
+                                    <div className="bg-white rounded-[2rem] border-2 border-indigo-50 overflow-hidden animate-fade-in shadow-xl">
+                                        <div className="bg-indigo-600 p-5 flex items-center gap-3 text-white">
+                                            <ScaleIcon size={24} />
+                                            <h3 className="font-black text-sm uppercase tracking-[0.1em]">Scenario Comparative Logic</h3>
                                         </div>
-                                        <div className="p-6">
-                                            <div className="grid grid-cols-3 gap-6">
-                                                <div className="space-y-4">
-                                                    <div className="h-10"></div>
-                                                    <div className="font-bold text-slate-400 text-xs uppercase tracking-widest py-4 border-b border-slate-100">Monthly Check</div>
-                                                    <div className="font-bold text-slate-400 text-xs uppercase tracking-widest py-4">Est. Breakeven</div>
+                                        <div className="p-8">
+                                            <div className="grid grid-cols-3 gap-8">
+                                                <div className="space-y-6 pt-10">
+                                                    <div className="font-bold text-slate-400 text-xs uppercase tracking-widest py-4 border-b border-slate-50">Estimated Check</div>
+                                                    <div className="font-bold text-slate-400 text-xs uppercase tracking-widest py-4">Total Wealth Crossover</div>
                                                 </div>
-                                                <div className="bg-slate-50 rounded-2xl p-4 text-center border border-slate-100">
-                                                    <div className="text-[10px] font-black text-slate-400 uppercase mb-2">Age {comparisonSnapshot.age}</div>
-                                                    <div className="text-xl font-black text-slate-700 py-3 border-b border-white">${(comparisonSnapshot.monthly * inflationFactor * taxFactor).toLocaleString(undefined, {maximumFractionDigits:0})}</div>
-                                                    <div className="py-4 text-slate-400 italic text-xs">Baseline</div>
+                                                <div className="bg-slate-50 rounded-3xl p-6 text-center border border-slate-100 flex flex-col items-center">
+                                                    <div className="bg-white px-3 py-1 rounded-full text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 shadow-sm border border-slate-100">Scenario A</div>
+                                                    <div className="text-xs font-bold text-slate-400 uppercase mb-1">Start @ Age {comparisonSnapshot.age}</div>
+                                                    <div className="text-3xl font-black text-slate-700 py-3 border-b border-white w-full font-mono">${(comparisonSnapshot.monthly * inflationFactor * taxFactor).toLocaleString(undefined, {maximumFractionDigits:0})}</div>
+                                                    <div className="py-6 text-slate-300 italic text-xs font-bold uppercase tracking-widest">Baseline</div>
                                                 </div>
-                                                <div className="bg-indigo-50 rounded-2xl p-4 text-center border border-indigo-100 ring-2 ring-indigo-200/50">
-                                                    <div className="text-[10px] font-black text-indigo-500 uppercase mb-2">Age {retirementAge}</div>
-                                                    <div className="text-xl font-black text-indigo-700 py-3 border-b border-indigo-100/50">
+                                                <div className="bg-indigo-50 rounded-3xl p-6 text-center border border-indigo-100 ring-4 ring-indigo-500/5 relative overflow-hidden flex flex-col items-center">
+                                                    <div className="bg-indigo-600 px-3 py-1 rounded-full text-[10px] font-black text-white uppercase tracking-widest mb-4 shadow-lg border border-indigo-500">Scenario B</div>
+                                                    <div className="text-xs font-bold text-indigo-400 uppercase mb-1">Start @ Age {retirementAge}</div>
+                                                    <div className="text-3xl font-black text-indigo-700 py-3 border-b border-indigo-100/50 w-full font-mono">
                                                         ${displayTotal.toLocaleString(undefined, {maximumFractionDigits:0})}
-                                                        <div className={`text-[10px] mt-1 font-sans font-bold ${results.grandTotal >= comparisonSnapshot.monthly ? 'text-emerald-600' : 'text-rose-500'}`}>
+                                                        <div className={`text-[10px] mt-1 font-sans font-black ${results.grandTotal >= comparisonSnapshot.monthly ? 'text-emerald-600' : 'text-rose-500'}`}>
                                                             {results.grandTotal >= comparisonSnapshot.monthly ? '+' : ''}
                                                             ${((results.grandTotal - comparisonSnapshot.monthly) * inflationFactor * taxFactor).toFixed(0)}/mo
                                                         </div>
                                                     </div>
-                                                    <div className="py-4 font-bold text-indigo-900 leading-tight">
-                                                        {comparisonSnapshot.age === retirementAge ? "No Difference" : comparisonMsg}
+                                                    <div className="py-6 font-bold text-indigo-900 leading-tight text-sm">
+                                                        {comparisonSnapshot.age === retirementAge ? "Identical Scenarios Selected" : comparisonMsg}
                                                     </div>
                                                 </div>
                                             </div>
@@ -693,121 +685,121 @@ export default function Calculator() {
 
                                 {/* BREAKDOWN CARDS */}
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                    <div className="bg-white p-6 rounded-3xl border border-slate-200 relative overflow-hidden group shadow-sm">
+                                    <div className="bg-white p-6 rounded-3xl border border-slate-200 relative overflow-hidden group shadow-sm transition-all hover:shadow-md hover:-translate-y-1">
                                         <div className="absolute top-0 left-0 w-full h-1.5 bg-indigo-500"></div>
-                                        <h3 className="font-black text-slate-800 mb-5 flex items-center gap-2 uppercase text-xs tracking-widest leading-none">
-                                            <TrendingUpIcon size={20} className="text-indigo-600"/> CPP Payout
+                                        <h3 className="font-black text-slate-800 mb-6 flex items-center gap-2 uppercase text-xs tracking-widest leading-none">
+                                            <TrendingUpIcon size={20} className="text-indigo-600"/> CPP Projection
                                         </h3>
                                         <div className="space-y-4">
                                             <div className="flex justify-between items-center text-sm">
-                                                <span className="text-slate-500 font-medium">Base Pension</span>
-                                                <span className="font-mono font-bold text-slate-700">${(results.cpp.base * inflationFactor * taxFactor).toFixed(2)}</span>
+                                                <span className="text-slate-500 font-bold uppercase text-[10px]">Base (Core)</span>
+                                                <span className="font-mono font-black text-slate-800">${(results.cpp.base * inflationFactor * taxFactor).toFixed(2)}</span>
                                             </div>
                                             <div className="flex justify-between items-center text-sm">
-                                                <span className="text-slate-500 font-medium flex items-center gap-1">Enhancement <Tooltip text="The results of your Phase 1 and Phase 2 (Tier 2) contributions since 2019." /></span>
-                                                <span className="font-mono font-bold text-emerald-600">+${(results.cpp.enhanced * inflationFactor * taxFactor).toFixed(2)}</span>
+                                                <span className="text-slate-500 font-bold uppercase text-[10px] flex items-center gap-1">Enhanced <Tooltip text="Forecasted results from 2019-2025 Tier 1 and Tier 2 contributions." /></span>
+                                                <span className="font-mono font-black text-emerald-600">+${(results.cpp.enhanced * inflationFactor * taxFactor).toFixed(2)}</span>
                                             </div>
-                                            <div className="pt-4 border-t border-slate-100 flex justify-between items-end">
-                                                <span className="text-slate-900 font-black text-xs uppercase">Total Monthly</span>
-                                                <span className="text-xl font-black text-slate-900">${displayCPP.toFixed(2)}</span>
+                                            <div className="pt-5 border-t-2 border-slate-50 flex justify-between items-end">
+                                                <span className="text-slate-900 font-black text-[10px] uppercase tracking-widest">Gross Monthly</span>
+                                                <span className="text-2xl font-black text-slate-900 font-mono tracking-tighter">${displayCPP.toFixed(2)}</span>
                                             </div>
                                         </div>
                                     </div>
                                     
-                                    <div className="bg-white p-6 rounded-3xl border border-slate-200 relative overflow-hidden group shadow-sm">
+                                    <div className="bg-white p-6 rounded-3xl border border-slate-200 relative overflow-hidden group shadow-sm transition-all hover:shadow-md hover:-translate-y-1">
                                         <div className="absolute top-0 left-0 w-full h-1.5 bg-amber-500"></div>
-                                        <h3 className="font-black text-slate-800 mb-5 flex items-center gap-2 uppercase text-xs tracking-widest leading-none">
-                                            <HomeIcon size={20} className="text-amber-600"/> OAS Payout
+                                        <h3 className="font-black text-slate-800 mb-6 flex items-center gap-2 uppercase text-xs tracking-widest leading-none">
+                                            <HomeIcon size={20} className="text-amber-600"/> OAS Projection
                                         </h3>
                                         <div className="space-y-4">
                                             <div className="flex justify-between items-center text-sm">
-                                                <span className="text-slate-500 font-medium">Standard Amount</span>
-                                                <span className="font-mono font-bold text-slate-700">${(results.oas.gross * inflationFactor * taxFactor).toFixed(2)}</span>
+                                                <span className="text-slate-500 font-bold uppercase text-[10px]">OAS Amount</span>
+                                                <span className="font-mono font-black text-slate-800">${(results.oas.gross * inflationFactor * taxFactor).toFixed(2)}</span>
                                             </div>
                                             {results.oas.clawback > 0 && (
-                                                <div className="flex justify-between items-center text-xs bg-rose-50 p-2 rounded-xl border border-rose-100 text-rose-700 font-bold animate-fade-in">
-                                                    <span>Recovery Tax (Clawback)</span>
+                                                <div className="flex justify-between items-center text-[10px] bg-rose-50 p-3 rounded-2xl border border-rose-100 text-rose-700 font-black uppercase tracking-tighter animate-fade-in shadow-inner">
+                                                    <span>Recovery Tax (Line 23500)</span>
                                                     <span className="font-mono">-${(results.oas.clawback * inflationFactor * taxFactor).toFixed(2)}</span>
                                                 </div>
                                             )}
-                                            <div className="pt-4 border-t border-slate-100 flex justify-between items-end">
-                                                <span className="text-slate-900 font-black text-xs uppercase">Net Payout</span>
-                                                <span className="text-xl font-black text-slate-900">${displayOAS.toFixed(2)}</span>
+                                            <div className="pt-5 border-t-2 border-slate-50 flex justify-between items-end">
+                                                <span className="text-slate-900 font-black text-[10px] uppercase tracking-widest">Estimated Net</span>
+                                                <span className="text-2xl font-black text-slate-900 font-mono tracking-tighter">${displayOAS.toFixed(2)}</span>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div className="bg-white p-6 rounded-3xl border border-slate-200 relative overflow-hidden group shadow-sm">
+                                    <div className="bg-white p-6 rounded-3xl border border-slate-200 relative overflow-hidden group shadow-sm transition-all hover:shadow-md hover:-translate-y-1">
                                         <div className="absolute top-0 left-0 w-full h-1.5 bg-emerald-500"></div>
-                                        <h3 className="font-black text-slate-800 mb-5 flex items-center gap-2 uppercase text-xs tracking-widest leading-none">
-                                            <HeartHandshakeIcon size={20} className="text-emerald-600"/> Supplement
+                                        <h3 className="font-black text-slate-800 mb-6 flex items-center gap-2 uppercase text-xs tracking-widest leading-none">
+                                            <HeartHandshakeIcon size={20} className="text-emerald-600"/> Low Income
                                         </h3>
                                         <div className="space-y-4">
                                             <div className="flex justify-between items-center text-sm">
-                                                <span className="text-slate-500 font-medium">GIS Amount</span>
-                                                <span className="font-mono font-bold text-emerald-600">${displayGIS.toFixed(2)}</span>
+                                                <span className="text-slate-500 font-bold uppercase text-[10px]">GIS Supplement</span>
+                                                <span className="font-mono font-black text-emerald-600">${displayGIS.toFixed(2)}</span>
                                             </div>
-                                            <div className="text-[10px] text-slate-400 font-medium leading-relaxed italic p-2 bg-slate-50 rounded-xl border border-slate-100">
-                                                {results.gis.note || "Calculated based on your reported taxable retirement income."}
+                                            <div className="text-[10px] text-slate-400 font-bold leading-relaxed italic p-3 bg-slate-50 rounded-2xl border border-slate-100 shadow-inner">
+                                                {results.gis.note || "Analysis based on provided taxable household retirement income figures."}
                                             </div>
-                                            <div className="pt-4 border-t border-slate-100 flex justify-between items-end">
-                                                <span className="text-slate-900 font-black text-xs uppercase">Total GIS</span>
-                                                <span className="text-xl font-black text-slate-900">${displayGIS.toFixed(2)}</span>
+                                            <div className="pt-5 border-t-2 border-slate-50 flex justify-between items-end">
+                                                <span className="text-slate-900 font-black text-[10px] uppercase tracking-widest">Total Monthly</span>
+                                                <span className="text-2xl font-black text-slate-900 font-mono tracking-tighter">${displayGIS.toFixed(2)}</span>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
 
                                 {/* CHART SECTION */}
-                                <div className="bg-white p-8 rounded-[2rem] border border-slate-200 shadow-xl mt-8">
-                                    <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-8">
-                                        <div className="flex items-center gap-4">
-                                            <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl shadow-inner"><BarChartIcon size={24}/></div>
+                                <div className="bg-white p-10 rounded-[3rem] border border-slate-200 shadow-2xl mt-8">
+                                    <div className="flex flex-col md:flex-row justify-between items-start gap-6 mb-10">
+                                        <div className="flex items-center gap-5">
+                                            <div className="p-4 bg-indigo-50 text-indigo-600 rounded-[1.5rem] shadow-inner"><BarChartIcon size={32}/></div>
                                             <div>
-                                                <h3 className="font-black text-slate-800 text-xl tracking-tight leading-none mb-1.5">Cumulative Lifetime Wealth</h3>
-                                                <p className="text-xs text-slate-400 font-bold uppercase tracking-widest leading-none">Total cash received over time</p>
+                                                <h3 className="font-black text-slate-800 text-2xl tracking-tighter leading-none mb-2">Lifetime Wealth Crossover</h3>
+                                                <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em] leading-none">Total cumulative cash flow by starting age</p>
                                             </div>
                                         </div>
                                         {comparisonSnapshot && (
-                                            <div className="bg-indigo-600 px-4 py-2 rounded-xl text-white text-xs font-black shadow-lg shadow-indigo-200 animate-slide-in">
-                                                Comparing: Age {comparisonSnapshot.age} vs {retirementAge}
+                                            <div className="bg-indigo-600 px-6 py-3 rounded-2xl text-white text-xs font-black shadow-xl shadow-indigo-900/20 animate-slide-in border-2 border-indigo-400">
+                                                ANALYZING: AGE {comparisonSnapshot.age} VS {retirementAge}
                                             </div>
                                         )}
                                     </div>
                                     
-                                    <div className="h-[400px] w-full cursor-crosshair relative">
+                                    <div className="h-[450px] w-full cursor-crosshair relative">
                                         <ResponsiveContainer width="100%" height="100%">
                                             <LineChart data={results.breakevenData} margin={{ top: 20, right: 30, left: 10, bottom: 20 }} onClick={(e) => { if(e && e.activeLabel) setChartSelection(e.activeLabel) }}>
-                                                <CartesianGrid strokeDasharray="4 4" stroke="#f1f5f9" vertical={false} />
-                                                <XAxis dataKey="age" stroke="#94a3b8" fontSize={11} fontWeight="700" tickLine={false} axisLine={false} tickMargin={10} />
-                                                <YAxis stroke="#94a3b8" fontSize={11} fontWeight="700" tickLine={false} axisLine={false} tickFormatter={(v) => `$${v/1000}k`} tickMargin={10} />
+                                                <CartesianGrid strokeDasharray="6 6" stroke="#f1f5f9" vertical={false} />
+                                                <XAxis dataKey="age" stroke="#94a3b8" fontSize={11} fontWeight="900" tickLine={false} axisLine={false} tickMargin={15} />
+                                                <YAxis stroke="#94a3b8" fontSize={11} fontWeight="900" tickLine={false} axisLine={false} tickFormatter={(v) => `$${v/1000}k`} tickMargin={15} />
                                                 <RechartsTooltip 
-                                                    cursor={{ stroke: '#6366f1', strokeWidth: 2, strokeDasharray: '6 6' }}
-                                                    contentStyle={{ backgroundColor: '#0f172a', border: 'none', borderRadius: '1.25rem', padding: '1rem', color: '#f8fafc', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)' }}
-                                                    itemStyle={{ fontSize: '12px', fontWeight: '700', padding: '4px 0' }}
-                                                    labelStyle={{ color: '#94a3b8', fontSize: '10px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.5rem', borderBottom: '1px solid #1e293b', paddingBottom: '0.5rem' }}
+                                                    cursor={{ stroke: '#6366f1', strokeWidth: 3, strokeDasharray: '8 8' }}
+                                                    contentStyle={{ backgroundColor: '#0f172a', border: 'none', borderRadius: '1.5rem', padding: '1.5rem', color: '#f8fafc', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.4)' }}
+                                                    itemStyle={{ fontSize: '13px', fontWeight: '800', padding: '6px 0' }}
+                                                    labelStyle={{ color: '#94a3b8', fontSize: '11px', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '1rem', borderBottom: '1px solid #1e293b', paddingBottom: '0.75rem' }}
                                                     formatter={(v, n) => [`$${v.toLocaleString()}`, n]}
                                                 />
-                                                <Legend wrapperStyle={{ paddingTop: '2rem', fontSize: '11px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.05em' }} iconType="circle" onClick={handleLegendClick} />
+                                                <Legend wrapperStyle={{ paddingTop: '3rem', fontSize: '12px', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '0.1em' }} iconType="circle" onClick={handleLegendClick} />
                                                 
-                                                <Line type="monotone" dataKey="Early" name="Start 60" stroke="#10b981" strokeWidth={3} dot={false} activeDot={{ r: 6, strokeWidth: 0 }} hide={!lineVisibility.Early} />
-                                                <Line type="monotone" dataKey="Standard" name="Start 65" stroke="#3b82f6" strokeWidth={3} dot={false} activeDot={{ r: 6, strokeWidth: 0 }} hide={!lineVisibility.Standard} />
-                                                <Line type="monotone" dataKey="Deferred" name="Start 70" stroke="#f59e0b" strokeWidth={3} dot={false} activeDot={{ r: 6, strokeWidth: 0 }} hide={!lineVisibility.Deferred} />
+                                                <Line type="monotone" dataKey="Early" name="Start 60" stroke="#10b981" strokeWidth={4} dot={false} activeDot={{ r: 8, strokeWidth: 0, fill: '#10b981' }} hide={!lineVisibility.Early} />
+                                                <Line type="monotone" dataKey="Standard" name="Start 65" stroke="#3b82f6" strokeWidth={4} dot={false} activeDot={{ r: 8, strokeWidth: 0, fill: '#3b82f6' }} hide={!lineVisibility.Standard} />
+                                                <Line type="monotone" dataKey="Deferred" name="Start 70" stroke="#f59e0b" strokeWidth={4} dot={false} activeDot={{ r: 8, strokeWidth: 0, fill: '#f59e0b' }} hide={!lineVisibility.Deferred} />
                                                 
                                                 {results.userIsDistinct && (
-                                                    <Line type="monotone" dataKey="Selected" name={`Start ${results.selectedAge}`} stroke="#8b5cf6" strokeWidth={4} strokeDasharray="8 4" dot={false} activeDot={{ r: 8, strokeWidth: 0 }} hide={!lineVisibility.Selected} />
+                                                    <Line type="monotone" dataKey="Selected" name={`Start ${results.selectedAge}`} stroke="#8b5cf6" strokeWidth={5} strokeDasharray="12 6" dot={false} activeDot={{ r: 10, strokeWidth: 0, fill: '#8b5cf6' }} hide={!lineVisibility.Selected} />
                                                 )}
 
-                                                {results.crossovers.age65 && lineVisibility.Early && lineVisibility.Standard && <ReferenceLine x={results.crossovers.age65} stroke="#3b82f6" strokeDasharray="4 4" label={{ position: 'top', value: `65 catches up to 60 at ${results.crossovers.age65}`, fill: '#3b82f6', fontSize: 10, fontWeight: '900' }} />}
-                                                {results.crossovers.age70 && lineVisibility.Standard && lineVisibility.Deferred && <ReferenceLine x={results.crossovers.age70} stroke="#f59e0b" strokeDasharray="4 4" label={{ position: 'top', value: `70 catches up to 65 at ${results.crossovers.age70}`, fill: '#f59e0b', fontSize: 10, fontWeight: '900' }} />}
+                                                {results.crossovers.age65 && lineVisibility.Early && lineVisibility.Standard && <ReferenceLine x={results.crossovers.age65} stroke="#3b82f6" strokeDasharray="6 6" label={{ position: 'top', value: `65 beats 60 at ${results.crossovers.age65}`, fill: '#3b82f6', fontSize: 11, fontWeight: '900' }} />}
+                                                {results.crossovers.age70 && lineVisibility.Standard && lineVisibility.Deferred && <ReferenceLine x={results.crossovers.age70} stroke="#f59e0b" strokeDasharray="6 6" label={{ position: 'top', value: `70 beats 65 at ${results.crossovers.age70}`, fill: '#f59e0b', fontSize: 11, fontWeight: '900' }} />}
                                             </LineChart>
                                         </ResponsiveContainer>
                                     </div>
                                 </div>
 
                                 <div className="flex justify-center pt-12">
-                                    <button onClick={() => {setActiveTab('input'); window.scrollTo(0,0)}} className="text-slate-400 hover:text-indigo-600 text-sm font-black flex items-center gap-2 transition-all uppercase tracking-widest group">
-                                        <RotateCcwIcon size={20} className="group-hover:rotate-[-180deg] transition-transform duration-500"/> Adjust Parameters
+                                    <button onClick={() => {setActiveTab('input'); window.scrollTo(0,0)}} className="text-slate-400 hover:text-indigo-600 text-[10px] font-black flex items-center gap-3 transition-all uppercase tracking-[0.3em] group">
+                                        <RotateCcwIcon size={24} className="group-hover:rotate-[-360deg] transition-transform duration-700"/> Return to Parameters
                                     </button>
                                 </div>
                             </div>
@@ -816,76 +808,73 @@ export default function Calculator() {
                 </div>
 
                 {/* ACCORDIONS SECTION */}
-                <div className="max-w-3xl mx-auto space-y-6">
+                <div className="max-w-3xl mx-auto space-y-6 pb-20">
                     <Accordion title="Understanding CPP Phase 2 (Enhanced)" icon={CalculatorIcon}>
-                        <p className="mb-4">From 2019 to 2023, CPP began 'Phase 1' of its enhancement, slowly increasing the percentage of income you contribute.</p>
-                        <p className="mb-4 font-bold text-slate-800">Starting in 2024 and reaching full effect in 2025, 'Phase 2' introduces a second earnings ceiling (YAMPE).</p>
-                        <div className="bg-indigo-50 p-4 rounded-2xl border border-indigo-100 text-indigo-900 font-medium">
-                            If you earn over <strong>$71,300</strong> in 2025, you now contribute an extra 4% on the portion above that limit (up to approx $81,200). 
+                        <p className="mb-4">Between 2019 and 2023, the Canada Pension Plan began 'Phase 1' of its modernization, increasing the base contribution percentage.</p>
+                        <p className="mb-4 font-bold text-slate-800">Beginning in 2024 and reaching full threshold in 2025, 'Phase 2' introduces the YAMPE (Year’s Additional Maximum Pensionable Earnings).</p>
+                        <div className="bg-indigo-50 p-5 rounded-3xl border-2 border-indigo-100 text-indigo-900 font-bold leading-relaxed text-sm shadow-inner">
+                            If you earn more than $71,300 in 2025, you now contribute an extra 4% on the 'Tier 2' slice of your income (up to approx $81,200). 
                         </div>
-                        <p className="mt-4">LoonieSense factors in these tiered contributions to give you a more accurate forecast of your 'Enhanced' pension portion.</p>
+                        <p className="mt-4">LoonieSense models these tiered contributions to accurately forecast the 'Enhanced' portion of your future monthly check.</p>
                     </Accordion>
 
-                    <Accordion title="How OAS Clawbacks Work" icon={FilterIcon}>
-                        <p className="mb-4">The Old Age Security (OAS) pension is subject to a 'Recovery Tax' if your annual retirement income exceeds a certain threshold ($90,997 for the 2024 tax year).</p>
-                        <p className="font-bold text-slate-800">For every dollar your income is above that threshold, your OAS payment is reduced by 15 cents.</p>
-                        <p className="mt-2">Use the 'Personal Retirement Income' field in Step 1 to see how this affects your net monthly check.</p>
+                    <Accordion title="OAS Recovery Tax (Clawbacks)" icon={FilterIcon}>
+                        <p className="mb-4">The Old Age Security (OAS) pension is subject to a 'Recovery Tax' if your total annual retirement income exceeds the threshold established by the CRA ($90,997 for the 2024 tax year).</p>
+                        <p className="font-bold text-slate-800">For every dollar your net income exceeds this threshold, your monthly OAS payment is reduced by 15 cents.</p>
+                        <p className="mt-2 text-slate-500 font-medium">LoonieSense automatically calculates this reduction based on the 'Personal Retirement Income' you provide in Step 1.</p>
                     </Accordion>
 
-                    <Accordion title="Official CRA & Service Canada Links" icon={BookOpenIcon}>
-                        <ul className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm font-bold">
-                            <li><a href="https://www.canada.ca/en/services/benefits/publicpensions/cpp/payment-amounts.html" target="_blank" className="text-indigo-600 hover:text-indigo-800 flex items-center gap-2 bg-indigo-50/50 p-3 rounded-xl border border-indigo-100 transition-colors">CPP Payment Rates <ExternalLinkIcon size={14}/></a></li>
-                            <li><a href="https://www.canada.ca/en/services/benefits/publicpensions/old-age-security/payments.html" target="_blank" className="text-indigo-600 hover:text-indigo-800 flex items-center gap-2 bg-indigo-50/50 p-3 rounded-xl border border-indigo-100 transition-colors">OAS Payment Rates <ExternalLinkIcon size={14}/></a></li>
-                            <li><a href="https://www.canada.ca/en/employment-social-development/services/my-account.html" target="_blank" className="text-indigo-600 hover:text-indigo-800 flex items-center gap-2 bg-indigo-50/50 p-3 rounded-xl border border-indigo-100 transition-colors">My Service Canada <ExternalLinkIcon size={14}/></a></li>
-                            <li><a href="https://www.canada.ca/en/services/benefits/publicpensions/cpp/cpp-enhancement.html" target="_blank" className="text-indigo-600 hover:text-indigo-800 flex items-center gap-2 bg-indigo-50/50 p-3 rounded-xl border border-indigo-100 transition-colors">CPP Enhancement Guide <ExternalLinkIcon size={14}/></a></li>
-                        </ul>
+                    <Accordion title="Government Resources & Links" icon={BookOpenIcon}>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <a href="https://www.canada.ca/en/services/benefits/publicpensions/cpp/payment-amounts.html" target="_blank" className="text-indigo-600 font-black text-xs uppercase tracking-widest flex items-center justify-between bg-indigo-50/50 p-4 rounded-2xl border border-indigo-100 hover:bg-indigo-100 transition-all">CPP Rates <ExternalLinkIcon size={16}/></a>
+                            <a href="https://www.canada.ca/en/services/benefits/publicpensions/old-age-security/payments.html" target="_blank" className="text-indigo-600 font-black text-xs uppercase tracking-widest flex items-center justify-between bg-indigo-50/50 p-4 rounded-2xl border border-indigo-100 hover:bg-indigo-100 transition-all">OAS Thresholds <ExternalLinkIcon size={16}/></a>
+                            <a href="https://www.canada.ca/en/employment-social-development/services/my-account.html" target="_blank" className="text-indigo-600 font-black text-xs uppercase tracking-widest flex items-center justify-between bg-indigo-50/50 p-4 rounded-2xl border border-indigo-100 hover:bg-indigo-100 transition-all">My Service Canada <ExternalLinkIcon size={16}/></a>
+                            <a href="https://www.canada.ca/en/services/benefits/publicpensions/cpp/cpp-enhancement.html" target="_blank" className="text-indigo-600 font-black text-xs uppercase tracking-widest flex items-center justify-between bg-indigo-50/50 p-4 rounded-2xl border border-indigo-100 hover:bg-indigo-100 transition-all">Enhancement Guide <ExternalLinkIcon size={16}/></a>
+                        </div>
                     </Accordion>
                 </div>
                 
                 <div style={{ height: '140px' }}></div> 
             </main>
 
-            {/* LIVE FOOTER (PORTAL) */}
+            {/* === OPTION 1: COMPACT MOBILE-FRIENDLY FOOTER === */}
             {activeTab === 'input' && mounted && createPortal(
                 <div 
-                    className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-slate-200 p-5 shadow-[0_-15px_50px_-15px_rgba(0,0,0,0.15)] z-[9999] animate-slide-up"
+                    className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-slate-200 p-3 shadow-[0_-15px_40px_-10px_rgba(0,0,0,0.15)] z-[9999] animate-slide-up"
                     style={{ position: 'fixed', bottom: 0, width: '100%' }}
                 >
-                    <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-                        <div className="flex items-center gap-5">
-                            <div className="flex flex-col">
-                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1.5">Forecast (Age {retirementAge})</span>
-                                <div className="flex items-baseline gap-1.5">
-                                    <span className="text-3xl md:text-4xl font-black text-slate-900 tracking-tighter">
-                                        ${displayTotal.toLocaleString('en-CA', { maximumFractionDigits: 0 })}
-                                    </span>
-                                    <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">/ mo</span>
-                                </div>
+                    <div className="max-w-5xl mx-auto flex items-center justify-between gap-4">
+                        
+                        {/* Summary View */}
+                        <div className="flex flex-col pl-2">
+                            <div className="flex items-baseline gap-1.5">
+                                <span className="text-3xl font-black text-slate-900 leading-none tracking-tighter">
+                                    ${displayTotal.toLocaleString('en-CA', { maximumFractionDigits: 0 })}
+                                </span>
+                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">/mo</span>
                             </div>
-                            <div className="hidden lg:flex gap-4 border-l border-slate-200 pl-5">
-                                <div className="flex flex-col"><span className="text-[9px] font-bold text-slate-400 uppercase">CPP</span><span className="text-xs font-mono font-bold text-indigo-600">${displayCPP.toFixed(0)}</span></div>
-                                <div className="flex flex-col"><span className="text-[9px] font-bold text-slate-400 uppercase">OAS</span><span className="text-xs font-mono font-bold text-amber-600">${displayOAS.toFixed(0)}</span></div>
-                            </div>
+                            <span className="text-[9px] font-black text-indigo-500 uppercase tracking-widest leading-none mt-2 drop-shadow-sm">Forecast @ Age {retirementAge}</span>
                         </div>
                         
-                        <div className="flex items-center gap-3 w-full sm:w-auto">
+                        <div className="flex items-center gap-2">
+                            {/* Icon-only Share for Mobile to Save Space */}
                             <button 
                                 onClick={copyLink}
-                                className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-4 rounded-2xl border-2 border-slate-100 font-black text-slate-600 hover:bg-slate-50 transition-all active:scale-95 shadow-sm"
+                                className="p-4 rounded-2xl border-2 border-slate-100 text-slate-500 hover:bg-slate-50 active:bg-slate-200 transition-all flex items-center justify-center shadow-sm"
                             >
-                                {copySuccess ? <CheckIcon size={20} className="text-emerald-500" /> : <LinkIcon size={20} />}
-                                <span className="text-sm uppercase tracking-widest">{copySuccess ? "Link Copied" : "Share"}</span>
+                                {copySuccess ? <CheckIcon size={22} className="text-emerald-500" /> : <LinkIcon size={22} />}
                             </button>
 
+                            {/* View Analysis Button */}
                             <button 
                                 onClick={() => {
                                     setActiveTab('results');
                                     window.scrollTo({ top: 0, behavior: 'smooth' });
                                 }} 
-                                className="flex-1 sm:flex-none bg-indigo-600 hover:bg-indigo-700 text-white font-black py-4 px-8 rounded-2xl shadow-xl shadow-indigo-100 transition-all flex items-center justify-center gap-2 group active:scale-95 overflow-hidden relative"
+                                className="bg-indigo-600 hover:bg-indigo-700 text-white font-black py-4 px-6 rounded-2xl shadow-xl shadow-indigo-100 transition-all flex items-center gap-3 active:scale-95"
                             >
-                                <span className="relative z-10 text-sm uppercase tracking-widest">View Analysis</span>
-                                <ArrowRightIcon size={20} className="relative z-10 group-hover:translate-x-1 transition-transform" />
+                                <span className="text-[10px] uppercase tracking-[0.2em] font-black">Analyze</span>
+                                <ArrowRightIcon size={20} />
                             </button>
                         </div>
                     </div>
