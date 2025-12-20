@@ -15,7 +15,8 @@ export default function ResultsTab({
     retirementAge, setRetirementAge, 
     comparisonSnapshot, saveComparison, clearComparison, comparisonMsg, 
     inflationFactor = 1, taxFactor = 1,
-    chartSelection, setChartSelection, lineVisibility, setLineVisibility
+    chartSelection, setChartSelection, lineVisibility, setLineVisibility,
+    birthYear // <--- 1. ADDED BIRTHYEAR PROP
 }) {
     
     const handleLegendClick = (e) => {
@@ -28,13 +29,23 @@ export default function ResultsTab({
     const cpp = safeResults.cpp || { base: 0, enhanced: 0, total: 0 };
     const oas = safeResults.oas || { gross: 0, clawback: 0, total: 0 };
     const gis = safeResults.gis || { total: 0, note: '' };
-    const crossovers = safeResults.crossovers || {};
+    // const crossovers = safeResults.crossovers || {}; // Unused currently
     const breakevenData = safeResults.breakevenData || [];
 
     const SafeCalculatorIcon = CalculatorIcon || (() => null);
     const SafeFilterIcon = FilterIcon || (() => null);
     const SafeBookOpenIcon = BookOpenIcon || (() => null);
 
+    // Helper for formatting large currency numbers on chart
+    const formatYAxis = (value) => {
+        if (value === 0) return '$0';
+        // Use 'M' for millions
+        if (value >= 1000000) return `$${(value / 1000000).toFixed(1)}M`;
+        // Use 'k' for thousands
+        if (value >= 1000) return `$${(value / 1000).toFixed(0)}k`;
+        // For small numbers (e.g., $500), display raw value without 'k'
+        return `$${value.toFixed(0)}`;
+    };
     return (
         <div className="space-y-6 md:space-y-8 animate-fade-in">
             {!hasEarnings && (
@@ -257,12 +268,38 @@ export default function ResultsTab({
                     <ResponsiveContainer width="100%" height="100%">
                         <LineChart data={breakevenData} margin={{ top: 20, right: 10, left: -20, bottom: 0 }} onClick={(e) => { if(e && e.activeLabel) setChartSelection(e.activeLabel) }}>
                             <CartesianGrid strokeDasharray="6 6" stroke="#f1f5f9" vertical={false} />
-                            <XAxis dataKey="age" stroke="#94a3b8" fontSize={10} fontWeight="900" tickLine={false} axisLine={false} tickMargin={10} />
-                            <YAxis stroke="#94a3b8" fontSize={10} fontWeight="900" tickLine={false} axisLine={false} tickFormatter={(v) => `$${v/1000}k`} tickMargin={5} />
+                            
+                            {/* 2. FIXED X-AXIS: Added Year display using birthYear */}
+                            <XAxis 
+                                dataKey="age" 
+                                stroke="#94a3b8" 
+                                fontSize={10} 
+                                fontWeight="900" 
+                                tickLine={false} 
+                                axisLine={false} 
+                                tickMargin={10} 
+                                tickFormatter={(age) => birthYear ? `${age} (${birthYear + age})` : age}
+                            />
+
+                            {/* 3. FIXED Y-AXIS: Added width and improved formatter (k vs M) */}
+                            <YAxis 
+                                width={66} 
+                                stroke="#94a3b8" 
+                                fontSize={10} 
+                                fontWeight="900" 
+                                tickLine={false} 
+                                axisLine={false} 
+                                tickFormatter={formatYAxis} 
+                                tickMargin={5} 
+                                allowDecimals={false}
+                            />
+                            
                             <RechartsTooltip 
                                 cursor={{ stroke: '#6366f1', strokeWidth: 3, strokeDasharray: '8 8' }}
                                 contentStyle={{ backgroundColor: '#0f172a', border: 'none', borderRadius: '1rem', padding: '1rem', color: '#f8fafc', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.4)' }}
                                 itemStyle={{ fontSize: '12px', fontWeight: '800', padding: '4px 0' }}
+                                // Update Tooltip label to match X-Axis
+                                labelFormatter={(age) => `Age ${age} ${birthYear ? `(${birthYear + age})` : ''}`}
                                 labelStyle={{ color: '#94a3b8', fontSize: '10px', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '0.5rem', borderBottom: '1px solid #1e293b', paddingBottom: '0.5rem' }}
                                 formatter={(v, n) => [`$${v.toLocaleString()}`, n]}
                             />

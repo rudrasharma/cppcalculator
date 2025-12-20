@@ -315,7 +315,7 @@ export default function Calculator() {
 
                         {activeTab === 'results' && (
                             <ResultsTab 
-                                results={results} hasEarnings={hasEarnings} setActiveTab={setActiveTab}
+                                results={results} hasEarnings={hasEarnings} setActiveTab={setActiveTab} birthYear={birthYear}
                                 copyLink={copyLink} copySuccess={copySuccess}
                                 displayTotal={displayTotal} displayCPP={displayCPP} displayOAS={displayOAS} displayGIS={displayGIS}
                                 cppPerc={cppPerc} oasPerc={oasPerc} gisPerc={gisPerc}
