@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 // This import automatically finds './Calculator/index.jsx' in the new folder structure
-import Calculator from './Calculator';
+import Calculator from './calculator';
 
 import HouseholdBenefits from './HouseHoldBenefits';
 import ParentalLeave from './ParentalLeave'; 
