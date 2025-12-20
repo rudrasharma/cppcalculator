@@ -172,15 +172,38 @@ export default function Calculator() {
 
     const applyAverageSalary = () => {
         if (!avgSalaryInput || avgSalaryInput <= 0) return;
+        
         const currentYMPE = getYMPE(CURRENT_YEAR);
-        const ratio = parseFloat(avgSalaryInput) / currentYMPE;
+        // Calculate the user's "Peak Earning Power" relative to the average Canadian
+        const peakRatio = parseFloat(avgSalaryInput) / currentYMPE;
+
         setEarnings(prev => {
             const newEarnings = { ...prev };
-            results.years.forEach(y => {
-                const isEmpty = Object.keys(prev).length === 0;
-                if (isEmpty || y >= CURRENT_YEAR || newEarnings[y] === undefined) {
-                    const yYMPE = getYMPE(y);
-                    newEarnings[y] = Math.round(yYMPE * ratio);
+            
+            // Define a simple curve function
+            const getAgeFactor = (age) => {
+                if (age < 22) return 0.3;  // Part-time / Student
+                if (age < 25) return 0.6;  // Entry Level
+                if (age < 30) return 0.8;  // Junior/Mid
+                if (age < 35) return 0.9;  // Senior
+                return 1.0;                // Peak (35+)
+            };
+
+            results.years.forEach(year => {
+                const age = year - birthYear;
+                
+                // Only overwrite if: 
+                // 1. It's a future year (projection)
+                // 2. OR it's a past year that the user hasn't manually entered yet
+                const isFuture = year >= CURRENT_YEAR;
+                const isEmpty = newEarnings[year] === undefined;
+
+                if (isFuture || isEmpty) {
+                    const yYMPE = getYMPE(year);
+                    const ageFactor = isFuture ? 1.0 : getAgeFactor(age); // Assume peak for future, curve for past
+                    
+                    // The calculation: Year's Average Wage * Your Peak Ratio * Age Adjustment
+                    newEarnings[year] = Math.round(yYMPE * peakRatio * ageFactor);
                 }
             });
             return newEarnings;
