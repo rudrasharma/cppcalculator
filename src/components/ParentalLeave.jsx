@@ -37,12 +37,13 @@ const EI_2025 = {
     EXT_SHARED_BONUS: 8
 };
 
+// Tooltip fixed to use 'group/tip' to avoid conflict with parent containers
 const Tooltip = ({ text }) => (
-    <div className="group/tooltip relative inline-flex items-center ml-1">
+    <div className="group/tip relative inline-flex items-center ml-1">
         <button type="button" className="text-slate-400 hover:text-rose-600 transition-colors cursor-help">
             <HelpCircleIcon size={16} />
         </button>
-        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-3 bg-slate-800 text-slate-50 text-xs rounded-xl shadow-xl opacity-0 group-hover/tooltip:opacity-100 transition-all duration-200 pointer-events-none z-50 text-center leading-relaxed border border-slate-700">
+        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-3 bg-slate-800 text-slate-50 text-xs rounded-xl shadow-xl opacity-0 group-hover/tip:opacity-100 transition-all duration-200 pointer-events-none z-50 text-center leading-relaxed border border-slate-700">
             {text}
             <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-800"></div>
         </div>
@@ -58,8 +59,36 @@ export default function ParentalLeave() {
     
     const [activeTab, setActiveTab] = useState('input');
     const [mounted, setMounted] = useState(false);
+    const [isInputFocused, setIsInputFocused] = useState(false);
 
     useEffect(() => { setMounted(true); }, []);
+
+    // Mobile Keyboard Detection
+    useEffect(() => {
+        const handleFocus = (e) => {
+            const tag = e.target.tagName;
+            const type = e.target.type;
+            if (tag === 'TEXTAREA' || (tag === 'INPUT' && !['checkbox', 'radio', 'range', 'submit', 'button', 'file', 'color'].includes(type))) {
+                setIsInputFocused(true);
+            }
+        };
+        const handleBlur = () => {
+            setTimeout(() => {
+                const active = document.activeElement;
+                const tag = active?.tagName;
+                const type = active?.type;
+                if (!(tag === 'TEXTAREA' || (tag === 'INPUT' && !['checkbox', 'radio', 'range', 'submit', 'button', 'file', 'color'].includes(type)))) {
+                    setIsInputFocused(false);
+                }
+            }, 100);
+        };
+        window.addEventListener('focus', handleFocus, true);
+        window.addEventListener('blur', handleBlur, true);
+        return () => {
+            window.removeEventListener('focus', handleFocus, true);
+            window.removeEventListener('blur', handleBlur, true);
+        };
+    }, []);
 
     // --- CALCULATION logic ---
     const results = useMemo(() => {
@@ -130,7 +159,7 @@ export default function ParentalLeave() {
                         <div className="bg-rose-600 text-white p-2 rounded-lg shadow-lg shadow-rose-500/20">
                             <BabyIcon size={24} />
                         </div>
-                        <h1 className="text-xl font-bold tracking-tight">Parental Leave Estimator</h1>
+                        <h1 className="text-lg md:text-xl font-bold tracking-tight">Parental Leave Estimator</h1>
                     </div>
                 </div>
             </header>
@@ -144,15 +173,15 @@ export default function ParentalLeave() {
                         </div>
                     </div>
 
-                    <div className="p-6 md:p-10">
+                    <div className="p-4 md:p-10">
                         {activeTab === 'input' && (
                             <div className="animate-fade-in space-y-10">
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-10">
                                     
                                     {/* SECTION 1: CONFIG */}
                                     <div className="space-y-6">
                                         <div className="flex items-center gap-2 text-rose-600 font-black uppercase text-[10px] tracking-widest"><MapPinIcon size={16} /> Location & Plan</div>
-                                        <div className="bg-slate-50 p-6 rounded-3xl space-y-5 border border-slate-100 shadow-sm">
+                                        <div className="bg-slate-50 p-5 md:p-6 rounded-3xl space-y-5 border border-slate-100 shadow-sm">
                                             <div>
                                                 <label className="text-xs font-black text-slate-700 block mb-1 uppercase tracking-tighter">Province</label>
                                                 <select value={province} onChange={(e) => setProvince(e.target.value)} className="w-full p-3 bg-white border border-slate-200 rounded-2xl text-sm focus:ring-2 focus:ring-rose-500 outline-none shadow-sm">
@@ -242,19 +271,23 @@ export default function ParentalLeave() {
                         {activeTab === 'results' && (
                             <div className="animate-fade-in space-y-10">
                                 {/* SUMMARY HERO */}
-                                <div className="bg-slate-900 rounded-[2.5rem] p-10 text-white relative overflow-hidden shadow-2xl">
-                                    <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-rose-500/20 rounded-full blur-[100px]"></div>
-                                    <div className="relative z-10 grid md:grid-cols-2 gap-12 items-center">
+                                <div className="bg-slate-900 rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-10 text-white relative overflow-hidden shadow-2xl">
+                                    <div className="absolute top-0 right-0 -mr-20 -mt-20 w-60 h-60 md:w-96 md:h-96 bg-rose-500/20 rounded-full blur-[100px]"></div>
+                                    
+                                    <div className="relative z-10 grid md:grid-cols-2 gap-8 md:gap-12 items-center">
                                         <div className="text-center md:text-left">
                                             <h2 className="text-rose-400 text-[10px] font-black uppercase tracking-[0.3em] mb-3">Estimated Claim Value</h2>
-                                            <div className="flex items-baseline justify-center md:justify-start gap-2">
-                                                <span className="text-7xl font-black tracking-tighter">${Math.round(results.totalValue).toLocaleString()}</span>
+                                            <div className="flex items-baseline justify-center md:justify-start gap-2 flex-wrap">
+                                                <span className="text-5xl md:text-7xl font-black tracking-tighter">${Math.round(results.totalValue).toLocaleString()}</span>
                                                 <span className="text-slate-400 text-xl font-bold">total</span>
                                             </div>
-                                            <p className="text-slate-400 text-sm mt-4 font-bold tracking-tight">Across {results.totalDuration} combined weeks of pay</p>
+                                            <p className="text-slate-400 text-xs md:text-sm mt-4 font-bold tracking-tight">Across {results.totalDuration} combined weeks of pay</p>
                                         </div>
-                                        <div className="bg-white/5 rounded-3xl p-8 border border-white/10 backdrop-blur-xl space-y-6">
-                                            <div className="flex justify-between items-center"><span className="text-slate-400 text-xs font-black uppercase tracking-widest">Weekly Cap</span><span className="text-3xl font-black text-rose-400 tracking-tighter">${Math.round(results.parentalWeekly).toLocaleString()}<span className="text-xs font-medium text-slate-500">/wk</span></span></div>
+                                        <div className="bg-white/5 rounded-3xl p-6 md:p-8 border border-white/10 backdrop-blur-xl space-y-6">
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-slate-400 text-xs font-black uppercase tracking-widest">Weekly Cap</span>
+                                                <span className="text-2xl md:text-3xl font-black text-rose-400 tracking-tighter">${Math.round(results.parentalWeekly).toLocaleString()}<span className="text-xs font-medium text-slate-500">/wk</span></span>
+                                            </div>
                                             <div className="flex h-5 w-full rounded-full overflow-hidden bg-white/10 p-1">
                                                 <div style={{ width: `${(results.maternityTotal/results.totalValue)*100}%` }} className="bg-rose-500 rounded-full mr-0.5"></div>
                                                 <div style={{ width: `${(results.parentalTotal/results.totalValue)*100}%` }} className="bg-indigo-500 rounded-full mr-0.5"></div>
@@ -271,7 +304,7 @@ export default function ParentalLeave() {
 
                                 {/* BREAKDOWN SECTION */}
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                    <div className="bg-white p-8 rounded-[2rem] border border-slate-200 shadow-sm flex flex-col">
+                                    <div className="bg-white p-6 md:p-8 rounded-[2rem] border border-slate-200 shadow-sm flex flex-col">
                                         <h3 className="font-black text-slate-800 mb-8 flex items-center gap-2 uppercase tracking-widest text-[10px]"><CalendarIcon size={18} className="text-rose-600"/> Specific Entitlements</h3>
                                         <div className="space-y-4 flex-1">
                                             {/* Pool 1: Exclusive Maternity */}
@@ -315,11 +348,11 @@ export default function ParentalLeave() {
                                     </div>
 
                                     {/* VISUAL CHART AREA */}
-                                    <div className="bg-white p-8 rounded-[2rem] border border-slate-200 shadow-sm">
+                                    <div className="bg-white p-6 md:p-8 rounded-[2rem] border border-slate-200 shadow-sm">
                                         <h3 className="font-black text-slate-800 mb-8 flex items-center gap-2 uppercase tracking-widest text-[10px]"><DollarSignIcon size={18} className="text-emerald-600"/> Benefit Allocation</h3>
                                         <div className="h-[280px] w-full">
                                             <ResponsiveContainer width="100%" height="100%">
-                                                <BarChart data={chartData} margin={{ top: 20, right: 30, left: 10, bottom: 20 }}>
+                                                <BarChart data={chartData} margin={{ top: 20, right: 10, left: -20, bottom: 0 }}>
                                                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                                                     <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 10, fontWeight: 900, fill: '#94a3b8'}} />
                                                     <YAxis hide />
@@ -345,15 +378,18 @@ export default function ParentalLeave() {
                 </div>
             </main>
 
-            {/* PORTAL FOOTER */}
-            {activeTab === 'input' && mounted && createPortal(
-                <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200 p-5 z-[9999] animate-slide-up" style={{ position: 'fixed', bottom: 0, width: '100%' }}>
-                    <div className="max-w-5xl mx-auto flex items-center justify-between gap-6">
+            {/* PORTAL FOOTER - Hidden if typing */}
+            {activeTab === 'input' && mounted && !isInputFocused && createPortal(
+                <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200 p-4 md:p-5 z-[9999] animate-slide-up" style={{ position: 'fixed', bottom: 0, width: '100%' }}>
+                    <div className="max-w-5xl mx-auto flex items-center justify-between gap-4 md:gap-6">
                         <div className="flex flex-col">
-                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Total Claim Estimate</span>
-                            <div className="flex items-baseline gap-1.5"><span className="text-4xl font-black text-slate-900 tracking-tighter">${Math.round(results.totalValue).toLocaleString()}</span><span className="text-sm font-bold text-slate-400">total</span></div>
+                            <span className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Total Claim Estimate</span>
+                            <div className="flex items-baseline gap-1.5">
+                                <span className="text-3xl md:text-4xl font-black text-slate-900 tracking-tighter">${Math.round(results.totalValue).toLocaleString()}</span>
+                                <span className="text-xs md:text-sm font-bold text-slate-400">total</span>
+                            </div>
                         </div>
-                        <button onClick={() => { setActiveTab('results'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="bg-rose-600 hover:bg-rose-700 text-white font-black py-4 px-10 rounded-2xl shadow-xl shadow-rose-200 transition-all flex items-center gap-2 transform active:scale-95 whitespace-nowrap">View Breakdown <ArrowRightIcon size={20} /></button>
+                        <button onClick={() => { setActiveTab('results'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="bg-rose-600 hover:bg-rose-700 text-white font-black py-3 px-6 md:py-4 md:px-10 rounded-xl md:rounded-2xl shadow-xl shadow-rose-200 transition-all flex items-center gap-2 transform active:scale-95 whitespace-nowrap text-xs md:text-sm">View Breakdown <ArrowRightIcon size={20} /></button>
                     </div>
                 </div>,
                 document.body 
