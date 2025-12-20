@@ -164,12 +164,15 @@ export default function Calculator() {
         });
     };
 
-    const handleImport = () => {
-        const { error, data } = parseMscaData(importText);
-        if (error) { setImportError(error); } 
-        else { setEarnings(prev => ({ ...prev, ...data })); setShowImport(false); setImportText(""); }
+    const handleImport = (importedData) => {
+        // The modal now does the work. We just receive the clean object!
+        if (importedData) {
+            setEarnings(prev => ({ ...prev, ...importedData })); 
+            setShowImport(false); 
+            setImportText(""); 
+        }
     };
-
+    
     const applyAverageSalary = () => {
         if (!avgSalaryInput || avgSalaryInput <= 0) return;
         
