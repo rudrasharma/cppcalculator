@@ -79,7 +79,11 @@ function useUrlTab(defaultTab = 'input') {
     return [activeTab, setActiveTab];
 }
 
-export default function ParentalLeave() {
+// ==========================================
+//              MAIN COMPONENT
+// ==========================================
+// 1. ADD 'isVisible' PROP
+export default function ParentalLeave({ isVisible = true }) {
     const [province, setProvince] = useState('ON');
     const [salary, setSalary] = useState(70000);
     const [partnerSalary, setPartnerSalary] = useState(60000);
@@ -91,7 +95,6 @@ export default function ParentalLeave() {
     const [p1Weeks, setP1Weeks] = useState(30); 
     const [p2Weeks, setP2Weeks] = useState(5); 
 
-    // USE THE HOOK HERE INSTEAD OF STANDARD STATE
     const [activeTab, setActiveTab] = useUrlTab('input');
     
     const [mounted, setMounted] = useState(false);
@@ -533,7 +536,8 @@ export default function ParentalLeave() {
             </main>
 
             {/* PORTAL FOOTER */}
-            {activeTab === 'input' && mounted && !isInputFocused && createPortal(
+            {/* 2. USE 'isVisible' HERE TO PREVENT LEAKING */}
+            {isVisible && activeTab === 'input' && mounted && !isInputFocused && createPortal(
                 <div 
                     className="fixed bottom-[64px] md:bottom-0 left-0 right-0 bg-white/90 backdrop-blur-xl border-t border-slate-200 p-4 z-[9999] animate-slide-up shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)]" 
                     style={{ width: '100%' }}

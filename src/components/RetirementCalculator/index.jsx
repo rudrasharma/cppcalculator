@@ -6,9 +6,6 @@ import { CURRENT_YEAR, getYMPE } from '../../utils/constants';
 import { useRetirementMath } from '../../hooks/useRetirementMath';
 import { compressEarnings, decompressEarnings } from '../../utils/compression';
 
-// Removed external import to embed hook directly for stability
-// import { useUrlTab } from '../../hooks/useUrlTab';
-
 import { AboutModal, ImportModal } from './Modals';
 import InputTab from './InputTab';
 import ResultsTab from './ResultsTab';
@@ -58,7 +55,8 @@ function useUrlTab(defaultTab = 'input', queryParam = 'step') {
 // ==========================================
 //              MAIN COMPONENT
 // ==========================================
-export default function Calculator() {
+// 1. ADD 'isVisible' PROP
+export default function Calculator({ isVisible = true }) {
     // --- 1. CORE STATE ---
     const [children, setChildren] = useState([]); 
     const [dob, setDob] = useState('1985-01-01');
@@ -383,11 +381,11 @@ export default function Calculator() {
             </main>
 
             {/* FLOATING FOOTER */}
-            {activeTab === 'input' && mounted && !isInputFocused && createPortal(
+            {/* 2. USE 'isVisible' HERE TO PREVENT LEAKING */}
+            {isVisible && activeTab === 'input' && mounted && !isInputFocused && createPortal(
                 <div 
-                    // 1. Mobile Fix: Lifted 64px from bottom
                     className="fixed bottom-[64px] md:bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-slate-200 p-3 shadow-[0_-15px_40px_-10px_rgba(0,0,0,0.15)] z-[9999] animate-slide-up"
-                    // 2. Mobile Fix: Removed 'bottom: 0' style
+                    // IMPORTANT: Removed 'bottom: 0' inline style here
                     style={{ width: '100%' }}
                 >
                     <div className="max-w-5xl mx-auto flex items-center justify-between gap-4">

@@ -82,44 +82,6 @@ const PROV_PARAMS = {
 };
 
 // ==========================================
-//        HOOK: SYNC TABS WITH URL
-// ==========================================
-function useUrlTab(defaultTab = 'input') {
-    const [activeTab, setActiveTabState] = useState(() => {
-        if (typeof window !== 'undefined') {
-            const params = new URLSearchParams(window.location.search);
-            return params.get('step') || defaultTab;
-        }
-        return defaultTab;
-    });
-
-    useEffect(() => {
-        const handlePopState = () => {
-            const params = new URLSearchParams(window.location.search);
-            const step = params.get('step');
-            setActiveTabState(step || defaultTab);
-        };
-        window.addEventListener('popstate', handlePopState);
-        return () => window.removeEventListener('popstate', handlePopState);
-    }, [defaultTab]);
-
-    const setActiveTab = (newTab) => {
-        setActiveTabState(newTab);
-        const url = new URL(window.location);
-        if (newTab === defaultTab) url.searchParams.delete('step');
-        else url.searchParams.set('step', newTab);
-        
-        window.history.pushState({}, '', url);
-        
-        if (newTab === 'results') {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-    };
-
-    return [activeTab, setActiveTab];
-}
-
-// ==========================================
 //              UI HELPERS
 // ==========================================
 const Tooltip = ({ text }) => (
@@ -150,7 +112,8 @@ const Accordion = ({ title, icon: Icon, children, defaultOpen = false }) => (
 // ==========================================
 //              MAIN COMPONENT
 // ==========================================
-export default function HouseholdBenefits() {
+// 1. ADD 'isVisible' PROP
+export default function HouseholdBenefits({ isVisible = true }) {
     const [grossAfni, setGrossAfni] = useState(65000); 
     const [children, setChildren] = useState([{ id: 1, age: 2, disability: false }]);
     const [sharedCustody, setSharedCustody] = useState(false);
@@ -158,9 +121,7 @@ export default function HouseholdBenefits() {
     const [province, setProvince] = useState('ON');
     const [isRural, setIsRural] = useState(false);
     
-    // USE THE HOOK HERE
-    const [activeTab, setActiveTab] = useUrlTab('input');
-    
+    const [activeTab, setActiveTab] = useState('input');
     const [copySuccess, setCopySuccess] = useState(false);
     const [mounted, setMounted] = useState(false);
     const [isInputFocused, setIsInputFocused] = useState(false);
@@ -603,7 +564,8 @@ export default function HouseholdBenefits() {
             </main>
 
             {/* Live Estimate Portal - Hidden if typing */}
-            {activeTab === 'input' && mounted && !isInputFocused && createPortal(
+            {/* 2. GATE THE PORTAL WITH 'isVisible' */}
+            {isVisible && activeTab === 'input' && mounted && !isInputFocused && createPortal(
                 <div 
                     className="fixed bottom-[64px] md:bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200 p-4 md:p-5 z-[9999] animate-slide-up shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)]" 
                     style={{ width: '100%' }}

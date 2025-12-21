@@ -8,60 +8,79 @@ const posts = await Astro.glob('./*.md');
 const sortedPosts = posts.sort((a, b) => 
   new Date(b.frontmatter.pubDate).valueOf() - new Date(a.frontmatter.pubDate).valueOf()
 );
+
+const SITE_TITLE = "Financial Planning Guides | LoonieFi";
+const SITE_DESCRIPTION = "Deep dives into Canadian government benefits, tax strategies, and how to optimize your family's finances.";
 ---
 
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width" />
-    <title>Financial Planning Guides | LoonieFi</title>
-    <meta name="description" content="Guides and tutorials on Canadian government benefits including CPP, OAS, CCB, and tax planning strategies." />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-  </head>
-  <body class="bg-gray-50 text-gray-800 font-sans min-h-screen flex flex-col">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     
-    {/* Navigation */}
-    <nav class="w-full bg-white border-b border-gray-200 sticky top-0 z-10">
-      <div class="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
-        <a href="/" class="text-blue-600 font-bold hover:text-blue-800 transition-colors flex items-center gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-          Back to Calculators
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#f59e0b"> 
+    <meta name="theme-color" content="#ffffff">
+
+    <title>{SITE_TITLE}</title>
+    <meta name="description" content={SITE_DESCRIPTION} />
+  </head>
+
+  <body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col antialiased selection:bg-amber-100 selection:text-amber-900">
+    
+    <nav class="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50">
+      <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+        
+        <a href="/" class="text-slate-500 hover:text-indigo-600 transition-colors flex items-center gap-2 font-bold text-sm group">
+          <div class="p-1.5 rounded-lg bg-slate-100 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          </div>
+          Back to Tools
         </a>
-        <div class="hidden sm:block font-bold text-gray-900 tracking-tight">
-            LoonieFi
+
+        <div class="flex items-center gap-2">
+            <img src="/android-chrome-192x192.png" alt="LoonieFi" class="h-8 w-8 rounded-full shadow-sm" />
+            <span class="font-bold text-slate-900 tracking-tight text-lg">Loonie<span class="text-amber-500">Fi</span></span>
         </div>
+
       </div>
     </nav>
 
-    {/* Hero Section */}
-    <header class="bg-white border-b border-gray-100 py-16">
-      <div class="max-w-5xl mx-auto px-6 text-center">
-        <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900 mb-4 tracking-tight">
-          Financial Insights
-        </h1>
-        <p class="text-xl text-gray-500 max-w-2xl mx-auto">
-          Deep dives into the math behind government benefits, tax strategies, and how to optimize your family's finances.
-        </p>
-      </div>
+    <header class="bg-white border-b border-slate-200 pt-16 pb-20 relative overflow-hidden">
+        <div class="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-indigo-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+        <div class="absolute bottom-0 left-0 -ml-20 -mb-20 w-64 h-64 bg-amber-50 rounded-full blur-3xl opacity-50 pointer-events-none"></div>
+
+        <div class="max-w-4xl mx-auto px-6 text-center relative z-10">
+            <span class="text-indigo-600 font-bold tracking-widest text-xs uppercase mb-3 block">LoonieFi Guides</span>
+            <h1 class="text-4xl md:text-5xl font-black text-slate-900 mb-6 tracking-tight leading-tight">
+            Financial Clarity for <br/><span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-amber-500">Canadian Families</span>
+            </h1>
+            <p class="text-lg md:text-xl text-slate-500 max-w-2xl mx-auto leading-relaxed">
+            Stop guessing. We break down the complex math behind government benefits, tax strategies, and retirement planning.
+            </p>
+        </div>
     </header>
 
-    {/* Blog Grid */}
-    <main class="max-w-5xl mx-auto px-6 py-12 flex-grow w-full">
+    <main class="max-w-6xl mx-auto px-6 py-16 flex-grow w-full">
       
       {sortedPosts.length === 0 ? (
-        <div class="text-center py-20 text-gray-500">
-          <p>No posts found yet. Check back soon!</p>
+        <div class="text-center py-20 text-slate-400 bg-white rounded-3xl border border-dashed border-slate-200">
+          <p class="font-medium">No guides published yet. Check back soon!</p>
         </div>
       ) : (
         <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
           {sortedPosts.map((post) => (
-            <article class="bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-xl transition-shadow duration-300 flex flex-col overflow-hidden group h-full">
+            <article class="bg-white rounded-[1.5rem] border border-slate-200 shadow-sm hover:shadow-xl hover:shadow-indigo-500/10 hover:-translate-y-1 transition-all duration-300 flex flex-col overflow-hidden group h-full">
               <a href={post.url} class="flex flex-col h-full">
                 
-                {/* Content */}
-                <div class="p-6 flex flex-col flex-grow">
-                  {/* Date & Tag */}
-                  <div class="flex items-center gap-3 text-xs font-medium text-gray-400 mb-3 uppercase tracking-wider">
+                {/* Content Container */}
+                <div class="p-6 md:p-8 flex flex-col flex-grow">
+                  
+                  {/* Meta: Date & Tags */}
+                  <div class="flex items-center gap-3 text-[10px] font-bold text-slate-400 mb-4 uppercase tracking-widest">
                     <time datetime={post.frontmatter.pubDate}>
                       {new Date(post.frontmatter.pubDate).toLocaleDateString('en-CA', { 
                         year: 'numeric', 
@@ -71,26 +90,26 @@ const sortedPosts = posts.sort((a, b) =>
                     </time>
                     {post.frontmatter.tags && (
                       <>
-                        <span>•</span>
-                        <span class="text-blue-600">{post.frontmatter.tags[0]}</span>
+                        <span class="w-1 h-1 rounded-full bg-slate-300"></span>
+                        <span class="text-indigo-500">{post.frontmatter.tags[0]}</span>
                       </>
                     )}
                   </div>
 
                   {/* Title */}
-                  <h2 class="text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors leading-snug">
+                  <h2 class="text-xl font-bold text-slate-900 mb-3 group-hover:text-indigo-600 transition-colors leading-snug">
                     {post.frontmatter.title}
                   </h2>
 
                   {/* Description */}
-                  <p class="text-gray-600 text-sm leading-relaxed mb-6 line-clamp-3">
+                  <p class="text-slate-500 text-sm leading-relaxed mb-6 line-clamp-3">
                     {post.frontmatter.description}
                   </p>
 
                   {/* Read More Link (Pushed to bottom) */}
-                  <div class="mt-auto pt-4 border-t border-gray-50 flex items-center text-blue-600 font-semibold text-sm group-hover:translate-x-1 transition-transform">
-                    Read Article 
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                  <div class="mt-auto pt-6 border-t border-slate-100 flex items-center text-indigo-600 font-bold text-sm group-hover:gap-2 transition-all">
+                    Read Guide 
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1 transition-transform group-hover:translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
                   </div>
                 </div>
               </a>
@@ -101,10 +120,16 @@ const sortedPosts = posts.sort((a, b) =>
 
     </main>
 
-    {/* Simple Footer */}
-    <footer class="bg-white border-t border-gray-200 mt-auto">
-      <div class="max-w-5xl mx-auto px-6 py-8 text-center">
-        <p class="text-sm text-gray-400">© {new Date().getFullYear()} LoonieFi. All rights reserved.</p>
+    <footer class="bg-slate-50 border-t border-slate-200 py-12 mt-auto">
+      <div class="max-w-5xl mx-auto px-6 text-center">
+        <div class="flex flex-col gap-2">
+            <p class="text-xs text-slate-400">
+                © {new Date().getFullYear()} LoonieFi. All rights reserved.
+            </p>
+            <p class="text-[10px] text-slate-300 uppercase tracking-wider">
+                Made with <span class="text-rose-400">♥</span> in Waterloo, ON
+            </p>
+        </div>
       </div>
     </footer>
 
