@@ -13,10 +13,7 @@ const IconBase = ({ size = 20, className = "", children }) => (
     <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>{children}</svg>
 );
 
-const BabyIcon = (props) => (<IconBase {...props}><path d="M9 12h.01"/><path d="M15 12h.01"/><path d="M10 16c.5.3 1.2.5 2 .5s1.5-.2 2-.5"/><path d="M19 6.3a9 9 0 0 1 1.8 3.9 2 2 0 0 1 0 3.6 9 9 0 0 1-17.6 0 2 2 0 0 1 0-3.6A9 9 0 0 1 12 3c2 0 4 .7 5.6 1.8"/><path d="M12 3v2"/></IconBase>);
 const TrashIcon = (props) => (<IconBase {...props}><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></IconBase>);
-const CheckIcon = (props) => (<IconBase {...props}><polyline points="20 6 9 17 4 12"/></IconBase>);
-const LinkIcon = (props) => (<IconBase {...props}><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></IconBase>);
 const HelpCircleIcon = (props) => (<IconBase {...props}><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></IconBase>);
 const ChevronDownIcon = (props) => (<IconBase {...props}><polyline points="6 9 12 15 18 9"/></IconBase>);
 const DollarSignIcon = (props) => (<IconBase {...props}><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></IconBase>);
@@ -26,6 +23,8 @@ const ArrowRightIcon = (props) => (<IconBase {...props}><line x1="5" y1="12" x2=
 const CalendarIcon = (props) => (<IconBase {...props}><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></IconBase>);
 const ExternalLinkIcon = (props) => (<IconBase {...props}><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></IconBase>);
 const InfoIcon = (props) => (<IconBase {...props}><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></IconBase>);
+const LinkIcon = (props) => (<IconBase {...props}><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></IconBase>);
+const CheckIcon = (props) => (<IconBase {...props}><polyline points="20 6 9 17 4 12"/></IconBase>);
 
 // ==========================================
 //              CONSTANTS
@@ -61,7 +60,6 @@ const PROV_PARAMS = {
 //              UI HELPERS
 // ==========================================
 const Tooltip = ({ text }) => (
-    // FIX: Using 'group/tip' to isolate hover state from parent containers
     <div className="group/tip relative inline-flex items-center ml-1">
         <button type="button" className="text-slate-400 hover:text-indigo-600 transition-colors cursor-help">
             <HelpCircleIcon size={16} />
@@ -107,28 +105,12 @@ export default function HouseholdBenefits() {
     // Mobile Keyboard Detection
     useEffect(() => {
         const handleFocus = (e) => {
-            const tag = e.target.tagName;
-            const type = e.target.type;
-            if (tag === 'TEXTAREA' || (tag === 'INPUT' && !['checkbox', 'radio', 'range', 'submit', 'button', 'file', 'color'].includes(type))) {
-                setIsInputFocused(true);
-            }
+            const tag = e.target.tagName; const type = e.target.type;
+            if (tag === 'TEXTAREA' || (tag === 'INPUT' && !['checkbox', 'radio', 'range', 'submit', 'button', 'file', 'color'].includes(type))) setIsInputFocused(true);
         };
-        const handleBlur = () => {
-            setTimeout(() => {
-                const active = document.activeElement;
-                const tag = active?.tagName;
-                const type = active?.type;
-                if (!(tag === 'TEXTAREA' || (tag === 'INPUT' && !['checkbox', 'radio', 'range', 'submit', 'button', 'file', 'color'].includes(type)))) {
-                    setIsInputFocused(false);
-                }
-            }, 100);
-        };
-        window.addEventListener('focus', handleFocus, true);
-        window.addEventListener('blur', handleBlur, true);
-        return () => {
-            window.removeEventListener('focus', handleFocus, true);
-            window.removeEventListener('blur', handleBlur, true);
-        };
+        const handleBlur = () => { setTimeout(() => setIsInputFocused(false), 100); };
+        window.addEventListener('focus', handleFocus, true); window.addEventListener('blur', handleBlur, true);
+        return () => { window.removeEventListener('focus', handleFocus, true); window.removeEventListener('blur', handleBlur, true); };
     }, []);
 
     const afni = Math.max(0, grossAfni || 0);
@@ -261,25 +243,15 @@ export default function HouseholdBenefits() {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-indigo-100" style={{ paddingBottom: activeTab === 'input' ? '180px' : '60px' }}>
-            <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-30 px-6 py-4">
-                <div className="max-w-5xl mx-auto flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <div className="bg-indigo-600 text-white p-2 rounded-lg shadow-lg"><BabyIcon size={24} /></div>
-                        <div><h1 className="text-lg md:text-xl font-bold">LoonieSense CCB</h1><div className="text-[10px] md:text-xs text-slate-500 uppercase font-medium tracking-widest">2024-2025 Estimator</div></div>
-                    </div>
-                    <button onClick={copyLink} className="text-sm font-bold text-indigo-600 flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-indigo-50 transition-all border border-transparent hover:border-indigo-100">
-                        {copySuccess ? <CheckIcon size={16} /> : <LinkIcon size={16} />} {copySuccess ? "Copied" : "Share"}
-                    </button>
-                </div>
-            </header>
-
-            <main className="max-w-5xl mx-auto p-4 md:p-8 w-full">
+        <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-indigo-100" style={{ paddingBottom: activeTab === 'input' ? '180px' : '40px' }}>
+            
+            <main className="max-w-5xl mx-auto p-4 md:p-8 w-full mt-6">
                 <div className="bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden mb-12">
+                    {/* TABS */}
                     <div className="p-2 bg-slate-50 border-b">
                         <div className="flex bg-slate-200/50 p-1 rounded-2xl">
-                            <button onClick={() => setActiveTab('input')} className={`flex-1 py-2.5 text-sm font-bold rounded-xl transition-all ${activeTab === 'input' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500'}`}>1. Household Inputs</button>
-                            <button onClick={() => setActiveTab('results')} className={`flex-1 py-2.5 text-sm font-bold rounded-xl transition-all ${activeTab === 'results' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500'}`}>2. Breakdown</button>
+                            <button onClick={() => setActiveTab('input')} className={`flex-1 py-2.5 text-sm font-bold rounded-xl transition-all ${activeTab === 'input' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>1. Household Inputs</button>
+                            <button onClick={() => setActiveTab('results')} className={`flex-1 py-2.5 text-sm font-bold rounded-xl transition-all ${activeTab === 'results' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>2. View Entitlement</button>
                         </div>
                     </div>
 
@@ -291,28 +263,37 @@ export default function HouseholdBenefits() {
                                         <div className="flex items-center gap-2 text-indigo-600 font-black uppercase text-[10px] tracking-widest"><DollarSignIcon size={16} /> Household Profile</div>
                                         <div className="bg-slate-50 p-5 md:p-6 rounded-3xl space-y-5 border border-slate-100 shadow-sm">
                                             <div>
-                                                <label className="text-xs font-black text-slate-700 block mb-1 uppercase tracking-tighter">Province</label>
-                                                <select value={province} onChange={(e) => setProvince(e.target.value)} className="w-full p-3 bg-white border border-slate-200 rounded-2xl text-sm outline-none shadow-sm focus:ring-2 focus:ring-indigo-500 transition-all">
+                                                <label className="text-xs font-black text-slate-700 block mb-1.5 uppercase tracking-tighter">Province</label>
+                                                <select value={province} onChange={(e) => setProvince(e.target.value)} className="w-full p-3 bg-white border border-slate-200 rounded-2xl text-sm outline-none shadow-sm focus:ring-2 focus:ring-indigo-500 transition-all font-medium">
                                                     <option value="ON">Ontario (ON)</option><option value="AB">Alberta (AB)</option><option value="BC">British Columbia (BC)</option><option value="OTHER">Other Provinces</option>
                                                 </select>
                                             </div>
                                             <div>
-                                                <label className="text-xs font-black text-slate-700 block mb-1 uppercase tracking-tighter">Marital Status</label>
-                                                <select value={maritalStatus} onChange={(e) => setMaritalStatus(e.target.value)} className="w-full p-3 bg-white border border-slate-200 rounded-2xl text-sm outline-none shadow-sm focus:ring-2 focus:ring-indigo-500 transition-all">
+                                                <label className="text-xs font-black text-slate-700 block mb-1.5 uppercase tracking-tighter">Marital Status</label>
+                                                <select value={maritalStatus} onChange={(e) => setMaritalStatus(e.target.value)} className="w-full p-3 bg-white border border-slate-200 rounded-2xl text-sm outline-none shadow-sm focus:ring-2 focus:ring-indigo-500 transition-all font-medium">
                                                     <option value="MARRIED">Married / Common-Law</option><option value="SINGLE">Single Parent</option>
                                                 </select>
                                             </div>
                                             <div>
-                                                <label className="text-sm font-bold text-slate-800 mb-1 flex items-center gap-1">Net Income <Tooltip text="Adjusted family net income (Line 23600). Use the combined income for couples." /></label>
-                                                <div className="relative"><span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span><input type="number" value={grossAfni} onChange={(e) => setGrossAfni(parseInt(e.target.value)||0)} className="w-full pl-9 p-3 bg-white border border-slate-200 rounded-2xl font-mono text-xl font-black text-slate-800 focus:ring-2 focus:ring-indigo-500 transition-all" /></div>
+                                                <label className="text-xs font-bold text-slate-400 uppercase mb-1 block">Net Household Income</label>
+                                                <div className="relative group">
+                                                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 font-bold group-focus-within:text-indigo-500 transition-colors">$</span>
+                                                    <input type="number" value={grossAfni} onChange={(e) => setGrossAfni(parseInt(e.target.value)||0)} className="w-full pl-9 p-3 bg-white border border-slate-200 rounded-2xl font-mono text-xl font-black text-slate-800 focus:ring-2 focus:ring-indigo-500 outline-none transition-all" />
+                                                </div>
                                             </div>
                                             <div className="space-y-3 pt-2">
                                                 <label className="flex items-center gap-3 cursor-pointer bg-white p-3 rounded-2xl border border-slate-200 text-sm font-bold transition-all hover:border-indigo-200 shadow-sm group">
-                                                    <input type="checkbox" checked={sharedCustody} onChange={(e) => setSharedCustody(e.target.checked)} className="w-5 h-5 text-indigo-600 rounded-lg border-slate-300" />
+                                                    <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${sharedCustody ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-slate-300 bg-slate-50'}`}>
+                                                        <input type="checkbox" checked={sharedCustody} onChange={(e) => setSharedCustody(e.target.checked)} className="sr-only" />
+                                                        {sharedCustody && <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><polyline points="20 6 9 17 4 12"/></svg>}
+                                                    </div>
                                                     <div className="flex flex-col"><span className="leading-none group-hover:text-indigo-600 transition-colors">Shared Custody?</span><span className="text-[9px] text-slate-400 uppercase font-black tracking-wider mt-1">40-60% split</span></div>
                                                 </label>
                                                 <label className="flex items-center gap-3 cursor-pointer bg-white p-3 rounded-2xl border border-slate-200 text-sm font-bold transition-all hover:border-emerald-200 shadow-sm group">
-                                                    <input type="checkbox" checked={isRural} onChange={(e) => setIsRural(e.target.checked)} className="w-5 h-5 text-emerald-600 rounded-lg border-slate-300" />
+                                                    <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${isRural ? 'bg-emerald-600 border-emerald-600 text-white' : 'border-slate-300 bg-slate-50'}`}>
+                                                        <input type="checkbox" checked={isRural} onChange={(e) => setIsRural(e.target.checked)} className="sr-only" />
+                                                        {isRural && <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><polyline points="20 6 9 17 4 12"/></svg>}
+                                                    </div>
                                                     <div className="flex flex-col"><span className="leading-none group-hover:text-emerald-600 transition-colors">Rural Area?</span><span className="text-[9px] text-slate-400 uppercase font-black tracking-wider mt-1">+20% Carbon Rebate</span></div>
                                                 </label>
                                             </div>
@@ -361,23 +342,23 @@ export default function HouseholdBenefits() {
                         {activeTab === 'results' && (
                             <div className="animate-fade-in space-y-8 md:space-y-10">
                                 {/* Result Hero */}
-                                <div className="bg-slate-900 rounded-[2rem] md:rounded-[3rem] p-6 md:p-10 text-white relative overflow-hidden shadow-2xl border-4 border-indigo-500/10">
-                                    <div className="absolute top-0 right-0 -mr-20 -mt-20 w-60 h-60 md:w-96 md:h-96 bg-emerald-500/20 rounded-full blur-[80px] md:blur-[100px]"></div>
-                                    <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-60 h-60 md:w-96 md:h-96 bg-indigo-500/20 rounded-full blur-[80px] md:blur-[100px]"></div>
+                                <div className="bg-slate-900 rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-10 text-white relative overflow-hidden shadow-2xl ring-1 ring-white/10">
+                                    <div className="absolute top-0 right-0 -mr-20 -mt-20 w-60 h-60 md:w-96 md:h-96 bg-emerald-500/20 rounded-full blur-[80px] md:blur-[100px] pointer-events-none"></div>
+                                    <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-60 h-60 md:w-96 md:h-96 bg-indigo-500/20 rounded-full blur-[80px] md:blur-[100px] pointer-events-none"></div>
                                     
                                     <div className="relative z-10 grid md:grid-cols-2 gap-8 md:gap-12 items-center">
                                         <div className="text-center md:text-left">
                                             <h2 className="text-emerald-400 text-[10px] font-black uppercase tracking-[0.3em] mb-3">Total Estimated Support</h2>
                                             <div className="flex items-baseline justify-center md:justify-start gap-2 flex-wrap">
-                                                <span className="text-5xl md:text-7xl font-black tracking-tighter">${results.total.toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
+                                                <span className="text-5xl md:text-7xl font-black tracking-tighter drop-shadow-xl">${results.total.toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
                                                 <span className="text-slate-400 text-lg md:text-xl font-bold tracking-tight">/ year</span>
                                             </div>
                                             <div className="mt-6 flex flex-col gap-2">
-                                                <p className="text-slate-400 text-sm font-bold tracking-tight flex items-center justify-center md:justify-start gap-2">
+                                                <p className="text-slate-400 text-sm font-bold tracking-tight flex items-center justify-center md:justify-start gap-2 bg-white/5 inline-flex self-center md:self-start px-4 py-2 rounded-full border border-white/5">
                                                     <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
                                                     ~${Math.round(results.monthly).toLocaleString()} Average Monthly Support
                                                 </p>
-                                                <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest pl-0 md:pl-4">Non-taxable federal & provincial assistance</p>
+                                                <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest pl-0 md:pl-4 mt-2">Non-taxable federal & provincial assistance</p>
                                             </div>
                                         </div>
                                         <div className="bg-white/5 rounded-[1.5rem] md:rounded-[2rem] p-5 md:p-8 border border-white/10 backdrop-blur-xl shadow-inner">
@@ -455,10 +436,10 @@ export default function HouseholdBenefits() {
                                     <Accordion title="Official CRA Resources" icon={ExternalLinkIcon}>
                                         <div className="flex flex-col gap-4">
                                             <a href="https://www.canada.ca/en/revenue-agency/services/child-family-benefits/canada-child-benefit-overview.html" target="_blank" className="flex items-center justify-between p-4 bg-indigo-50 rounded-2xl group transition-all hover:bg-indigo-100">
-                                                <div className="flex items-center gap-3"><BabyIcon className="text-indigo-600" /> <span className="font-bold text-indigo-900 text-sm">CRA CCB Overview</span></div>
+                                                <div className="flex items-center gap-3"><DollarSignIcon className="text-indigo-600" /> <span className="font-bold text-indigo-900 text-sm">CRA CCB Overview</span></div>
                                                 <ExternalLinkIcon size={16} className="text-indigo-400 group-hover:translate-x-1 transition-transform" />
                                             </a>
-                                            <a href="https://www.canada.ca/en/revenue-agency/services/child-family-benefits/goods-services-tax-harmonized-sales-tax-credit.html" target="_blank" className="flex items-center justify-between p-4 bg-emerald-50 rounded-2xl group transition-all hover:bg-emerald-100">
+                                            <a href="https://www.canada.ca/en/revenue-agency/services/child-family-benefits/goods-services-tax-harmonized-sales-tax-credit.html" target="_blank" className="flex items-center justify-between p-4 bg-emerald-5 rounded-2xl group transition-all hover:bg-emerald-100">
                                                 <div className="flex items-center gap-3"><DollarSignIcon className="text-emerald-600" /> <span className="font-bold text-emerald-900 text-sm">GST/HST Credit Rules</span></div>
                                                 <ExternalLinkIcon size={16} className="text-emerald-400 group-hover:translate-x-1 transition-transform" />
                                             </a>
@@ -473,7 +454,7 @@ export default function HouseholdBenefits() {
 
             {/* Live Estimate Portal - Hidden if typing */}
             {activeTab === 'input' && mounted && !isInputFocused && createPortal(
-                <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200 p-4 md:p-5 z-[9999] animate-slide-up shadow-[0_-20px_50px_-15px_rgba(0,0,0,0.1)]" style={{ position: 'fixed', bottom: 0, width: '100%' }}>
+                <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200 p-4 md:p-5 z-[9999] animate-slide-up shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)]" style={{ position: 'fixed', bottom: 0, width: '100%' }}>
                     <div className="max-w-5xl mx-auto flex items-center justify-between gap-4 md:gap-6">
                         <div className="flex flex-col">
                             <span className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-1">Est. Total Benefits</span>
@@ -484,11 +465,14 @@ export default function HouseholdBenefits() {
                                 <span className="text-xs font-black text-slate-400 uppercase">/ yr</span>
                             </div>
                         </div>
-                        <div className="flex items-center gap-4">
-                            <div className="hidden sm:flex flex-col items-end text-[10px] font-black text-slate-500 uppercase tracking-tight leading-tight">
-                                <span>Approx. ${Math.round(results.monthly).toLocaleString()} Monthly</span>
-                                <span className="text-emerald-500">Tax-Free Assistance</span>
-                            </div>
+                        <div className="flex items-center gap-3">
+                             {/* Shared Button in Footer */}
+                             <button onClick={copyLink} className="bg-white text-indigo-600 p-3 md:py-4 md:px-6 rounded-[1.2rem] md:rounded-[1.5rem] border border-indigo-100 shadow-lg shadow-indigo-100/50 transition-all hover:bg-indigo-50 active:scale-95 flex items-center justify-center gap-2">
+                               {copySuccess ? <CheckIcon size={20}/> : <LinkIcon size={20}/>}
+                               <span className="hidden md:inline font-bold text-xs uppercase tracking-wider">{copySuccess ? 'Copied' : 'Share'}</span>
+                             </button>
+                            
+                            {/* Primary CTA */}
                             <button onClick={() => { setActiveTab('results'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="bg-indigo-600 hover:bg-indigo-700 text-white font-black py-3 px-6 md:py-4 md:px-12 rounded-[1.2rem] md:rounded-[1.5rem] shadow-xl shadow-indigo-200 transition-all flex items-center gap-2 transform active:scale-95 whitespace-nowrap uppercase tracking-widest text-[10px]">
                                 View Full Breakdown <ArrowRightIcon size={18} />
                             </button>
