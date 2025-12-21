@@ -3,7 +3,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { 
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, 
-    ResponsiveContainer, Legend, ReferenceLine, Cell
+    ResponsiveContainer, Cell
 } from 'recharts';
 
 // ==========================================
@@ -13,50 +13,46 @@ const IconBase = ({ size = 20, className = "", children }) => (
     <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>{children}</svg>
 );
 
-const BabyIcon = (props) => (<IconBase {...props}><path d="M9 12h.01"/><path d="M15 12h.01"/><path d="M10 16c.5.3 1.2.5 2 .5s1.5-.2 2-.5"/><path d="M19 6.3a9 9 0 0 1 1.8 3.9 2 2 0 0 1 0 3.6 9 9 0 0 1-17.6 0 2 2 0 0 1 0-3.6A9 9 0 0 1 12 3c2 0 4 .7 5.6 1.8"/><path d="M12 3v2"/></IconBase>);
-const DollarSignIcon = (props) => (<IconBase {...props}><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></IconBase>);
-const CalendarIcon = (props) => (<IconBase {...props}><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></IconBase>);
 const UsersIcon = (props) => (<IconBase {...props}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></IconBase>);
-const HelpCircleIcon = (props) => (<IconBase {...props}><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></IconBase>);
 const MapPinIcon = (props) => (<IconBase {...props}><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></IconBase>);
 const ArrowRightIcon = (props) => (<IconBase {...props}><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></IconBase>);
+const SlidersIcon = (props) => (<IconBase {...props}><line x1="4" x2="4" y1="21" y2="14"/><line x1="4" x2="4" y1="10" y2="3"/><line x1="12" x2="12" y1="21" y2="12"/><line x1="12" x2="12" y1="8" y2="3"/><line x1="20" x2="20" y1="21" y2="16"/><line x1="20" x2="20" y1="12" y2="3"/><line x1="2" x2="6" y1="14" y2="14"/><line x1="10" x2="14" y1="8" y2="8"/><line x1="18" x2="22" y1="16" y2="16"/></IconBase>);
+const CheckCircleIcon = (props) => (<IconBase {...props}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></IconBase>);
+const SparklesIcon = (props) => (<IconBase {...props}><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></IconBase>);
+const CalendarIcon = (props) => (<IconBase {...props}><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></IconBase>);
+const WalletIcon = (props) => (<IconBase {...props}><path d="M20 7h-7"/><path d="M14 11h6"/><path d="m20 7 2 2-2 2"/><path d="M5 20h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-3"/><path d="M7 2v16"/><path d="M3 11h4"/></IconBase>);
 
 // ==========================================
 //              CONSTANTS
 // ==========================================
 const EI_2025 = {
-    MAX_INSURABLE: 65700, 
+    MAX_INSURABLE: 66600, // 2025 Projected
+    QC_MAX_INSURABLE: 98000, 
+    
     STD_RATE: 0.55,
     EXT_RATE: 0.33,
-    MAX_WEEKLY_STD: 695, 
-    MAX_WEEKLY_EXT: 417, 
-    MATERNITY_WEEKS: 15,
-    STD_PARENTAL_WEEKS: 35,
-    EXT_PARENTAL_WEEKS: 61,
-    STD_SHARED_BONUS: 5,
-    EXT_SHARED_BONUS: 8
+    MAX_WEEKLY_STD: 705, 
+    MAX_WEEKLY_EXT: 423, 
+    
+    // Parental Limits
+    STD_INDIVIDUAL_MAX: 35,
+    STD_COMBINED_MAX: 40,
+    EXT_INDIVIDUAL_MAX: 61,
+    EXT_COMBINED_MAX: 69,
 };
-
-// Tooltip fixed to use 'group/tip' to avoid conflict with parent containers
-const Tooltip = ({ text }) => (
-    <div className="group/tip relative inline-flex items-center ml-1">
-        <button type="button" className="text-slate-400 hover:text-rose-600 transition-colors cursor-help">
-            <HelpCircleIcon size={16} />
-        </button>
-        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-3 bg-slate-800 text-slate-50 text-xs rounded-xl shadow-xl opacity-0 group-hover/tip:opacity-100 transition-all duration-200 pointer-events-none z-50 text-center leading-relaxed border border-slate-700">
-            {text}
-            <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-800"></div>
-        </div>
-    </div>
-);
 
 export default function ParentalLeave() {
     const [province, setProvince] = useState('ON');
-    const [salary, setSalary] = useState(65000);
-    const [partnerSalary, setPartnerSalary] = useState(55000);
+    const [salary, setSalary] = useState(70000);
+    const [partnerSalary, setPartnerSalary] = useState(60000);
     const [hasPartner, setHasPartner] = useState(true);
     const [planType, setPlanType] = useState('STANDARD'); 
     
+    // --- ALLOCATION STATE ---
+    const [p1Maternity, setP1Maternity] = useState(true); 
+    const [p1Weeks, setP1Weeks] = useState(30); 
+    const [p2Weeks, setP2Weeks] = useState(5); 
+
     const [activeTab, setActiveTab] = useState('input');
     const [mounted, setMounted] = useState(false);
     const [isInputFocused, setIsInputFocused] = useState(false);
@@ -66,330 +62,449 @@ export default function ParentalLeave() {
     // Mobile Keyboard Detection
     useEffect(() => {
         const handleFocus = (e) => {
-            const tag = e.target.tagName;
-            const type = e.target.type;
-            if (tag === 'TEXTAREA' || (tag === 'INPUT' && !['checkbox', 'radio', 'range', 'submit', 'button', 'file', 'color'].includes(type))) {
-                setIsInputFocused(true);
-            }
+            const tag = e.target.tagName; const type = e.target.type;
+            if (tag === 'TEXTAREA' || (tag === 'INPUT' && !['checkbox', 'radio', 'range', 'submit', 'button'].includes(type))) setIsInputFocused(true);
         };
-        const handleBlur = () => {
-            setTimeout(() => {
-                const active = document.activeElement;
-                const tag = active?.tagName;
-                const type = active?.type;
-                if (!(tag === 'TEXTAREA' || (tag === 'INPUT' && !['checkbox', 'radio', 'range', 'submit', 'button', 'file', 'color'].includes(type)))) {
-                    setIsInputFocused(false);
-                }
-            }, 100);
-        };
-        window.addEventListener('focus', handleFocus, true);
-        window.addEventListener('blur', handleBlur, true);
-        return () => {
-            window.removeEventListener('focus', handleFocus, true);
-            window.removeEventListener('blur', handleBlur, true);
-        };
+        const handleBlur = () => { setTimeout(() => setIsInputFocused(false), 100); };
+        window.addEventListener('focus', handleFocus, true); window.addEventListener('blur', handleBlur, true);
+        return () => { window.removeEventListener('focus', handleFocus, true); window.removeEventListener('blur', handleBlur, true); };
     }, []);
 
-    // --- CALCULATION logic ---
+    // Helper: Get Current Max Insurable based on province
+    const currentMaxInsurable = province === 'QC' ? EI_2025.QC_MAX_INSURABLE : EI_2025.MAX_INSURABLE;
+
+    // Reset/Adjust weeks when Plan Type or Partner status changes
+    useEffect(() => {
+        const isExtended = planType === 'EXTENDED';
+        const indMax = isExtended ? EI_2025.EXT_INDIVIDUAL_MAX : EI_2025.STD_INDIVIDUAL_MAX;
+        
+        if (p1Weeks > indMax) setP1Weeks(indMax);
+        if (p2Weeks > indMax) setP2Weeks(indMax);
+        if (!hasPartner) setP2Weeks(0);
+    }, [planType, hasPartner, p1Weeks, p2Weeks]);
+
+    // --- SLIDER LOGIC ---
+    const handleWeeksChange = (parent, val) => {
+        const isExtended = planType === 'EXTENDED';
+        const indMax = isExtended ? EI_2025.EXT_INDIVIDUAL_MAX : EI_2025.STD_INDIVIDUAL_MAX;
+        const combinedMax = isExtended ? EI_2025.EXT_COMBINED_MAX : EI_2025.STD_COMBINED_MAX;
+        const pool = hasPartner ? combinedMax : indMax;
+
+        let newWeeks = parseInt(val, 10);
+        
+        if (newWeeks > indMax) newWeeks = indMax;
+
+        if (parent === 1) {
+            if (newWeeks + p2Weeks > pool) setP2Weeks(Math.max(0, pool - newWeeks));
+            setP1Weeks(newWeeks);
+        } else {
+            if (newWeeks + p1Weeks > pool) setP1Weeks(Math.max(0, pool - newWeeks));
+            setP2Weeks(newWeeks);
+        }
+    };
+
+    // --- CALCULATION LOGIC ---
     const results = useMemo(() => {
         const isQuebec = province === 'QC';
         let data = {
-            maternityWeekly: 0, maternityWeeks: 15, maternityTotal: 0,
-            parentalWeekly: 0, parentalWeeks: 0, parentalTotal: 0,
-            bonusWeeks: 0, bonusTotal: 0,
-            totalDuration: 0, totalValue: 0,
-            isQuebec
+            maternityWeekly: 0, maternityWeeks: p1Maternity ? (isQuebec ? 18 : 15) : 0, maternityTotal: 0,
+            p1Weekly: 0, p1Weeks: p1Weeks, p1Total: 0,
+            p2Weekly: 0, p2Weeks: p2Weeks, p2Total: 0,
+            totalDuration: 0, totalValue: 0
         };
 
+        const insurableCap = isQuebec ? EI_2025.QC_MAX_INSURABLE : EI_2025.MAX_INSURABLE;
+        const p1Insurable = Math.min(salary, insurableCap);
+        const p2Insurable = Math.min(partnerSalary, insurableCap);
+        const isExtended = planType === 'EXTENDED';
+
         if (!isQuebec) {
-            const insurable = Math.min(salary, EI_2025.MAX_INSURABLE);
-            const isExtended = planType === 'EXTENDED';
-            
-            // Maternity (Fixed)
-            data.maternityWeekly = Math.min(EI_2025.MAX_WEEKLY_STD, (insurable * EI_2025.STD_RATE) / 52);
+            // Maternity
+            data.maternityWeekly = Math.min(EI_2025.MAX_WEEKLY_STD, (p1Insurable * EI_2025.STD_RATE) / 52);
             data.maternityTotal = data.maternityWeekly * data.maternityWeeks;
 
             // Parental
             const pRate = isExtended ? EI_2025.EXT_RATE : EI_2025.STD_RATE;
             const pMax = isExtended ? EI_2025.MAX_WEEKLY_EXT : EI_2025.MAX_WEEKLY_STD;
-            data.parentalWeekly = Math.min(pMax, (insurable * pRate) / 52);
-            data.parentalWeeks = isExtended ? EI_2025.EXT_PARENTAL_WEEKS : EI_2025.STD_PARENTAL_WEEKS;
-            data.parentalTotal = data.parentalWeekly * data.parentalWeeks;
 
-            // Bonus Reserved Weeks (Sharing Benefit)
-            if (hasPartner) {
-                const partnerInsurable = Math.min(partnerSalary, EI_2025.MAX_INSURABLE);
-                const partnerWeekly = Math.min(pMax, (partnerInsurable * pRate) / 52);
-                data.bonusWeeks = isExtended ? EI_2025.EXT_SHARED_BONUS : EI_2025.STD_SHARED_BONUS;
-                data.bonusTotal = partnerWeekly * data.bonusWeeks;
-            }
+            data.p1Weekly = Math.min(pMax, (p1Insurable * pRate) / 52);
+            data.p1Total = data.p1Weekly * data.p1Weeks;
+
+            data.p2Weekly = Math.min(pMax, (p2Insurable * pRate) / 52);
+            data.p2Total = data.p2Weekly * data.p2Weeks;
         } else {
-            // Simplified Quebec Logic for this UI improvement
-            const insurable = Math.min(salary, 98000);
-            data.maternityWeekly = (insurable * 0.70) / 52;
-            data.maternityWeeks = 18;
+            // Simplified QC
+            data.maternityWeekly = (p1Insurable * 0.70) / 52;
             data.maternityTotal = data.maternityWeekly * data.maternityWeeks;
-            data.parentalWeekly = (insurable * 0.70) / 52;
-            data.parentalWeeks = 32;
-            data.parentalTotal = data.parentalWeekly * data.parentalWeeks;
-            if (hasPartner) {
-                const pInsurable = Math.min(partnerSalary, 98000);
-                data.bonusWeeks = 5;
-                data.bonusTotal = ((pInsurable * 0.70) / 52) * 5;
-            }
+            data.p1Weekly = (p1Insurable * 0.70) / 52;
+            data.p1Total = data.p1Weekly * data.p1Weeks;
+            data.p2Weekly = (p2Insurable * 0.70) / 52;
+            data.p2Total = data.p2Weekly * data.p2Weeks;
         }
 
-        data.totalDuration = data.maternityWeeks + data.parentalWeeks + data.bonusWeeks;
-        data.totalValue = data.maternityTotal + data.parentalTotal + data.bonusTotal;
+        data.totalDuration = data.maternityWeeks + data.p1Weeks + data.p2Weeks;
+        data.totalValue = data.maternityTotal + data.p1Total + data.p2Total;
         return data;
-    }, [province, salary, partnerSalary, hasPartner, planType]);
+    }, [province, salary, partnerSalary, hasPartner, planType, p1Weeks, p2Weeks, p1Maternity]);
 
-    const chartData = [
-        { name: 'Maternity', value: Math.round(results.maternityTotal), color: '#f43f5e' },
-        { name: 'Parental', value: Math.round(results.parentalTotal), color: '#6366f1' },
-        { name: 'Reserved Bonus', value: Math.round(results.bonusTotal), color: '#10b981' }
-    ].filter(d => d.value > 0);
+    // Helpers
+    const getMaxWeeks = () => {
+        if (province === 'QC') return 32 + 5; 
+        return planType === 'EXTENDED' ? 69 : 40;
+    };
+    const getIndividualMax = () => {
+         if (province === 'QC') return 32; 
+         return planType === 'EXTENDED' ? 61 : 35;
+    };
+    const combinedWeeks = p1Weeks + p2Weeks;
+    const bonusWeeksActive = combinedWeeks > getIndividualMax();
 
     return (
         <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-rose-100" style={{ paddingBottom: activeTab === 'input' ? '180px' : '40px' }}>
             
-            <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-30 px-6 py-4">
-                <div className="max-w-5xl mx-auto flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <div className="bg-rose-600 text-white p-2 rounded-lg shadow-lg shadow-rose-500/20">
-                            <BabyIcon size={24} />
-                        </div>
-                        <h1 className="text-lg md:text-xl font-bold tracking-tight">Parental Leave Estimator</h1>
-                    </div>
-                </div>
-            </header>
-
-            <main className="max-w-5xl mx-auto p-4 md:p-8 w-full">
+            <main className="max-w-5xl mx-auto p-4 md:p-8 w-full mt-6">
                 <div className="bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden mb-12">
+                    {/* TABS */}
                     <div className="p-2 bg-slate-50 border-b">
                         <div className="flex bg-slate-200/50 p-1 rounded-2xl">
-                            <button onClick={() => setActiveTab('input')} className={`flex-1 py-2.5 text-sm font-bold rounded-xl transition-all ${activeTab === 'input' ? 'bg-white text-rose-600 shadow-sm' : 'text-slate-500'}`}>1. Personal Setup</button>
-                            <button onClick={() => setActiveTab('results')} className={`flex-1 py-2.5 text-sm font-bold rounded-xl transition-all ${activeTab === 'results' ? 'bg-white text-rose-600 shadow-sm' : 'text-slate-500'}`}>2. View Entitlement</button>
+                            <button onClick={() => setActiveTab('input')} className={`flex-1 py-2.5 text-sm font-bold rounded-xl transition-all ${activeTab === 'input' ? 'bg-white text-rose-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>1. Configure</button>
+                            <button onClick={() => setActiveTab('results')} className={`flex-1 py-2.5 text-sm font-bold rounded-xl transition-all ${activeTab === 'results' ? 'bg-white text-rose-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>2. Your Results</button>
                         </div>
                     </div>
 
                     <div className="p-4 md:p-10">
                         {activeTab === 'input' && (
                             <div className="animate-fade-in space-y-10">
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-10">
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16">
                                     
-                                    {/* SECTION 1: CONFIG */}
-                                    <div className="space-y-6">
-                                        <div className="flex items-center gap-2 text-rose-600 font-black uppercase text-[10px] tracking-widest"><MapPinIcon size={16} /> Location & Plan</div>
-                                        <div className="bg-slate-50 p-5 md:p-6 rounded-3xl space-y-5 border border-slate-100 shadow-sm">
-                                            <div>
-                                                <label className="text-xs font-black text-slate-700 block mb-1 uppercase tracking-tighter">Province</label>
-                                                <select value={province} onChange={(e) => setProvince(e.target.value)} className="w-full p-3 bg-white border border-slate-200 rounded-2xl text-sm focus:ring-2 focus:ring-rose-500 outline-none shadow-sm">
-                                                    <option value="ON">Ontario (EI)</option>
-                                                    <option value="BC">BC (EI)</option>
-                                                    <option value="AB">Alberta (EI)</option>
-                                                    <option value="QC">Quebec (QPIP)</option>
-                                                    <option value="OTHER">Other Provinces (EI)</option>
-                                                </select>
+                                    {/* --- SETTINGS --- */}
+                                    <div className="space-y-8">
+                                        
+                                        {/* LOCATION */}
+                                        <div className="space-y-4">
+                                            <div className="flex items-center gap-2 text-rose-600 font-black uppercase text-[10px] tracking-widest"><MapPinIcon size={16} /> Location & Plan</div>
+                                            <div className="bg-slate-50 p-5 rounded-3xl border border-slate-100 shadow-sm space-y-4">
+                                                <div>
+                                                    <label className="text-xs font-black text-slate-700 block mb-1.5 uppercase tracking-tighter">Province</label>
+                                                    <select value={province} onChange={(e) => setProvince(e.target.value)} className="w-full p-3 bg-white border border-slate-200 rounded-2xl text-sm focus:ring-2 focus:ring-rose-500 outline-none shadow-sm font-medium">
+                                                        <option value="ON">Ontario (EI)</option>
+                                                        <option value="BC">BC (EI)</option>
+                                                        <option value="AB">Alberta (EI)</option>
+                                                        <option value="QC">Quebec (QPIP)</option>
+                                                        <option value="OTHER">Other Provinces (EI)</option>
+                                                    </select>
+                                                </div>
+                                                <div>
+                                                    <label className="text-xs font-black text-slate-700 block mb-1.5 uppercase tracking-tighter">Plan Type</label>
+                                                    <div className="grid grid-cols-2 gap-3">
+                                                        <button onClick={() => setPlanType('STANDARD')} className={`p-3 text-center rounded-2xl border-2 transition-all relative ${planType === 'STANDARD' ? 'border-rose-500 bg-rose-50 text-rose-900 shadow-sm' : 'border-slate-200 bg-white text-slate-400 hover:border-slate-300'}`}>
+                                                            {planType === 'STANDARD' && <div className="absolute top-2 right-2 text-rose-500"><CheckCircleIcon size={14}/></div>}
+                                                            <div className="font-bold text-sm">Standard</div>
+                                                            <div className="text-[10px] opacity-70 font-medium">12 Months (55%)</div>
+                                                        </button>
+                                                        <button onClick={() => setPlanType('EXTENDED')} className={`p-3 text-center rounded-2xl border-2 transition-all relative ${planType === 'EXTENDED' ? 'border-rose-500 bg-rose-50 text-rose-900 shadow-sm' : 'border-slate-200 bg-white text-slate-400 hover:border-slate-300'}`}>
+                                                            {planType === 'EXTENDED' && <div className="absolute top-2 right-2 text-rose-500"><CheckCircleIcon size={14}/></div>}
+                                                            <div className="font-bold text-sm">Extended</div>
+                                                            <div className="text-[10px] opacity-70 font-medium">18 Months (33%)</div>
+                                                        </button>
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <div>
-                                                <label className="text-xs font-black text-slate-700 block mb-1 uppercase tracking-tighter">Plan Duration</label>
-                                                <div className="grid grid-cols-1 gap-2">
-                                                    <button onClick={() => setPlanType('STANDARD')} className={`p-3 text-left rounded-2xl border-2 transition-all ${planType === 'STANDARD' ? 'border-rose-500 bg-rose-50' : 'border-slate-200 bg-white hover:border-slate-300'}`}>
-                                                        <div className="font-bold text-sm">Standard</div>
-                                                        <div className="text-[10px] text-slate-500 uppercase">12 Months (55% pay)</div>
-                                                    </button>
-                                                    <button onClick={() => setPlanType('EXTENDED')} className={`p-3 text-left rounded-2xl border-2 transition-all ${planType === 'EXTENDED' ? 'border-rose-500 bg-rose-50' : 'border-slate-200 bg-white hover:border-slate-300'}`}>
-                                                        <div className="font-bold text-sm">Extended</div>
-                                                        <div className="text-[10px] text-slate-500 uppercase">18 Months (33% pay)</div>
-                                                    </button>
+                                        </div>
+
+                                        {/* INCOMES */}
+                                        <div className="space-y-4">
+                                            <div className="flex items-center gap-2 text-indigo-600 font-black uppercase text-[10px] tracking-widest"><UsersIcon size={16} /> Annual Income</div>
+                                            
+                                            <div className="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-5">
+                                                {/* P1 */}
+                                                <div>
+                                                    <div className="flex justify-between items-end mb-1.5">
+                                                        <label className="text-xs font-bold text-slate-400 uppercase">Parent 1 (Birth)</label>
+                                                        <button onClick={() => setSalary(currentMaxInsurable)} className="text-[10px] bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-md font-bold hover:bg-indigo-100 transition-colors">
+                                                            Set Max (${currentMaxInsurable.toLocaleString()})
+                                                        </button>
+                                                    </div>
+                                                    <div className="relative group">
+                                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 font-bold group-focus-within:text-indigo-500 transition-colors">$</span>
+                                                        <input type="number" value={salary} onChange={(e) => setSalary(parseInt(e.target.value)||0)} className="w-full pl-8 p-3 bg-slate-50 border border-slate-200 rounded-2xl font-mono text-lg font-black focus:ring-2 focus:ring-indigo-500 outline-none transition-all" />
+                                                    </div>
+                                                </div>
+                                                {/* P2 */}
+                                                <div className="pt-4 border-t border-slate-100">
+                                                    <label className="flex items-center gap-3 cursor-pointer mb-4 select-none">
+                                                        <div className={`w-12 h-6 rounded-full transition-colors relative ${hasPartner ? 'bg-emerald-500' : 'bg-slate-200'}`}>
+                                                            <input type="checkbox" checked={hasPartner} onChange={(e) => setHasPartner(e.target.checked)} className="sr-only" />
+                                                            <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all shadow-sm ${hasPartner ? 'left-7' : 'left-1'}`}></div>
+                                                        </div>
+                                                        <span className="font-bold text-slate-700 text-sm">Include Partner?</span>
+                                                    </label>
+                                                    
+                                                    {hasPartner && (
+                                                        <div className="animate-fade-in">
+                                                            <div className="flex justify-between items-end mb-1.5">
+                                                                <label className="text-xs font-bold text-slate-400 uppercase">Parent 2 (Non-Birth)</label>
+                                                                <button onClick={() => setPartnerSalary(currentMaxInsurable)} className="text-[10px] bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-md font-bold hover:bg-emerald-100 transition-colors">
+                                                                    Set Max (${currentMaxInsurable.toLocaleString()})
+                                                                </button>
+                                                            </div>
+                                                            <div className="relative group">
+                                                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 font-bold group-focus-within:text-emerald-500 transition-colors">$</span>
+                                                                <input type="number" value={partnerSalary} onChange={(e) => setPartnerSalary(parseInt(e.target.value)||0)} className="w-full pl-8 p-3 bg-slate-50 border border-slate-200 rounded-2xl font-mono text-lg font-black focus:ring-2 focus:ring-emerald-500 outline-none transition-all" />
+                                                            </div>
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
 
-                                    {/* SECTION 2: SHARING & INCOME */}
-                                    <div className="md:col-span-2 space-y-6">
-                                        <div className="flex items-center gap-2 text-indigo-600 font-black uppercase text-[10px] tracking-widest"><UsersIcon size={16} /> Parental Sharing</div>
-                                        
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                            {/* PRIMARY PARENT */}
-                                            <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
-                                                <div className="font-bold text-slate-800 text-sm border-b pb-2">Parent 1 (Birth Parent)</div>
+                                    {/* --- ALLOCATION SLIDERS --- */}
+                                    <div className="space-y-6">
+                                         <div className="flex items-center gap-2 text-emerald-600 font-black uppercase text-[10px] tracking-widest"><SlidersIcon size={16} /> Strategy & Allocation</div>
+                                         
+                                         <div className="bg-slate-900 text-white p-6 md:p-8 rounded-[2rem] shadow-2xl space-y-8 relative overflow-hidden ring-1 ring-white/10">
+                                            {/* Glow Effect */}
+                                            <div className="absolute -top-24 -right-24 w-64 h-64 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none"></div>
+
+                                            {/* Maternity Toggle */}
+                                            <div className="relative z-10 flex justify-between items-center bg-white/5 p-4 rounded-2xl border border-white/10 backdrop-blur-sm">
                                                 <div>
-                                                    <label className="text-xs font-bold text-slate-400 uppercase mb-1 block">Annual Gross Salary</label>
-                                                    <div className="relative">
-                                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 font-bold">$</span>
-                                                        <input type="number" value={salary} onChange={(e) => setSalary(parseInt(e.target.value)||0)} className="w-full pl-8 p-3 bg-slate-50 border border-slate-200 rounded-2xl font-mono text-xl font-black focus:ring-2 focus:ring-rose-500 outline-none" />
-                                                    </div>
+                                                    <div className="font-bold text-sm text-rose-300">Maternity Leave</div>
+                                                    <div className="text-[10px] text-slate-400 uppercase tracking-wider font-bold">Exclusive to Parent 1</div>
                                                 </div>
-                                                <div className="p-3 bg-slate-50 rounded-xl">
-                                                    <div className="text-[10px] font-black text-slate-400 uppercase mb-1">Entitlements</div>
-                                                    <ul className="text-xs space-y-1 font-bold text-slate-600">
-                                                        <li className="flex justify-between"><span>Maternity Leave:</span> <span className="text-rose-600">15 Weeks</span></li>
-                                                        <li className="flex justify-between"><span>Parental Leave:</span> <span className="text-indigo-600">Up to 35 Weeks</span></li>
-                                                    </ul>
+                                                <div className="flex items-center gap-3">
+                                                    <span className={`text-xl font-black tabular-nums ${p1Maternity ? 'text-white' : 'text-slate-600'}`}>{p1Maternity ? (province === 'QC' ? 18 : 15) : 0} <span className="text-xs font-bold text-slate-500">Wks</span></span>
+                                                    <button onClick={() => setP1Maternity(!p1Maternity)} className={`w-12 h-6 rounded-full transition-colors relative ${p1Maternity ? 'bg-rose-500' : 'bg-slate-700'}`}>
+                                                        <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all shadow-sm ${p1Maternity ? 'left-7' : 'left-1'}`}></div>
+                                                    </button>
                                                 </div>
                                             </div>
 
-                                            {/* SECOND PARENT */}
-                                            <div className={`p-6 rounded-3xl border transition-all shadow-sm space-y-4 ${hasPartner ? 'bg-white border-slate-200' : 'bg-slate-50 border-dashed border-slate-300'}`}>
-                                                <label className="flex items-center gap-3 cursor-pointer group">
-                                                    <input type="checkbox" checked={hasPartner} onChange={(e) => setHasPartner(e.target.checked)} className="w-6 h-6 text-rose-600 rounded-lg border-slate-300" />
-                                                    <span className="font-bold text-slate-800 text-sm">Parent 2 (Non-Birth)</span>
-                                                </label>
+                                            {/* Parental Sliders */}
+                                            <div className="relative z-10 space-y-8">
+                                                
+                                                {/* Visual Pool Meter */}
+                                                <div className="space-y-2">
+                                                    <div className="flex justify-between items-end">
+                                                        <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Shared Pool</span>
+                                                        {bonusWeeksActive ? (
+                                                            <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-emerald-500 text-slate-900 flex items-center gap-1 animate-fade-in">
+                                                                <SparklesIcon size={10} /> Bonus Weeks Active!
+                                                            </span>
+                                                        ) : (
+                                                            <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-slate-800 text-slate-400">
+                                                                Standard Pool
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    <div className="h-3 bg-slate-800 rounded-full overflow-hidden flex border border-white/5 relative">
+                                                        {/* Marker for the Bonus Threshold */}
+                                                        <div className="absolute top-0 bottom-0 w-0.5 bg-slate-900 z-20 opacity-50" style={{ left: `${(getIndividualMax() / getMaxWeeks()) * 100}%` }}></div>
+                                                        <div style={{ width: `${(p1Weeks / getMaxWeeks()) * 100}%` }} className="bg-indigo-500 transition-all duration-300 z-10"></div>
+                                                        <div style={{ width: `${(p2Weeks / getMaxWeeks()) * 100}%` }} className={`transition-all duration-300 z-10 ${bonusWeeksActive ? 'bg-emerald-400 shadow-[0_0_15px_rgba(52,211,153,0.5)]' : 'bg-emerald-600'}`}></div>
+                                                    </div>
+                                                </div>
 
-                                                {hasPartner ? (
-                                                    <div className="animate-fade-in space-y-4">
-                                                        <div>
-                                                            <label className="text-xs font-bold text-slate-400 uppercase mb-1 block">Annual Gross Salary</label>
-                                                            <div className="relative">
-                                                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 font-bold">$</span>
-                                                                <input type="number" value={partnerSalary} onChange={(e) => setPartnerSalary(parseInt(e.target.value)||0)} className="w-full pl-8 p-3 bg-slate-50 border border-slate-200 rounded-2xl font-mono text-xl font-black focus:ring-2 focus:ring-rose-500 outline-none" />
+                                                <div className="space-y-6">
+                                                    {/* Parent 1 Slider */}
+                                                    <div className="space-y-3">
+                                                        <div className="flex justify-between text-sm items-end">
+                                                            <div className="flex flex-col">
+                                                                <span className="font-bold text-indigo-300">Parent 1 (Birth)</span>
+                                                                <span className="text-[10px] text-indigo-300/60 uppercase font-bold tracking-wider">Parental Weeks</span>
                                                             </div>
+                                                            <span className="font-black text-2xl tabular-nums">{p1Weeks}</span>
                                                         </div>
-                                                        <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-100">
-                                                            <div className="text-[10px] font-black text-emerald-600 uppercase mb-1 flex items-center gap-1">Sharing Bonus <Tooltip text="Reserved for the second parent only. If not taken, these extra weeks are lost." /></div>
-                                                            <div className="text-xs font-bold text-emerald-800 flex justify-between">
-                                                                <span>Extra Reserved Weeks:</span>
-                                                                <span>+{results.bonusWeeks} Weeks</span>
+                                                        <input 
+                                                            type="range" 
+                                                            min="0" 
+                                                            max={getIndividualMax()} 
+                                                            value={p1Weeks} 
+                                                            onChange={(e) => handleWeeksChange(1, e.target.value)}
+                                                            className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-indigo-500 hover:accent-indigo-400 transition-all"
+                                                        />
+                                                    </div>
+
+                                                    {/* Parent 2 Slider */}
+                                                    <div className={`space-y-3 transition-all duration-300 ${!hasPartner ? 'opacity-30 pointer-events-none blur-sm grayscale' : ''}`}>
+                                                        <div className="flex justify-between text-sm items-end">
+                                                            <div className="flex flex-col">
+                                                                <span className="font-bold text-emerald-300">Parent 2 (Non-Birth)</span>
+                                                                <span className="text-[10px] text-emerald-300/60 uppercase font-bold tracking-wider">Parental Weeks</span>
                                                             </div>
+                                                            <span className="font-black text-2xl tabular-nums">{p2Weeks}</span>
                                                         </div>
+                                                        <input 
+                                                            type="range" 
+                                                            min="0" 
+                                                            max={getIndividualMax()} 
+                                                            value={p2Weeks} 
+                                                            onChange={(e) => handleWeeksChange(2, e.target.value)}
+                                                            className={`w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer hover:accent-emerald-400 transition-all ${bonusWeeksActive ? 'accent-emerald-400' : 'accent-emerald-600'}`}
+                                                        />
                                                     </div>
-                                                ) : (
-                                                    <div className="text-xs text-slate-400 italic py-8 text-center px-4 leading-relaxed">
-                                                        Sharing benefits with a partner unlocks extra paid weeks.
-                                                    </div>
-                                                )}
+                                                </div>
+
+                                                {/* Total Check */}
+                                                <div className="bg-white/5 rounded-xl p-4 flex justify-between items-center text-xs border border-white/5">
+                                                    <span className="text-slate-400 font-bold">Total Shared Weeks</span>
+                                                    <span className={`font-black text-base ${p1Weeks + p2Weeks === getMaxWeeks() ? 'text-emerald-400' : 'text-white'}`}>
+                                                        {p1Weeks + p2Weeks} / {getMaxWeeks()}
+                                                    </span>
+                                                </div>
                                             </div>
-                                        </div>
+                                         </div>
                                     </div>
                                 </div>
                             </div>
                         )}
 
                         {activeTab === 'results' && (
-                            <div className="animate-fade-in space-y-10">
-                                {/* SUMMARY HERO */}
-                                <div className="bg-slate-900 rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-10 text-white relative overflow-hidden shadow-2xl">
-                                    <div className="absolute top-0 right-0 -mr-20 -mt-20 w-60 h-60 md:w-96 md:h-96 bg-rose-500/20 rounded-full blur-[100px]"></div>
-                                    
-                                    <div className="relative z-10 grid md:grid-cols-2 gap-8 md:gap-12 items-center">
-                                        <div className="text-center md:text-left">
-                                            <h2 className="text-rose-400 text-[10px] font-black uppercase tracking-[0.3em] mb-3">Estimated Claim Value</h2>
-                                            <div className="flex items-baseline justify-center md:justify-start gap-2 flex-wrap">
-                                                <span className="text-5xl md:text-7xl font-black tracking-tighter">${Math.round(results.totalValue).toLocaleString()}</span>
-                                                <span className="text-slate-400 text-xl font-bold">total</span>
-                                            </div>
-                                            <p className="text-slate-400 text-xs md:text-sm mt-4 font-bold tracking-tight">Across {results.totalDuration} combined weeks of pay</p>
+                            <div className="animate-fade-in space-y-12">
+                                
+                                {/* HERO CARD: TOTAL HOUSEHOLD */}
+                                <div className="bg-slate-900 rounded-[2rem] md:rounded-[2.5rem] p-8 md:p-12 text-white relative overflow-hidden shadow-2xl flex flex-col items-center text-center">
+                                    <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-indigo-900/40 via-slate-900 to-slate-900"></div>
+                                    <div className="relative z-10">
+                                        <div className="inline-block bg-white/10 backdrop-blur-md px-4 py-1.5 rounded-full border border-white/10 mb-6">
+                                            <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-300">Total Household Benefit</span>
                                         </div>
-                                        <div className="bg-white/5 rounded-3xl p-6 md:p-8 border border-white/10 backdrop-blur-xl space-y-6">
-                                            <div className="flex justify-between items-center">
-                                                <span className="text-slate-400 text-xs font-black uppercase tracking-widest">Weekly Cap</span>
-                                                <span className="text-2xl md:text-3xl font-black text-rose-400 tracking-tighter">${Math.round(results.parentalWeekly).toLocaleString()}<span className="text-xs font-medium text-slate-500">/wk</span></span>
-                                            </div>
-                                            <div className="flex h-5 w-full rounded-full overflow-hidden bg-white/10 p-1">
-                                                <div style={{ width: `${(results.maternityTotal/results.totalValue)*100}%` }} className="bg-rose-500 rounded-full mr-0.5"></div>
-                                                <div style={{ width: `${(results.parentalTotal/results.totalValue)*100}%` }} className="bg-indigo-500 rounded-full mr-0.5"></div>
-                                                <div style={{ width: `${(results.bonusTotal/results.totalValue)*100}%` }} className="bg-emerald-500 rounded-full"></div>
-                                            </div>
-                                            <div className="grid grid-cols-2 gap-x-4 gap-y-3">
-                                                <div className="flex items-center gap-2 text-[10px] font-black uppercase text-slate-400 tracking-tighter"><div className="w-2 h-2 rounded-full bg-rose-500"></div> Maternity</div>
-                                                <div className="flex items-center gap-2 text-[10px] font-black uppercase text-slate-400 tracking-tighter"><div className="w-2 h-2 rounded-full bg-indigo-500"></div> Parental</div>
-                                                {hasPartner && <div className="flex items-center gap-2 text-[10px] font-black uppercase text-slate-400 tracking-tighter"><div className="w-2 h-2 rounded-full bg-emerald-500"></div> Sharing Bonus</div>}
-                                            </div>
+                                        <div className="flex items-start justify-center gap-2 mb-2">
+                                            <span className="text-6xl md:text-8xl font-black tracking-tighter drop-shadow-2xl">${Math.round(results.totalValue).toLocaleString()}</span>
                                         </div>
+                                        <div className="text-slate-400 font-bold text-sm bg-black/20 px-3 py-1 rounded-lg inline-block">Pre-Tax Estimate (Gross)</div>
                                     </div>
                                 </div>
 
-                                {/* BREAKDOWN SECTION */}
+                                {/* PERSON BREAKDOWN GRID */}
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                    <div className="bg-white p-6 md:p-8 rounded-[2rem] border border-slate-200 shadow-sm flex flex-col">
-                                        <h3 className="font-black text-slate-800 mb-8 flex items-center gap-2 uppercase tracking-widest text-[10px]"><CalendarIcon size={18} className="text-rose-600"/> Specific Entitlements</h3>
-                                        <div className="space-y-4 flex-1">
-                                            {/* Pool 1: Exclusive Maternity */}
-                                            <div className="p-5 bg-slate-50 rounded-2xl border border-slate-100 group transition-all hover:bg-slate-100 flex justify-between items-center">
-                                                <div>
-                                                    <div className="font-black text-slate-800 text-sm">Maternity Benefits</div>
-                                                    <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-1">Exclusive to Parent 1</div>
+                                    
+                                    {/* PARENT 1 CARD */}
+                                    <div className="bg-white rounded-[2rem] border border-slate-200 shadow-xl overflow-hidden flex flex-col">
+                                        <div className="p-6 bg-indigo-50/50 border-b border-indigo-100 flex items-center gap-4">
+                                            <div className="w-12 h-12 rounded-2xl bg-indigo-100 text-indigo-600 flex items-center justify-center shadow-sm">
+                                                <span className="font-black text-lg">P1</span>
+                                            </div>
+                                            <div>
+                                                <div className="font-black text-slate-800 text-lg">Parent 1 (Birth)</div>
+                                                <div className="text-xs font-bold text-slate-400 uppercase tracking-wide">Maternity + Parental</div>
+                                            </div>
+                                        </div>
+                                        <div className="p-8 space-y-8 flex-1">
+                                            <div className="flex justify-between items-end">
+                                                <div className="space-y-1">
+                                                    <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Time Off</div>
+                                                    <div className="text-3xl font-black text-slate-800">{results.maternityWeeks + results.p1Weeks} <span className="text-sm text-slate-400 font-bold">Weeks</span></div>
                                                 </div>
-                                                <div className="text-right">
-                                                    <div className="font-black text-rose-600 text-lg">${Math.round(results.maternityTotal).toLocaleString()}</div>
-                                                    <div className="text-[10px] font-bold text-slate-400 tracking-tighter">{results.maternityWeeks} Wks @ ${Math.round(results.maternityWeekly)}/wk</div>
+                                                <div className="text-right space-y-1">
+                                                    <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Pay</div>
+                                                    <div className="text-3xl font-black text-indigo-600">${Math.round(results.maternityTotal + results.p1Total).toLocaleString()}</div>
                                                 </div>
                                             </div>
 
-                                            {/* Pool 2: Shareable Parental */}
-                                            <div className="p-5 bg-indigo-50/50 rounded-2xl border border-indigo-100 group transition-all hover:bg-indigo-50 flex justify-between items-center">
-                                                <div>
-                                                    <div className="font-black text-slate-800 text-sm">Shareable Parental</div>
-                                                    <div className="text-[9px] font-black text-indigo-400 uppercase tracking-widest mt-1">Either Parent can use</div>
+                                            {/* Visual Bar P1 */}
+                                            <div className="space-y-2">
+                                                <div className="flex h-4 w-full rounded-full overflow-hidden bg-slate-100">
+                                                    <div style={{ width: `${(results.maternityWeeks / (results.maternityWeeks + results.p1Weeks)) * 100}%` }} className="bg-rose-400"></div>
+                                                    <div style={{ width: `${(results.p1Weeks / (results.maternityWeeks + results.p1Weeks)) * 100}%` }} className="bg-indigo-500"></div>
                                                 </div>
-                                                <div className="text-right">
-                                                    <div className="font-black text-indigo-600 text-lg">${Math.round(results.parentalTotal).toLocaleString()}</div>
-                                                    <div className="text-[10px] font-bold text-slate-400 tracking-tighter">{results.parentalWeeks} Wks @ ${Math.round(results.parentalWeekly)}/wk</div>
+                                                <div className="flex justify-between text-[10px] font-bold uppercase text-slate-400">
+                                                    <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-rose-400"></div> Maternity ({results.maternityWeeks}w)</span>
+                                                    <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-indigo-500"></div> Parental ({results.p1Weeks}w)</span>
                                                 </div>
                                             </div>
-
-                                            {/* Pool 3: Reserved Bonus */}
-                                            {hasPartner && (
-                                                <div className="p-5 bg-emerald-50 rounded-2xl border border-emerald-200 group transition-all hover:bg-emerald-100 flex justify-between items-center animate-fade-in shadow-sm">
-                                                    <div>
-                                                        <div className="font-black text-emerald-800 text-sm">Sharing Bonus</div>
-                                                        <div className="text-[9px] font-black text-emerald-500 uppercase tracking-widest mt-1">Reserved for Parent 2</div>
-                                                    </div>
-                                                    <div className="text-right">
-                                                        <div className="font-black text-emerald-600 text-lg">${Math.round(results.bonusTotal).toLocaleString()}</div>
-                                                        <div className="text-[10px] font-bold text-emerald-400 tracking-tighter">{results.bonusWeeks} Wks • Use or lose</div>
-                                                    </div>
-                                                </div>
-                                            )}
                                         </div>
                                     </div>
 
-                                    {/* VISUAL CHART AREA */}
-                                    <div className="bg-white p-6 md:p-8 rounded-[2rem] border border-slate-200 shadow-sm">
-                                        <h3 className="font-black text-slate-800 mb-8 flex items-center gap-2 uppercase tracking-widest text-[10px]"><DollarSignIcon size={18} className="text-emerald-600"/> Benefit Allocation</h3>
-                                        <div className="h-[280px] w-full">
-                                            <ResponsiveContainer width="100%" height="100%">
-                                                <BarChart data={chartData} margin={{ top: 20, right: 10, left: -20, bottom: 0 }}>
-                                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                                                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 10, fontWeight: 900, fill: '#94a3b8'}} />
-                                                    <YAxis hide />
-                                                    <RechartsTooltip cursor={{fill: 'transparent'}} contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '15px', color: '#f8fafc', fontWeight: 'bold' }} />
-                                                    <Bar dataKey="value" radius={[10, 10, 0, 0]} barSize={50}>
-                                                        {chartData.map((entry, index) => (
-                                                            <Cell key={`cell-${index}`} fill={entry.color} />
-                                                        ))}
-                                                    </Bar>
-                                                </BarChart>
-                                            </ResponsiveContainer>
+                                    {/* PARENT 2 CARD */}
+                                    <div className={`bg-white rounded-[2rem] border border-slate-200 shadow-xl overflow-hidden flex flex-col ${!hasPartner ? 'opacity-50 grayscale' : ''}`}>
+                                        <div className="p-6 bg-emerald-50/50 border-b border-emerald-100 flex items-center gap-4">
+                                            <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center shadow-sm">
+                                                <span className="font-black text-lg">P2</span>
+                                            </div>
+                                            <div>
+                                                <div className="font-black text-slate-800 text-lg">Parent 2 (Non-Birth)</div>
+                                                <div className="text-xs font-bold text-slate-400 uppercase tracking-wide">Parental Only</div>
+                                            </div>
                                         </div>
-                                        <div className="mt-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                                            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest text-center">
-                                                Benefits are taxable and paid bi-weekly via direct deposit.
-                                            </p>
-                                        </div>
+                                        {hasPartner ? (
+                                            <div className="p-8 space-y-8 flex-1">
+                                                <div className="flex justify-between items-end">
+                                                    <div className="space-y-1">
+                                                        <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Time Off</div>
+                                                        <div className="text-3xl font-black text-slate-800">{results.p2Weeks} <span className="text-sm text-slate-400 font-bold">Weeks</span></div>
+                                                    </div>
+                                                    <div className="text-right space-y-1">
+                                                        <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Pay</div>
+                                                        <div className="text-3xl font-black text-emerald-600">${Math.round(results.p2Total).toLocaleString()}</div>
+                                                    </div>
+                                                </div>
+
+                                                {/* Visual Bar P2 */}
+                                                <div className="space-y-2">
+                                                    <div className="flex h-4 w-full rounded-full overflow-hidden bg-slate-100">
+                                                        <div className="w-full bg-emerald-500"></div>
+                                                    </div>
+                                                    <div className="flex justify-start text-[10px] font-bold uppercase text-slate-400">
+                                                        <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-emerald-500"></div> Standard Parental</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div className="p-8 flex items-center justify-center flex-1 text-slate-400 font-bold italic">
+                                                No partner selected
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
+
+                                {/* BI-WEEKLY PAYCHECK ESTIMATE */}
+                                <div className="bg-slate-50 border border-slate-200 rounded-[2rem] p-8 md:p-10">
+                                    <div className="flex items-center gap-3 mb-6">
+                                        <div className="bg-white p-3 rounded-xl shadow-sm text-slate-900"><WalletIcon size={24} /></div>
+                                        <div>
+                                            <h3 className="font-black text-slate-800 text-lg">The "Paycheck" View</h3>
+                                            <p className="text-xs font-bold text-slate-400 uppercase tracking-wide">What hits your bank account every 2 weeks</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex justify-between items-center">
+                                            <span className="font-bold text-slate-600">Parent 1 receives:</span>
+                                            <span className="font-black text-xl text-slate-900">${Math.round((results.p1Weekly || results.maternityWeekly) * 2).toLocaleString()} <span className="text-xs text-slate-400 font-medium">/ 2 wks</span></span>
+                                        </div>
+                                        {hasPartner && results.p2Weeks > 0 && (
+                                            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex justify-between items-center">
+                                                <span className="font-bold text-slate-600">Parent 2 receives:</span>
+                                                <span className="font-black text-xl text-slate-900">${Math.round(results.p2Weekly * 2).toLocaleString()} <span className="text-xs text-slate-400 font-medium">/ 2 wks</span></span>
+                                            </div>
+                                        )}
+                                    </div>
+                                    <p className="mt-6 text-center text-xs text-slate-400 font-medium max-w-2xl mx-auto">
+                                        * Note: Service Canada pays bi-weekly. This is a pre-tax estimate. Actual net amount will be lower depending on your tax bracket.
+                                    </p>
+                                </div>
+
                             </div>
                         )}
                     </div>
                 </div>
             </main>
 
-            {/* PORTAL FOOTER - Hidden if typing */}
+            {/* PORTAL FOOTER */}
             {activeTab === 'input' && mounted && !isInputFocused && createPortal(
-                <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200 p-4 md:p-5 z-[9999] animate-slide-up" style={{ position: 'fixed', bottom: 0, width: '100%' }}>
-                    <div className="max-w-5xl mx-auto flex items-center justify-between gap-4 md:gap-6">
+                <div className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-xl border-t border-slate-200 p-4 z-[9999] animate-slide-up shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)]" style={{ position: 'fixed', bottom: 0, width: '100%' }}>
+                    <div className="max-w-5xl mx-auto flex items-center justify-between gap-4">
                         <div className="flex flex-col">
-                            <span className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Total Claim Estimate</span>
+                            <span className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Total Household Benefit</span>
                             <div className="flex items-baseline gap-1.5">
-                                <span className="text-3xl md:text-4xl font-black text-slate-900 tracking-tighter">${Math.round(results.totalValue).toLocaleString()}</span>
-                                <span className="text-xs md:text-sm font-bold text-slate-400">total</span>
+                                <span className="text-3xl font-black text-slate-900 tracking-tighter">${Math.round(results.totalValue).toLocaleString()}</span>
                             </div>
                         </div>
-                        <button onClick={() => { setActiveTab('results'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="bg-rose-600 hover:bg-rose-700 text-white font-black py-3 px-6 md:py-4 md:px-10 rounded-xl md:rounded-2xl shadow-xl shadow-rose-200 transition-all flex items-center gap-2 transform active:scale-95 whitespace-nowrap text-xs md:text-sm">View Breakdown <ArrowRightIcon size={20} /></button>
+                        <button onClick={() => { setActiveTab('results'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="bg-rose-600 hover:bg-rose-700 text-white font-black py-3.5 px-6 rounded-2xl shadow-lg shadow-rose-200 transition-all flex items-center gap-2 transform active:scale-95 whitespace-nowrap text-sm">
+                            See My Results <ArrowRightIcon size={18} />
+                        </button>
                     </div>
                 </div>,
                 document.body 
