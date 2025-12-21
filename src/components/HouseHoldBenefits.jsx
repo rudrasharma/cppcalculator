@@ -585,7 +585,7 @@ export default function HouseholdBenefits() {
                              </button>
                             
                             <button onClick={() => { setActiveTab('results'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="bg-indigo-600 hover:bg-indigo-700 text-white font-black py-3 px-6 md:py-4 md:px-12 rounded-[1.2rem] md:rounded-[1.5rem] shadow-xl shadow-indigo-200 transition-all flex items-center gap-2 transform active:scale-95 whitespace-nowrap uppercase tracking-widest text-[10px]">
-                                View Breakdown <ArrowRightIcon size={18} />
+                                View Full Breakdown <ArrowRightIcon size={18} />
                             </button>
                         </div>
                     </div>
