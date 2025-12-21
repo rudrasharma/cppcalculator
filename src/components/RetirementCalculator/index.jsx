@@ -1,9 +1,9 @@
+// src/components/RetirementCalculator/index.jsx
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { CheckIcon, LinkIcon, ArrowRightIcon } from './Icons';
 import { CURRENT_YEAR, getYMPE } from '../../utils/constants';
 import { useRetirementMath } from '../../hooks/useRetirementMath';
-import { parseMscaData } from '../../utils/mscaParser';
 import { compressEarnings, decompressEarnings } from '../../utils/compression';
 
 import { AboutModal, ImportModal } from './Modals';
@@ -11,7 +11,7 @@ import InputTab from './InputTab';
 import ResultsTab from './ResultsTab';
 
 // ==========================================
-//             MAIN COMPONENT
+//              MAIN COMPONENT
 // ==========================================
 export default function Calculator() {
     // --- 1. CORE STATE ---
@@ -337,8 +337,9 @@ export default function Calculator() {
             {/* FLOATING FOOTER */}
             {activeTab === 'input' && mounted && !isInputFocused && createPortal(
                 <div 
-                    className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-slate-200 p-3 shadow-[0_-15px_40px_-10px_rgba(0,0,0,0.15)] z-[9999] animate-slide-up"
-                    style={{ position: 'fixed', bottom: 0, width: '100%' }}
+                    className="fixed bottom-[64px] md:bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-slate-200 p-3 shadow-[0_-15px_40px_-10px_rgba(0,0,0,0.15)] z-[9999] animate-slide-up"
+                    // IMPORTANT: Removed 'bottom: 0' inline style here
+                    style={{ width: '100%' }}
                 >
                     <div className="max-w-5xl mx-auto flex items-center justify-between gap-4">
                         <div className="flex flex-col pl-2">

@@ -564,7 +564,10 @@ export default function HouseholdBenefits() {
 
             {/* Live Estimate Portal - Hidden if typing */}
             {activeTab === 'input' && mounted && !isInputFocused && createPortal(
-                <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200 p-4 md:p-5 z-[9999] animate-slide-up shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)]" style={{ position: 'fixed', bottom: 0, width: '100%' }}>
+                <div 
+                    className="fixed bottom-[64px] md:bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200 p-4 md:p-5 z-[9999] animate-slide-up shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)]" 
+                    style={{ width: '100%' }}
+                >
                     <div className="max-w-5xl mx-auto flex items-center justify-between gap-4 md:gap-6">
                         <div className="flex flex-col">
                             <span className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-1">Est. Total Benefits</span>
@@ -582,7 +585,7 @@ export default function HouseholdBenefits() {
                              </button>
                             
                             <button onClick={() => { setActiveTab('results'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="bg-indigo-600 hover:bg-indigo-700 text-white font-black py-3 px-6 md:py-4 md:px-12 rounded-[1.2rem] md:rounded-[1.5rem] shadow-xl shadow-indigo-200 transition-all flex items-center gap-2 transform active:scale-95 whitespace-nowrap uppercase tracking-widest text-[10px]">
-                                View Full Breakdown <ArrowRightIcon size={18} />
+                                View Breakdown <ArrowRightIcon size={18} />
                             </button>
                         </div>
                     </div>
