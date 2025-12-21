@@ -27,13 +27,13 @@ const LinkIcon = (props) => (<IconBase {...props}><path d="M10 13a5 5 0 0 0 7.54
 const CheckIcon = (props) => (<IconBase {...props}><polyline points="20 6 9 17 4 12"/></IconBase>);
 
 // ==========================================
-//              CONSTANTS
+//              CONSTANTS (2025/2026 Benefit Year)
 // ==========================================
 const CCB_PARAMS = {
-    MAX_UNDER_6: 7787,
-    MAX_6_TO_17: 6570,
-    THRESHOLD_1: 36502,
-    THRESHOLD_2: 79051,
+    MAX_UNDER_6: 7997, // Indexed for July 2025
+    MAX_6_TO_17: 6748, // Indexed for July 2025
+    THRESHOLD_1: 37487,
+    THRESHOLD_2: 81222,
     PHASE_OUT: {
         1: { t1: 0.07, t2: 0.032 },
         2: { t1: 0.135, t2: 0.057 },
@@ -42,17 +42,42 @@ const CCB_PARAMS = {
     }
 };
 
-const CDB_PARAMS = { MAX_AMOUNT: 3322, THRESHOLD: 79051 };
+const CDB_PARAMS = { MAX_AMOUNT: 3411, THRESHOLD: 81222 };
 
 const GST_PARAMS = {
-    ADULT_AMOUNT: 356, CHILD_AMOUNT: 187, SUPPLEMENT_MAX: 187,
-    SUPPLEMENT_THRESHOLD: 11544, THRESHOLD: 45358, REDUCTION_RATE: 0.05
+    // July 2025 Estimates
+    ADULT_AMOUNT: 366, CHILD_AMOUNT: 192, SUPPLEMENT_MAX: 192,
+    SUPPLEMENT_THRESHOLD: 11856, THRESHOLD: 46582, REDUCTION_RATE: 0.05
 };
 
 const PROV_PARAMS = {
-    ON: { NAME: "Ontario Child Benefit", MAX_PER_CHILD: 1727, THRESHOLD: 25646, REDUCTION_RATE: 0.08, CAIP: { ADULT: 140, SPOUSE: 70, CHILD: 35 } },
-    AB: { NAME: "Alberta Child Benefit", AMOUNTS: [1469, 735, 735, 735], THRESHOLD: 27024, REDUCTION_RATES: [0.0312, 0.0935, 0.1559, 0.2183], CAIP: { ADULT: 225, SPOUSE: 112.5, CHILD: 56.25 } },
-    BC: { NAME: "BC Family Benefit", AMOUNTS: [2188, 1375, 1125], THRESHOLD: 35902, REDUCTION_RATE: 0.04, CAIP: { ADULT: 126, SPOUSE: 63, CHILD: 31.5 } },
+    ON: { 
+        NAME: "Ontario Child & Trillium", 
+        // Ontario Child Benefit
+        OCB: { MAX: 1803, THRESHOLD: 26343, RATE: 0.08 },
+        // Ontario Sales Tax Credit (Trillium)
+        OSTC: { MAX: 371, THRESHOLD_SINGLE: 28506, THRESHOLD_FAM: 35632, RATE: 0.04 },
+        CAIP: { ADULT: 140, SPOUSE: 70, CHILD: 35 } 
+    },
+    AB: { 
+        NAME: "Alberta Child & Family", 
+        // Base Component (July 2025)
+        BASE: { AMOUNTS: [1499, 749, 749, 749], THRESHOLD: 27565, RATES: [0.0312, 0.0935, 0.1559, 0.2183] },
+        // Working Component
+        WORKING: { AMOUNTS: [767, 698, 418, 138], THRESHOLD: 2760, CAP: 46191, RATE_IN: 0.15, RATE_OUT: 0.15 }, 
+        CAIP: { ADULT: 225, SPOUSE: 112.5, CHILD: 56.25 } 
+    },
+    BC: { 
+        NAME: "BC Family Benefit", 
+        AMOUNTS: [2188, 1375, 1125], THRESHOLD: 35902, REDUCTION_RATE: 0.04, 
+        CAIP: { ADULT: 126, SPOUSE: 63, CHILD: 31.5 } 
+    },
+    QC: {
+        NAME: "Family Allowance",
+        // Retraite Québec (2025 Indexed)
+        FAM_ALLOW: { MAX: 3006, SINGLE_SUPP: 1055, THRESHOLD_COUPLE: 59369, THRESHOLD_SINGLE: 43280, RATE: 0.04 },
+        CAIP: null // QC has no federal carbon rebate
+    },
     OTHER: { NAME: "Provincial Benefit", CAIP: null }
 };
 
@@ -173,26 +198,88 @@ export default function HouseholdBenefits() {
         let gstAdd = (status === 'MARRIED') ? (GST_PARAMS.ADULT_AMOUNT + (totalChildren * GST_PARAMS.CHILD_AMOUNT)) : (totalChildren > 0 ? (GST_PARAMS.ADULT_AMOUNT + (totalChildren - 1) * GST_PARAMS.CHILD_AMOUNT) : Math.max(0, Math.min(GST_PARAMS.SUPPLEMENT_MAX, (netInc - GST_PARAMS.SUPPLEMENT_THRESHOLD) * 0.02)));
         let gstTotal = Math.max(0, (GST_PARAMS.ADULT_AMOUNT + gstAdd) - (netInc > GST_PARAMS.THRESHOLD ? (netInc - GST_PARAMS.THRESHOLD) * GST_PARAMS.REDUCTION_RATE : 0));
 
-        // 3. Carbon (CAIP)
+        // 3. Carbon (CAIP) - QC gets 0
         let caip = 0;
-        const provData = PROV_PARAMS[provCode] || PROV_PARAMS['OTHER'];
-        if (provData && provData.CAIP) {
-            const rates = provData.CAIP;
-            let quarterly = rates.ADULT + (status === 'MARRIED' ? rates.SPOUSE : 0) + (totalChildren * rates.CHILD);
-            if (rural) quarterly *= 1.20;
-            caip = quarterly * 4;
+        if (provCode !== 'QC') {
+            const provData = PROV_PARAMS[provCode] || PROV_PARAMS['OTHER'];
+            if (provData && provData.CAIP) {
+                const rates = provData.CAIP;
+                let quarterly = rates.ADULT + (status === 'MARRIED' ? rates.SPOUSE : 0) + (totalChildren * rates.CHILD);
+                if (rural) quarterly *= 1.20;
+                caip = quarterly * 4;
+            }
         }
 
-        // 4. Provincial Child
+        // 4. Provincial Benefits
         let provNet = 0;
         let provName = PROV_PARAMS[provCode]?.NAME || "Provincial Support";
-        if (totalChildren > 0 && provCode !== 'OTHER') {
-            const p = PROV_PARAMS[provCode];
-            if (provCode === 'ON') provNet = Math.max(0, (p.MAX_PER_CHILD * totalChildren) - (netInc > p.THRESHOLD ? (netInc - p.THRESHOLD) * p.REDUCTION_RATE : 0));
-            else {
+
+        if (provCode === 'ON') {
+            // Ontario Child Benefit
+            if (totalChildren > 0) {
+                const ocb = (PROV_PARAMS.ON.OCB.MAX * totalChildren);
+                const ocbRed = netInc > PROV_PARAMS.ON.OCB.THRESHOLD ? (netInc - PROV_PARAMS.ON.OCB.THRESHOLD) * PROV_PARAMS.ON.OCB.RATE : 0;
+                provNet += Math.max(0, ocb - ocbRed);
+            }
+            // Ontario Sales Tax Credit (OSTC)
+            const ostcRate = PROV_PARAMS.ON.OSTC;
+            let ostcMax = ostcRate.MAX; // Claimant
+            if (status === 'MARRIED') ostcMax += ostcRate.MAX; // Spouse
+            ostcMax += (totalChildren * ostcRate.MAX); // Children
+            
+            const ostcThreshold = (status === 'SINGLE' && totalChildren === 0) ? ostcRate.THRESHOLD_SINGLE : ostcRate.THRESHOLD_FAM;
+            const ostcRed = netInc > ostcThreshold ? (netInc - ostcThreshold) * ostcRate.RATE : 0;
+            
+            // Add OSTC to provincial total (often paid via OTB)
+            provNet += Math.max(0, ostcMax - ostcRed);
+
+        } else if (provCode === 'AB') {
+            // Alberta Child and Family Benefit
+            if (totalChildren > 0) {
+                const p = PROV_PARAMS.AB;
+                // Base Component
+                let baseMax = 0;
+                p.BASE.AMOUNTS.forEach((amt, i) => { if(i < totalChildren) baseMax += amt; });
+                const baseRate = p.BASE.RATES[Math.min(totalChildren, 4) - 1];
+                const baseNet = Math.max(0, baseMax - (netInc > p.BASE.THRESHOLD ? (netInc - p.BASE.THRESHOLD) * baseRate : 0));
+
+                // Working Component (Hump)
+                // Proxy: Using Net Household Income as Working Income for estimate
+                let workingMax = 0;
+                p.WORKING.AMOUNTS.forEach((amt, i) => { if(i < totalChildren) workingMax += amt; });
+                
+                let workingNet = 0;
+                if (netInc > p.WORKING.THRESHOLD) {
+                     // Phase IN
+                     let phasedIn = (netInc - p.WORKING.THRESHOLD) * p.WORKING.RATE_IN;
+                     workingNet = Math.min(phasedIn, workingMax);
+                     // Phase OUT
+                     if (netInc > p.WORKING.CAP) {
+                        const reduction = (netInc - p.WORKING.CAP) * p.WORKING.RATE_OUT;
+                        workingNet = Math.max(0, workingNet - reduction);
+                     }
+                }
+                provNet = baseNet + workingNet;
+            }
+
+        } else if (provCode === 'QC') {
+            // Quebec Family Allowance
+            if (totalChildren > 0) {
+                const q = PROV_PARAMS.QC.FAM_ALLOW;
+                let qMax = (totalChildren * q.MAX);
+                if (status === 'SINGLE') qMax += q.SINGLE_SUPP;
+
+                const qThreshold = status === 'SINGLE' ? q.THRESHOLD_SINGLE : q.THRESHOLD_COUPLE;
+                const qRed = netInc > qThreshold ? (netInc - qThreshold) * q.RATE : 0;
+                provNet = Math.max(0, qMax - qRed);
+            }
+
+        } else if (provCode === 'BC') {
+            // BC Family Benefit
+            if (totalChildren > 0) {
+                const p = PROV_PARAMS.BC;
                 let max = 0; p.AMOUNTS.forEach((amt, i) => { if(i < totalChildren) max += amt; });
-                const rate = (provCode === 'AB') ? p.REDUCTION_RATES[Math.min(totalChildren, 4) - 1] : p.REDUCTION_RATE;
-                provNet = Math.max(0, max - (netInc > p.THRESHOLD ? (netInc - p.THRESHOLD) * rate : 0));
+                provNet = Math.max(0, max - (netInc > p.THRESHOLD ? (netInc - p.THRESHOLD) * p.REDUCTION_RATE : 0));
             }
         }
 
@@ -223,11 +310,28 @@ export default function HouseholdBenefits() {
         const months = ["Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun"];
         return months.map(m => {
             const isQuarterly = ["Jul", "Oct", "Jan", "Apr"].includes(m);
-            const base = (results.federal + results.provincial) / 12;
+            // Monthly base
+            let base = (results.federal) / 12;
+            
+            // Provincial Schedules
+            if (province === 'ON') {
+                // OTB is usually monthly if > $360, but simplified here to monthly spread for UI cleanliness
+                base += (results.provincial / 12);
+            } else if (province === 'AB' || province === 'QC') {
+                // AB ACFB is Quarterly (Aug, Nov, Feb, May)
+                const isAbQuarter = ["Aug", "Nov", "Feb", "May"].includes(m);
+                if (province === 'QC') isAbQuarter ? base += (results.provincial / 4) : base += 0; // QC is quarterly
+                else isAbQuarter ? base += (results.provincial / 4) : base += 0; // AB is quarterly
+            } else {
+                base += (results.provincial / 12); // BC is monthly
+            }
+
+            // GST/Carbon
             const extra = isQuarterly ? (results.gst / 4) + (results.caip / 4) : 0;
-            return { month: m, total: base + extra, isQuarterly };
+            
+            return { month: m, total: base + extra, isQuarterly: (isQuarterly || (["Aug", "Nov", "Feb", "May"].includes(m) && (province === 'AB' || province === 'QC'))) };
         });
-    }, [results]);
+    }, [results, province]);
 
     const copyLink = () => {
         const params = new URLSearchParams();
@@ -265,7 +369,11 @@ export default function HouseholdBenefits() {
                                             <div>
                                                 <label className="text-xs font-black text-slate-700 block mb-1.5 uppercase tracking-tighter">Province</label>
                                                 <select value={province} onChange={(e) => setProvince(e.target.value)} className="w-full p-3 bg-white border border-slate-200 rounded-2xl text-sm outline-none shadow-sm focus:ring-2 focus:ring-indigo-500 transition-all font-medium">
-                                                    <option value="ON">Ontario (ON)</option><option value="AB">Alberta (AB)</option><option value="BC">British Columbia (BC)</option><option value="OTHER">Other Provinces</option>
+                                                    <option value="ON">Ontario (ON)</option>
+                                                    <option value="AB">Alberta (AB)</option>
+                                                    <option value="BC">British Columbia (BC)</option>
+                                                    <option value="QC">Quebec (QC)</option>
+                                                    <option value="OTHER">Other Provinces</option>
                                                 </select>
                                             </div>
                                             <div>
@@ -289,6 +397,7 @@ export default function HouseholdBenefits() {
                                                     </div>
                                                     <div className="flex flex-col"><span className="leading-none group-hover:text-indigo-600 transition-colors">Shared Custody?</span><span className="text-[9px] text-slate-400 uppercase font-black tracking-wider mt-1">40-60% split</span></div>
                                                 </label>
+                                                {province !== 'QC' && (
                                                 <label className="flex items-center gap-3 cursor-pointer bg-white p-3 rounded-2xl border border-slate-200 text-sm font-bold transition-all hover:border-emerald-200 shadow-sm group">
                                                     <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${isRural ? 'bg-emerald-600 border-emerald-600 text-white' : 'border-slate-300 bg-slate-50'}`}>
                                                         <input type="checkbox" checked={isRural} onChange={(e) => setIsRural(e.target.checked)} className="sr-only" />
@@ -296,6 +405,7 @@ export default function HouseholdBenefits() {
                                                     </div>
                                                     <div className="flex flex-col"><span className="leading-none group-hover:text-emerald-600 transition-colors">Rural Area?</span><span className="text-[9px] text-slate-400 uppercase font-black tracking-wider mt-1">+20% Carbon Rebate</span></div>
                                                 </label>
+                                                )}
                                             </div>
                                         </div>
                                     </div>
@@ -324,7 +434,7 @@ export default function HouseholdBenefits() {
                                                             <input type="checkbox" checked={child.disability} onChange={(e) => updateChild(child.id, 'disability', e.target.checked)} className="w-6 h-6 text-emerald-600 rounded-lg border-slate-300" />
                                                             <div className="flex flex-col">
                                                                 <span className="text-xs font-black text-slate-700 group-hover/dis:text-emerald-600 transition-colors">Disability (DTC)</span>
-                                                                <span className="text-[9px] text-slate-400 font-bold uppercase tracking-tighter">Required T2201 <Tooltip text="Requires an approved Form T2201 (Disability Tax Credit Certificate) on file with the CRA. This adds up to $3,322 per year per child." /></span>
+                                                                <span className="text-[9px] text-slate-400 font-bold uppercase tracking-tighter">Required T2201 <Tooltip text="Requires an approved Form T2201 (Disability Tax Credit Certificate) on file with the CRA. This adds up to $3,411 per year per child." /></span>
                                                             </div>
                                                         </label>
                                                         <div className="w-full h-px sm:w-px sm:h-8 bg-slate-200"></div>
@@ -428,7 +538,7 @@ export default function HouseholdBenefits() {
                                 {/* FAQ Section */}
                                 <div className="max-w-3xl mx-auto w-full space-y-4">
                                     <Accordion title="Understanding Net Income (AFNI)" icon={HelpCircleIcon}>
-                                        <p>Your <strong>Adjusted Family Net Income</strong> is the primary driver of benefit reductions (clawbacks). For the benefit year of July 2024 to June 2025, the government looks at your <strong>2023 Tax Return</strong>. Specifically, it uses <strong>Line 23600</strong> (Net Income) minus any UCCB or RDSP income received.</p>
+                                        <p>Your <strong>Adjusted Family Net Income</strong> is the primary driver of benefit reductions (clawbacks). For the benefit year of July 2025 to June 2026, the government looks at your <strong>2024 Tax Return</strong>. Specifically, it uses <strong>Line 23600</strong> (Net Income) minus any UCCB or RDSP income received.</p>
                                     </Accordion>
                                     <Accordion title="Shared Custody Rules" icon={UsersIcon}>
                                         <p>If you have a 40-60% shared custody arrangement that has been registered with the CRA, each parent receives exactly <strong>50% of the benefit amount</strong> they would have received if the child lived with them full-time. The amount is calculated based on each parent's individual household income.</p>
@@ -466,13 +576,11 @@ export default function HouseholdBenefits() {
                             </div>
                         </div>
                         <div className="flex items-center gap-3">
-                             {/* Shared Button in Footer */}
                              <button onClick={copyLink} className="bg-white text-indigo-600 p-3 md:py-4 md:px-6 rounded-[1.2rem] md:rounded-[1.5rem] border border-indigo-100 shadow-lg shadow-indigo-100/50 transition-all hover:bg-indigo-50 active:scale-95 flex items-center justify-center gap-2">
                                {copySuccess ? <CheckIcon size={20}/> : <LinkIcon size={20}/>}
                                <span className="hidden md:inline font-bold text-xs uppercase tracking-wider">{copySuccess ? 'Copied' : 'Share'}</span>
                              </button>
                             
-                            {/* Primary CTA */}
                             <button onClick={() => { setActiveTab('results'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="bg-indigo-600 hover:bg-indigo-700 text-white font-black py-3 px-6 md:py-4 md:px-12 rounded-[1.2rem] md:rounded-[1.5rem] shadow-xl shadow-indigo-200 transition-all flex items-center gap-2 transform active:scale-95 whitespace-nowrap uppercase tracking-widest text-[10px]">
                                 View Full Breakdown <ArrowRightIcon size={18} />
                             </button>
