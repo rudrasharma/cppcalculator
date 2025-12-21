@@ -12,7 +12,7 @@ export function AboutModal({ onClose }) {
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-fade-in">
             <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden relative">
                 <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-                    <h2 className="text-lg font-black text-slate-800">About LoonieSense</h2>
+                    <h2 className="text-lg font-black text-slate-800">About LoonieFi</h2>
                     <button onClick={onClose} className="p-2 hover:bg-slate-200 rounded-full text-slate-400 transition-colors"><XIcon size={20} /></button>
                 </div>
                 <div className="p-6 text-sm text-slate-600 leading-relaxed space-y-4">

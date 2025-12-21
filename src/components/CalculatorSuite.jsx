@@ -28,7 +28,7 @@ export default function CalculatorSuite() {
           <div className="flex items-center gap-2.5 select-none hover:opacity-80 transition-opacity cursor-pointer">
             <img 
               src="/android-chrome-192x192.png" 
-              alt="Loonie Sense Logo"
+              alt="Loonie Fi Logo"
               // Rounded-full gives it that modern "app icon" shape, shadow adds depth
               className="h-10 w-10 object-contain shadow-sm rounded-full bg-white" 
             />
@@ -36,7 +36,7 @@ export default function CalculatorSuite() {
               {/* Option 1 Colors: Matches the Gold/Yellow in the logo */}
               <span className="text-amber-500">Loonie</span>
               {/* Option 1 Colors: Matches the Deep Blue in the logo */}
-              <span className="text-slate-900">Sense</span>
+              <span className="text-slate-900">Fi</span>
             </div>
           </div>   
           {/* NAVIGATION BUTTONS */}

@@ -8,7 +8,7 @@ tags: ["Parental Leave", "EI", "Financial Planning", "Tools"]
 
 Welcoming a new child is a major life transition, but the paperwork can feel like a full-time job. In Canada, the difference between choosing **Standard** or **Extended** leave isn't just about time—it’s a major financial decision that can impact your household by thousands of dollars.
 
-With the **2025 maximum insurable earnings** now set at **$65,700**, we’ve updated LoonieSense with a dedicated [Parental Leave Estimator](/) to help you stop guessing and start planning.
+With the **2025 maximum insurable earnings** now set at **$65,700**, we’ve updated LoonieFi with a dedicated [Parental Leave Estimator](/) to help you stop guessing and start planning.
 
 ## The Three "Pools" of Benefits
 One of the biggest points of confusion is how leave is actually divided. Most people think of it as "one year off," but the government sees it as three distinct buckets:
@@ -36,7 +36,7 @@ If you live in Quebec, you do not use federal EI. You use the **Quebec Parental 
 * **Special Plan:** Pays 75% but for a shorter duration.
 * **Higher Caps:** The 2025 maximum insurable earnings for QPIP is **$98,000**, significantly higher than the rest of Canada.
 
-## How to Use the LoonieSense Estimator
+## How to Use the LoonieFi Estimator
 
 Planning your budget shouldn't require a spreadsheet. Our tool does the heavy lifting for you:
 

@@ -332,13 +332,13 @@ export default function ResultsTab({
                     <div className="bg-indigo-50 p-4 md:p-5 rounded-3xl border-2 border-indigo-100 text-indigo-900 font-bold leading-relaxed text-sm shadow-inner">
                         If you earn more than $71,300 in 2025, you now contribute an extra 4% on the 'Tier 2' slice of your income (up to approx $81,200). 
                     </div>
-                    <p className="mt-4">LoonieSense models these tiered contributions to accurately forecast the 'Enhanced' portion of your future monthly check.</p>
+                    <p className="mt-4">LoonieFi models these tiered contributions to accurately forecast the 'Enhanced' portion of your future monthly check.</p>
                 </Accordion>
 
                 <Accordion title="OAS Recovery Tax (Clawbacks)" icon={SafeFilterIcon}>
                     <p className="mb-4">The Old Age Security (OAS) pension is subject to a 'Recovery Tax' if your total annual retirement income exceeds the threshold established by the CRA ($90,997 for the 2024 tax year).</p>
                     <p className="font-bold text-slate-800">For every dollar your net income exceeds this threshold, your monthly OAS payment is reduced by 15 cents.</p>
-                    <p className="mt-2 text-slate-500 font-medium">LoonieSense automatically calculates this reduction based on the 'Personal Retirement Income' you provide in Step 1.</p>
+                    <p className="mt-2 text-slate-500 font-medium">LoonieFi automatically calculates this reduction based on the 'Personal Retirement Income' you provide in Step 1.</p>
                 </Accordion>
 
                 <Accordion title="Government Resources & Links" icon={SafeBookOpenIcon}>

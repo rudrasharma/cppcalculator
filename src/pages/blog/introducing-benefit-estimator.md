@@ -12,7 +12,7 @@ Most calculators online only focus on one of these at a time. You have to go to 
 
 **That changes today.**
 
-We have updated LoonieSense with a new **Household Benefit Estimator**. It combines 5 major federal and provincial programs into a single, privacy-friendly calculator.
+We have updated LoonieFi with a new **Household Benefit Estimator**. It combines 5 major federal and provincial programs into a single, privacy-friendly calculator.
 
 ## What it Calculates
 Our tool uses the official **July 2024 to June 2025** benefit year rules to estimate:
@@ -36,7 +36,7 @@ This is the "eligibility" number. It generally includes **only** money earned fr
 * **Why we need it:** You generally need to earn at least $3,000 in working income to qualify for the **Canada Workers Benefit (CWB)**.
 
 ### Step-by-Step
-1.  Open the [LoonieSense Calculator](/).
+1.  Open the [LoonieFi Calculator](/).
 2.  Switch the toggle at the top from **CPP/OAS** to **Benefits**.
 3.  Enter your Province and Marital Status (these affect your GST and Carbon Rebate).
 4.  Input your income details.
