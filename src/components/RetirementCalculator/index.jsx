@@ -6,9 +6,54 @@ import { CURRENT_YEAR, getYMPE } from '../../utils/constants';
 import { useRetirementMath } from '../../hooks/useRetirementMath';
 import { compressEarnings, decompressEarnings } from '../../utils/compression';
 
+// Removed external import to embed hook directly for stability
+// import { useUrlTab } from '../../hooks/useUrlTab';
+
 import { AboutModal, ImportModal } from './Modals';
 import InputTab from './InputTab';
 import ResultsTab from './ResultsTab';
+
+// ==========================================
+//        HOOK: SYNC TABS WITH URL
+// ==========================================
+function useUrlTab(defaultTab = 'input', queryParam = 'step') {
+    const [activeTab, setActiveTabState] = useState(() => {
+        if (typeof window !== 'undefined') {
+            const params = new URLSearchParams(window.location.search);
+            return params.get(queryParam) || defaultTab;
+        }
+        return defaultTab;
+    });
+
+    useEffect(() => {
+        const handlePopState = () => {
+            const params = new URLSearchParams(window.location.search);
+            const step = params.get(queryParam);
+            setActiveTabState(step || defaultTab);
+        };
+        window.addEventListener('popstate', handlePopState);
+        return () => window.removeEventListener('popstate', handlePopState);
+    }, [defaultTab, queryParam]);
+
+    const setActiveTab = (newTab) => {
+        setActiveTabState(newTab);
+        const url = new URL(window.location);
+        
+        if (newTab === defaultTab) {
+             url.searchParams.delete(queryParam);
+        } else {
+             url.searchParams.set(queryParam, newTab);
+        }
+        
+        window.history.pushState({}, '', url);
+        
+        if (newTab === 'results') {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    };
+
+    return [activeTab, setActiveTab];
+}
 
 // ==========================================
 //              MAIN COMPONENT
@@ -20,7 +65,10 @@ export default function Calculator() {
     const [retirementAge, setRetirementAge] = useState(65);
     const [yearsInCanada, setYearsInCanada] = useState(40);
     const [earnings, setEarnings] = useState({});
-    const [activeTab, setActiveTab] = useState('input');
+    
+    // USE THE HOOK HERE
+    const [activeTab, setActiveTab] = useUrlTab('input', 'step');
+    
     const [mounted, setMounted] = useState(false); 
 
     // --- 2. INPUT STATE & TOGGLES ---
@@ -337,8 +385,9 @@ export default function Calculator() {
             {/* FLOATING FOOTER */}
             {activeTab === 'input' && mounted && !isInputFocused && createPortal(
                 <div 
+                    // 1. Mobile Fix: Lifted 64px from bottom
                     className="fixed bottom-[64px] md:bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-slate-200 p-3 shadow-[0_-15px_40px_-10px_rgba(0,0,0,0.15)] z-[9999] animate-slide-up"
-                    // IMPORTANT: Removed 'bottom: 0' inline style here
+                    // 2. Mobile Fix: Removed 'bottom: 0' style
                     style={{ width: '100%' }}
                 >
                     <div className="max-w-5xl mx-auto flex items-center justify-between gap-4">

@@ -33,11 +33,23 @@ export default function CalculatorSuite() {
   }, []);
 
   const changeView = (newView) => {
-    setView(newView);
-    const url = new URL(window.location);
-    url.searchParams.set('view', newView);
-    window.history.pushState({}, '', url);
-  };
+      setView(newView);
+      
+      const url = new URL(window.location);
+      
+      // 1. Update the Main View
+      url.searchParams.set('view', newView);
+      
+      // 2. THE FIX: Remove the 'step' (or 'tab') parameter
+      // This forces the new calculator to default back to 'input'
+      url.searchParams.delete('step'); 
+      
+      // 3. Push the clean URL state
+      window.history.pushState({}, '', url);
+      
+      // 4. Scroll to top
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
 
   return (
     <div className="min-h-screen bg-slate-50 pb-24 md:pb-0"> 

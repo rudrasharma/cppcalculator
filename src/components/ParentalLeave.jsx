@@ -41,6 +41,44 @@ const EI_2025 = {
     EXT_COMBINED_MAX: 69,
 };
 
+// ==========================================
+//        HOOK: SYNC TABS WITH URL
+// ==========================================
+function useUrlTab(defaultTab = 'input') {
+    const [activeTab, setActiveTabState] = useState(() => {
+        if (typeof window !== 'undefined') {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('step') || defaultTab;
+        }
+        return defaultTab;
+    });
+
+    useEffect(() => {
+        const handlePopState = () => {
+            const params = new URLSearchParams(window.location.search);
+            const step = params.get('step');
+            setActiveTabState(step || defaultTab);
+        };
+        window.addEventListener('popstate', handlePopState);
+        return () => window.removeEventListener('popstate', handlePopState);
+    }, [defaultTab]);
+
+    const setActiveTab = (newTab) => {
+        setActiveTabState(newTab);
+        const url = new URL(window.location);
+        if (newTab === defaultTab) url.searchParams.delete('step');
+        else url.searchParams.set('step', newTab);
+        
+        window.history.pushState({}, '', url);
+        
+        if (newTab === 'results') {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    };
+
+    return [activeTab, setActiveTab];
+}
+
 export default function ParentalLeave() {
     const [province, setProvince] = useState('ON');
     const [salary, setSalary] = useState(70000);
@@ -53,7 +91,9 @@ export default function ParentalLeave() {
     const [p1Weeks, setP1Weeks] = useState(30); 
     const [p2Weeks, setP2Weeks] = useState(5); 
 
-    const [activeTab, setActiveTab] = useState('input');
+    // USE THE HOOK HERE INSTEAD OF STANDARD STATE
+    const [activeTab, setActiveTab] = useUrlTab('input');
+    
     const [mounted, setMounted] = useState(false);
     const [isInputFocused, setIsInputFocused] = useState(false);
 

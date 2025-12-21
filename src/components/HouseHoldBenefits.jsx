@@ -82,6 +82,44 @@ const PROV_PARAMS = {
 };
 
 // ==========================================
+//        HOOK: SYNC TABS WITH URL
+// ==========================================
+function useUrlTab(defaultTab = 'input') {
+    const [activeTab, setActiveTabState] = useState(() => {
+        if (typeof window !== 'undefined') {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('step') || defaultTab;
+        }
+        return defaultTab;
+    });
+
+    useEffect(() => {
+        const handlePopState = () => {
+            const params = new URLSearchParams(window.location.search);
+            const step = params.get('step');
+            setActiveTabState(step || defaultTab);
+        };
+        window.addEventListener('popstate', handlePopState);
+        return () => window.removeEventListener('popstate', handlePopState);
+    }, [defaultTab]);
+
+    const setActiveTab = (newTab) => {
+        setActiveTabState(newTab);
+        const url = new URL(window.location);
+        if (newTab === defaultTab) url.searchParams.delete('step');
+        else url.searchParams.set('step', newTab);
+        
+        window.history.pushState({}, '', url);
+        
+        if (newTab === 'results') {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    };
+
+    return [activeTab, setActiveTab];
+}
+
+// ==========================================
 //              UI HELPERS
 // ==========================================
 const Tooltip = ({ text }) => (
@@ -120,7 +158,9 @@ export default function HouseholdBenefits() {
     const [province, setProvince] = useState('ON');
     const [isRural, setIsRural] = useState(false);
     
-    const [activeTab, setActiveTab] = useState('input');
+    // USE THE HOOK HERE
+    const [activeTab, setActiveTab] = useUrlTab('input');
+    
     const [copySuccess, setCopySuccess] = useState(false);
     const [mounted, setMounted] = useState(false);
     const [isInputFocused, setIsInputFocused] = useState(false);
