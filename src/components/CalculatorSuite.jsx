@@ -23,16 +23,22 @@ export default function CalculatorSuite() {
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           
           {/* LOGO SECTION: Updated to use your new image */}
-          <div className="font-bold text-lg tracking-tight flex items-center gap-3 select-none text-slate-900">
-             <img 
-                /* This file comes from the favicon zip you put in 'public' */
-                src="/android-chrome-192x192.png" 
-                alt="Loonie Sense Logo"
-                className="h-10 w-10 object-contain" 
-             />
-             <span>LoonieSense</span>
-          </div>
-          
+
+          {/* LOGO SECTION: Combined Option 1 & 3 */}
+          <div className="flex items-center gap-2.5 select-none hover:opacity-80 transition-opacity cursor-pointer">
+            <img 
+              src="/android-chrome-192x192.png" 
+              alt="Loonie Sense Logo"
+              // Rounded-full gives it that modern "app icon" shape, shadow adds depth
+              className="h-10 w-10 object-contain shadow-sm rounded-full bg-white" 
+            />
+            <div className="text-xl font-bold tracking-tight">
+              {/* Option 1 Colors: Matches the Gold/Yellow in the logo */}
+              <span className="text-amber-500">Loonie</span>
+              {/* Option 1 Colors: Matches the Deep Blue in the logo */}
+              <span className="text-slate-900">Sense</span>
+            </div>
+          </div>   
           {/* NAVIGATION BUTTONS */}
           <div className="flex gap-1 bg-slate-100 p-1.5 rounded-xl border border-slate-200 overflow-x-auto max-w-full">
             <button 
