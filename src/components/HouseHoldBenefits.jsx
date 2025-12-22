@@ -1,4 +1,3 @@
-// src/components/HouseholdBenefits.jsx
 import React, { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { 
@@ -30,8 +29,8 @@ const CheckIcon = (props) => (<IconBase {...props}><polyline points="20 6 9 17 4
 //              CONSTANTS (2025/2026 Benefit Year)
 // ==========================================
 const CCB_PARAMS = {
-    MAX_UNDER_6: 7997, // Indexed for July 2025
-    MAX_6_TO_17: 6748, // Indexed for July 2025
+    MAX_UNDER_6: 7997, 
+    MAX_6_TO_17: 6748, 
     THRESHOLD_1: 37487,
     THRESHOLD_2: 81222,
     PHASE_OUT: {
@@ -45,7 +44,6 @@ const CCB_PARAMS = {
 const CDB_PARAMS = { MAX_AMOUNT: 3411, THRESHOLD: 81222 };
 
 const GST_PARAMS = {
-    // July 2025 Estimates
     ADULT_AMOUNT: 366, CHILD_AMOUNT: 192, SUPPLEMENT_MAX: 192,
     SUPPLEMENT_THRESHOLD: 11856, THRESHOLD: 46582, REDUCTION_RATE: 0.05
 };
@@ -53,17 +51,13 @@ const GST_PARAMS = {
 const PROV_PARAMS = {
     ON: { 
         NAME: "Ontario Child & Trillium", 
-        // Ontario Child Benefit
         OCB: { MAX: 1803, THRESHOLD: 26343, RATE: 0.08 },
-        // Ontario Sales Tax Credit (Trillium)
         OSTC: { MAX: 371, THRESHOLD_SINGLE: 28506, THRESHOLD_FAM: 35632, RATE: 0.04 },
         CAIP: { ADULT: 140, SPOUSE: 70, CHILD: 35 } 
     },
     AB: { 
         NAME: "Alberta Child & Family", 
-        // Base Component (July 2025)
         BASE: { AMOUNTS: [1499, 749, 749, 749], THRESHOLD: 27565, RATES: [0.0312, 0.0935, 0.1559, 0.2183] },
-        // Working Component
         WORKING: { AMOUNTS: [767, 698, 418, 138], THRESHOLD: 2760, CAP: 46191, RATE_IN: 0.15, RATE_OUT: 0.15 }, 
         CAIP: { ADULT: 225, SPOUSE: 112.5, CHILD: 56.25 } 
     },
@@ -74,9 +68,8 @@ const PROV_PARAMS = {
     },
     QC: {
         NAME: "Family Allowance",
-        // Retraite Québec (2025 Indexed)
         FAM_ALLOW: { MAX: 3006, SINGLE_SUPP: 1055, THRESHOLD_COUPLE: 59369, THRESHOLD_SINGLE: 43280, RATE: 0.04 },
-        CAIP: null // QC has no federal carbon rebate
+        CAIP: null 
     },
     OTHER: { NAME: "Provincial Benefit", CAIP: null }
 };
@@ -112,7 +105,6 @@ const Accordion = ({ title, icon: Icon, children, defaultOpen = false }) => (
 // ==========================================
 //              MAIN COMPONENT
 // ==========================================
-// 1. ADD 'isVisible' PROP
 export default function HouseholdBenefits({ isVisible = true }) {
     const [grossAfni, setGrossAfni] = useState(65000); 
     const [children, setChildren] = useState([{ id: 1, age: 2, disability: false }]);
@@ -124,20 +116,8 @@ export default function HouseholdBenefits({ isVisible = true }) {
     const [activeTab, setActiveTab] = useState('input');
     const [copySuccess, setCopySuccess] = useState(false);
     const [mounted, setMounted] = useState(false);
-    const [isInputFocused, setIsInputFocused] = useState(false);
 
     useEffect(() => { setMounted(true); }, []);
-
-    // Mobile Keyboard Detection
-    useEffect(() => {
-        const handleFocus = (e) => {
-            const tag = e.target.tagName; const type = e.target.type;
-            if (tag === 'TEXTAREA' || (tag === 'INPUT' && !['checkbox', 'radio', 'range', 'submit', 'button', 'file', 'color'].includes(type))) setIsInputFocused(true);
-        };
-        const handleBlur = () => { setTimeout(() => setIsInputFocused(false), 100); };
-        window.addEventListener('focus', handleFocus, true); window.addEventListener('blur', handleBlur, true);
-        return () => { window.removeEventListener('focus', handleFocus, true); window.removeEventListener('blur', handleBlur, true); };
-    }, []);
 
     const afni = Math.max(0, grossAfni || 0);
 
@@ -216,55 +196,44 @@ export default function HouseholdBenefits({ isVisible = true }) {
         let provName = PROV_PARAMS[provCode]?.NAME || "Provincial Support";
 
         if (provCode === 'ON') {
-            // Ontario Child Benefit
             if (totalChildren > 0) {
                 const ocb = (PROV_PARAMS.ON.OCB.MAX * totalChildren);
                 const ocbRed = netInc > PROV_PARAMS.ON.OCB.THRESHOLD ? (netInc - PROV_PARAMS.ON.OCB.THRESHOLD) * PROV_PARAMS.ON.OCB.RATE : 0;
                 provNet += Math.max(0, ocb - ocbRed);
             }
-            // Ontario Sales Tax Credit (OSTC)
             const ostcRate = PROV_PARAMS.ON.OSTC;
-            let ostcMax = ostcRate.MAX; // Claimant
-            if (status === 'MARRIED') ostcMax += ostcRate.MAX; // Spouse
-            ostcMax += (totalChildren * ostcRate.MAX); // Children
+            let ostcMax = ostcRate.MAX; 
+            if (status === 'MARRIED') ostcMax += ostcRate.MAX; 
+            ostcMax += (totalChildren * ostcRate.MAX); 
             
             const ostcThreshold = (status === 'SINGLE' && totalChildren === 0) ? ostcRate.THRESHOLD_SINGLE : ostcRate.THRESHOLD_FAM;
             const ostcRed = netInc > ostcThreshold ? (netInc - ostcThreshold) * ostcRate.RATE : 0;
-            
-            // Add OSTC to provincial total (often paid via OTB)
             provNet += Math.max(0, ostcMax - ostcRed);
 
         } else if (provCode === 'AB') {
-            // Alberta Child and Family Benefit
             if (totalChildren > 0) {
                 const p = PROV_PARAMS.AB;
-                // Base Component
                 let baseMax = 0;
                 p.BASE.AMOUNTS.forEach((amt, i) => { if(i < totalChildren) baseMax += amt; });
                 const baseRate = p.BASE.RATES[Math.min(totalChildren, 4) - 1];
                 const baseNet = Math.max(0, baseMax - (netInc > p.BASE.THRESHOLD ? (netInc - p.BASE.THRESHOLD) * baseRate : 0));
 
-                // Working Component (Hump)
-                // Proxy: Using Net Household Income as Working Income for estimate
                 let workingMax = 0;
                 p.WORKING.AMOUNTS.forEach((amt, i) => { if(i < totalChildren) workingMax += amt; });
                 
                 let workingNet = 0;
                 if (netInc > p.WORKING.THRESHOLD) {
-                     // Phase IN
-                     let phasedIn = (netInc - p.WORKING.THRESHOLD) * p.WORKING.RATE_IN;
-                     workingNet = Math.min(phasedIn, workingMax);
-                     // Phase OUT
-                     if (netInc > p.WORKING.CAP) {
+                      let phasedIn = (netInc - p.WORKING.THRESHOLD) * p.WORKING.RATE_IN;
+                      workingNet = Math.min(phasedIn, workingMax);
+                      if (netInc > p.WORKING.CAP) {
                         const reduction = (netInc - p.WORKING.CAP) * p.WORKING.RATE_OUT;
                         workingNet = Math.max(0, workingNet - reduction);
-                     }
+                      }
                 }
                 provNet = baseNet + workingNet;
             }
 
         } else if (provCode === 'QC') {
-            // Quebec Family Allowance
             if (totalChildren > 0) {
                 const q = PROV_PARAMS.QC.FAM_ALLOW;
                 let qMax = (totalChildren * q.MAX);
@@ -276,7 +245,6 @@ export default function HouseholdBenefits({ isVisible = true }) {
             }
 
         } else if (provCode === 'BC') {
-            // BC Family Benefit
             if (totalChildren > 0) {
                 const p = PROV_PARAMS.BC;
                 let max = 0; p.AMOUNTS.forEach((amt, i) => { if(i < totalChildren) max += amt; });
@@ -306,28 +274,22 @@ export default function HouseholdBenefits({ isVisible = true }) {
         return data;
     }, [children, sharedCustody, province, maritalStatus, isRural]);
 
-    // Schedule logic
     const paymentSchedule = useMemo(() => {
         const months = ["Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun"];
         return months.map(m => {
             const isQuarterly = ["Jul", "Oct", "Jan", "Apr"].includes(m);
-            // Monthly base
             let base = (results.federal) / 12;
             
-            // Provincial Schedules
             if (province === 'ON') {
-                // OTB is usually monthly if > $360, but simplified here to monthly spread for UI cleanliness
                 base += (results.provincial / 12);
             } else if (province === 'AB' || province === 'QC') {
-                // AB ACFB is Quarterly (Aug, Nov, Feb, May)
                 const isAbQuarter = ["Aug", "Nov", "Feb", "May"].includes(m);
-                if (province === 'QC') isAbQuarter ? base += (results.provincial / 4) : base += 0; // QC is quarterly
-                else isAbQuarter ? base += (results.provincial / 4) : base += 0; // AB is quarterly
+                if (province === 'QC') isAbQuarter ? base += (results.provincial / 4) : base += 0; 
+                else isAbQuarter ? base += (results.provincial / 4) : base += 0; 
             } else {
-                base += (results.provincial / 12); // BC is monthly
+                base += (results.provincial / 12); 
             }
 
-            // GST/Carbon
             const extra = isQuarterly ? (results.gst / 4) + (results.caip / 4) : 0;
             
             return { month: m, total: base + extra, isQuarterly: (isQuarterly || (["Aug", "Nov", "Feb", "May"].includes(m) && (province === 'AB' || province === 'QC'))) };
@@ -348,7 +310,7 @@ export default function HouseholdBenefits({ isVisible = true }) {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-indigo-100" style={{ paddingBottom: activeTab === 'input' ? '180px' : '40px' }}>
+        <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-indigo-100" style={{ paddingBottom: activeTab === 'input' ? '100px' : '40px' }}>
             
             <main className="max-w-5xl mx-auto p-4 md:p-8 w-full mt-6">
                 <div className="bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden mb-12">
@@ -446,6 +408,22 @@ export default function HouseholdBenefits({ isVisible = true }) {
                                             {children.length === 0 && <div className="text-center p-10 md:p-20 border-2 border-dashed rounded-[2.5rem] text-slate-400 font-black uppercase tracking-widest text-xs bg-slate-50/50">Add a child to begin estimating CCB Support</div>}
                                         </div>
                                     </div>
+                                </div>
+
+                                {/* --- HYBRID: DESKTOP INLINE ACTION --- */}
+                                <div className="hidden md:flex justify-between items-center bg-slate-50 p-6 rounded-3xl border border-slate-200">
+                                    <div className="flex flex-col">
+                                        <span className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Estimated Annual Benefit</span>
+                                        <div className="text-4xl font-black text-slate-900 tracking-tighter">
+                                            ${Math.round(results.total).toLocaleString()} <span className="text-sm text-slate-400 font-bold">/ yr</span>
+                                        </div>
+                                    </div>
+                                    <button 
+                                        onClick={() => { setActiveTab('results'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} 
+                                        className="bg-indigo-600 hover:bg-indigo-700 text-white font-black py-4 px-12 rounded-2xl shadow-xl shadow-indigo-200 transition-all transform hover:-translate-y-1 active:scale-95 flex items-center gap-3 uppercase tracking-widest text-xs"
+                                    >
+                                        View Full Breakdown <ArrowRightIcon size={20} />
+                                    </button>
                                 </div>
                             </div>
                         )}
@@ -563,11 +541,10 @@ export default function HouseholdBenefits({ isVisible = true }) {
                 </div>
             </main>
 
-            {/* Live Estimate Portal - Hidden if typing */}
-            {/* 2. GATE THE PORTAL WITH 'isVisible' */}
-            {isVisible && activeTab === 'input' && mounted && !isInputFocused && createPortal(
+            {/* HYBRID: MOBILE FLOATING FOOTER */}
+            {isVisible && activeTab === 'input' && mounted && createPortal(
                 <div 
-                    className="fixed bottom-[64px] md:bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200 p-4 md:p-5 z-[9999] animate-slide-up shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)]" 
+                    className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200 p-4 md:p-5 z-[9999] animate-slide-up shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)]" 
                     style={{ width: '100%' }}
                 >
                     <div className="max-w-5xl mx-auto flex items-center justify-between gap-4 md:gap-6">

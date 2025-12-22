@@ -1,4 +1,3 @@
-// src/components/ParentalLeave.jsx
 import React, { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { 
@@ -82,7 +81,6 @@ function useUrlTab(defaultTab = 'input') {
 // ==========================================
 //              MAIN COMPONENT
 // ==========================================
-// 1. ADD 'isVisible' PROP
 export default function ParentalLeave({ isVisible = true }) {
     const [province, setProvince] = useState('ON');
     const [salary, setSalary] = useState(70000);
@@ -98,20 +96,8 @@ export default function ParentalLeave({ isVisible = true }) {
     const [activeTab, setActiveTab] = useUrlTab('input');
     
     const [mounted, setMounted] = useState(false);
-    const [isInputFocused, setIsInputFocused] = useState(false);
 
     useEffect(() => { setMounted(true); }, []);
-
-    // Mobile Keyboard Detection
-    useEffect(() => {
-        const handleFocus = (e) => {
-            const tag = e.target.tagName; const type = e.target.type;
-            if (tag === 'TEXTAREA' || (tag === 'INPUT' && !['checkbox', 'radio', 'range', 'submit', 'button'].includes(type))) setIsInputFocused(true);
-        };
-        const handleBlur = () => { setTimeout(() => setIsInputFocused(false), 100); };
-        window.addEventListener('focus', handleFocus, true); window.addEventListener('blur', handleBlur, true);
-        return () => { window.removeEventListener('focus', handleFocus, true); window.removeEventListener('blur', handleBlur, true); };
-    }, []);
 
     // Helper: Get Current Max Insurable based on province
     const currentMaxInsurable = province === 'QC' ? EI_2025.QC_MAX_INSURABLE : EI_2025.MAX_INSURABLE;
@@ -203,7 +189,7 @@ export default function ParentalLeave({ isVisible = true }) {
     const bonusWeeksActive = combinedWeeks > getIndividualMax();
 
     return (
-        <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-rose-100" style={{ paddingBottom: activeTab === 'input' ? '180px' : '40px' }}>
+        <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-rose-100" style={{ paddingBottom: activeTab === 'input' ? '100px' : '40px' }}>
             
             <main className="max-w-5xl mx-auto p-4 md:p-8 w-full mt-6">
                 <div className="bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden mb-12">
@@ -223,83 +209,83 @@ export default function ParentalLeave({ isVisible = true }) {
                                     {/* --- SETTINGS --- */}
                                     <div className="space-y-8">
                                         
-                                        {/* LOCATION */}
-                                        <div className="space-y-4">
-                                            <div className="flex items-center gap-2 text-rose-600 font-black uppercase text-[10px] tracking-widest"><MapPinIcon size={16} /> Location & Plan</div>
-                                            <div className="bg-slate-50 p-5 rounded-3xl border border-slate-100 shadow-sm space-y-4">
-                                                <div>
-                                                    <label className="text-xs font-black text-slate-700 block mb-1.5 uppercase tracking-tighter">Province</label>
-                                                    <select value={province} onChange={(e) => setProvince(e.target.value)} className="w-full p-3 bg-white border border-slate-200 rounded-2xl text-sm focus:ring-2 focus:ring-rose-500 outline-none shadow-sm font-medium">
-                                                        <option value="ON">Ontario (EI)</option>
-                                                        <option value="BC">BC (EI)</option>
-                                                        <option value="AB">Alberta (EI)</option>
-                                                        <option value="QC">Quebec (QPIP)</option>
-                                                        <option value="OTHER">Other Provinces (EI)</option>
-                                                    </select>
-                                                </div>
-                                                <div>
-                                                    <label className="text-xs font-black text-slate-700 block mb-1.5 uppercase tracking-tighter">Plan Type</label>
-                                                    <div className="grid grid-cols-2 gap-3">
-                                                        <button onClick={() => setPlanType('STANDARD')} className={`p-3 text-center rounded-2xl border-2 transition-all relative ${planType === 'STANDARD' ? 'border-rose-500 bg-rose-50 text-rose-900 shadow-sm' : 'border-slate-200 bg-white text-slate-400 hover:border-slate-300'}`}>
-                                                            {planType === 'STANDARD' && <div className="absolute top-2 right-2 text-rose-500"><CheckCircleIcon size={14}/></div>}
-                                                            <div className="font-bold text-sm">Standard</div>
-                                                            <div className="text-[10px] opacity-70 font-medium">12 Months (55%)</div>
-                                                        </button>
-                                                        <button onClick={() => setPlanType('EXTENDED')} className={`p-3 text-center rounded-2xl border-2 transition-all relative ${planType === 'EXTENDED' ? 'border-rose-500 bg-rose-50 text-rose-900 shadow-sm' : 'border-slate-200 bg-white text-slate-400 hover:border-slate-300'}`}>
-                                                            {planType === 'EXTENDED' && <div className="absolute top-2 right-2 text-rose-500"><CheckCircleIcon size={14}/></div>}
-                                                            <div className="font-bold text-sm">Extended</div>
-                                                            <div className="text-[10px] opacity-70 font-medium">18 Months (33%)</div>
-                                                        </button>
-                                                    </div>
+                                    {/* LOCATION */}
+                                    <div className="space-y-4">
+                                        <div className="flex items-center gap-2 text-rose-600 font-black uppercase text-[10px] tracking-widest"><MapPinIcon size={16} /> Location & Plan</div>
+                                        <div className="bg-slate-50 p-5 rounded-3xl border border-slate-100 shadow-sm space-y-4">
+                                            <div>
+                                                <label className="text-xs font-black text-slate-700 block mb-1.5 uppercase tracking-tighter">Province</label>
+                                                <select value={province} onChange={(e) => setProvince(e.target.value)} className="w-full p-3 bg-white border border-slate-200 rounded-2xl text-sm focus:ring-2 focus:ring-rose-500 outline-none shadow-sm font-medium">
+                                                    <option value="ON">Ontario (EI)</option>
+                                                    <option value="BC">BC (EI)</option>
+                                                    <option value="AB">Alberta (EI)</option>
+                                                    <option value="QC">Quebec (QPIP)</option>
+                                                    <option value="OTHER">Other Provinces (EI)</option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label className="text-xs font-black text-slate-700 block mb-1.5 uppercase tracking-tighter">Plan Type</label>
+                                                <div className="grid grid-cols-2 gap-3">
+                                                    <button onClick={() => setPlanType('STANDARD')} className={`p-3 text-center rounded-2xl border-2 transition-all relative ${planType === 'STANDARD' ? 'border-rose-500 bg-rose-50 text-rose-900 shadow-sm' : 'border-slate-200 bg-white text-slate-400 hover:border-slate-300'}`}>
+                                                        {planType === 'STANDARD' && <div className="absolute top-2 right-2 text-rose-500"><CheckCircleIcon size={14}/></div>}
+                                                        <div className="font-bold text-sm">Standard</div>
+                                                        <div className="text-[10px] opacity-70 font-medium">12 Months (55%)</div>
+                                                    </button>
+                                                    <button onClick={() => setPlanType('EXTENDED')} className={`p-3 text-center rounded-2xl border-2 transition-all relative ${planType === 'EXTENDED' ? 'border-rose-500 bg-rose-50 text-rose-900 shadow-sm' : 'border-slate-200 bg-white text-slate-400 hover:border-slate-300'}`}>
+                                                        {planType === 'EXTENDED' && <div className="absolute top-2 right-2 text-rose-500"><CheckCircleIcon size={14}/></div>}
+                                                        <div className="font-bold text-sm">Extended</div>
+                                                        <div className="text-[10px] opacity-70 font-medium">18 Months (33%)</div>
+                                                    </button>
                                                 </div>
                                             </div>
                                         </div>
+                                    </div>
 
-                                        {/* INCOMES */}
-                                        <div className="space-y-4">
-                                            <div className="flex items-center gap-2 text-indigo-600 font-black uppercase text-[10px] tracking-widest"><UsersIcon size={16} /> Annual Income</div>
-                                            
-                                            <div className="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-5">
-                                                {/* P1 */}
-                                                <div>
-                                                    <div className="flex justify-between items-end mb-1.5">
-                                                        <label className="text-xs font-bold text-slate-400 uppercase">Parent 1 (Birth)</label>
-                                                        <button onClick={() => setSalary(currentMaxInsurable)} className="text-[10px] bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-md font-bold hover:bg-indigo-100 transition-colors">
-                                                            Set Max (${currentMaxInsurable.toLocaleString()})
-                                                        </button>
-                                                    </div>
-                                                    <div className="relative group">
-                                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 font-bold group-focus-within:text-indigo-500 transition-colors">$</span>
-                                                        <input type="number" value={salary} onChange={(e) => setSalary(parseInt(e.target.value)||0)} className="w-full pl-8 p-3 bg-slate-50 border border-slate-200 rounded-2xl font-mono text-lg font-black focus:ring-2 focus:ring-indigo-500 outline-none transition-all" />
-                                                    </div>
+                                    {/* INCOMES */}
+                                    <div className="space-y-4">
+                                        <div className="flex items-center gap-2 text-indigo-600 font-black uppercase text-[10px] tracking-widest"><UsersIcon size={16} /> Annual Income</div>
+                                        
+                                        <div className="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-5">
+                                            {/* P1 */}
+                                            <div>
+                                                <div className="flex justify-between items-end mb-1.5">
+                                                    <label className="text-xs font-bold text-slate-400 uppercase">Parent 1 (Birth)</label>
+                                                    <button onClick={() => setSalary(currentMaxInsurable)} className="text-[10px] bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-md font-bold hover:bg-indigo-100 transition-colors">
+                                                        Set Max (${currentMaxInsurable.toLocaleString()})
+                                                    </button>
                                                 </div>
-                                                {/* P2 */}
-                                                <div className="pt-4 border-t border-slate-100">
-                                                    <label className="flex items-center gap-3 cursor-pointer mb-4 select-none">
-                                                        <div className={`w-12 h-6 rounded-full transition-colors relative ${hasPartner ? 'bg-emerald-500' : 'bg-slate-200'}`}>
-                                                            <input type="checkbox" checked={hasPartner} onChange={(e) => setHasPartner(e.target.checked)} className="sr-only" />
-                                                            <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all shadow-sm ${hasPartner ? 'left-7' : 'left-1'}`}></div>
-                                                        </div>
-                                                        <span className="font-bold text-slate-700 text-sm">Include Partner?</span>
-                                                    </label>
-                                                    
-                                                    {hasPartner && (
-                                                        <div className="animate-fade-in">
-                                                            <div className="flex justify-between items-end mb-1.5">
-                                                                <label className="text-xs font-bold text-slate-400 uppercase">Parent 2 (Non-Birth)</label>
-                                                                <button onClick={() => setPartnerSalary(currentMaxInsurable)} className="text-[10px] bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-md font-bold hover:bg-emerald-100 transition-colors">
-                                                                    Set Max (${currentMaxInsurable.toLocaleString()})
-                                                                </button>
-                                                            </div>
-                                                            <div className="relative group">
-                                                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 font-bold group-focus-within:text-emerald-500 transition-colors">$</span>
-                                                                <input type="number" value={partnerSalary} onChange={(e) => setPartnerSalary(parseInt(e.target.value)||0)} className="w-full pl-8 p-3 bg-slate-50 border border-slate-200 rounded-2xl font-mono text-lg font-black focus:ring-2 focus:ring-emerald-500 outline-none transition-all" />
-                                                            </div>
-                                                        </div>
-                                                    )}
+                                                <div className="relative group">
+                                                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 font-bold group-focus-within:text-indigo-500 transition-colors">$</span>
+                                                    <input type="number" value={salary} onChange={(e) => setSalary(parseInt(e.target.value)||0)} className="w-full pl-8 p-3 bg-slate-50 border border-slate-200 rounded-2xl font-mono text-lg font-black focus:ring-2 focus:ring-indigo-500 outline-none transition-all" />
                                                 </div>
                                             </div>
+                                            {/* P2 */}
+                                            <div className="pt-4 border-t border-slate-100">
+                                                <label className="flex items-center gap-3 cursor-pointer mb-4 select-none">
+                                                    <div className={`w-12 h-6 rounded-full transition-colors relative ${hasPartner ? 'bg-emerald-500' : 'bg-slate-200'}`}>
+                                                        <input type="checkbox" checked={hasPartner} onChange={(e) => setHasPartner(e.target.checked)} className="sr-only" />
+                                                        <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all shadow-sm ${hasPartner ? 'left-7' : 'left-1'}`}></div>
+                                                    </div>
+                                                    <span className="font-bold text-slate-700 text-sm">Include Partner?</span>
+                                                </label>
+                                                
+                                                {hasPartner && (
+                                                    <div className="animate-fade-in">
+                                                        <div className="flex justify-between items-end mb-1.5">
+                                                            <label className="text-xs font-bold text-slate-400 uppercase">Parent 2 (Non-Birth)</label>
+                                                            <button onClick={() => setPartnerSalary(currentMaxInsurable)} className="text-[10px] bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-md font-bold hover:bg-emerald-100 transition-colors">
+                                                                Set Max (${currentMaxInsurable.toLocaleString()})
+                                                            </button>
+                                                        </div>
+                                                        <div className="relative group">
+                                                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 font-bold group-focus-within:text-emerald-500 transition-colors">$</span>
+                                                            <input type="number" value={partnerSalary} onChange={(e) => setPartnerSalary(parseInt(e.target.value)||0)} className="w-full pl-8 p-3 bg-slate-50 border border-slate-200 rounded-2xl font-mono text-lg font-black focus:ring-2 focus:ring-emerald-500 outline-none transition-all" />
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
+                                    </div>
                                     </div>
 
                                     {/* --- ALLOCATION SLIDERS --- */}
@@ -399,6 +385,22 @@ export default function ParentalLeave({ isVisible = true }) {
                                             </div>
                                      </div>
                                     </div>
+                                </div>
+
+                                {/* --- HYBRID: DESKTOP INLINE ACTION --- */}
+                                <div className="hidden md:flex justify-between items-center bg-slate-50 p-6 rounded-3xl border border-slate-200 mt-8">
+                                    <div className="flex flex-col">
+                                        <span className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Estimated Total Benefit</span>
+                                        <div className="text-4xl font-black text-slate-900 tracking-tighter">
+                                            ${Math.round(results.totalValue).toLocaleString()} <span className="text-sm text-slate-400 font-bold">Total</span>
+                                        </div>
+                                    </div>
+                                    <button 
+                                        onClick={() => { setActiveTab('results'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} 
+                                        className="bg-rose-600 hover:bg-rose-700 text-white font-black py-4 px-12 rounded-2xl shadow-xl shadow-rose-200 transition-all transform hover:-translate-y-1 active:scale-95 flex items-center gap-3 uppercase tracking-widest text-xs"
+                                    >
+                                        View Your Plan <ArrowRightIcon size={20} />
+                                    </button>
                                 </div>
                             </div>
                         )}
@@ -535,16 +537,15 @@ export default function ParentalLeave({ isVisible = true }) {
                 </div>
             </main>
 
-            {/* PORTAL FOOTER */}
-            {/* 2. USE 'isVisible' HERE TO PREVENT LEAKING */}
-            {isVisible && activeTab === 'input' && mounted && !isInputFocused && createPortal(
+            {/* HYBRID: MOBILE FLOATING FOOTER */}
+            {isVisible && activeTab === 'input' && mounted && createPortal(
                 <div 
-                    className="fixed bottom-[64px] md:bottom-0 left-0 right-0 bg-white/90 backdrop-blur-xl border-t border-slate-200 p-4 z-[9999] animate-slide-up shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)]" 
+                    className="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-xl border-t border-slate-200 p-4 z-[9999] animate-slide-up shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)]" 
                     style={{ width: '100%' }}
                 >
                     <div className="max-w-5xl mx-auto flex items-center justify-between gap-4">
                         <div className="flex flex-col">
-                            <span className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Total Household Benefit</span>
+                            <span className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Total Benefit</span>
                             <div className="flex items-baseline gap-1.5">
                                 <span className="text-3xl font-black text-slate-900 tracking-tighter">${Math.round(results.totalValue).toLocaleString()}</span>
                             </div>

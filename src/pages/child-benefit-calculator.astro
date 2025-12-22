@@ -1,0 +1,50 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import HouseholdBenefits from '../components/HouseholdBenefits'; // Import the React component
+---
+
+<BaseLayout 
+  title="Canada Child Benefit (CCB) Calculator 2025" 
+  description="Estimate your monthly Canada Child Benefit (CCB) and provincial family payments for the July 2025 to June 2026 benefit year."
+>
+  
+  {/* TITLE SECTION with Trust Badge */}
+  <div class="max-w-6xl mx-auto px-4 pt-8 text-center md:text-left animate-fade-in">
+    <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+        <div>
+            <h1 class="text-2xl font-black text-slate-900 flex items-center gap-2 justify-center md:justify-start">
+              Household Benefits Estimator
+            </h1>
+            <p class="text-slate-500 text-sm font-medium">
+              CCB, Trillium, Carbon Rebate & GST Credits
+            </p>
+        </div>
+
+        {/* TRUST BADGE SPECIFIC TO CCB DATA */}
+        <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 border border-slate-200">
+            <div class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                Data: CRA Indexed Rates (July 2025)
+            </span>
+        </div>
+    </div>
+  </div>
+
+  {/* REACT COMPONENT */}
+  <main class="flex-grow flex flex-col justify-center w-full animate-fade-in">
+    {/* client:only="react" ensures all the interactive charts and sliders work immediately */}
+    <HouseholdBenefits client:only="react" isVisible={true} />
+  </main>
+
+  {/* SEO CONTENT SECTION */}
+  <section class="max-w-3xl mx-auto px-6 py-12 text-slate-600 leading-relaxed text-sm">
+      <h2 class="text-lg font-bold text-slate-900 mb-4">When do CCB payments change?</h2>
+      <p class="mb-4">
+          The Canada Child Benefit (CCB) is recalculated every July based on your "Adjusted Family Net Income" (AFNI) from the previous year's tax return. For example, payments starting in <strong>July 2025</strong> are based on your <strong>2024 Tax Return</strong>.
+      </p>
+      <p>
+          This calculator uses the latest indexation rates (announced late 2024) to forecast exactly how much your family will receive in the upcoming benefit year.
+      </p>
+  </section>
+
+</BaseLayout>

@@ -1,0 +1,49 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import GroceryInflation from '../components/GroceryInflation'; // Import the React component
+---
+
+<BaseLayout 
+  title="Grocery Inflation Calculator & Forecast 2025" 
+  description="Audit your grocery bill and see how 4.7% food inflation impacts your family budget over the next 5 years."
+>
+  
+  {/* TITLE SECTION with Trust Badge */}
+  <div class="max-w-6xl mx-auto px-4 pt-8 text-center md:text-left animate-fade-in">
+    <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+        <div>
+            <h1 class="text-2xl font-black text-slate-900 flex items-center gap-2 justify-center md:justify-start">
+              Budget Defense & Purchasing Power
+            </h1>
+            <p class="text-slate-500 text-sm font-medium">
+              Forecast grocery inflation and shrinking money value
+            </p>
+        </div>
+
+        {/* TRUST BADGE SPECIFIC TO FOOD DATA */}
+        <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 border border-slate-200">
+            <div class="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></div>
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                Data: Canada Food Price Report 2025
+            </span>
+        </div>
+    </div>
+  </div>
+
+  {/* REACT COMPONENT */}
+  <main class="flex-grow flex flex-col justify-center w-full animate-fade-in">
+    <GroceryInflation client:only="react" isVisible={true} />
+  </main>
+
+  {/* SEO CONTENT SECTION (Great for ranking) */}
+  <section class="max-w-3xl mx-auto px-6 py-12 text-slate-600 leading-relaxed text-sm">
+      <h2 class="text-lg font-bold text-slate-900 mb-4">Why does my grocery bill feel so high?</h2>
+      <p class="mb-4">
+          While the general inflation rate might be cooling, specific categories like <strong>meats, vegetables, and bakery items</strong> are seeing higher volatility due to supply chain issues and climate events affecting harvest yields.
+      </p>
+      <p>
+          This tool uses provincial-specific data to calculate your personal inflation rate, which often differs from the national average reported by Statistics Canada.
+      </p>
+  </section>
+
+</BaseLayout>

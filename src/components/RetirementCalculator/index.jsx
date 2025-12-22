@@ -1,4 +1,3 @@
-// src/components/RetirementCalculator/index.jsx
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { CheckIcon, LinkIcon, ArrowRightIcon } from './Icons';
@@ -11,7 +10,7 @@ import InputTab from './InputTab';
 import ResultsTab from './ResultsTab';
 
 // ==========================================
-//        HOOK: SYNC TABS WITH URL
+//         HOOK: SYNC TABS WITH URL
 // ==========================================
 function useUrlTab(defaultTab = 'input', queryParam = 'step') {
     const [activeTab, setActiveTabState] = useState(() => {
@@ -55,7 +54,6 @@ function useUrlTab(defaultTab = 'input', queryParam = 'step') {
 // ==========================================
 //              MAIN COMPONENT
 // ==========================================
-// 1. ADD 'isVisible' PROP
 export default function Calculator({ isVisible = true }) {
     // --- 1. CORE STATE ---
     const [children, setChildren] = useState([]); 
@@ -103,9 +101,6 @@ export default function Calculator({ isVisible = true }) {
     const [copySuccess, setCopySuccess] = useState(false);
     const [comparisonSnapshot, setComparisonSnapshot] = useState(null);
 
-    // --- 5. MOBILE UX STATE ---
-    const [isInputFocused, setIsInputFocused] = useState(false);
-
     const birthYear = parseInt(dob.split('-')[0]);
 
     // --- 6. LOGIC HOOK ---
@@ -131,35 +126,6 @@ export default function Calculator({ isVisible = true }) {
     useEffect(() => { setMounted(true); }, []);
     useEffect(() => { if (livedInCanadaAllLife) setYearsInCanada(40); }, [livedInCanadaAllLife]);
     useEffect(() => { if (!showChildren) setChildren([]); }, [showChildren]);
-
-    // Handle Mobile Keyboard Detection
-    useEffect(() => {
-        const handleFocus = (e) => {
-            const tag = e.target.tagName;
-            const type = e.target.type;
-            if (tag === 'TEXTAREA' || (tag === 'INPUT' && !['checkbox', 'radio', 'range', 'submit', 'button', 'file', 'color'].includes(type))) {
-                setIsInputFocused(true);
-            }
-        };
-
-        const handleBlur = () => {
-            setTimeout(() => {
-                const active = document.activeElement;
-                const tag = active?.tagName;
-                const type = active?.type;
-                if (!(tag === 'TEXTAREA' || (tag === 'INPUT' && !['checkbox', 'radio', 'range', 'submit', 'button', 'file', 'color'].includes(type)))) {
-                    setIsInputFocused(false);
-                }
-            }, 100);
-        };
-
-        window.addEventListener('focus', handleFocus, true);
-        window.addEventListener('blur', handleBlur, true);
-        return () => {
-            window.removeEventListener('focus', handleFocus, true);
-            window.removeEventListener('blur', handleBlur, true);
-        };
-    }, []);
 
     // Load from URL
     useEffect(() => {
@@ -298,7 +264,6 @@ export default function Calculator({ isVisible = true }) {
     const taxFactor = showNet ? (1 - TAX_RATE) : 1; 
     
     // --- SAFE CALCULATIONS ---
-    // We access results.cpp.total safely because we forced defaults in step 6
     const displayTotal = (results.grandTotal || 0) * inflationFactor * taxFactor;
     const displayCPP = (results.cpp.total || 0) * inflationFactor * taxFactor;
     const displayOAS = (results.oas.total || 0) * inflationFactor * taxFactor;
@@ -314,7 +279,7 @@ export default function Calculator({ isVisible = true }) {
     return (
         <div 
             className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-indigo-100 selection:text-indigo-700"
-            style={{ paddingBottom: activeTab === 'input' ? '200px' : '60px' }}
+            style={{ paddingBottom: activeTab === 'input' ? '100px' : '60px' }}
         > 
             {showAbout && <AboutModal onClose={() => setShowAbout(false)} />}
             
@@ -341,25 +306,43 @@ export default function Calculator({ isVisible = true }) {
 
                     <div className="p-6 md:p-8">
                         {activeTab === 'input' && (
-                            <InputTab 
-                                dob={dob} setDob={setDob}
-                                retirementAge={retirementAge} setRetirementAge={setRetirementAge}
-                                isMarried={isMarried} setIsMarried={setIsMarried}
-                                spouseDob={spouseDob} setSpouseDob={setSpouseDob}
-                                spouseIncome={spouseIncome} setSpouseIncome={setSpouseIncome}
-                                showChildren={showChildren} setShowChildren={setShowChildren}
-                                children={children} setChildren={setChildren}
-                                livedInCanadaAllLife={livedInCanadaAllLife} setLivedInCanadaAllLife={setLivedInCanadaAllLife}
-                                yearsInCanada={yearsInCanada} setYearsInCanada={setYearsInCanada}
-                                otherIncome={otherIncome} setOtherIncome={setOtherIncome}
-                                earnings={earnings} setEarnings={setEarnings}
-                                avgSalaryInput={avgSalaryInput} setAvgSalaryInput={setAvgSalaryInput}
-                                applyAverageSalary={applyAverageSalary}
-                                setShowImport={setShowImport}
-                                hasEarnings={hasEarnings}
-                                showGrid={showGrid} setShowGrid={setShowGrid}
-                                results={results} birthYear={birthYear}
-                            />
+                            <>
+                                <InputTab 
+                                    dob={dob} setDob={setDob}
+                                    retirementAge={retirementAge} setRetirementAge={setRetirementAge}
+                                    isMarried={isMarried} setIsMarried={setIsMarried}
+                                    spouseDob={spouseDob} setSpouseDob={setSpouseDob}
+                                    spouseIncome={spouseIncome} setSpouseIncome={setSpouseIncome}
+                                    showChildren={showChildren} setShowChildren={setShowChildren}
+                                    children={children} setChildren={setChildren}
+                                    livedInCanadaAllLife={livedInCanadaAllLife} setLivedInCanadaAllLife={setLivedInCanadaAllLife}
+                                    yearsInCanada={yearsInCanada} setYearsInCanada={setYearsInCanada}
+                                    otherIncome={otherIncome} setOtherIncome={setOtherIncome}
+                                    earnings={earnings} setEarnings={setEarnings}
+                                    avgSalaryInput={avgSalaryInput} setAvgSalaryInput={setAvgSalaryInput}
+                                    applyAverageSalary={applyAverageSalary}
+                                    setShowImport={setShowImport}
+                                    hasEarnings={hasEarnings}
+                                    showGrid={showGrid} setShowGrid={setShowGrid}
+                                    results={results} birthYear={birthYear}
+                                />
+
+                                {/* --- HYBRID: DESKTOP INLINE ACTION BAR (Added here) --- */}
+                                <div className="hidden md:flex justify-between items-center bg-slate-50 p-6 rounded-3xl border border-slate-200 mt-8">
+                                    <div className="flex flex-col">
+                                        <span className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Forecast @ Age {retirementAge}</span>
+                                        <div className="text-4xl font-black text-slate-900 tracking-tighter">
+                                            ${displayTotal.toLocaleString('en-CA', { maximumFractionDigits: 0 })} <span className="text-sm text-slate-400 font-bold">/ mo</span>
+                                        </div>
+                                    </div>
+                                    <button 
+                                        onClick={() => { setActiveTab('results'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} 
+                                        className="bg-indigo-600 hover:bg-indigo-700 text-white font-black py-4 px-12 rounded-2xl shadow-xl shadow-indigo-200 transition-all transform hover:-translate-y-1 active:scale-95 flex items-center gap-3 uppercase tracking-widest text-xs"
+                                    >
+                                        Analyze Forecast <ArrowRightIcon size={20} />
+                                    </button>
+                                </div>
+                            </>
                         )}
 
                         {activeTab === 'results' && (
@@ -380,12 +363,11 @@ export default function Calculator({ isVisible = true }) {
                 <div style={{ height: '140px' }}></div> 
             </main>
 
-            {/* FLOATING FOOTER */}
-            {/* 2. USE 'isVisible' HERE TO PREVENT LEAKING */}
-            {isVisible && activeTab === 'input' && mounted && !isInputFocused && createPortal(
+            {/* FLOATING FOOTER (MOBILE ONLY) */}
+            {/* Added 'md:hidden' so it disappears on desktop */}
+            {isVisible && activeTab === 'input' && mounted && createPortal(
                 <div 
-                    className="fixed bottom-[64px] md:bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-slate-200 p-3 shadow-[0_-15px_40px_-10px_rgba(0,0,0,0.15)] z-[9999] animate-slide-up"
-                    // IMPORTANT: Removed 'bottom: 0' inline style here
+                    className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-slate-200 p-3 shadow-[0_-15px_40px_-10px_rgba(0,0,0,0.15)] z-[9999] animate-slide-up"
                     style={{ width: '100%' }}
                 >
                     <div className="max-w-5xl mx-auto flex items-center justify-between gap-4">

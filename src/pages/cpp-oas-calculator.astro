@@ -1,0 +1,51 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import RetirementCalculator from '../components/RetirementCalculator'; // Import component directly
+import { CalculatorIcon } from '../components/Icons'; // Optional: for title icon
+---
+
+<BaseLayout 
+  title="CPP & OAS Calculator 2025" 
+  description="Estimate your future Canada Pension Plan (CPP) and Old Age Security (OAS) payments with our privacy-first calculator."
+>
+  
+  {/* TITLE SECTION with Trust Badge */}
+  <div class="max-w-5xl mx-auto px-8 pt-8 pb-2 text-center md:text-left animate-fade-in">
+    <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+        <div>
+            <h1 class="text-2xl font-black text-slate-900 flex items-center gap-2 justify-center md:justify-start">
+              Government Retirement Benefits
+            </h1>
+            <p class="text-slate-500 text-sm font-medium">
+              Estimates for CPP, Old Age Security (OAS), and GIS
+            </p>
+        </div>
+
+        {/* TRUST BADGE SPECIFIC TO CPP/CRA DATA */}
+        <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 border border-slate-200">
+            {/* Indigo color to match the CPP theme */}
+            <div class="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></div>
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                Data: Service Canada / CRA (2025)
+            </span>
+        </div>
+    </div>
+  </div>
+
+  {/* REACT COMPONENT */}
+  <main class="flex-grow flex flex-col justify-center w-full animate-fade-in">
+    <RetirementCalculator client:only="react" isVisible={true} />
+  </main>
+
+  {/* SEO CONTENT SECTION */}
+  <section class="max-w-3xl mx-auto px-8 py-12 text-slate-600 leading-relaxed text-sm">
+      <h2 class="text-lg font-bold text-slate-900 mb-4">How accurate are these estimates?</h2>
+      <p class="mb-4">
+          This calculator uses the official <strong>Year's Maximum Pensionable Earnings (YMPE)</strong> and the new "Second Ceiling" (YAMPE) introduced in the 2024/2025 CPP enhancement.
+      </p>
+      <p>
+          It projects your future contributions based on your current salary and years of residency to estimate your monthly payouts at age 60, 65, and 70.
+      </p>
+  </section>
+
+</BaseLayout>

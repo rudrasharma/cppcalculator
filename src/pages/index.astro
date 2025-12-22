@@ -1,101 +1,88 @@
 ---
-// src/pages/index.astro
-import CalculatorSuite from '../components/CalculatorSuite';
-import ContactButton from '../components/ContactButton'; // Import the new button
-import '../styles/global.css';
+import BaseLayout from '../layouts/BaseLayout.astro';
 
-// SEO CONSTANTS
-const SITE_TITLE = "LoonieFi | Canadian Financial & Family Calculators";
-const SITE_DESCRIPTION = "Free, privacy-first calculators for Canada Pension Plan (CPP), Child Benefits (CCB), and Parental Leave planning.";
-const SITE_IMAGE = "/android-chrome-192x192.png"; 
+// FIX: Store icons as simple HTML strings to avoid JSX errors in frontmatter
+const TOOLS = [
+  { 
+    href: '/cpp-oas-calculator', 
+    label: 'CPP & OAS', 
+    color: 'text-indigo-600', 
+    bg: 'bg-indigo-50',
+    // Bar Chart Icon
+    iconSvg: `<path d="M12 20v-10m6 10v-16m-12 16v-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`,
+    description: 'Calculate your future monthly income from government pensions.'
+  },
+  { 
+    href: '/parental-leave-calculator', 
+    label: 'Mat. Leave', 
+    color: 'text-rose-600', 
+    bg: 'bg-rose-50',
+    // Baby Icon
+    iconSvg: `<circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/><path d="M8 14s1.5 2 4 2 4-2 4-2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/><line x1="9" y1="9" x2="9.01" y2="9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="15" y1="9" x2="15.01" y2="9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>`,
+    description: 'Estimate your EI weekly payments and total leave duration.'
+  },
+  { 
+    href: '/child-benefit-calculator', 
+    label: 'Family Cash', 
+    color: 'text-emerald-600', 
+    bg: 'bg-emerald-50',
+    // House Icon
+    iconSvg: `<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/><polyline points="9 22 9 12 15 12 15 22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>`,
+    description: 'Maximize your Child Benefits and quarterly tax rebates.'
+  },
+  { 
+    href: '/grocery-inflation-calculator', 
+    label: 'Budget Def.', 
+    color: 'text-amber-600', 
+    bg: 'bg-amber-50',
+    // Shield Icon
+    iconSvg: `<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>`,
+    description: 'Protect your spending power against rising Canadian food costs.'
+  },
+];
 ---
 
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, viewport-fit=cover" />
-    
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-    <link rel="manifest" href="/site.webmanifest">
-    <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#f59e0b"> 
-    <meta name="msapplication-TileColor" content="#ffffff">
-    <meta name="theme-color" content="#ffffff">
-
-    <title>{SITE_TITLE}</title>
-    <meta name="description" content={SITE_DESCRIPTION} />
-    
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://looniefi.ca/" />
-    <meta property="og:title" content={SITE_TITLE} />
-    <meta property="og:description" content={SITE_DESCRIPTION} />
-    <meta property="og:image" content={SITE_IMAGE} />
-
-    <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content="https://looniefi.ca/" />
-    <meta property="twitter:title" content={SITE_TITLE} />
-    <meta property="twitter:description" content={SITE_DESCRIPTION} />
-    <meta property="twitter:image" content={SITE_IMAGE} />
-  </head>
-
-  <body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col antialiased selection:bg-amber-100 selection:text-amber-900">
-    
-    <div class="flex-grow">
-      <CalculatorSuite client:only="react" />
-    </div>
-
-    <footer class="bg-slate-50 border-t border-slate-200 pb-[250px] md:pb-40 pt-10 mt-auto">
-      <div class="max-w-5xl mx-auto px-6 text-center">
-        
-        <div class="flex flex-wrap justify-center items-center gap-x-6 gap-y-2 mb-8 font-medium text-sm">
-            
-            <a href="/blog" class="text-indigo-600 hover:text-indigo-800 transition-colors flex items-center gap-2 group">
-                <span class="bg-indigo-100 text-indigo-700 p-1 rounded group-hover:bg-indigo-200 transition-colors">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-                </span>
-                Guides & Blog
-            </a>
-
-            <span class="text-slate-300 hidden sm:inline">•</span>
-
-            {/* PRIVACY TOOLTIP (MOBILE FRIENDLY) */}
-            <div class="relative group inline-block cursor-help">
-                <span class="text-slate-400 border-b border-dotted border-slate-300">Privacy First</span>
-                
-                {/* TOOLTIP POPUP */}
-                <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-slate-800 text-white text-xs rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 text-center z-50 pointer-events-none">
-                    All calculations are performed locally in your browser. No data is sent to our servers.
-                    {/* ARROW */}
-                    <div class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-800"></div>
-                </div>
-            </div>
-
-            <span class="text-slate-300 hidden sm:inline">•</span>
-
-            {/* NEW REACT CONTACT BUTTON */}
-            <ContactButton client:visible />
-
-        </div>
-
-        {/* DISCLAIMER SECTION */}
-        <div class="max-w-2xl mx-auto mb-6">
-            <p class="text-[11px] leading-relaxed text-slate-400">
-                <strong>Disclaimer:</strong> This tool provides estimates for informational purposes only and does not constitute financial, legal, or tax advice. While we strive for accuracy using official formulas, your actual government benefits (CPP, OAS, CCB) may vary based on official assessments. Please consult a professional financial planner or Service Canada for your specific situation.
-            </p>
-        </div>
-
-        <div class="flex flex-col gap-2 border-t border-slate-100 pt-6">
-            <p class="text-xs text-slate-400">
-                © {new Date().getFullYear()} LoonieFi. All rights reserved.
-            </p>
-            <p class="text-[10px] text-slate-300 uppercase tracking-wider">
-                Made with <span class="text-rose-400">♥</span> in Waterloo, ON
-            </p>
-        </div>
+<BaseLayout 
+  title="Canadian Financial & Family Calculators" 
+  description="Free, privacy-first calculators for CPP, Child Benefits, Parental Leave, and Inflation."
+>
+  <main class="max-w-6xl mx-auto px-6 py-12 md:py-20 animate-fade-in text-center">
+      
+      {/* HERO SECTION */}
+      <div class="mb-12 md:mb-16">
+        <h1 class="text-4xl md:text-6xl font-black text-slate-900 mb-6 tracking-tight leading-tight">
+          What are we planning <br class="hidden md:block" /> for <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-amber-500 italic">today?</span>
+        </h1>
+        <p class="text-lg text-slate-600 max-w-xl mx-auto font-medium">
+           Select a tool below to get instant, privacy-first estimates of your Canadian government benefits and purchasing power.
+        </p>
       </div>
-    </footer>
 
-  </body>
-</html>
+      {/* TOOLS GRID */}
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {TOOLS.map((tool) => (
+            <a 
+                href={tool.href} 
+                class="group relative flex flex-col items-start p-8 bg-white border border-slate-200 rounded-[2.5rem] transition-all duration-300 hover:border-transparent hover:shadow-[0_20px_50px_rgba(0,0,0,0.08)] hover:-translate-y-2 text-left"
+            >
+                {/* ICON BOX */}
+                <div class={`p-4 rounded-2xl mb-6 transition-transform group-hover:scale-110 group-hover:rotate-3 ${tool.bg} ${tool.color}`}>
+                    {/* FIX: Use set:html to render the SVG string securely */}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" set:html={tool.iconSvg} />
+                </div>
+
+                <h3 class="text-xl font-black text-slate-900 mb-2">{tool.label}</h3>
+                <p class="text-slate-500 mb-8 text-sm leading-relaxed font-medium">{tool.description}</p>
+                
+                <div class="mt-auto flex items-center font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
+                    Start Calculating 
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                </div>
+            </a>
+          ))}
+      </div>
+  </main>
+</BaseLayout>
