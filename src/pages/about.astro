@@ -1,0 +1,124 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+// DATA DEFINITION (Plain JS Object)
+const DATA_SOURCES = [
+  {
+    title: "Canada Pension Plan (CPP)",
+    text: "Calculations utilize the 2025 YMPE ($71,300) and YAMPE ($81,100) ceilings defined by the CRA. Enhancement phases 1 and 2 are modeled based on the official C-26 legislation."
+  },
+  {
+    title: "Child Benefits (CCB)",
+    text: "Base Benefit and Phase-out thresholds are indexed to the July 2025 rates (4.7% adjustment factor estimate). Provincial benefits include OCB (Ontario), ACFB (Alberta), and Family Benefit (BC)."
+  },
+  {
+    title: "Inflation & Cost of Living",
+    text: "Food inflation data is sourced from the 'Canada's Food Price Report 2025' (Dalhousie University/University of Guelph), adjusted for provincial CPI variations."
+  }
+];
+---
+
+<BaseLayout 
+  title="About LoonieFi" 
+  description="LoonieFi provides privacy-first, open-source financial calculators for Canadians."
+>
+  
+  <main class="max-w-4xl mx-auto px-6 py-12 md:py-20 animate-fade-in">
+    
+    {/* HERO SECTION */}
+    <div class="text-center mb-16">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 border border-slate-200 mb-6">
+        <span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
+        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Established 2025</span>
+      </div>
+      <h1 class="text-4xl md:text-5xl font-black text-slate-900 mb-6 tracking-tight">
+        Making Canadian Finance <br class="hidden md:block" /> <span class="text-indigo-600">Transparent</span> & <span class="text-emerald-600">Private</span>.
+      </h1>
+      <p class="text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
+        We build fast, free, and privacy-focused tools to help Canadians plan their future without handing over their data to banks or government portals.
+      </p>
+    </div>
+
+    {/* THREE PILLARS */}
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
+      <div class="bg-white p-8 rounded-[2rem] border border-slate-200 shadow-sm">
+        <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mb-6">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <h3 class="text-xl font-bold text-slate-900 mb-3">Privacy First</h3>
+        <p class="text-slate-500 text-sm leading-relaxed">
+          Your financial data never leaves your device. All calculations happen locally in your browser. We don't have a database, and we don't want one.
+        </p>
+      </div>
+
+      <div class="bg-white p-8 rounded-[2rem] border border-slate-200 shadow-sm">
+        <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mb-6">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
+        </div>
+        <h3 class="text-xl font-bold text-slate-900 mb-3">Official Data</h3>
+        <p class="text-slate-500 text-sm leading-relaxed">
+          Our models are updated annually using official indexing rates from the CRA, Service Canada, and Statistics Canada. No magic numbers.
+        </p>
+      </div>
+
+      <div class="bg-white p-8 rounded-[2rem] border border-slate-200 shadow-sm">
+        <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center mb-6">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m16 10-4 4-4-4"/></svg>
+        </div>
+        <h3 class="text-xl font-bold text-slate-900 mb-3">Open Source</h3>
+        <p class="text-slate-500 text-sm leading-relaxed">
+          We believe financial formulas should be transparent. Our calculation logic is open for inspection to ensure accuracy and trust.
+        </p>
+      </div>
+    </div>
+
+    {/* STORY SECTION */}
+    <div class="bg-slate-900 text-white rounded-[2.5rem] p-8 md:p-12 relative overflow-hidden shadow-2xl mb-20">
+      <div class="absolute top-0 right-0 w-64 h-64 bg-indigo-500/20 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+      
+      <div class="relative z-10 max-w-2xl">
+        <h2 class="text-2xl md:text-3xl font-black mb-6 tracking-tight">The Story Behind LoonieFi</h2>
+        <div class="space-y-4 text-slate-300 leading-relaxed">
+          <p>
+            Like many Canadians, we found ourselves frustrated when trying to plan for the future. Official government calculators are often buried behind login portals or are overly simplistic tools that don't account for real-world scenarios like shared custody, early retirement, or varying inflation rates.
+          </p>
+          <p>
+            We built LoonieFi to bridge that gap. We wanted to create a suite of tools that are fast, modern, and respectful of your privacy.
+          </p>
+          <p>
+            This site is a passion project. It generates no revenue, sells no data, and serves no ads. It exists simply to help you make better financial decisions.
+          </p>
+        </div>
+        
+        <div class="mt-8 pt-8 border-t border-white/10 flex items-center gap-4">
+          <div class="h-12 w-12 bg-white/10 rounded-full flex items-center justify-center font-black text-xl text-indigo-400">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <div>
+            <div class="font-bold text-white">The LoonieFi Team</div>
+            <div class="text-xs text-indigo-300 font-bold uppercase tracking-widest">Built in Canada</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {/* DATA SOURCES */}
+    <div class="max-w-2xl mx-auto">
+      <h2 class="text-2xl font-black text-slate-900 mb-8 text-center">Data Sources & Methodologies</h2>
+      <div class="space-y-4">
+        {DATA_SOURCES.map((item) => (
+          <div class="flex gap-4 items-start">
+            <div class="mt-1 p-1 bg-indigo-100 text-indigo-600 rounded-full">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div>
+              <h3 class="font-bold text-slate-900">{item.title}</h3>
+              <p class="text-slate-600 text-sm leading-relaxed mt-1">{item.text}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+
+  </main>
+</BaseLayout>
