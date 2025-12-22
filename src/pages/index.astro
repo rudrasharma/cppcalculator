@@ -1,5 +1,7 @@
 ---
+// src/pages/index.astro
 import CalculatorSuite from '../components/CalculatorSuite';
+import ContactButton from '../components/ContactButton'; // Import the new button
 import '../styles/global.css';
 
 // SEO CONSTANTS
@@ -58,23 +60,26 @@ const SITE_IMAGE = "/android-chrome-192x192.png";
 
             <span class="text-slate-300 hidden sm:inline">•</span>
 
+            {/* PRIVACY TOOLTIP (MOBILE FRIENDLY) */}
             <div class="relative group inline-block cursor-help">
                 <span class="text-slate-400 border-b border-dotted border-slate-300">Privacy First</span>
                 
+                {/* TOOLTIP POPUP */}
                 <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-slate-800 text-white text-xs rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 text-center z-50 pointer-events-none">
                     All calculations are performed locally in your browser. No data is sent to our servers.
+                    {/* ARROW */}
                     <div class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-800"></div>
                 </div>
             </div>
 
             <span class="text-slate-300 hidden sm:inline">•</span>
 
-            <a href="mailto:support@cppforecast.ca" class="text-slate-500 hover:text-indigo-600 transition-colors">
-                Contact
-            </a>
+            {/* NEW REACT CONTACT BUTTON */}
+            <ContactButton client:visible />
 
         </div>
 
+        {/* DISCLAIMER SECTION */}
         <div class="max-w-2xl mx-auto mb-6">
             <p class="text-[11px] leading-relaxed text-slate-400">
                 <strong>Disclaimer:</strong> This tool provides estimates for informational purposes only and does not constitute financial, legal, or tax advice. While we strive for accuracy using official formulas, your actual government benefits (CPP, OAS, CCB) may vary based on official assessments. Please consult a professional financial planner or Service Canada for your specific situation.

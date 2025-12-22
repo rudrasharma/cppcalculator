@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Calculator from './RetirementCalculator';
 import HouseholdBenefits from './HouseHoldBenefits';
 import ParentalLeave from './ParentalLeave'; 
-import GroceryInflation from './GroceryInflation'; // Ensure this component is created
+import GroceryInflation from './GroceryInflation'; 
 import '../styles/global.css'
 
 // ICONS
@@ -12,7 +12,7 @@ const HomeIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" view
 const ShieldIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>;
 const ArrowRight = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>;
 
-// CONFIGURATION: Labels & Explainer Titles
+// CONFIGURATION
 const TABS = [
   { 
     id: 'cpp', 
@@ -89,7 +89,8 @@ export default function CalculatorSuite() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 pb-24 md:pb-0"> 
+    // FIX 1: Removed 'min-h-screen'. Added 'flex flex-col h-full' to allow Index.astro to manage height.
+    <div className="flex flex-col h-full bg-slate-50 pb-24 md:pb-0"> 
       
       {/* --- DESKTOP HEADER --- */}
       <nav className="hidden md:block bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50">
@@ -137,7 +138,8 @@ export default function CalculatorSuite() {
 
       {/* --- LANDING VIEW --- */}
       {view === 'landing' && (
-        <main className="max-w-6xl mx-auto px-6 py-12 md:py-20 animate-fade-in text-center">
+        // FIX 2: Added flex-grow and justify-center to center landing content
+        <main className="flex-grow flex flex-col justify-center max-w-6xl mx-auto px-6 py-12 md:py-20 animate-fade-in text-center">
           <div className="mb-12 md:mb-16">
             <h1 className="text-4xl md:text-6xl font-black text-slate-900 mb-6 tracking-tight leading-tight">
               What are we planning <br className="hidden md:block" /> for <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-amber-500 italic">today?</span>
@@ -176,7 +178,8 @@ export default function CalculatorSuite() {
             <p className="text-slate-500 text-sm font-medium">{activeTabInfo?.subtitle}</p>
           </div>
 
-          <main className="animate-fade-in transition-all duration-300">
+          {/* FIX 3: Added flex-grow and justify-center to center the active calculator */}
+          <main className="flex-grow flex flex-col justify-center w-full animate-fade-in transition-all duration-300">
             <div style={{ display: view === 'cpp' ? 'block' : 'none' }}>
                 <Calculator isVisible={view === 'cpp'} />
             </div>
