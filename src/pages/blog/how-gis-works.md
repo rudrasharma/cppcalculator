@@ -2,7 +2,7 @@
 title: "The Hidden Safety Net: How the Guaranteed Income Supplement (GIS) Really Works"
 pubDate: 2025-12-14
 description: "Unlike CPP and OAS, the GIS is not for everyone. It is a tax-free monthly benefit for low-income seniors, but it comes with a steep 'clawback' that can surprise you."
-slug: "how-gis-works-clawback-math"
+slug: "how-gis-works"
 layout: ../../layouts/BlogPost.astro
 category: "cpp"
 ---

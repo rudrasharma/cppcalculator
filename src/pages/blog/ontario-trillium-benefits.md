@@ -2,7 +2,7 @@
 title: "The 'Secret' 10th-of-the-Month Payment: How the Ontario Trillium Benefit Works"
 pubDate: 2025-12-20
 description: "It is not just one benefit—it is three wrapped in one. We break down the math behind the Ontario Sales Tax Credit and Property Tax Credit, and why you might be getting a lump sum instead of monthly cash."
-slug: "ontario-trillium-benefit-math-explained"
+slug: "ontario-trillium-benefit"
 layout: ../../layouts/BlogPost.astro
 category: "ccb"
 ---

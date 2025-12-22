@@ -2,7 +2,7 @@
 title: "Feature Update: Why We Killed the 'Linear' Salary Projection"
 pubDate: 2025-12-20
 description: "We updated our 'Quick Estimate' logic from a simple linear projection to a realistic Lifecycle Earnings Curve. Here is why your estimate might have changed (and why it's better)."
-slug: "feature-update-lifecycle-earnings-curve"
+slug: "salary-estimate-update"
 layout: ../../layouts/BlogPost.astro
 category: "cpp"
 ---

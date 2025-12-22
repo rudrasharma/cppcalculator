@@ -2,7 +2,7 @@
 title: "The Vanishing Cart: How Our Grocery Inflation Audit Works"
 pubDate: 2025-12-21
 description: "We go beyond the headline news to audit your 'Personal Inflation Rate.' Here is the deep dive into our math, provincial overrides, and 2026 data sources."
-slug: "how-grocery-inflation-math-works"
+slug: "grocery-inflation"
 layout: ../../layouts/BlogPost.astro
 category: "inflation"
 ---

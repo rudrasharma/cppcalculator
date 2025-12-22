@@ -3,6 +3,7 @@ layout: ../../layouts/BlogPost.astro
 title: "The 2025 Guide to Canadian Parental Leave: Standard vs. Extended"
 pubDate: 2025-12-20
 description: "Confused by EI maternity and parental benefits? Learn how to maximize your 2025 claim, understand the 'Sharing Bonus' rules, and use our new estimator to plan your family's finances."
+slug: "parental-leave-guide"
 tags: ["Parental Leave", "EI", "Financial Planning", "Tools"]
 category: "parental"
 ---
@@ -56,6 +57,3 @@ Planning your budget shouldn't require a spreadsheet. Our tool does the heavy li
 * [How the Sharing Benefit Works](https://www.canada.ca/en/services/benefits/ei/ei-maternity-parental/sharing-benefit.html)
 * [Quebec QPIP Official Site (RQAP)](https://www.rqap.gouv.qc.ca/en)
 * [2025 Maximum Insurable Earnings Notice](https://www.canada.ca/en/employment-social-development/programs/ei/ei-list/ei-employers/2025-maximum-insurable-earnings.html)
-
-**Plan your leave today:**
-[Launch the Parental Leave Estimator →](/)

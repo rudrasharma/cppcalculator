@@ -3,8 +3,7 @@ layout: ../../layouts/BlogPost.astro
 title: "How to Estimate Your 2025 CPP & OAS: A Step-by-Step Guide"
 pubDate: 2025-12-10
 description: "Learn how to use our free calculator to estimate your retirement income, including the new 2025 Enhanced CPP tier and OAS clawback."
-# Note: You need to add an image to public/images/blog/ for this to appear in social shares
-# image: { url: "/images/blog/guide-hero.jpg", alt: "CPP Calculator Interface" }
+slug: "how-to-use-calculator"
 tags: ["guide", "CPP", "OAS", "retirement planning"]
 category: "cpp"
 ---

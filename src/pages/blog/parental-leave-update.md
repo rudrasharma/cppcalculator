@@ -4,6 +4,7 @@ title: "Stop Guessing: A Better Way to Plan Parental Leave"
 pubDate: 2025-12-20
 description: "We overhauled the Parental Leave Calculator to help Canadian families maximize their benefits, visualize the 'Sharing Bonus', and budget with bi-weekly accuracy."
 tags: ["Parental Leave", "Family Finance", "EI", "Service Canada", "New Features"]
+slug: "parental-leave-update"
 category: "parental"
 ---
 
@@ -46,5 +47,3 @@ We added **"Set to Max"** badges inside the salary inputs. One click automatical
 
 ## Try it Out
 The goal of Loonie Sense is to make Canadian finance clear and actionable. We hope this new tool helps you plan your time off with confidence, so you can focus on what really matters—your growing family.
-
-[**👉 Try the New Parental Leave Calculator**](/tools/parental-leave)
