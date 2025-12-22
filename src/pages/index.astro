@@ -58,8 +58,18 @@ const SITE_IMAGE = "/android-chrome-192x192.png";
 
             <span class="text-slate-300 hidden sm:inline">•</span>
 
-            <span class="text-slate-400 cursor-help border-b border-dotted border-slate-300" title="All calculations are performed locally in your browser. No data is sent to our servers.">Privacy First</span>
-
+            {/* PRIVACY TOOLTIP WRAPPER */}
+            <div class="relative group inline-block cursor-help">
+                <span class="text-slate-400 border-b border-dotted border-slate-300">Privacy First</span>
+                
+                {/* THE TOOLTIP POPUP */}
+                <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-slate-800 text-white text-xs rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 text-center z-50">
+                    All calculations are performed locally in your browser. No data is sent to our servers.
+                    
+                    {/* LITTLE DOWN ARROW */}
+                    <div class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-800"></div>
+                </div>
+            </div>
             <span class="text-slate-300 hidden sm:inline">•</span>
 
             <a href="mailto:support@cppforecast.ca" class="text-slate-500 hover:text-indigo-600 transition-colors">
