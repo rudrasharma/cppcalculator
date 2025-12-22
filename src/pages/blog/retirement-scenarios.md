@@ -4,6 +4,7 @@ pubDate: 2025-12-18
 description: "We modeled three common retirement personalities—The Early Bird, The Late Starter, and The Power Couple. Click their profiles to load their exact data into the calculator."
 slug: "real-retirement-scenarios-share-links"
 layout: ../../layouts/BlogPost.astro
+category: "cpp"
 ---
 
 Personal finance is, well, *personal*. Generic advice like "save 10% of your income" is useful, but it doesn't tell you what your actual government pension cheque will look like.
@@ -24,7 +25,7 @@ To demonstrate, we have modeled **three distinct Canadian retirement profiles**.
 * **Avg Salary:** \$65,000 (Projected to age 60)
 * **Years in Canada:** 40+
 
-<a href="/?d=19660101&r=60&y=40&s=1e4s&e=0i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2" 
+<a href="/cpp-oas-calculator?d=19660101&r=60&y=40&s=1e4s&e=0i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2" 
    style="background-color: #4f46e5; color: white; text-decoration: none; padding: 12px 24px; border-radius: 8px; display: inline-flex; align-items: center; gap: 8px; font-weight: bold;"
    class="hover:opacity-90 transition">
     Load Sarah's Profile ➜
@@ -46,7 +47,7 @@ When you load Sarah's data, check the **Earnings Input** tab. You will see that 
 * **Years in Canada (at 70):** 25
 * **Avg Salary:** \$55,000 (Projected to age 70)
 
-<a href="/?d=19650615&r=70&y=25&s=16f4&e=mfafafafafafafafafafafafafafafafafafafafafafafafafafafafafa" 
+<a href="/cpp-oas-calculator?d=19650615&r=70&y=25&s=16f4&e=mfafafafafafafafafafafafafafafafafafafafafafafafafafafafafa" 
    style="background-color: #059669; color: white; text-decoration: none; padding: 12px 24px; border-radius: 8px; display: inline-flex; align-items: center; gap: 8px; font-weight: bold;"
    class="hover:opacity-90 transition">
     Load Raj's Profile ➜
@@ -68,7 +69,7 @@ Since Raj is still working, we have pre-filled his future income all the way to 
 * **Maria's Income:** \$0
 * **Other Income (RRSP):** \$12,000/year withdrawl
 
-<a href="/?d=19600101&r=65&y=40&m=1&sd=19620520&o=99c&si=dw0&e=050505050505050505050505050505050505050505050505050505050505050505050505050505050" 
+<a href="/cpp-oas-calculator?d=19600101&r=65&y=40&m=1&sd=19620520&o=99c&si=dw0&e=050505050505050505050505050505050505050505050505050505050505050505050505050505050" 
    style="background-color: #e11d48; color: white; text-decoration: none; padding: 12px 24px; border-radius: 8px; display: inline-flex; align-items: center; gap: 8px; font-weight: bold;"
    class="hover:opacity-90 transition">
     Load Couple's Profile ➜

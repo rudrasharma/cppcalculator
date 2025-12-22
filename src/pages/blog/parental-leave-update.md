@@ -4,7 +4,7 @@ title: "Stop Guessing: A Better Way to Plan Parental Leave"
 pubDate: 2025-12-20
 description: "We overhauled the Parental Leave Calculator to help Canadian families maximize their benefits, visualize the 'Sharing Bonus', and budget with bi-weekly accuracy."
 tags: ["Parental Leave", "Family Finance", "EI", "Service Canada", "New Features"]
-category: "Product Updates"
+category: "parental"
 ---
 
 Planning for a new child is exciting, but navigating Service Canada’s rules for Maternity and Parental leave is often... less exciting. 

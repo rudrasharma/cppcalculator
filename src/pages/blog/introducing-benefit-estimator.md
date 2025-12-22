@@ -4,6 +4,7 @@ title: "Stop Guessing: The New All-in-One Canadian Benefit Estimator"
 pubDate: 2025-12-20
 description: "Introducing our new tool that calculates CCB, GST/HST, Carbon Rebates, and the Workers Benefit all in one place. See exactly how much your family qualifies for in the 2024-2025 benefit year."
 tags: ["Tools", "CCB", "Financial Planning"]
+category: "cpp"
 ---
 
 Navigating the web of Canadian government benefits can feel like a part-time job. You have the **Canada Child Benefit (CCB)** coming on the 20th, the **GST/HST credit** coming quarterly, and the new **Carbon Rebate (CAIP)** landing in your bank account on a different schedule entirely.
@@ -36,11 +37,10 @@ This is the "eligibility" number. It generally includes **only** money earned fr
 * **Why we need it:** You generally need to earn at least $3,000 in working income to qualify for the **Canada Workers Benefit (CWB)**.
 
 ### Step-by-Step
-1.  Open the [LoonieFi Calculator](/).
-2.  Switch the toggle at the top from **CPP/OAS** to **Benefits**.
-3.  Enter your Province and Marital Status (these affect your GST and Carbon Rebate).
-4.  Input your income details.
-5.  Add your children (and check the disability box if they have the Disability Tax Credit).
+1.  Open the [Household Benefits Estimator](/child-benefit-calculator).
+2.  Enter your **Province** and **Marital Status** (these affect your GST and Carbon Rebate).
+3.  Input your **Net Household Income**.
+4.  Add your **Children** (and check the disability box if they have the Disability Tax Credit).
 
 ## Privacy First
 Just like our CPP calculator, the Household Benefit Estimator runs **100% in your browser**. We do not store, save, or transmit your financial data. You can experiment with different income scenarios safely, knowing your data never leaves your device.

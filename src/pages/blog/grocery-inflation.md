@@ -4,6 +4,7 @@ pubDate: 2025-12-21
 description: "We go beyond the headline news to audit your 'Personal Inflation Rate.' Here is the deep dive into our math, provincial overrides, and 2026 data sources."
 slug: "how-grocery-inflation-math-works"
 layout: ../../layouts/BlogPost.astro
+category: "inflation"
 ---
 
 If you feel like your $100 grocery bill buys half of what it used to, you aren't imagining things. While the Bank of Canada aims for a 2% "All-Items" inflation target, food prices in late 2025 have been behaving very differently.
@@ -72,6 +73,3 @@ To keep the tool fast and privacy-first, we make a few necessary assumptions:
 ## 5. Why We Built This
 
 The "Vanishing Cart" is a significant threat to a senior's fixed income and a young family's ability to save. By visualizing your **Purchasing Power**, we hope to help you make more informed decisions—whether that means bulk-buying non-perishables or adjusting your RRSP contributions to boost your tax-free CCB payments.
-
-**Protect your budget:**
-[👉 Run your own Grocery Audit now](/#budget)

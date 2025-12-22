@@ -4,6 +4,7 @@ pubDate: 2025-12-12
 description: "We open the black box to show you exactly how the new Enhanced CPP, Tier 2 contributions, and OAS clawbacks are calculated using three real-world scenarios."
 slug: "under-the-hood-enhanced-cpp-math"
 layout: ../../layouts/BlogPost.astro
+category: "cpp"
 ---
 
 Most retirement calculators are "black boxes." You put in a few numbers, spit out a result, and you are expected to trust it.

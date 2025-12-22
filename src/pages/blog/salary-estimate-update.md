@@ -4,6 +4,7 @@ pubDate: 2025-12-20
 description: "We updated our 'Quick Estimate' logic from a simple linear projection to a realistic Lifecycle Earnings Curve. Here is why your estimate might have changed (and why it's better)."
 slug: "feature-update-lifecycle-earnings-curve"
 layout: ../../layouts/BlogPost.astro
+category: "cpp"
 ---
 
 If you’ve used the **"Quick Estimate"** button on our CPP Calculator recently, you might have noticed the math got a little smarter—and perhaps a little more conservative.

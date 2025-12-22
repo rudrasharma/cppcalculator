@@ -4,6 +4,7 @@ pubDate: 2025-12-20
 description: "It is not just one benefit—it is three wrapped in one. We break down the math behind the Ontario Sales Tax Credit and Property Tax Credit, and why you might be getting a lump sum instead of monthly cash."
 slug: "ontario-trillium-benefit-math-explained"
 layout: ../../layouts/BlogPost.astro
+category: "ccb"
 ---
 
 If you live in Ontario, the 10th of the month is a specific kind of payday. While the Child Benefit hits on the 20th and the Carbon Rebate arrives quarterly, the **Ontario Trillium Benefit (OTB)** is the quiet monthly deposit that millions of residents rely on.

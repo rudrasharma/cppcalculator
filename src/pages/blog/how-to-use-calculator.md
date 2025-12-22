@@ -6,6 +6,7 @@ description: "Learn how to use our free calculator to estimate your retirement i
 # Note: You need to add an image to public/images/blog/ for this to appear in social shares
 # image: { url: "/images/blog/guide-hero.jpg", alt: "CPP Calculator Interface" }
 tags: ["guide", "CPP", "OAS", "retirement planning"]
+category: "cpp"
 ---
 
 Planning for retirement in Canada has just gotten more complicated. With the full implementation of the "Enhanced CPP" in 2025 introducing a second earnings ceiling (YAMPE), the old "back-of-the-napkin" math no longer works.
@@ -88,7 +89,3 @@ Don't ignore the colored boxes at the top of the results! The calculator analyze
 
 ![Screenshot of the final results tab showing total estimated monthly payout, breakdown of Base CPP, Enhanced CPP, and OAS, and smart analysis insights](/images/blog/step3-results.png)
 *Above: The final results show your total monthly estimate and break down exactly where the money is coming from.*
-
-## Ready to try it?
-
-Go back to the [home page](/) to start your calculation. Remember, this tool runs entirely in your browser—your financial data never leaves your device.

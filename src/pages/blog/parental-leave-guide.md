@@ -4,6 +4,7 @@ title: "The 2025 Guide to Canadian Parental Leave: Standard vs. Extended"
 pubDate: 2025-12-20
 description: "Confused by EI maternity and parental benefits? Learn how to maximize your 2025 claim, understand the 'Sharing Bonus' rules, and use our new estimator to plan your family's finances."
 tags: ["Parental Leave", "EI", "Financial Planning", "Tools"]
+category: "parental"
 ---
 
 Welcoming a new child is a major life transition, but the paperwork can feel like a full-time job. In Canada, the difference between choosing **Standard** or **Extended** leave isn't just about time—it’s a major financial decision that can impact your household by thousands of dollars.

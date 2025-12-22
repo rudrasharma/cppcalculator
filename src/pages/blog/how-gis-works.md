@@ -4,6 +4,7 @@ pubDate: 2025-12-14
 description: "Unlike CPP and OAS, the GIS is not for everyone. It is a tax-free monthly benefit for low-income seniors, but it comes with a steep 'clawback' that can surprise you."
 slug: "how-gis-works-clawback-math"
 layout: ../../layouts/BlogPost.astro
+category: "cpp"
 ---
 
 Most Canadians know about the two main pillars of retirement: the Canada Pension Plan (**CPP**) and Old Age Security (**OAS**). But there is a third pillar that often gets overlooked until it is too late: the **Guaranteed Income Supplement (GIS)**.

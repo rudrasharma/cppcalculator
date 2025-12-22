@@ -4,6 +4,7 @@ pubDate: 2025-12-20
 description: "Don't type out 40 years of earnings by hand. Our new import tool lets you copy-paste your entire Service Canada history—messy formatting included."
 slug: "how-to-import-msca-data"
 layout: ../../layouts/BlogPost.astro
+category: "cpp"
 ---
 
 The most accurate CPP estimate requires your **exact** earnings history. Service Canada keeps this record, known as your "Statement of Contributions."
