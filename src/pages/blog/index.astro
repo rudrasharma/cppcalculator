@@ -1,6 +1,6 @@
 ---
+export const prerender = true;
 // src/pages/blog/index.astro
-
 // 1. Fetch all markdown files in this folder
 const posts = await Astro.glob('./*.md');
 
@@ -88,10 +88,14 @@ const SITE_DESCRIPTION = "Deep dives into Canadian government benefits, tax stra
                         day: 'numeric' 
                       })}
                     </time>
-                    {post.frontmatter.tags && (
+
+                    {/* Check for 'category' instead of 'tags' */}
+                    {post.frontmatter.category && (
                       <>
                         <span class="w-1 h-1 rounded-full bg-slate-300"></span>
-                        <span class="text-indigo-500">{post.frontmatter.tags[0]}</span>
+                        <span class="text-indigo-500 font-bold uppercase text-[10px]">
+                          {post.frontmatter.category}
+                        </span>
                       </>
                     )}
                   </div>

@@ -1,6 +1,7 @@
 ---
 layout: ../../layouts/BlogPost.astro
 title: "Stop Guessing: The New All-in-One Canadian Benefit Estimator"
+prerender: true
 pubDate: 2025-12-20
 description: "Introducing our new tool that calculates CCB, GST/HST, Carbon Rebates, and the Workers Benefit all in one place. See exactly how much your family qualifies for in the 2024-2025 benefit year."
 tags: ["Tools", "CCB", "Financial Planning"]

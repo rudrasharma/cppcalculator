@@ -1,6 +1,7 @@
 ---
 layout: ../../layouts/BlogPost.astro
 title: "The 2025 Guide to Canadian Parental Leave: Standard vs. Extended"
+prerender: true
 pubDate: 2025-12-20
 description: "Confused by EI maternity and parental benefits? Learn how to maximize your 2025 claim, understand the 'Sharing Bonus' rules, and use our new estimator to plan your family's finances."
 slug: "parental-leave-guide"

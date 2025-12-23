@@ -1,5 +1,6 @@
 ---
 title: "Real Retirement Scenarios: See How 3 Canadians Plan to Retire (With Data)"
+prerender: true
 pubDate: 2025-12-18
 description: "We modeled three common retirement personalities—The Early Bird, The Late Starter, and The Power Couple. Click their profiles to load their exact data into the calculator."
 slug: "retirement-scenarios"

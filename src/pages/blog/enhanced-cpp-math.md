@@ -1,6 +1,7 @@
 ---
 title: "Under the Hood: The Exact Math Behind Your Enhanced CPP & OAS"
 pubDate: 2025-12-12
+prerender: true
 description: "We open the black box to show you exactly how the new Enhanced CPP, Tier 2 contributions, and OAS clawbacks are calculated using three real-world scenarios."
 slug: "enhanced-cpp-math"
 layout: ../../layouts/BlogPost.astro
