@@ -121,7 +121,9 @@ export default function HouseholdBenefits({ isVisible = true }) {
 
     const afni = Math.max(0, grossAfni || 0);
 
-    // URL Loading Logic
+    // ==========================================
+    //   1. LOAD FROM URL (Initial Mount Only)
+    // ==========================================
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
         if (params.toString()) {
@@ -141,6 +143,39 @@ export default function HouseholdBenefits({ isVisible = true }) {
             }
         }
     }, []);
+
+    // ==========================================
+    //   2. SYNC TO URL (Live Update)
+    // ==========================================
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+
+        // Update Income (Base36 for compactness)
+        if (grossAfni > 0) params.set('i', grossAfni.toString(36));
+        else params.delete('i');
+
+        // Update Standard Params
+        params.set('p', province);
+        params.set('ms', maritalStatus);
+        params.set('sc', sharedCustody ? '1' : '0');
+        params.set('r', isRural ? '1' : '0');
+
+        // Update Children (Format: age-disability_age-disability)
+        if (children.length > 0) {
+            const childStr = children.map(c => `${c.age}-${c.disability ? 1 : 0}`).join('_');
+            params.set('c', childStr);
+        } else {
+            params.delete('c');
+        }
+
+        // Optional: Keep view context
+        params.set('view', 'ccb');
+
+        const newUrl = `${window.location.pathname}?${params.toString()}`;
+        window.history.replaceState(null, '', newUrl);
+
+    }, [grossAfni, province, maritalStatus, sharedCustody, isRural, children]);
+
 
     // Child Handlers
     const addChild = () => setChildren([...children, { id: Date.now(), age: 0, disability: false }]);
@@ -241,7 +276,7 @@ export default function HouseholdBenefits({ isVisible = true }) {
 
                 const qThreshold = status === 'SINGLE' ? q.THRESHOLD_SINGLE : q.THRESHOLD_COUPLE;
                 const qRed = netInc > qThreshold ? (netInc - qThreshold) * q.RATE : 0;
-                provNet = Math.max(0, qMax - qRed);
+                provNet += Math.max(0, qMax - qRed);
             }
 
         } else if (provCode === 'BC') {
@@ -297,16 +332,10 @@ export default function HouseholdBenefits({ isVisible = true }) {
     }, [results, province]);
 
     const copyLink = () => {
-        const params = new URLSearchParams();
-        params.set('view', 'ccb');
-        params.set('i', grossAfni.toString(36));
-        params.set('p', province);
-        params.set('ms', maritalStatus);
-        params.set('sc', sharedCustody ? '1' : '0');
-        params.set('r', isRural ? '1' : '0');
-        params.set('c', children.map(c => `${c.age}-${c.disability ? 1 : 0}`).join('_'));
-        const url = `${window.location.origin}${window.location.pathname}?${params.toString()}`;
-        navigator.clipboard.writeText(url).then(() => { setCopySuccess(true); setTimeout(() => setCopySuccess(false), 2000); });
+        navigator.clipboard.writeText(window.location.href).then(() => { 
+            setCopySuccess(true); 
+            setTimeout(() => setCopySuccess(false), 2000); 
+        });
     };
 
     return (
@@ -418,12 +447,24 @@ export default function HouseholdBenefits({ isVisible = true }) {
                                             ${Math.round(results.total).toLocaleString()} <span className="text-sm text-slate-400 font-bold">/ yr</span>
                                         </div>
                                     </div>
-                                    <button 
-                                        onClick={() => { setActiveTab('results'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} 
-                                        className="bg-indigo-600 hover:bg-indigo-700 text-white font-black py-4 px-12 rounded-2xl shadow-xl shadow-indigo-200 transition-all transform hover:-translate-y-1 active:scale-95 flex items-center gap-3 uppercase tracking-widest text-xs"
-                                    >
-                                        View Full Breakdown <ArrowRightIcon size={20} />
-                                    </button>
+                                    
+                                    <div className="flex items-center gap-3">
+                                        {/* ADDED SHARE BUTTON */}
+                                        <button 
+                                            onClick={copyLink}
+                                            className="bg-white text-indigo-600 py-4 px-6 rounded-2xl border border-indigo-100 shadow-sm hover:shadow-md hover:bg-indigo-50 transition-all flex items-center gap-2 font-bold text-xs uppercase tracking-wider active:scale-95"
+                                        >
+                                            {copySuccess ? <CheckIcon size={18}/> : <LinkIcon size={18}/>}
+                                            {copySuccess ? 'Copied!' : 'Share'}
+                                        </button>
+
+                                        <button 
+                                            onClick={() => { setActiveTab('results'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} 
+                                            className="bg-indigo-600 hover:bg-indigo-700 text-white font-black py-4 px-12 rounded-2xl shadow-xl shadow-indigo-200 transition-all transform hover:-translate-y-1 active:scale-95 flex items-center gap-3 uppercase tracking-widest text-xs"
+                                        >
+                                            View Full Breakdown <ArrowRightIcon size={20} />
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         )}

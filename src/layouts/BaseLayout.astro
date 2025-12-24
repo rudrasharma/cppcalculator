@@ -68,6 +68,11 @@ const TABS = [
         
         {/* FOOTER LINKS */}
         <div class="flex flex-wrap justify-center items-center gap-x-6 gap-y-2 mb-8 font-medium text-sm">
+            
+            {/* 1. ABOUT US LINK */}
+            <a href="/about" class="text-slate-500 hover:text-indigo-600 transition-colors">About Us</a>
+            <span class="text-slate-300 hidden sm:inline">•</span>
+
             <a href="/blog" class="text-indigo-600 hover:text-indigo-800 transition-colors flex items-center gap-2 group">
                 <span class="bg-indigo-100 text-indigo-700 p-1 rounded group-hover:bg-indigo-200 transition-colors">
                   <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
@@ -77,21 +82,19 @@ const TABS = [
 
             <span class="text-slate-300 hidden sm:inline">•</span>
 
-            {/* PRIVACY TOOLTIP */}
-            <div class="relative group inline-block cursor-help">
-                <span class="text-slate-400 border-b border-dotted border-slate-300">Privacy First</span>
-                <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-slate-800 text-white text-xs rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 text-center z-50 pointer-events-none">
-                    All calculations are performed locally in your browser. No data is sent to our servers.
-                    <div class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-800"></div>
-                </div>
-            </div>
+            {/* 2. SHARE LINK BUTTON (RESTORED) */}
+            <button id="share-btn" class="text-slate-500 hover:text-indigo-600 transition-colors flex items-center gap-1">
+                Share Link
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+            </button>
+            <span id="share-toast" class="hidden text-xs text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full animate-fade-in">Copied!</span>
 
             <span class="text-slate-300 hidden sm:inline">•</span>
 
             <ContactButton client:visible />
         </div>
 
-        {/* DISCLAIMER SECTION (RESTORED) */}
+        {/* DISCLAIMER SECTION */}
         <div class="max-w-2xl mx-auto mb-6">
             <p class="text-[11px] leading-relaxed text-slate-400">
                 <strong>Disclaimer:</strong> This tool provides estimates for informational purposes only and does not constitute financial, legal, or tax advice. While we strive for accuracy using official formulas, your actual government benefits (CPP, OAS, CCB) may vary based on official assessments. Please consult a professional financial planner or Service Canada for your specific situation.
@@ -104,11 +107,32 @@ const TABS = [
                 © {new Date().getFullYear()} LoonieFi. All rights reserved.
             </p>
             <p class="text-[10px] text-slate-300 uppercase tracking-wider">
-                Made with <span class="text-rose-400">♥</span> in Waterloo, ON
+                Made with <span class="text-rose-400">♥</span> in Waterloo, ON (v1.2)
             </p>
         </div>
       </div>
     </footer>
+
+    {/* SCRIPT FOR SHARE BUTTON */}
+    <script is:inline>
+        const shareBtn = document.getElementById('share-btn');
+        const shareToast = document.getElementById('share-toast');
+
+        if (shareBtn) {
+            shareBtn.addEventListener('click', async () => {
+                try {
+                    await navigator.clipboard.writeText(window.location.href);
+                    // Show "Copied!" toast
+                    shareToast.classList.remove('hidden');
+                    setTimeout(() => {
+                        shareToast.classList.add('hidden');
+                    }, 2000);
+                } catch (err) {
+                    console.error('Failed to copy: ', err);
+                }
+            });
+        }
+    </script>
 
   </body>
 </html>

@@ -20,6 +20,8 @@ const CheckCircleIcon = (props) => (<IconBase {...props}><path d="M22 11.08V12a1
 const SparklesIcon = (props) => (<IconBase {...props}><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></IconBase>);
 const CalendarIcon = (props) => (<IconBase {...props}><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></IconBase>);
 const WalletIcon = (props) => (<IconBase {...props}><path d="M20 7h-7"/><path d="M14 11h6"/><path d="m20 7 2 2-2 2"/><path d="M5 20h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-3"/><path d="M7 2v16"/><path d="M3 11h4"/></IconBase>);
+const LinkIcon = (props) => (<IconBase {...props}><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></IconBase>);
+const CheckIcon = (props) => (<IconBase {...props}><polyline points="20 6 9 17 4 12"/></IconBase>);
 
 // ==========================================
 //              CONSTANTS
@@ -94,13 +96,63 @@ export default function ParentalLeave({ isVisible = true }) {
     const [p2Weeks, setP2Weeks] = useState(5); 
 
     const [activeTab, setActiveTab] = useUrlTab('input');
-    
+    const [copySuccess, setCopySuccess] = useState(false);
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => { setMounted(true); }, []);
 
     // Helper: Get Current Max Insurable based on province
     const currentMaxInsurable = province === 'QC' ? EI_2025.QC_MAX_INSURABLE : EI_2025.MAX_INSURABLE;
+
+    // ==========================================
+    //   1. LOAD FROM URL (Initial Mount Only)
+    // ==========================================
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        if (params.toString()) {
+            if (params.get('prov')) setProvince(params.get('prov'));
+            if (params.get('sal')) setSalary(parseInt(params.get('sal'), 36));
+            if (params.get('psal')) setPartnerSalary(parseInt(params.get('psal'), 36));
+            if (params.get('part')) setHasPartner(params.get('part') === '1');
+            if (params.get('plan')) setPlanType(params.get('plan') === 'ext' ? 'EXTENDED' : 'STANDARD');
+            if (params.get('mat')) setP1Maternity(params.get('mat') === '1');
+            if (params.get('p1w')) setP1Weeks(parseInt(params.get('p1w')));
+            if (params.get('p2w')) setP2Weeks(parseInt(params.get('p2w')));
+        }
+    }, []);
+
+    // ==========================================
+    //   2. SYNC TO URL (Live Update)
+    // ==========================================
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+
+        // Inputs
+        params.set('prov', province);
+        if (salary > 0) params.set('sal', salary.toString(36)); else params.delete('sal');
+        
+        if (hasPartner) {
+            params.set('part', '1');
+            if (partnerSalary > 0) params.set('psal', partnerSalary.toString(36)); else params.delete('psal');
+        } else {
+            params.set('part', '0');
+            params.delete('psal');
+        }
+
+        params.set('plan', planType === 'EXTENDED' ? 'ext' : 'std');
+        params.set('mat', p1Maternity ? '1' : '0');
+        
+        // Weeks allocation
+        params.set('p1w', p1Weeks);
+        if (hasPartner) params.set('p2w', p2Weeks); else params.delete('p2w');
+
+        // View context
+        params.set('view', 'parental');
+
+        const newUrl = `${window.location.pathname}?${params.toString()}`;
+        window.history.replaceState(null, '', newUrl);
+    }, [province, salary, partnerSalary, hasPartner, planType, p1Maternity, p1Weeks, p2Weeks]);
+
 
     // Reset/Adjust weeks when Plan Type or Partner status changes
     useEffect(() => {
@@ -187,6 +239,13 @@ export default function ParentalLeave({ isVisible = true }) {
     };
     const combinedWeeks = p1Weeks + p2Weeks;
     const bonusWeeksActive = combinedWeeks > getIndividualMax();
+
+    const copyLink = () => {
+        navigator.clipboard.writeText(window.location.href).then(() => { 
+            setCopySuccess(true); 
+            setTimeout(() => setCopySuccess(false), 2000); 
+        });
+    };
 
     return (
         <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-rose-100" style={{ paddingBottom: activeTab === 'input' ? '100px' : '40px' }}>
@@ -383,11 +442,11 @@ export default function ParentalLeave({ isVisible = true }) {
                                                     </span>
                                                 </div>
                                             </div>
-                                     </div>
+                                         </div>
                                     </div>
                                 </div>
 
-                                {/* --- HYBRID: DESKTOP INLINE ACTION --- */}
+                                {/* --- HYBRID: DESKTOP INLINE ACTION BAR (UPDATED) --- */}
                                 <div className="hidden md:flex justify-between items-center bg-slate-50 p-6 rounded-3xl border border-slate-200 mt-8">
                                     <div className="flex flex-col">
                                         <span className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Estimated Total Benefit</span>
@@ -395,12 +454,26 @@ export default function ParentalLeave({ isVisible = true }) {
                                             ${Math.round(results.totalValue).toLocaleString()} <span className="text-sm text-slate-400 font-bold">Total</span>
                                         </div>
                                     </div>
-                                    <button 
-                                        onClick={() => { setActiveTab('results'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} 
-                                        className="bg-rose-600 hover:bg-rose-700 text-white font-black py-4 px-12 rounded-2xl shadow-xl shadow-rose-200 transition-all transform hover:-translate-y-1 active:scale-95 flex items-center gap-3 uppercase tracking-widest text-xs"
-                                    >
-                                        View Your Plan <ArrowRightIcon size={20} />
-                                    </button>
+                                    
+                                    {/* ADDED: Action Buttons Container */}
+                                    <div className="flex items-center gap-3">
+                                        {/* SHARE BUTTON */}
+                                        <button 
+                                            onClick={copyLink}
+                                            className="bg-white text-rose-600 py-4 px-6 rounded-2xl border border-rose-100 shadow-sm hover:shadow-md hover:bg-rose-50 transition-all flex items-center gap-2 font-bold text-xs uppercase tracking-wider active:scale-95"
+                                        >
+                                            {copySuccess ? <CheckIcon size={18}/> : <LinkIcon size={18}/>}
+                                            {copySuccess ? 'Copied!' : 'Share'}
+                                        </button>
+
+                                        {/* VIEW PLAN BUTTON */}
+                                        <button 
+                                            onClick={() => { setActiveTab('results'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} 
+                                            className="bg-rose-600 hover:bg-rose-700 text-white font-black py-4 px-12 rounded-2xl shadow-xl shadow-rose-200 transition-all transform hover:-translate-y-1 active:scale-95 flex items-center gap-3 uppercase tracking-widest text-xs"
+                                        >
+                                            View Your Plan <ArrowRightIcon size={20} />
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         )}
@@ -550,9 +623,16 @@ export default function ParentalLeave({ isVisible = true }) {
                                 <span className="text-3xl font-black text-slate-900 tracking-tighter">${Math.round(results.totalValue).toLocaleString()}</span>
                             </div>
                         </div>
-                        <button onClick={() => { setActiveTab('results'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="bg-rose-600 hover:bg-rose-700 text-white font-black py-3.5 px-6 rounded-2xl shadow-lg shadow-rose-200 transition-all flex items-center gap-2 transform active:scale-95 whitespace-nowrap text-sm">
-                            See My Results <ArrowRightIcon size={18} />
-                        </button>
+                        <div className="flex items-center gap-3">
+                             <button onClick={copyLink} className="bg-white text-indigo-600 p-3 md:py-4 md:px-6 rounded-[1.2rem] md:rounded-[1.5rem] border border-indigo-100 shadow-lg shadow-indigo-100/50 transition-all hover:bg-indigo-50 active:scale-95 flex items-center justify-center gap-2">
+                               {copySuccess ? <CheckIcon size={20}/> : <LinkIcon size={20}/>}
+                               <span className="hidden md:inline font-bold text-xs uppercase tracking-wider">{copySuccess ? 'Copied' : 'Share'}</span>
+                             </button>
+                            
+                            <button onClick={() => { setActiveTab('results'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="bg-rose-600 hover:bg-rose-700 text-white font-black py-3.5 px-6 rounded-2xl shadow-lg shadow-rose-200 transition-all flex items-center gap-2 transform active:scale-95 whitespace-nowrap text-sm">
+                                See My Results <ArrowRightIcon size={18} />
+                            </button>
+                        </div>
                     </div>
                 </div>,
                 document.body 

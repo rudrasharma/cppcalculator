@@ -10,7 +10,7 @@ import InputTab from './InputTab';
 import ResultsTab from './ResultsTab';
 
 // ==========================================
-//         HOOK: SYNC TABS WITH URL
+//          HOOK: SYNC TABS WITH URL
 // ==========================================
 function useUrlTab(defaultTab = 'input', queryParam = 'step') {
     const [activeTab, setActiveTabState] = useState(() => {
@@ -127,7 +127,9 @@ export default function Calculator({ isVisible = true }) {
     useEffect(() => { if (livedInCanadaAllLife) setYearsInCanada(40); }, [livedInCanadaAllLife]);
     useEffect(() => { if (!showChildren) setChildren([]); }, [showChildren]);
 
-    // Load from URL
+    // ==========================================
+    //   1. LOAD FROM URL (Initial Mount Only)
+    // ==========================================
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
         if (params.toString()) {
@@ -154,23 +156,52 @@ export default function Calculator({ isVisible = true }) {
         }
     }, []);
 
-    const copyLink = () => {
-        const params = new URLSearchParams();
+    // ==========================================
+    //   2. SYNC TO URL (Live Update)
+    // ==========================================
+    useEffect(() => {
+        // 1. Get current params (preserve 'step' if it exists)
+        const params = new URLSearchParams(window.location.search);
+
+        // 2. Set Data Params
         params.set('d', dob.replace(/-/g,'')); 
         params.set('r', retirementAge);
         params.set('y', yearsInCanada);
+
         if (avgSalaryInput) params.set('s', parseInt(avgSalaryInput).toString(36));
+        else params.delete('s');
+
         if (otherIncome) params.set('o', parseInt(otherIncome).toString(36));
+        else params.delete('o');
+
         if (isMarried) {
             params.set('m', '1');
             params.set('sd', spouseDob.replace(/-/g,''));
             if (spouseIncome) params.set('si', parseInt(spouseIncome).toString(36));
             if (forceAllowance) params.set('fa', '1');
+        } else {
+             params.delete('m');
+             params.delete('sd');
+             params.delete('si');
+             params.delete('fa');
         }
+
         const compressedEarn = compressEarnings(earnings, birthYear);
         if (compressedEarn) params.set('e', compressedEarn);
-        const url = `${window.location.origin}${window.location.pathname}?${params.toString()}`;
-        navigator.clipboard.writeText(url).then(() => {
+        else params.delete('e');
+
+        // Optional: track view context
+        params.set('view', 'cpp');
+
+        // 3. Update URL without reloading the page
+        const newUrl = `${window.location.pathname}?${params.toString()}`;
+        window.history.replaceState(null, '', newUrl);
+
+    }, [dob, retirementAge, yearsInCanada, avgSalaryInput, otherIncome, isMarried, spouseDob, spouseIncome, forceAllowance, earnings, birthYear]);
+
+
+    const copyLink = () => {
+        navigator.clipboard.writeText(window.location.href).then(() => {
             setCopySuccess(true);
             setTimeout(() => setCopySuccess(false), 2000);
         });
@@ -327,7 +358,7 @@ export default function Calculator({ isVisible = true }) {
                                     results={results} birthYear={birthYear}
                                 />
 
-                                {/* --- HYBRID: DESKTOP INLINE ACTION BAR (Added here) --- */}
+                                {/* --- HYBRID: DESKTOP INLINE ACTION BAR --- */}
                                 <div className="hidden md:flex justify-between items-center bg-slate-50 p-6 rounded-3xl border border-slate-200 mt-8">
                                     <div className="flex flex-col">
                                         <span className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Forecast @ Age {retirementAge}</span>
@@ -335,12 +366,25 @@ export default function Calculator({ isVisible = true }) {
                                             ${displayTotal.toLocaleString('en-CA', { maximumFractionDigits: 0 })} <span className="text-sm text-slate-400 font-bold">/ mo</span>
                                         </div>
                                     </div>
-                                    <button 
-                                        onClick={() => { setActiveTab('results'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} 
-                                        className="bg-indigo-600 hover:bg-indigo-700 text-white font-black py-4 px-12 rounded-2xl shadow-xl shadow-indigo-200 transition-all transform hover:-translate-y-1 active:scale-95 flex items-center gap-3 uppercase tracking-widest text-xs"
-                                    >
-                                        Analyze Forecast <ArrowRightIcon size={20} />
-                                    </button>
+                                    
+                                    {/* ADDED: Action Buttons Container */}
+                                    <div className="flex items-center gap-3">
+                                        {/* NEW SHARE BUTTON */}
+                                        <button 
+                                            onClick={copyLink}
+                                            className="bg-white text-indigo-600 py-4 px-6 rounded-2xl border border-indigo-100 shadow-sm hover:shadow-md hover:bg-indigo-50 transition-all flex items-center gap-2 font-bold text-xs uppercase tracking-wider active:scale-95"
+                                        >
+                                            {copySuccess ? <CheckIcon size={18}/> : <LinkIcon size={18}/>}
+                                            {copySuccess ? 'Copied!' : 'Share'}
+                                        </button>
+
+                                        <button 
+                                            onClick={() => { setActiveTab('results'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} 
+                                            className="bg-indigo-600 hover:bg-indigo-700 text-white font-black py-4 px-12 rounded-2xl shadow-xl shadow-indigo-200 transition-all transform hover:-translate-y-1 active:scale-95 flex items-center gap-3 uppercase tracking-widest text-xs"
+                                        >
+                                            Analyze Forecast <ArrowRightIcon size={20} />
+                                        </button>
+                                    </div>
                                 </div>
                             </>
                         )}
@@ -364,7 +408,6 @@ export default function Calculator({ isVisible = true }) {
             </main>
 
             {/* FLOATING FOOTER (MOBILE ONLY) */}
-            {/* Added 'md:hidden' so it disappears on desktop */}
             {isVisible && activeTab === 'input' && mounted && createPortal(
                 <div 
                     className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-slate-200 p-3 shadow-[0_-15px_40px_-10px_rgba(0,0,0,0.15)] z-[9999] animate-slide-up"
