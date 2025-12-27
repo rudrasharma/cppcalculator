@@ -9,15 +9,17 @@ export const prerender = true;
 export async function getStaticPaths() {
   const paths = [];
   
-  // Optimizing build time: popular provinces get all salary bands
-  const CORE_SALARIES = [30000, 60000, 90000, 120000];
-  const POPULAR_PROVS = ['ON', 'BC', 'AB'];
+  // REMOVED: const CORE_SALARIES = ...
+  // REMOVED: const POPULAR_PROVS = ...
 
+  // Just generate everything for everyone. 
+  // 10 Provinces * 4 Scenarios * ~13 Salaries = ~520 pages. 
+  // Astro handles this easily.
+  
   PROVINCES.forEach((prov) => {
-    const salaryList = POPULAR_PROVS.includes(prov.code) ? SALARIES : CORE_SALARIES;
-
+    // Use the full SALARIES list for every province
     LEAVE_SCENARIOS.forEach((scene) => {
-        salaryList.forEach((salary) => {
+        SALARIES.forEach((salary) => {
             paths.push({
                 params: { 
                     province: prov.slug, 

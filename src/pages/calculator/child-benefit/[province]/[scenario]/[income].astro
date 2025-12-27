@@ -8,17 +8,14 @@ export const prerender = true;
 export async function getStaticPaths() {
   const paths = [];
 
-  // Limit combinations to prevent build timeout (Selective Generation)
-  // We only generate 30k, 60k, 90k, 120k for ALL scenarios
-  // For popular provinces (ON, BC, AB), we generate ALL salaries
-  const CORE_SALARIES = [30000, 60000, 90000, 120000];
-  const POPULAR_PROVS = ['ON', 'BC', 'AB'];
+  // REMOVED: const CORE_SALARIES = ...
+  // REMOVED: const POPULAR_PROVS = ...
 
+  // Loop through ALL provinces, ALL scenarios, and ALL salaries
   PROVINCES.forEach((prov) => {
-    const salaryList = POPULAR_PROVS.includes(prov.code) ? SALARIES : CORE_SALARIES;
-    
+    // Use the full SALARIES list for every province
     FAMILY_SCENARIOS.forEach((fam) => {
-        salaryList.forEach((salary) => {
+        SALARIES.forEach((salary) => {
             paths.push({
                 params: { 
                     province: prov.slug, 

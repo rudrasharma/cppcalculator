@@ -5,11 +5,13 @@ import {
     ResponsiveContainer, Cell
 } from 'recharts';
 
-// [KEEP YOUR EXISTING ICON COMPONENTS HERE - IconBase, UsersIcon, etc.]
-// ... (I am abbreviating the icons to save space, keep them exactly as they were)
+// ==========================================
+//              ICONS
+// ==========================================
 const IconBase = ({ size = 20, className = "", children }) => (
     <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>{children}</svg>
 );
+
 const UsersIcon = (props) => (<IconBase {...props}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></IconBase>);
 const MapPinIcon = (props) => (<IconBase {...props}><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></IconBase>);
 const ArrowRightIcon = (props) => (<IconBase {...props}><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></IconBase>);
@@ -86,7 +88,7 @@ export default function ParentalLeave({
     initialProvince = 'ON', 
     initialSalary = 70000,
     initialPartner = true,
-    initialPlan = 'STANDARD' // 'STANDARD' or 'EXTENDED'
+    initialPlan = 'STANDARD' 
 }) {
     
     const getParam = (key) => {
@@ -124,11 +126,9 @@ export default function ParentalLeave({
         return val ? val === '1' : true;
     });
 
-    // Default weeks logic needs to respect plan type
     const [p1Weeks, setP1Weeks] = useState(() => {
         const val = getParam('p1w');
         if (val) return parseInt(val);
-        // If extended, default to 50 weeks, else 30
         return initialPlan === 'EXTENDED' ? 50 : 30;
     });
 
@@ -144,10 +144,11 @@ export default function ParentalLeave({
 
     useEffect(() => { setMounted(true); }, []);
 
+    // Helper: Get Current Max Insurable based on province
     const currentMaxInsurable = province === 'QC' ? EI_2025.QC_MAX_INSURABLE : EI_2025.MAX_INSURABLE;
 
     // ==========================================
-    //   SYNC TO URL
+    //   SYNC TO URL (Live Update)
     // ==========================================
     useEffect(() => {
         if (!mounted) return;
@@ -168,7 +169,6 @@ export default function ParentalLeave({
         params.set('plan', planType === 'EXTENDED' ? 'ext' : 'std');
         params.set('mat', p1Maternity ? '1' : '0');
         params.set('p1w', p1Weeks);
-        
         if (hasPartner) params.set('p2w', p2Weeks); else params.delete('p2w');
 
         params.set('view', 'parental');
@@ -299,12 +299,19 @@ export default function ParentalLeave({
                                         <div className="bg-slate-50 p-5 rounded-3xl border border-slate-100 shadow-sm space-y-4">
                                             <div>
                                                 <label className="text-xs font-black text-slate-700 block mb-1.5 uppercase tracking-tighter">Province</label>
+                                                {/* FIX: Added missing provinces so 'SK', 'MB', 'NS' etc. select correctly */}
                                                 <select value={province} onChange={(e) => setProvince(e.target.value)} className="w-full p-3 bg-white border border-slate-200 rounded-2xl text-sm focus:ring-2 focus:ring-rose-500 outline-none shadow-sm font-medium">
                                                     <option value="ON">Ontario (EI)</option>
-                                                    <option value="BC">BC (EI)</option>
+                                                    <option value="BC">British Columbia (EI)</option>
                                                     <option value="AB">Alberta (EI)</option>
                                                     <option value="QC">Quebec (QPIP)</option>
-                                                    <option value="OTHER">Other Provinces (EI)</option>
+                                                    <option value="NS">Nova Scotia (EI)</option>
+                                                    <option value="NB">New Brunswick (EI)</option>
+                                                    <option value="MB">Manitoba (EI)</option>
+                                                    <option value="SK">Saskatchewan (EI)</option>
+                                                    <option value="PE">PEI (EI)</option>
+                                                    <option value="NL">Newfoundland (EI)</option>
+                                                    <option value="OTHER">Territories / Other (EI)</option>
                                                 </select>
                                             </div>
                                             <div>

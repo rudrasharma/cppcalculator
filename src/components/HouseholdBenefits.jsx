@@ -64,13 +64,25 @@ const PROV_PARAMS = {
     BC: { 
         NAME: "BC Family Benefit", 
         AMOUNTS: [2188, 1375, 1125], THRESHOLD: 35902, REDUCTION_RATE: 0.04, 
-        CAIP: { ADULT: 126, SPOUSE: 63, CHILD: 31.5 } 
+        // BC has its own carbon tax, but uses CAIP structure for federal. 
+        // For simplicity using Fed rates or null if handled purely provincially. 
+        // BC residents actually get 'Climate Action Tax Credit' via province, not Fed CAIP.
+        // We will leave CAIP null for BC to avoid double counting if they get provincial credit separately.
+        CAIP: null 
     },
     QC: {
         NAME: "Family Allowance",
         FAM_ALLOW: { MAX: 3006, SINGLE_SUPP: 1055, THRESHOLD_COUPLE: 59369, THRESHOLD_SINGLE: 43280, RATE: 0.04 },
         CAIP: null 
     },
+    // ADDED: Missing CAIP Rates for other provinces (2024-2025 Base Rates)
+    SK: { NAME: "Saskatchewan Child Benefit", CAIP: { ADULT: 188, SPOUSE: 94, CHILD: 47 } },
+    MB: { NAME: "Manitoba Child Benefit", CAIP: { ADULT: 150, SPOUSE: 75, CHILD: 37.5 } },
+    NS: { NAME: "Nova Scotia Child Benefit", CAIP: { ADULT: 103, SPOUSE: 51.5, CHILD: 25.75 } },
+    NB: { NAME: "New Brunswick Child Tax", CAIP: { ADULT: 95, SPOUSE: 47.5, CHILD: 23.75 } },
+    NL: { NAME: "Newfoundland Child Benefit", CAIP: { ADULT: 164, SPOUSE: 82, CHILD: 41 } },
+    PE: { NAME: "PEI Child Benefit", CAIP: { ADULT: 110, SPOUSE: 55, CHILD: 27.5 } },
+    
     OTHER: { NAME: "Provincial Benefit", CAIP: null }
 };
 
@@ -110,7 +122,7 @@ export default function HouseholdBenefits({
     initialProvince = 'ON', 
     initialIncome = 65000,
     initialMaritalStatus = 'MARRIED',
-    initialChildCount = 2 // Simple prop to generate children array
+    initialChildCount = 2 
 }) {
     
     const getParam = (key) => {
@@ -147,7 +159,6 @@ export default function HouseholdBenefits({
                 });
             } catch(e) { return [{ id: 1, age: 3, disability: false }]; }
         }
-        // If no URL, use the prop to generate default kids (e.g. 3yr old and 5yr old)
         const kids = [];
         for(let i=0; i < initialChildCount; i++) {
             kids.push({ id: Date.now() + i, age: i * 2 + 1, disability: false });
@@ -236,7 +247,7 @@ export default function HouseholdBenefits({
 
         // 3. Carbon (CAIP) - QC gets 0
         let caip = 0;
-        if (provCode !== 'QC') {
+        if (provCode !== 'QC' && provCode !== 'BC') {
             const provData = PROV_PARAMS[provCode] || PROV_PARAMS['OTHER'];
             if (provData && provData.CAIP) {
                 const rates = provData.CAIP;
@@ -380,11 +391,18 @@ export default function HouseholdBenefits({
                                         <div className="bg-slate-50 p-5 md:p-6 rounded-3xl space-y-5 border border-slate-100 shadow-sm">
                                             <div>
                                                 <label className="text-xs font-black text-slate-700 block mb-1.5 uppercase tracking-tighter">Province</label>
+                                                {/* FIX: ADDED MISSING PROVINCES TO DROPDOWN */}
                                                 <select value={province} onChange={(e) => setProvince(e.target.value)} className="w-full p-3 bg-white border border-slate-200 rounded-2xl text-sm outline-none shadow-sm focus:ring-2 focus:ring-indigo-500 transition-all font-medium">
                                                     <option value="ON">Ontario (ON)</option>
                                                     <option value="AB">Alberta (AB)</option>
                                                     <option value="BC">British Columbia (BC)</option>
                                                     <option value="QC">Quebec (QC)</option>
+                                                    <option value="SK">Saskatchewan (SK)</option>
+                                                    <option value="MB">Manitoba (MB)</option>
+                                                    <option value="NS">Nova Scotia (NS)</option>
+                                                    <option value="NB">New Brunswick (NB)</option>
+                                                    <option value="NL">Newfoundland (NL)</option>
+                                                    <option value="PE">Prince Edward Island (PE)</option>
                                                     <option value="OTHER">Other Provinces</option>
                                                 </select>
                                             </div>
