@@ -1,0 +1,37 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { PROVINCES, FAMILY_SCENARIOS } from '../../../data/seo-scenarios';
+
+const title = "Browse Child Benefit Scenarios by Province & Family Type";
+const description = "Find specific Canada Child Benefit (CCB) calculations for single parents, couples, and various income levels across Canada.";
+---
+
+<BaseLayout title={title} description={description}>
+  <section class="max-w-6xl mx-auto px-4 py-12">
+    <h1 class="text-4xl font-black text-slate-900 mb-8 text-center">Browse CCB Scenarios</h1>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      {PROVINCES.map((prov) => (
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:border-indigo-200 transition-colors">
+          <h2 class="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
+            {prov.name}
+          </h2>
+          <div class="space-y-4">
+            {FAMILY_SCENARIOS.map((fam) => (
+                <div>
+                    <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-2">{fam.label}</h3>
+                    <div class="flex flex-wrap gap-2">
+                        <a href={`/calculator/child-benefit/${prov.slug}/${fam.slug}/30000`} class="text-xs bg-slate-50 hover:bg-indigo-50 text-slate-600 hover:text-indigo-600 px-2 py-1 rounded border border-slate-100 transition-colors">$30k</a>
+                        <a href={`/calculator/child-benefit/${prov.slug}/${fam.slug}/60000`} class="text-xs bg-slate-50 hover:bg-indigo-50 text-slate-600 hover:text-indigo-600 px-2 py-1 rounded border border-slate-100 transition-colors">$60k</a>
+                        <a href={`/calculator/child-benefit/${prov.slug}/${fam.slug}/90000`} class="text-xs bg-slate-50 hover:bg-indigo-50 text-slate-600 hover:text-indigo-600 px-2 py-1 rounded border border-slate-100 transition-colors">$90k</a>
+                        <a href={`/calculator/child-benefit/${prov.slug}/${fam.slug}/120000`} class="text-xs bg-slate-50 hover:bg-indigo-50 text-slate-600 hover:text-indigo-600 px-2 py-1 rounded border border-slate-100 transition-colors">$120k</a>
+                    </div>
+                </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  </section>
+</BaseLayout>

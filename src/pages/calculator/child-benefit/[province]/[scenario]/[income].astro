@@ -1,0 +1,87 @@
+---
+// src/pages/calculator/child-benefit/[province]/[scenario]/[income].astro
+import BaseLayout from '../../../../../layouts/BaseLayout.astro';
+import HouseholdBenefits from '../../../../../components/HouseholdBenefits.jsx'; 
+import { PROVINCES, SALARIES, FAMILY_SCENARIOS } from '../../../../../data/seo-scenarios';
+export const prerender = true;
+
+export async function getStaticPaths() {
+  const paths = [];
+
+  // Limit combinations to prevent build timeout (Selective Generation)
+  // We only generate 30k, 60k, 90k, 120k for ALL scenarios
+  // For popular provinces (ON, BC, AB), we generate ALL salaries
+  const CORE_SALARIES = [30000, 60000, 90000, 120000];
+  const POPULAR_PROVS = ['ON', 'BC', 'AB'];
+
+  PROVINCES.forEach((prov) => {
+    const salaryList = POPULAR_PROVS.includes(prov.code) ? SALARIES : CORE_SALARIES;
+    
+    FAMILY_SCENARIOS.forEach((fam) => {
+        salaryList.forEach((salary) => {
+            paths.push({
+                params: { 
+                    province: prov.slug, 
+                    scenario: fam.slug,
+                    income: salary.toString() 
+                },
+                props: { 
+                    provinceCode: prov.code, 
+                    provinceName: prov.name, 
+                    familyStatus: fam.status,
+                    childCount: fam.count,
+                    familyLabel: fam.label,
+                    salaryVal: salary 
+                },
+            });
+        });
+    });
+  });
+
+  return paths;
+}
+
+const { provinceCode, provinceName, familyStatus, childCount, familyLabel, salaryVal } = Astro.props;
+
+const salaryFormatted = new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD', maximumFractionDigits: 0 }).format(salaryVal);
+const title = `CCB Calculator: ${familyLabel} in ${provinceName} (${salaryFormatted}) | 2025 Estimate`;
+const description = `Calculate 2025 Canada Child Benefit (CCB) for a ${familyLabel.toLowerCase()} in ${provinceName} with a household income of ${salaryFormatted}. Includes OCB, ACFB and GST credits.`;
+---
+
+<BaseLayout title={title} description={description}>
+  
+  <section class="py-12 px-4 max-w-5xl mx-auto">
+    <div class="text-center mb-10">
+        <h1 class="text-3xl md:text-4xl font-black text-slate-900 mb-4">
+          {provinceName} Child Benefit Calculator
+        </h1>
+        <p class="text-lg text-slate-600">
+          Scenario: <strong>{familyLabel}</strong> with <strong>{salaryFormatted}</strong> Income
+        </p>
+    </div>
+
+    <HouseholdBenefits 
+      client:load 
+      initialProvince={provinceCode} 
+      initialIncome={salaryVal}
+      initialMaritalStatus={familyStatus}
+      initialChildCount={childCount}
+    />
+
+    <div class="prose prose-slate mx-auto mt-16 bg-white p-8 rounded-3xl border border-slate-100 shadow-sm">
+      <h2>How {provinceName} Benefits Work for this Family</h2>
+      <p>
+        Based on a <strong>{familyStatus.toLowerCase()}</strong> household with <strong>{childCount} children</strong> in {provinceName}, you may be eligible for:
+      </p>
+      <ul>
+        <li><strong>Canada Child Benefit (CCB):</strong> The federal tax-free monthly payment.</li>
+        <li><strong>{provinceCode === 'ON' ? 'Ontario Child Benefit (OCB)' : provinceCode === 'AB' ? 'Alberta Child and Family Benefit (ACFB)' : provinceCode === 'BC' ? 'BC Family Benefit' : 'Provincial Child Benefits'}</strong>: Specific support for families living in {provinceName}.</li>
+        <li><strong>GST/HST Credit:</strong> Quarterly payments based on your ${salaryFormatted} net income.</li>
+      </ul>
+      <p>
+        Use the calculator above to see the exact breakdown of your monthly and annual entitlement.
+      </p>
+    </div>
+
+  </section>
+</BaseLayout>

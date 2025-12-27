@@ -105,13 +105,58 @@ const Accordion = ({ title, icon: Icon, children, defaultOpen = false }) => (
 // ==========================================
 //              MAIN COMPONENT
 // ==========================================
-export default function HouseholdBenefits({ isVisible = true }) {
-    const [grossAfni, setGrossAfni] = useState(65000); 
-    const [children, setChildren] = useState([{ id: 1, age: 2, disability: false }]);
-    const [sharedCustody, setSharedCustody] = useState(false);
-    const [maritalStatus, setMaritalStatus] = useState('MARRIED'); 
-    const [province, setProvince] = useState('ON');
-    const [isRural, setIsRural] = useState(false);
+export default function HouseholdBenefits({ 
+    isVisible = true, 
+    initialProvince = 'ON', 
+    initialIncome = 65000,
+    initialMaritalStatus = 'MARRIED',
+    initialChildCount = 2 // Simple prop to generate children array
+}) {
+    
+    const getParam = (key) => {
+        if (typeof window === 'undefined') return null;
+        const params = new URLSearchParams(window.location.search);
+        return params.get(key);
+    };
+
+    // --- LAZY STATE INITIALIZATION ---
+    // 1. Province
+    const [province, setProvince] = useState(() => {
+        return getParam('p') || initialProvince;
+    });
+
+    // 2. Income
+    const [grossAfni, setGrossAfni] = useState(() => {
+        const urlI = getParam('i');
+        return urlI ? parseInt(urlI, 36) : initialIncome;
+    });
+
+    // 3. Marital Status
+    const [maritalStatus, setMaritalStatus] = useState(() => {
+        return getParam('ms') || initialMaritalStatus;
+    });
+
+    // 4. Children (Complex Logic)
+    const [children, setChildren] = useState(() => {
+        const urlC = getParam('c');
+        if (urlC) {
+            try {
+                return urlC.split('_').map((str, idx) => {
+                    const [age, dis] = str.split('-');
+                    return { id: Date.now() + idx, age: parseInt(age) || 0, disability: dis === '1' };
+                });
+            } catch(e) { return [{ id: 1, age: 3, disability: false }]; }
+        }
+        // If no URL, use the prop to generate default kids (e.g. 3yr old and 5yr old)
+        const kids = [];
+        for(let i=0; i < initialChildCount; i++) {
+            kids.push({ id: Date.now() + i, age: i * 2 + 1, disability: false });
+        }
+        return kids;
+    });
+
+    const [sharedCustody, setSharedCustody] = useState(() => getParam('sc') === '1');
+    const [isRural, setIsRural] = useState(() => getParam('r') === '1');
     
     const [activeTab, setActiveTab] = useState('input');
     const [copySuccess, setCopySuccess] = useState(false);
@@ -122,45 +167,21 @@ export default function HouseholdBenefits({ isVisible = true }) {
     const afni = Math.max(0, grossAfni || 0);
 
     // ==========================================
-    //   1. LOAD FROM URL (Initial Mount Only)
+    //   SYNC TO URL (Live Update)
     // ==========================================
     useEffect(() => {
-        const params = new URLSearchParams(window.location.search);
-        if (params.toString()) {
-            if (params.get('i')) setGrossAfni(parseInt(params.get('i'), 36));
-            if (params.get('p')) setProvince(params.get('p'));
-            if (params.get('ms')) setMaritalStatus(params.get('ms'));
-            if (params.get('sc')) setSharedCustody(params.get('sc') === '1');
-            if (params.get('r')) setIsRural(params.get('r') === '1');
-            if (params.get('c')) {
-                try {
-                    const childData = params.get('c').split('_').map((str, idx) => {
-                        const [age, dis] = str.split('-');
-                        return { id: Date.now() + idx, age: parseInt(age) || 0, disability: dis === '1' };
-                    });
-                    setChildren(childData);
-                } catch (e) { console.error("URL Load Error", e); }
-            }
-        }
-    }, []);
+        if(!mounted) return;
 
-    // ==========================================
-    //   2. SYNC TO URL (Live Update)
-    // ==========================================
-    useEffect(() => {
         const params = new URLSearchParams(window.location.search);
 
-        // Update Income (Base36 for compactness)
         if (grossAfni > 0) params.set('i', grossAfni.toString(36));
         else params.delete('i');
 
-        // Update Standard Params
         params.set('p', province);
         params.set('ms', maritalStatus);
         params.set('sc', sharedCustody ? '1' : '0');
         params.set('r', isRural ? '1' : '0');
 
-        // Update Children (Format: age-disability_age-disability)
         if (children.length > 0) {
             const childStr = children.map(c => `${c.age}-${c.disability ? 1 : 0}`).join('_');
             params.set('c', childStr);
@@ -168,13 +189,12 @@ export default function HouseholdBenefits({ isVisible = true }) {
             params.delete('c');
         }
 
-        // Optional: Keep view context
         params.set('view', 'ccb');
 
         const newUrl = `${window.location.pathname}?${params.toString()}`;
         window.history.replaceState(null, '', newUrl);
 
-    }, [grossAfni, province, maritalStatus, sharedCustody, isRural, children]);
+    }, [grossAfni, province, maritalStatus, sharedCustody, isRural, children, mounted]);
 
 
     // Child Handlers
