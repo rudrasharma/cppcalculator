@@ -1,12 +1,32 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import PurchasingPowerGauge from './PurchasingPowerGauge';
 import { STAPLES, PROVINCIAL_FACTORS } from '../data/groceryData';
 
-export default function GroceryInflation({ isVisible = true }) {
-    const [cart, setCart] = useState([]);
-    const [years, setYears] = useState(5);
-    const [province, setProvince] = useState('ON');
+export default function GroceryInflation({ 
+    isVisible = true,
+    initialProvince = 'ON',
+    initialYears = 5,
+    initialCartIds = [] 
+}) {
+    // 1. Initialize State
+    const [province, setProvince] = useState(initialProvince);
+    const [years, setYears] = useState(initialYears);
     const [activeCategory, setActiveCategory] = useState('All');
+    const [cart, setCart] = useState([]); // Start empty, useEffect will fill it
+
+    // 2. DEBUG & SYNC: Force cart update and log IDs
+    useEffect(() => {
+        // Log the IDs so you can find the correct numbers for seo-scenarios.js
+        console.log("Available Grocery IDs:", STAPLES.map(s => `${s.name}: ${s.id}`));
+
+        if (initialCartIds && initialCartIds.length > 0) {
+            // "Loose" equality check (==) allows matching string "1" with number 1
+            const foundItems = STAPLES.filter(item => 
+                initialCartIds.some(id => id == item.id)
+            );
+            setCart(foundItems);
+        }
+    }, [initialCartIds]);
 
     const categories = ['All', 'Meat', 'Dairy', 'Produce', 'Pantry'];
 

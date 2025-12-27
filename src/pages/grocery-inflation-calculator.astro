@@ -1,12 +1,13 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import GroceryInflation from '../components/GroceryInflation.jsx';
+import GroceryInflation from '../components/GroceryInflation.jsx'; // Check if this path needs to be '../components/GroceryInflation.jsx' based on your structure
+import { GROCERY_SCENARIOS } from '../data/seo-scenarios';
+
+const title = "Grocery Inflation Calculator & Forecast 2025";
+const description = "Audit your grocery bill and see how 4.7% food inflation impacts your family budget over the next 5 years.";
 ---
 
-<BaseLayout 
-  title="Grocery Inflation Calculator & Forecast 2025" 
-  description="Audit your grocery bill and see how 4.7% food inflation impacts your family budget over the next 5 years."
->
+<BaseLayout title={title} description={description}>
   
   {/* TITLE SECTION with Trust Badge */}
   <div class="max-w-6xl mx-auto px-4 pt-8 text-center md:text-left animate-fade-in">
@@ -35,8 +36,44 @@ import GroceryInflation from '../components/GroceryInflation.jsx';
     <GroceryInflation client:only="react" isVisible={true} />
   </main>
 
-  {/* SEO CONTENT SECTION (Great for ranking) */}
-  <section class="max-w-3xl mx-auto px-6 py-12 text-slate-600 leading-relaxed text-sm">
+  {/* NEW: pSEO LINKING SECTION */}
+  <div class="max-w-6xl mx-auto px-6 pb-12">
+    <div class="pt-10 border-t border-slate-200">
+        <h2 class="text-2xl font-black text-slate-900 mb-6 text-center">Popular Inflation Scenarios</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {GROCERY_SCENARIOS.slice(0, 6).map((scene) => (
+                <a 
+                    href={`/calculator/grocery-inflation/ontario/${scene.slug}`} 
+                    class="block p-4 rounded-xl border border-slate-200 bg-white hover:border-indigo-500 hover:shadow-md transition-all group"
+                >
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-[10px] font-black uppercase tracking-widest text-indigo-500 bg-indigo-50 px-2 py-1 rounded">
+                            {scene.years} Year Forecast
+                        </span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-300 group-hover:text-indigo-500 transition-colors"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                    </div>
+                    <h3 class="font-bold text-slate-900 text-sm mb-1 group-hover:text-indigo-700 transition-colors">
+                        {scene.label}
+                    </h3>
+                    <p class="text-xs text-slate-500 line-clamp-2">
+                        {scene.desc}
+                    </p>
+                </a>
+            ))}
+        </div>
+
+        <div class="text-center mt-8">
+            <a href="/calculator/grocery-inflation/browse" class="inline-flex items-center gap-2 text-sm font-bold text-slate-600 hover:text-indigo-600 transition-colors">
+                View All Forecasts
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+            </a>
+        </div>
+    </div>
+  </div>
+
+  {/* SEO CONTENT SECTION */}
+  <section class="max-w-3xl mx-auto px-6 pb-12 text-slate-600 leading-relaxed text-sm">
       <h2 class="text-lg font-bold text-slate-900 mb-4">Why does my grocery bill feel so high?</h2>
       <p class="mb-4">
           While the general inflation rate might be cooling, specific categories like <strong>meats, vegetables, and bakery items</strong> are seeing higher volatility due to supply chain issues and climate events affecting harvest yields.

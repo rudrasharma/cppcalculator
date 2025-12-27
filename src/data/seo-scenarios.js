@@ -158,3 +158,54 @@ export const CPP_SCENARIOS = [
         desc: "Stopped working at 55, taking pension at 60. See how 'zero contribution' years affect your average."
     }
 ];
+
+// ==========================================
+//          4. GROCERY INFLATION
+// ==========================================
+// ... keep existing PROVINCES, LEAVE_SCENARIOS, FAMILY_SCENARIOS, CPP_SCENARIOS ...
+
+// ==========================================
+//          4. GROCERY INFLATION
+// ==========================================
+export const GROCERY_SCENARIOS = [
+    { 
+        slug: 'family-essentials-basket', 
+        years: 5, 
+        // IDs: Milk, Eggs, Bread, Chicken, Beef, Apples, Potatoes, Pasta, Cheese
+        cart: ['milk', 'eggs', 'bread', 'chicken', 'beef', 'apples', 'potatoes', 'pasta', 'cheese'], 
+        label: "Family Essentials Basket (5-Year Forecast)",
+        desc: "Forecast for a standard weekly shop including dairy, meat, and produce staples."
+    },
+    { 
+        slug: 'vegetarian-healthy-basket', 
+        years: 5, 
+        // IDs: Milk, Eggs, Bread, Apples, Bananas, Potatoes, Rice, Tofu, Lettuce
+        cart: ['milk', 'eggs', 'bread', 'apples', 'bananas', 'potatoes', 'rice', 'tofu', 'lettuce'], 
+        label: "Vegetarian & Healthy Basket",
+        desc: "See how inflation impacts a produce-heavy diet without meat products."
+    },
+    { 
+        slug: 'carnivore-protein-basket', 
+        years: 3, 
+        // IDs: Beef, Chicken, Bacon, Salmon, Eggs, Butter
+        cart: ['beef', 'chicken', 'bacon', 'salmon', 'eggs', 'butter'], 
+        label: "High-Protein / Carnivore Basket",
+        desc: "Meat prices are volatile. See the 3-year outlook for a protein-focused diet."
+    },
+    { 
+        slug: 'pantry-staples-long-term', 
+        years: 10, 
+        // IDs: Rice, Pasta, Coffee, Bread, Cereal
+        cart: ['rice', 'pasta', 'coffee', 'bread', 'cereal'], 
+        label: "Pantry Staples (10-Year Outlook)",
+        desc: "Long-term inflation forecast for shelf-stable goods and basic ingredients."
+    },
+    { 
+        slug: 'single-student-budget', 
+        years: 1, 
+        // IDs: Pasta, Bread, Eggs, Apples, Beef
+        cart: ['pasta', 'bread', 'eggs', 'apples', 'beef'], 
+        label: "Student / Single Budget Basket",
+        desc: "Short-term forecast for essential low-cost grocery items."
+    }
+];

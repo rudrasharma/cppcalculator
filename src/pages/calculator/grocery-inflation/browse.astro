@@ -1,0 +1,34 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { PROVINCES, GROCERY_SCENARIOS } from '../../../data/seo-scenarios';
+
+const title = "Browse Grocery Inflation Scenarios by Province";
+const description = "See future grocery costs for families, couples, and students across Canada.";
+---
+
+<BaseLayout title={title} description={description}>
+  <section class="max-w-6xl mx-auto px-4 py-12">
+    <h1 class="text-4xl font-black text-slate-900 mb-12 text-center">Grocery Inflation Scenarios</h1>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      {PROVINCES.map((prov) => (
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:border-indigo-200 transition-colors">
+          <h2 class="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
+            {prov.name}
+          </h2>
+          <div class="space-y-4">
+            {GROCERY_SCENARIOS.map((scene) => (
+                <a 
+                    href={`/calculator/grocery-inflation/${prov.slug}/${scene.slug}`}
+                    class="block text-sm text-slate-600 hover:text-indigo-600 font-bold transition-colors border-b border-slate-50 pb-2 last:border-0"
+                >
+                    {scene.label}
+                </a>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  </section>
+</BaseLayout>

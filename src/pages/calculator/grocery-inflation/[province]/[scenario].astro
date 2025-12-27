@@ -1,0 +1,64 @@
+---
+import BaseLayout from '../../../../layouts/BaseLayout.astro';
+
+import GroceryInflation from '../../../../components/GroceryInflation.jsx';
+
+import { PROVINCES, GROCERY_SCENARIOS } from '../../../../data/seo-scenarios';
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  const paths = [];
+  PROVINCES.forEach((prov) => {
+    GROCERY_SCENARIOS.forEach((scene) => {
+        paths.push({
+            params: { 
+                province: prov.slug, 
+                scenario: scene.slug 
+            },
+            props: { 
+                provinceCode: prov.code, 
+                provinceName: prov.name, 
+                scenario: scene
+            },
+        });
+    });
+  });
+  return paths;
+}
+
+const { provinceCode, provinceName, scenario } = Astro.props;
+
+const title = `${scenario.label} in ${provinceName} | 2025 Grocery Inflation`;
+const description = `Calculate the future cost of a ${scenario.label.toLowerCase()} in ${provinceName}. ${scenario.desc}`;
+---
+
+<BaseLayout title={title} description={description}>
+  <section class="py-12 px-4 max-w-6xl mx-auto">
+    <div class="text-center mb-10">
+        <h1 class="text-3xl md:text-4xl font-black text-slate-900 mb-4">
+            {scenario.label} in <span class="text-indigo-600">{provinceName}</span>
+        </h1>
+        <p class="text-lg text-slate-600 max-w-2xl mx-auto">
+            {scenario.desc}
+        </p>
+    </div>
+
+    <GroceryInflation 
+      client:load 
+      initialProvince={provinceCode} 
+      initialYears={scenario.years}
+      initialCartIds={scenario.cart}
+    />
+
+    <div class="prose prose-slate mx-auto mt-16 bg-white p-8 rounded-3xl border border-slate-100 shadow-sm">
+        <h2>About this Forecast</h2>
+        <p>
+            Food inflation varies significantly by province and food category. This calculator applies <strong>{provinceName}-specific</strong> inflation factors to the items in your basket.
+        </p>
+        <p>
+            While the Bank of Canada targets 2% inflation, grocery categories like <strong>Meat</strong> and <strong>Dairy</strong> often see higher volatility due to supply chain costs and carbon pricing. This "basket approach" gives you a more realistic personal inflation rate than the generic CPI number.
+        </p>
+    </div>
+  </section>
+</BaseLayout>
