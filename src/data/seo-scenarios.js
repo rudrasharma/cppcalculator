@@ -36,71 +36,125 @@ export const LEAVE_SCENARIOS = [
 // ... existing exports ...
 
 export const CPP_SCENARIOS = [
-    // --- TIMING SCENARIOS ---
+    // --- 1. THE TIMING STRATEGISTS (High Volume) ---
     { 
-        slug: 'early-retirement-age-60', 
-        age: 60, income: '65000', years: 40, married: false,
-        label: "Taking CPP Early at Age 60",
-        desc: "Calculate the 36% permanent reduction penalty for starting your pension early."
+        slug: 'taking-cpp-early-at-60', 
+        age: 60, income: '55000', years: 40, married: false,
+        label: "Retiring Early at Age 60",
+        desc: "See the impact of the 36% permanent penalty on your monthly payments."
+    },
+    { 
+        slug: 'taking-cpp-at-62', 
+        age: 62, income: '60000', years: 40, married: false,
+        label: "Retiring at Age 62",
+        desc: "A common compromise age. Calculate your specific penalty (21.6% reduction)."
     },
     { 
         slug: 'standard-retirement-age-65', 
-        age: 65, income: '65000', years: 40, married: false,
-        label: "Standard Retirement at Age 65",
-        desc: "Estimate your standard CPP and OAS payments with no penalties or bonuses."
+        age: 65, income: '55000', years: 40, married: false,
+        label: "Standard Retirement (Age 65)",
+        desc: "The benchmark calculation. 100% of your entitled CPP and OAS with no adjustments."
     },
     { 
-        slug: 'deferred-retirement-age-70', 
+        slug: 'deferring-cpp-to-68', 
+        age: 68, income: '65000', years: 40, married: false,
+        label: "Deferring to Age 68",
+        desc: "Boost your pension by 25.2% (CPP) and 21.6% (OAS) by waiting three extra years."
+    },
+    { 
+        slug: 'maximum-deferral-age-70', 
         age: 70, income: '65000', years: 40, married: false,
-        label: "Maximum Deferral to Age 70",
-        desc: "See how waiting until 70 increases your monthly pension by 42%."
+        label: "Max Deferral (Age 70)",
+        desc: "The 'patience payoff'. See the maximum possible monthly boost (42% CPP, 36% OAS)."
     },
 
-    // --- INCOME SCENARIOS ---
+    // --- 2. INCOME TIERS (Search intent: "How much will I get?") ---
     { 
-        slug: 'max-cpp-contribution', 
+        slug: 'maximum-cpp-amount-2025', 
         age: 65, income: '73200', years: 40, married: false, // 2025 YMPE
         label: "Maximum CPP Contributor",
-        desc: "Scenario for high-income earners who hit the yearly maximum pensionable earnings (YMPE)."
+        desc: "Estimate for high-income earners who consistently hit the Yearly Maximum Pensionable Earnings."
     },
     { 
         slug: 'average-canadian-salary', 
         age: 65, income: '55000', years: 40, married: false,
         label: "Average Canadian Income ($55k)",
-        desc: "A realistic estimate for the average Canadian worker retiring today."
+        desc: "A realistic baseline for the typical Canadian worker with steady employment."
     },
     { 
-        slug: 'low-income-gis-eligibility', 
-        age: 65, income: '20000', years: 40, married: false,
+        slug: 'modest-income-35k', 
+        age: 65, income: '35000', years: 40, married: false,
+        label: "Modest Income ($35k/yr)",
+        desc: "Estimate benefits for service/retail workers or those with part-time career history."
+    },
+    { 
+        slug: 'low-income-gis-estimate', 
+        age: 65, income: '18000', years: 40, married: false,
         label: "Low Income & GIS Estimate",
-        desc: "Determine if you qualify for the Guaranteed Income Supplement (GIS) top-up."
+        desc: "Check eligibility for the Guaranteed Income Supplement (GIS) top-up for low-income seniors."
+    },
+    { 
+        slug: 'high-income-oas-clawback', 
+        age: 65, income: '95000', years: 40, married: false,
+        label: "High Income (OAS Clawback Risk)",
+        desc: "See how higher retirement income might trigger the OAS Recovery Tax (Clawback)."
     },
 
-    // --- NEWCOMER SCENARIOS ---
+    // --- 3. NEWCOMERS & IMMIGRANTS (Specific "Years in Canada" intent) ---
     { 
         slug: 'newcomer-10-years-residence', 
         age: 65, income: '45000', years: 10, married: false,
         label: "Newcomer (10 Years in Canada)",
-        desc: "The minimum residency requirement to qualify for Old Age Security (OAS) in Canada."
+        desc: "The absolute minimum residency to qualify for Old Age Security (OAS)."
+    },
+    { 
+        slug: 'newcomer-15-years-residence', 
+        age: 65, income: '50000', years: 15, married: false,
+        label: "Newcomer (15 Years in Canada)",
+        desc: "Estimate your partial OAS pension (15/40ths) and CPP contributions."
     },
     { 
         slug: 'newcomer-20-years-residence', 
-        age: 65, income: '50000', years: 20, married: false,
+        age: 65, income: '55000', years: 20, married: false,
         label: "Newcomer (20 Years in Canada)",
-        desc: "Calculate your partial OAS pension (20/40ths) based on 20 years of residency."
+        desc: "Mid-life arrival estimate. You qualify for exactly 50% of the full OAS pension."
+    },
+    { 
+        slug: 'immigrant-30-years-residence', 
+        age: 65, income: '60000', years: 30, married: false,
+        label: "Immigrant (30 Years in Canada)",
+        desc: "Long-term resident estimate. You qualify for 75% of the standard OAS pension."
     },
 
-    // --- FAMILY SCENARIOS ---
-    { 
-        slug: 'senior-couple-gis', 
-        age: 65, income: '35000', years: 40, married: true, spouseIncome: '25000',
-        label: "Senior Couple (GIS Eligibility)",
-        desc: "Calculate combined household benefits for a retired couple with modest income."
-    },
+    // --- 4. FAMILY & LIFESTYLE ---
     { 
         slug: 'stay-at-home-parent', 
         age: 65, income: '45000', years: 40, married: true, childCount: 2,
-        label: "Stay-at-Home Parent (Child Rearing)",
-        desc: "See how the Child-Rearing Dropout Provision protects your CPP benefit amount."
+        label: "Stay-at-Home Parent",
+        desc: "See how the Child Rearing Dropout provision helps protect your average earnings history."
+    },
+    { 
+        slug: 'retired-couple-average-income', 
+        age: 65, income: '50000', years: 40, married: true, spouseIncome: '50000',
+        label: "Retired Couple (Average Income)",
+        desc: "Combined household pension estimate for two average income earners."
+    },
+    { 
+        slug: 'retired-couple-one-earner', 
+        age: 65, income: '70000', years: 40, married: true, spouseIncome: '0',
+        label: "Retired Couple (One Earner)",
+        desc: "Estimate for a household where one spouse worked and the other had no income (Allowance eligibility)."
+    },
+    { 
+        slug: 'self-employed-contractor', 
+        age: 65, income: '60000', years: 40, married: false,
+        label: "Self-Employed / Contractor",
+        desc: "Estimate for gig workers or business owners who contribute both portions of CPP."
+    },
+    { 
+        slug: 'fire-retirement-at-55', 
+        age: 60, income: '80000', years: 40, married: false,
+        label: "FIRE (Retired Early at 55)",
+        desc: "Stopped working at 55, taking pension at 60. See how 'zero contribution' years affect your average."
     }
 ];
