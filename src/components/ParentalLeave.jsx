@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { 
-    BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, 
-    ResponsiveContainer, Cell
+    AreaChart, Area, XAxis, YAxis, CartesianGrid, 
+    Tooltip as RechartsTooltip, ResponsiveContainer
 } from 'recharts';
 
 // ==========================================
@@ -83,17 +83,55 @@ function useUrlTab(defaultTab = 'input') {
 // ==========================================
 //              MAIN COMPONENT
 // ==========================================
-export default function ParentalLeave({ isVisible = true }) {
-    const [province, setProvince] = useState('ON');
-    const [salary, setSalary] = useState(70000);
-    const [partnerSalary, setPartnerSalary] = useState(60000);
-    const [hasPartner, setHasPartner] = useState(true);
-    const [planType, setPlanType] = useState('STANDARD'); 
+export default function ParentalLeave({ isVisible = true, initialProvince = 'ON', initialSalary = 70000 }) {
     
-    // --- ALLOCATION STATE ---
-    const [p1Maternity, setP1Maternity] = useState(true); 
-    const [p1Weeks, setP1Weeks] = useState(30); 
-    const [p2Weeks, setP2Weeks] = useState(5); 
+    // Helper to get URL params safely
+    const getParam = (key) => {
+        if (typeof window === 'undefined') return null;
+        const params = new URLSearchParams(window.location.search);
+        return params.get(key);
+    };
+
+    // --- INITIALIZE STATE (Priority: URL Params -> Props -> Defaults) ---
+    const [province, setProvince] = useState(() => {
+        const urlProv = getParam('prov');
+        return urlProv || initialProvince;
+    });
+
+    const [salary, setSalary] = useState(() => {
+        const urlSal = getParam('sal');
+        return urlSal ? parseInt(urlSal, 36) : initialSalary;
+    });
+
+    const [partnerSalary, setPartnerSalary] = useState(() => {
+        const urlPsal = getParam('psal');
+        return urlPsal ? parseInt(urlPsal, 36) : 60000;
+    });
+
+    const [hasPartner, setHasPartner] = useState(() => {
+        const urlPart = getParam('part');
+        return urlPart ? urlPart === '1' : true;
+    });
+
+    const [planType, setPlanType] = useState(() => {
+        const urlPlan = getParam('plan');
+        return urlPlan === 'ext' ? 'EXTENDED' : 'STANDARD';
+    });
+
+    const [p1Maternity, setP1Maternity] = useState(() => {
+        const urlMat = getParam('mat');
+        return urlMat ? urlMat === '1' : true;
+    });
+
+    const [p1Weeks, setP1Weeks] = useState(() => {
+        const urlW = getParam('p1w');
+        return urlW ? parseInt(urlW) : 30;
+    });
+
+    const [p2Weeks, setP2Weeks] = useState(() => {
+        const urlW = getParam('p2w');
+        return urlW ? parseInt(urlW) : 5;
+    });
 
     const [activeTab, setActiveTab] = useUrlTab('input');
     const [copySuccess, setCopySuccess] = useState(false);
@@ -105,26 +143,11 @@ export default function ParentalLeave({ isVisible = true }) {
     const currentMaxInsurable = province === 'QC' ? EI_2025.QC_MAX_INSURABLE : EI_2025.MAX_INSURABLE;
 
     // ==========================================
-    //   1. LOAD FROM URL (Initial Mount Only)
+    //   SYNC TO URL (Live Update)
     // ==========================================
     useEffect(() => {
-        const params = new URLSearchParams(window.location.search);
-        if (params.toString()) {
-            if (params.get('prov')) setProvince(params.get('prov'));
-            if (params.get('sal')) setSalary(parseInt(params.get('sal'), 36));
-            if (params.get('psal')) setPartnerSalary(parseInt(params.get('psal'), 36));
-            if (params.get('part')) setHasPartner(params.get('part') === '1');
-            if (params.get('plan')) setPlanType(params.get('plan') === 'ext' ? 'EXTENDED' : 'STANDARD');
-            if (params.get('mat')) setP1Maternity(params.get('mat') === '1');
-            if (params.get('p1w')) setP1Weeks(parseInt(params.get('p1w')));
-            if (params.get('p2w')) setP2Weeks(parseInt(params.get('p2w')));
-        }
-    }, []);
+        if (!mounted) return; // Prevent overwriting URL on hydration
 
-    // ==========================================
-    //   2. SYNC TO URL (Live Update)
-    // ==========================================
-    useEffect(() => {
         const params = new URLSearchParams(window.location.search);
 
         // Inputs
@@ -151,18 +174,19 @@ export default function ParentalLeave({ isVisible = true }) {
 
         const newUrl = `${window.location.pathname}?${params.toString()}`;
         window.history.replaceState(null, '', newUrl);
-    }, [province, salary, partnerSalary, hasPartner, planType, p1Maternity, p1Weeks, p2Weeks]);
+    }, [province, salary, partnerSalary, hasPartner, planType, p1Maternity, p1Weeks, p2Weeks, mounted]);
 
 
     // Reset/Adjust weeks when Plan Type or Partner status changes
     useEffect(() => {
+        if (!mounted) return;
         const isExtended = planType === 'EXTENDED';
         const indMax = isExtended ? EI_2025.EXT_INDIVIDUAL_MAX : EI_2025.STD_INDIVIDUAL_MAX;
         
         if (p1Weeks > indMax) setP1Weeks(indMax);
         if (p2Weeks > indMax) setP2Weeks(indMax);
         if (!hasPartner) setP2Weeks(0);
-    }, [planType, hasPartner, p1Weeks, p2Weeks]);
+    }, [planType, hasPartner]);
 
     // --- SLIDER LOGIC ---
     const handleWeeksChange = (parent, val) => {

@@ -46,7 +46,7 @@ const TOOLS = [
   title="Canadian Financial & Family Calculators" 
   description="Free, privacy-first calculators for CPP, Child Benefits, Parental Leave, and Inflation."
 >
-  <main class="max-w-6xl mx-auto px-6 py-12 md:py-20 animate-fade-in text-center">
+  <main class="max-w-6xl mx-auto px-6 py-12 md:py-20 animate-fade-in text-center flex flex-col min-h-[60vh]">
       
       {/* HERO SECTION */}
       <div class="mb-12 md:mb-16">
@@ -59,7 +59,7 @@ const TOOLS = [
       </div>
 
       {/* TOOLS GRID */}
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
           {TOOLS.map((tool) => (
             <a 
                 href={tool.href} 

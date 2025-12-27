@@ -1,7 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+// FIX: The path is now corrected to match your folder structure
 import ParentalLeave from '../components/ParentalLeave.jsx';
-
 ---
 
 <BaseLayout 
@@ -9,7 +9,7 @@ import ParentalLeave from '../components/ParentalLeave.jsx';
   description="Estimate your EI maternity and parental leave benefits for 2025. Supports Standard vs. Extended plans and shared custody allocations."
 >
   
-  {/* TITLE SECTION with Trust Badge */}
+  {/* TITLE SECTION */}
   <div class="max-w-6xl mx-auto px-4 pt-8 text-center md:text-left animate-fade-in">
     <div class="flex flex-col md:flex-row justify-between items-center gap-4">
         <div>
@@ -21,7 +21,7 @@ import ParentalLeave from '../components/ParentalLeave.jsx';
             </p>
         </div>
 
-        {/* TRUST BADGE SPECIFIC TO EI DATA */}
+        {/* TRUST BADGE */}
         <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 border border-slate-200">
             <div class="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></div>
             <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">
@@ -33,12 +33,26 @@ import ParentalLeave from '../components/ParentalLeave.jsx';
 
   {/* REACT COMPONENT */}
   <main class="flex-grow flex flex-col justify-center w-full animate-fade-in">
-    {/* client:only="react" ensures sliders and charts work immediately */}
-    <ParentalLeave client:only="react" isVisible={true} />
+    {/* client:load allows it to render on the server and hydrate on the client */}
+    <ParentalLeave client:load isVisible={true} />
   </main>
 
+  {/* pSEO LINK SECTION */}
+  <div class="max-w-3xl mx-auto px-6 pt-12 pb-4 text-center">
+    <div class="bg-slate-50 border border-slate-100 rounded-2xl p-6">
+        <p class="text-xs font-black text-slate-400 uppercase tracking-widest mb-3">Looking for specific examples?</p>
+        <a 
+            href="/calculator/parental-leave/browse" 
+            class="inline-flex items-center gap-2 text-sm font-bold text-rose-600 hover:text-rose-700 transition-colors hover:underline"
+        >
+            Browse Benefits by Province & Salary
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+        </a>
+    </div>
+  </div>
+
   {/* SEO CONTENT SECTION */}
-  <section class="max-w-3xl mx-auto px-6 py-12 text-slate-600 leading-relaxed text-sm">
+  <section class="max-w-3xl mx-auto px-6 py-8 text-slate-600 leading-relaxed text-sm">
       <h2 class="text-lg font-bold text-slate-900 mb-4">Standard vs. Extended Parental Leave</h2>
       <p class="mb-4">
           In Canada (outside Quebec), you can choose between a <strong>Standard</strong> (12-month) plan at 55% income replacement or an <strong>Extended</strong> (18-month) plan at 33%.
