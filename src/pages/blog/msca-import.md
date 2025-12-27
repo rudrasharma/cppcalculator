@@ -8,6 +8,47 @@ layout: ../../layouts/BlogPost.astro
 category: "cpp"
 ---
 
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How do I download my CPP Statement of Contributions?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Log in to your My Service Canada Account (MSCA). From the main dashboard, click on 'Canada Pension Plan (CPP)' and then select 'Contributions'. This page displays your complete earnings history."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "When is the My Service Canada Account (MSCA) website available?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The MSCA website frequently undergoes maintenance or experiences high traffic. We have found it is most reliably accessed during standard business hours (Monday to Friday, 9 AM – 5 PM EST)."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does the LoonieFi Bulk Import tool work?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Our import tool uses a 'fuzzy' text parser. You can simply press Ctrl+A to select all text on your Service Canada contributions page, copy it, and paste it directly into our tool. The importer ignores menu links and website noise, extracting only the valid year and earnings data."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I estimate future CPP earnings?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "After importing your past data, use the 'Quick Fill' toolbar in our calculator. Enter your current salary and click the 'Fill Future' (wand) icon. This preserves your actual past data while projecting your current salary forward to your retirement age."
+      }
+    }
+  ]
+}
+</script>
+
 The most accurate CPP estimate requires your **exact** earnings history. Service Canada keeps this record, known as your "Statement of Contributions."
 
 However, manually typing 30 or 40 years of numbers into a calculator is tedious and prone to typos. A single extra zero can throw off your entire retirement forecast.
@@ -48,7 +89,7 @@ Your Service Canada data only tells the story of your *past*. It ends in 2024 (o
 To get a true estimate, you need to combine **actual past data** with **projected future data**.
 
 1.  **Import First:** Follow the steps above to fill your history from age 18 to present.
-2.  **Estimate Future:** In the "Quick Fill" toolbar above the grid, enter your current salary (e.g., \$85,000).
+2.  **Estimate Future:** In the "Quick Fill" toolbar above the grid, enter your current salary (e.g., $85,000).
 3.  **Click "Fill Future":** Click the purple wand icon.
 
 The calculator will preserve your imported data exactly as is, but it will automatically fill every future year (from today until your retirement age) with your projected salary. This gives you the most precise "hybrid" forecast possible.

@@ -8,9 +8,50 @@ layout: ../../layouts/BlogPost.astro
 category: "cpp"
 ---
 
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Who is eligible for the Guaranteed Income Supplement (GIS)?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "To qualify for GIS, you must be 65 or older, live in Canada, receive the OAS pension, and have an annual income below the specific threshold (approx. $22,128 for a single person in 2025, excluding OAS)."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How much is the GIS clawback rate?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The GIS clawback rate is 50%. This means for every $1.00 of non-OAS income you receive (such as CPP, RRSP withdrawals, or employment income), your GIS benefit is reduced by $0.50."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Do TFSA withdrawals reduce my GIS benefits?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. Withdrawals from a Tax-Free Savings Account (TFSA) are not considered 'income' for GIS calculations and do not reduce your benefits. This makes TFSAs a preferred savings vehicle for low-income seniors compared to RRSPs."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What counts as income for GIS calculations?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Income that reduces GIS includes CPP/QPP benefits, private pensions, RRSP/RRIF withdrawals, capital gains, and employment income (though a $5,000 exemption applies). Old Age Security (OAS) payments do NOT count as income."
+      }
+    }
+  ]
+}
+</script>
+
 Most Canadians know about the two main pillars of retirement: the Canada Pension Plan (**CPP**) and Old Age Security (**OAS**). But there is a third pillar that often gets overlooked until it is too late: the **Guaranteed Income Supplement (GIS)**.
 
-If you are a low-income senior, GIS can be a lifeline, providing over \$1,000 a month tax-free. However, it operates on a completely different set of mathematical rules than CPP or OAS. If you don't understand the "clawback," you might accidentally wipe out your benefits.
+If you are a low-income senior, GIS can be a lifeline, providing over $1,000 a month tax-free. However, it operates on a completely different set of mathematical rules than CPP or OAS. If you don't understand the "clawback," you might accidentally wipe out your benefits.
 
 Here is the deep dive into how GIS actually works.
 
@@ -21,7 +62,7 @@ The GIS is designed to help seniors who have little to no income other than thei
 1.  Be **65 or older**.
 2.  Live in Canada.
 3.  Receive the **OAS pension**.
-4.  Have a combined annual income below a specific threshold (approx. **\$22,128** for a single person in 2025, excluding OAS).
+4.  Have a combined annual income below a specific threshold (approx. **$22,128** for a single person in 2025, excluding OAS).
 
 Unlike CPP, you do not "pay into" GIS. It is funded by general tax revenue.
 
@@ -29,15 +70,15 @@ Unlike CPP, you do not "pay into" GIS. It is funded by general tax revenue.
 
 This is the most critical part of retirement planning for low-income Canadians.
 
-While OAS is clawed back at a rate of 15% for high earners (over \$93k), **GIS is clawed back at a rate of 50% starting at the very first dollar of income.**
+While OAS is clawed back at a rate of 15% for high earners (over $93k), **GIS is clawed back at a rate of 50% starting at the very first dollar of income.**
 
-This means for every **\$1.00** of income you earn (from CPP, RRSPs, or a part-time job), your GIS payment is reduced by **\$0.50**.
+This means for every **$1.00** of income you earn (from CPP, RRSPs, or a part-time job), your GIS payment is reduced by **$0.50**.
 
 ### The Formula (Single Person)
 
 Let's look at the math for a single senior in 2025.
 
-* **Max Monthly GIS:** ~\$$1,085$
+* **Max Monthly GIS:** ~$1,085$
 * **Clawback Rate:** $50\%$
 
 $$
@@ -46,7 +87,7 @@ $$
 
 ### Example: The "GIS Trap"
 
-Meet Arthur. He receives the full OAS pension. He also receives a modest CPP payment of \$600/month. He decides to withdraw \$200/month from his RRSP to help with groceries.
+Meet Arthur. He receives the full OAS pension. He also receives a modest CPP payment of $600/month. He decides to withdraw $200/month from his RRSP to help with groceries.
 
 How does this affect his GIS?
 
@@ -57,7 +98,7 @@ How does this affect his GIS?
     $$
 
 2.  **Calculate the Clawback:**
-    The government reduces his GIS by 50 cents for every dollar of that \$800.
+    The government reduces his GIS by 50 cents for every dollar of that $800.
     $$
     \$800 \times 0.50 = \$400 \text{ reduction}
     $$
@@ -67,7 +108,7 @@ How does this affect his GIS?
     \$1,085 \text{ (Max)} - \$400 \text{ (Clawback)} = \$685
     $$
 
-**The Result:** Arthur withdrew \$200 from his RRSP, but he lost \$100 in GIS benefits because of it. His "effective tax rate" on that RRSP withdrawal is 50%, even if he pays zero income tax!
+**The Result:** Arthur withdrew $200 from his RRSP, but he lost $100 in GIS benefits because of it. His "effective tax rate" on that RRSP withdrawal is 50%, even if he pays zero income tax!
 
 ## What Counts as Income?
 
@@ -77,7 +118,7 @@ To maximize your GIS, you need to know what counts against you and what doesn't.
 * CPP or QPP benefits.
 * Private pension income.
 * RRSP or RRIF withdrawals.
-* Employment income (though there is a \$5,000 exemption for wages).
+* Employment income (though there is a $5,000 exemption for wages).
 * Capital gains and dividends (taxable amount).
 
 **Income that DOES NOT reduce your GIS:**
@@ -90,7 +131,7 @@ To maximize your GIS, you need to know what counts against you and what doesn't.
 
 If you expect to be eligible for GIS, the math suggests you should prioritize **TFSA** savings over **RRSP** savings.
 
-* **RRSP Scenario:** You save tax today, but when you withdraw at 67, you lose \$0.50 of GIS for every dollar withdrawn.
+* **RRSP Scenario:** You save tax today, but when you withdraw at 67, you lose $0.50 of GIS for every dollar withdrawn.
 * **TFSA Scenario:** You pay tax today, but when you withdraw at 67, your GIS remains untouched.
 
 ## Summary

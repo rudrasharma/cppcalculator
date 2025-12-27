@@ -8,11 +8,52 @@ layout: ../../layouts/BlogPost.astro
 category: "ccb"
 ---
 
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What dates are the Ontario Trillium Benefit paid in 2025?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The Ontario Trillium Benefit (OTB) is paid on the 10th of each month. If the 10th falls on a weekend or holiday, the payment is issued on the last working day prior."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why did I get a single lump sum Trillium payment instead of monthly?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "If your total annual OTB entitlement is $360 or less, the government issues it as a single lump-sum payment in July (the first month of the benefit year) rather than small monthly deposits."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I get the Ontario Energy and Property Tax Credit if I have a high income?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, it is possible. Unlike other credits with steep clawbacks, the OEPTC is reduced by only 2% of your income over the threshold. If you pay high rent or property taxes, this cost can often offset the clawback, allowing even higher-income earners to qualify for a partial payment."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How much is the Ontario Sales Tax Credit (OSTC) for 2025?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "For the 2025 benefit year (based on 2024 income), the maximum annual credit is approximately $371 for each adult and each child in the family. This amount is reduced by 4% once your family net income exceeds the threshold (~$28,506 for singles or ~$35,632 for families)."
+      }
+    }
+  ]
+}
+</script>
+
 If you live in Ontario, the 10th of the month is a specific kind of payday. While the Child Benefit hits on the 20th and the Carbon Rebate arrives quarterly, the **Ontario Trillium Benefit (OTB)** is the quiet monthly deposit that millions of residents rely on.
 
 But unlike the federal Carbon Rebate, which is a flat rate for everyone, the Trillium Benefit is calculated using a complex mix of your income, your family size, and—crucially—your housing costs.
 
-If you don't know how the math works, specifically regarding the "Rent & Property Tax" component, you might be missing out on over \$1,000 a year.
+If you don't know how the math works, specifically regarding the "Rent & Property Tax" component, you might be missing out on over $1,000 a year.
 
 Here is the breakdown of what is actually inside that deposit.
 
@@ -30,9 +71,9 @@ This is the "base" layer of the benefit. You get this simply for being a low-to-
 
 ### The 2025 Math
 
-* **Max Annual Credit:** ~\$$371$ per adult and per child.
-* **Clawback Threshold:** ~\$$28,506$ (Single) or ~\$$35,632$ (Family).
-* **Reduction Rate:** $4\%$
+* **Max Annual Credit:** ~$371 per adult and per child.
+* **Clawback Threshold:** ~$28,506 (Single) or ~$35,632 (Family).
+* **Reduction Rate:** 4%
 
 If your income is below the threshold, you get the full amount. Once you cross that line, the government reduces your benefit by 4 cents for every dollar earned.
 
@@ -48,33 +89,33 @@ It consists of an **Energy Component** (for sales tax on hydro/gas) and a **Prop
 
 ### The 2025 Math (Non-Seniors)
 
-* **Max Annual Benefit:** Up to ~\$$1,283$.
+* **Max Annual Benefit:** Up to ~$1,283.
 * **The Calculation:** The government calculates 10% of your rent paid (or property tax paid) plus a base amount, up to the maximum.
-* **Clawback Rate:** $2\%$
+* **Clawback Rate:** 2%
 
 This leads to a unique dynamic: **You can have a high income but still qualify if your rent is high.** Because the clawback rate is only 2% (lower than the OSTC's 4%), this benefit extends much further up the income ladder.
 
 **Example:**
-A single person earning \$45,000 usually assumes they make "too much" for benefits. But if they pay \$2,000/month in rent in Toronto, they likely still qualify for a portion of this credit because their high housing costs offset the income clawback.
+A single person earning $45,000 usually assumes they make "too much" for benefits. But if they pay $2,000/month in rent in Toronto, they likely still qualify for a portion of this credit because their high housing costs offset the income clawback.
 
 ## The "Payment Trap": Monthly vs. Lump Sum
 
 The most confusing part of the Trillium Benefit is the delivery schedule. The government applies a strict rule based on your **total annual entitlement**:
 
-1.  **Over \$360/year:** You receive **monthly** deposits on the 10th of each month.
-2.  **\$360 or less:** You receive a **single lump sum** payment in July.
+1.  **Over $360/year:** You receive **monthly** deposits on the 10th of each month.
+2.  **$360 or less:** You receive a **single lump sum** payment in July.
 
 ### The "Choice" Option
 Did you know you can opt out of monthly payments?
 
-If you qualify for \$500/year, you would normally get ~\$$41$/month. Many people find this amount negligible and hard to budget with. On your tax return, you can tick a box to wait and receive the entire \$500 as one lump sum in June of the following year. It acts like a forced savings plan.
+If you qualify for $500/year, you would normally get ~$41/month. Many people find this amount negligible and hard to budget with. On your tax return, you can tick a box to wait and receive the entire $500 as one lump sum in June of the following year. It acts like a forced savings plan.
 
 ## Summary
 
 The Ontario Trillium Benefit is more than just a sales tax rebate. It is a critical housing subsidy for renters and homeowners.
 
 * **If you rent:** Ensure you report your total rent paid on your tax return.
-* **If you are a student:** Ensure you report your residence fees (you get a flat \$25 credit).
-* **If you have a high income:** Don't assume you get \$0. Use a calculator to check if your high rent qualifies you for a partial payment.
+* **If you are a student:** Ensure you report your residence fees (you get a flat $25 credit).
+* **If you have a high income:** Don't assume you get $0. Use a calculator to check if your high rent qualifies you for a partial payment.
 
 Use our **Household Benefits Calculator** to input your rent and income to see exactly how much OTB you should be expecting on the 10th.

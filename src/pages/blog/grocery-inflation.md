@@ -8,9 +8,50 @@ layout: ../../layouts/BlogPost.astro
 category: "inflation"
 ---
 
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Why is my grocery bill increasing faster than the 2% inflation target?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "While the Bank of Canada targets a 2% 'All-Items' inflation rate, food prices often rise much faster due to specific factors like weather, supply chain issues, and tariffs. As of November 2025, grocery inflation hit 4.7%, significantly outpacing general inflation."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How much will a family of four spend on groceries in 2026?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "According to Canada’s Food Price Report 2026, a typical family of four is predicted to spend nearly $1,000 more on groceries next year, bringing their total annual food expenditure to over $17,500."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Which Canadian provinces will have the highest food prices in 2026?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "For 2026, Ontario, Quebec, Alberta, and Nova Scotia are forecasted to experience food price increases above the national average due to unique regional logistics and economic factors."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does this calculator account for shrinkflation?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Our model assumes product volume stays constant to maintain speed and privacy. However, shrinkflation (where package sizes shrink but prices stay the same) effectively raises your real inflation rate even higher than the sticker price suggests."
+      }
+    }
+  ]
+}
+</script>
+
 If you feel like your $100 grocery bill buys half of what it used to, you aren't imagining things. While the Bank of Canada aims for a 2% "All-Items" inflation target, food prices in late 2025 have been behaving very differently.
 
-As of November 2025, grocery inflation hit **4.7%**—its highest level in nearly two years. Furthermore, **Canada’s Food Price Report 2026** predicts that a typical family of four will spend nearly **\$1,000 more** on groceries next year, bringing the annual total to over **\$17,500**.
+As of November 2025, grocery inflation hit **4.7%**—its highest level in nearly two years. Furthermore, **Canada’s Food Price Report 2026** predicts that a typical family of four will spend nearly **$1,000 more** on groceries next year, bringing the annual total to over **$17,500**.
 
 We built the **Budget Defense Tool** to move beyond generic news headlines and show you the long-term impact of these spikes on your specific household.
 
@@ -21,7 +62,7 @@ Here is the "under the hood" look at how we calculate your future bill.
 
 To ensure accuracy, we anchor our tool in the latest verified data from the following institutions:
 
-* **Statistics Canada (Monthly Retail Prices):** Our baseline prices for items like ground beef (\$15.83/kg) and coffee ($5.61/300g) are pulled directly from the [StatCan Food Price Data Hub](https://www.statcan.gc.ca/en/topics-start/food-price). We use December 2025 national averages as the starting point for your cart.
+* **Statistics Canada (Monthly Retail Prices):** Our baseline prices for items like ground beef ($15.83/kg) and coffee ($5.61/300g) are pulled directly from the [StatCan Food Price Data Hub](https://www.statcan.gc.ca/en/topics-start/food-price). We use December 2025 national averages as the starting point for your cart.
 * **Canada’s Food Price Report 2026:** We integrate forecasting models from researchers at Dalhousie University and the University of Guelph. Their [2026 report](https://www.dal.ca/sites/agri-food/research/canada-s-food-price-report-2026.html) predicts meat prices will jump by another **5% to 7%**, driven by the smallest cattle inventories since 1988.
 * **Provincial CPI Tracking:** Every province has unique logistics. For 2026, **Ontario, Quebec, Alberta, and Nova Scotia** are forecasted to see price increases *above* the national average. We adjust your baseline cost according to these regional highlights.
 

@@ -8,6 +8,47 @@ layout: ../../layouts/BlogPost.astro
 category: "cpp"
 ---
 
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How much is the penalty for retiring and taking CPP at 60?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Taking your Canada Pension Plan (CPP) at age 60 results in a permanent reduction of 36% compared to age 65. This is calculated as a 0.6% penalty for every month you are under age 65."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I get Old Age Security (OAS) if I have lived in Canada for less than 40 years?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, you can receive a partial OAS pension as long as you have lived in Canada for at least 10 years after turning 18. Your payment will be prorated based on your years of residency (e.g., 20 years of residency earns you 50% of the maximum benefit)."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Do RRSP withdrawals reduce the Guaranteed Income Supplement (GIS)?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. RRSP withdrawals are considered taxable income and will reduce your GIS benefits by $0.50 for every $1.00 withdrawn. This 'clawback' can significantly impact low-income seniors."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How can I project my future CPP payments if I am still working?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "You can use the LoonieFi CPP & OAS Estimator to input your past earnings and 'project' your current salary forward. This fills in future years with your estimated income to give you a more accurate calculation of your benefit at retirement."
+      }
+    }
+  ]
+}
+</script>
+
 Personal finance is, well, *personal*. Generic advice like "save 10% of your income" is useful, but it doesn't tell you what your actual government pension cheque will look like.
 
 One of the most powerful features of our **CPP & OAS Estimator** is the ability to save and share scenarios. Whether you are a financial planner sending a link to a client, or just showing your spouse the math, you can "freeze" a scenario into a URL.
@@ -23,7 +64,7 @@ To demonstrate, we have modeled **three distinct Canadian retirement profiles**.
 **The Profile:**
 * **Current Age:** 59 (Born 1966)
 * **Retirement Age:** 60
-* **Avg Salary:** \$65,000 (Projected to age 60)
+* **Avg Salary:** $65,000 (Projected to age 60)
 * **Years in Canada:** 40+
 
 <a href="/cpp-oas-calculator?d=19660101&r=60&y=40&s=1e4s&e=0i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2i2" 
@@ -34,7 +75,7 @@ To demonstrate, we have modeled **three distinct Canadian retirement profiles**.
 
 **What to watch for:**
 We have **filled in her estimated earnings until she retires**.
-When you load Sarah's data, check the **Earnings Input** tab. You will see that we haven't just imported her past history; we have also projected her \$65,000 salary for 2025 and 2026. This gives her a true estimate of what her pension will be *after* she finishes her final year of work.
+When you load Sarah's data, check the **Earnings Input** tab. You will see that we haven't just imported her past history; we have also projected her $65,000 salary for 2025 and 2026. This gives her a true estimate of what her pension will be *after* she finishes her final year of work.
 
 ---
 
@@ -46,7 +87,7 @@ When you load Sarah's data, check the **Earnings Input** tab. You will see that 
 * **Current Age:** 60 (Born 1965)
 * **Retirement Age:** 70 (Deferred)
 * **Years in Canada (at 70):** 25
-* **Avg Salary:** \$55,000 (Projected to age 70)
+* **Avg Salary:** $55,000 (Projected to age 70)
 
 <a href="/cpp-oas-calculator?d=19650615&r=70&y=25&s=16f4&e=mfafafafafafafafafafafafafafafafafafafafafafafafafafafafafa" 
    style="background-color: #059669; color: white; text-decoration: none; padding: 12px 24px; border-radius: 8px; display: inline-flex; align-items: center; gap: 8px; font-weight: bold;"
@@ -66,9 +107,9 @@ Since Raj is still working, we have pre-filled his future income all the way to 
 
 **The Profile:**
 * **Status:** Married
-* **Jim's Income:** \$18,000 (CPP/Pension)
-* **Maria's Income:** \$0
-* **Other Income (RRSP):** \$12,000/year withdrawl
+* **Jim's Income:** $18,000 (CPP/Pension)
+* **Maria's Income:** $0
+* **Other Income (RRSP):** $12,000/year withdrawl
 
 <a href="/cpp-oas-calculator?d=19600101&r=65&y=40&m=1&sd=19620520&o=99c&si=dw0&e=050505050505050505050505050505050505050505050505050505050505050505050505050505050" 
    style="background-color: #e11d48; color: white; text-decoration: none; padding: 12px 24px; border-radius: 8px; display: inline-flex; align-items: center; gap: 8px; font-weight: bold;"
@@ -78,7 +119,7 @@ Since Raj is still working, we have pre-filled his future income all the way to 
 
 **What to watch for:**
 Check the **Insights** section at the bottom.
-You will likely see a warning about the **Guaranteed Income Supplement (GIS)**. Because they are withdrawing \$12,000 from their RRSPs (entered as "Other Income"), they are losing 50 cents of GIS for every dollar withdrawn.
+You will likely see a warning about the **Guaranteed Income Supplement (GIS)**. Because they are withdrawing $12,000 from their RRSPs (entered as "Other Income"), they are losing 50 cents of GIS for every dollar withdrawn.
 
 ---
 

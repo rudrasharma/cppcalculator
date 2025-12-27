@@ -9,6 +9,47 @@ slug: "introducing-benefits-estimator"
 category: "cpp"
 ---
 
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What are the CCB payment dates for 2025?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The Canada Child Benefit (CCB) is paid monthly, typically on the 20th. For 2025, the payment dates are January 20, February 20, March 20, April 17, May 20, June 20, July 18, August 20, September 19, October 20, November 20, and December 12."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How much is the Canada Workers Benefit (CWB) for 2025?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "For the 2025 tax year, the maximum basic CWB amount is $1,590 for single individuals and $2,739 for families. The benefit is gradually reduced once your net income exceeds $26,149 (singles) or $29,833 (families)."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Who qualifies for the 20% rural top-up on the Carbon Rebate?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Residents of Ontario, Manitoba, Saskatchewan, Alberta, Newfoundland and Labrador, Nova Scotia, and Prince Edward Island who live in designated small and rural communities are eligible for a 20% supplement on their base Canada Carbon Rebate (CAIP)."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does the Ontario Child Benefit (OCB) come separately?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. The Ontario Child Benefit is combined with your federal Canada Child Benefit (CCB) into a single monthly payment. You do not need to apply for it separately; filing your taxes automatically enrolls you."
+      }
+    }
+  ]
+}
+</script>
+
 Navigating the web of Canadian government benefits can feel like a part-time job. You have the **Canada Child Benefit (CCB)** coming on the 20th, the **GST/HST credit** coming quarterly, and the new **Carbon Rebate (CAIP)** landing in your bank account on a different schedule entirely.
 
 Most calculators online only focus on one of these at a time. You have to go to one site for your child benefits, another for your tax credits, and a third to figure out provincial help.

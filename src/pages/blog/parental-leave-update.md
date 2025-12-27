@@ -9,6 +9,47 @@ slug: "parental-leave-update"
 category: "parental"
 ---
 
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How does the Parental Sharing Benefit work?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The Sharing Benefit (often called the 'Use it or Lose it' bonus) encourages both parents to take leave. On a standard plan, one parent can take a maximum of 35 weeks. However, if both parents share the leave, the government grants an additional 5 weeks, bringing the total family pool to 40 weeks."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I see my EI parental benefits as a bi-weekly paycheck?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Our updated calculator includes a 'Paycheck View' that breaks down your total annual estimate into the actual bi-weekly deposit you can expect from Service Canada, helping you budget for monthly expenses like your mortgage."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the maximum insurable earnings for EI in 2025?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "For 2025, the maximum insurable earnings amount is set at $66,600. Our calculator includes a 'Set to Max' button to automatically cap your salary at this limit for accurate calculations."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is Maternity leave different from Parental leave?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Maternity leave is exclusive to the birth parent and cannot be shared. Parental leave is a separate pool of benefits that can be shared between both parents. Our calculator separates these into 'Person-Centric' results to show exactly who gets paid what."
+      }
+    }
+  ]
+}
+</script>
+
 Planning for a new child is exciting, but navigating Service Canada’s rules for Maternity and Parental leave is often... less exciting. 
 
 The government rules are complex. There are "Standard" vs. "Extended" plans, "Individual Maximums" vs. "Family Pools," and the confusing "Sharing Benefit" (often called the "Use it or Lose it" bonus).

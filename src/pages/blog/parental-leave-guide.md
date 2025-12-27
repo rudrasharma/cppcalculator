@@ -9,6 +9,47 @@ tags: ["Parental Leave", "EI", "Financial Planning", "Tools"]
 category: "parental"
 ---
 
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is the maximum weekly EI parental benefit for 2025?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "For 2025, based on maximum insurable earnings of $65,700, the maximum weekly payment is $695 for Standard Parental and Maternity benefits (55% replacement rate) and $417 for Extended Parental benefits (33% replacement rate)."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How many extra weeks do you get for sharing parental leave?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The 'Sharing Benefit' unlocks extra weeks if both parents take leave. On the Standard plan, you get 5 extra weeks (total 40 weeks). On the Extended plan, you get 8 extra weeks (total 69 weeks). One parent cannot take these bonus weeks alone."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I switch from Standard to Extended parental leave later?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Generally, no. Once you start receiving parental benefits, your choice between Standard (12 months) and Extended (18 months) is irrevocable. It is crucial to calculate your budget before applying."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Are maternity and parental benefits taxable in Canada?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Both federal EI and Quebec QPIP benefits are considered taxable income. The government will deduct tax from your payments, but you may still owe additional taxes when filing your annual return depending on your total household income."
+      }
+    }
+  ]
+}
+</script>
+
 Welcoming a new child is a major life transition, but the paperwork can feel like a full-time job. In Canada, the difference between choosing **Standard** or **Extended** leave isn't just about time—it’s a major financial decision that can impact your household by thousands of dollars.
 
 With the **2025 maximum insurable earnings** now set at **$65,700**, we’ve updated LoonieFi with a dedicated [Parental Leave Estimator](/) to help you stop guessing and start planning.

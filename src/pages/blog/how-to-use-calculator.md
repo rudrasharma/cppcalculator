@@ -9,6 +9,47 @@ tags: ["guide", "CPP", "OAS", "retirement planning"]
 category: "cpp"
 ---
 
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Where can I find my CPP Statement of Contributions?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "You can view your official Statement of Contributions by logging into your My Service Canada Account (MSCA). This document lists your pensionable earnings for every year since you turned 18, which is required for an accurate calculation."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How much is the penalty for taking CPP before age 65?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "If you take CPP before age 65, your monthly payment is permanently reduced by 0.6% per month. For example, retiring at age 60 results in a total permanent reduction of 36% compared to age 65."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How many years of residency do I need for a full OAS pension?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "To qualify for the maximum Old Age Security (OAS) pension, you must have lived in Canada for at least 40 years between the ages of 18 and 65. If you have fewer years, your payment is prorated based on your actual years of residency."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the 2025 Enhanced CPP (YAMPE) change?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Starting in 2024 and fully implemented in 2025, the CPP introduced a second earnings ceiling called the Year's Additional Maximum Pensionable Earnings (YAMPE). This allows you to contribute on income above the standard limit, building a larger 'Enhanced' pension portion."
+      }
+    }
+  ]
+}
+</script>
+
 Planning for retirement in Canada has just gotten more complicated. With the full implementation of the "Enhanced CPP" in 2025 introducing a second earnings ceiling (YAMPE), the old "back-of-the-napkin" math no longer works.
 
 We built the **2025 CPP & OAS Estimator** to handle this complexity for you privately in your browser.
