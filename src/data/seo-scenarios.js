@@ -16,7 +16,6 @@ export const SALARIES = [
   70000, 75000, 80000, 90000, 100000, 120000, 150000
 ];
 
-// --- ADD THIS SECTION BELOW ---
 export const FAMILY_SCENARIOS = [
   { slug: 'single-1-child', status: 'SINGLE', count: 1, label: "Single Parent (1 Child)" },
   { slug: 'single-2-children', status: 'SINGLE', count: 2, label: "Single Parent (2 Children)" },
@@ -24,4 +23,12 @@ export const FAMILY_SCENARIOS = [
   { slug: 'married-2-children', status: 'MARRIED', count: 2, label: "Couple (2 Children)" },
   { slug: 'married-3-children', status: 'MARRIED', count: 3, label: "Couple (3 Children)" },
   { slug: 'married-4-children', status: 'MARRIED', count: 4, label: "Couple (4 Children)" }
+];
+
+// --- NEW PARENTAL LEAVE SCENARIOS ---
+export const LEAVE_SCENARIOS = [
+    { slug: 'standard-couple', plan: 'STANDARD', partner: true, label: "Standard 12-Month Leave (Couple)" },
+    { slug: 'extended-couple', plan: 'EXTENDED', partner: true, label: "Extended 18-Month Leave (Couple)" },
+    { slug: 'standard-solo', plan: 'STANDARD', partner: false, label: "Standard 12-Month Leave (Single Parent)" },
+    { slug: 'extended-solo', plan: 'EXTENDED', partner: false, label: "Extended 18-Month Leave (Single Parent)" }
 ];

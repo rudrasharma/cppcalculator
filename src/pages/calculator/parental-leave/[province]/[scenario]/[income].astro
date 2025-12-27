@@ -1,0 +1,87 @@
+---
+// src/pages/calculator/parental-leave/[province]/[scenario]/[income].astro
+import BaseLayout from '../../../../../layouts/BaseLayout.astro';
+import ParentalLeave from '../../../../../components/ParentalLeave.jsx'; // OR src/components/ParentalLeave.jsx depending on your structure
+import { PROVINCES, SALARIES, LEAVE_SCENARIOS } from '../../../../../data/seo-scenarios';
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  const paths = [];
+  
+  // Optimizing build time: popular provinces get all salary bands
+  const CORE_SALARIES = [30000, 60000, 90000, 120000];
+  const POPULAR_PROVS = ['ON', 'BC', 'AB'];
+
+  PROVINCES.forEach((prov) => {
+    const salaryList = POPULAR_PROVS.includes(prov.code) ? SALARIES : CORE_SALARIES;
+
+    LEAVE_SCENARIOS.forEach((scene) => {
+        salaryList.forEach((salary) => {
+            paths.push({
+                params: { 
+                    province: prov.slug, 
+                    scenario: scene.slug,
+                    income: salary.toString() 
+                },
+                props: { 
+                    provinceCode: prov.code, 
+                    provinceName: prov.name, 
+                    salaryVal: salary,
+                    scenarioLabel: scene.label,
+                    planType: scene.plan,
+                    hasPartner: scene.partner
+                },
+            });
+        });
+    });
+  });
+
+  return paths;
+}
+
+const { provinceCode, provinceName, salaryVal, scenarioLabel, planType, hasPartner } = Astro.props;
+
+const salaryFormatted = new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD', maximumFractionDigits: 0 }).format(salaryVal);
+const durationText = planType === 'EXTENDED' ? '18 months' : '12 months';
+const title = `${durationText} Parental Leave Calculator ${provinceName} (${salaryFormatted}) | 2025 Guide`;
+const description = `Calculate your ${scenarioLabel.toLowerCase()} benefits in ${provinceName}. See weekly EI payments for a ${salaryFormatted} income under the ${planType.toLowerCase()} plan.`;
+---
+
+<BaseLayout title={title} description={description}>
+  
+  <section class="py-12 px-4 max-w-5xl mx-auto">
+    <div class="text-center mb-10">
+        <h1 class="text-3xl md:text-4xl font-black text-slate-900 mb-4">
+            {scenarioLabel} in <span class="text-rose-600">{provinceName}</span>
+        </h1>
+        <p class="text-lg text-slate-600">
+            Estimating EI benefits for an annual income of <strong>{salaryFormatted}</strong>
+        </p>
+    </div>
+
+    <ParentalLeave 
+      client:load 
+      initialProvince={provinceCode} 
+      initialSalary={salaryVal} 
+      initialPlan={planType}
+      initialPartner={hasPartner}
+    />
+
+    <div class="prose prose-slate mx-auto mt-16 bg-white p-8 rounded-3xl border border-slate-100 shadow-sm">
+      <h2>Understanding {scenarioLabel}</h2>
+      <p>
+        You have selected the <strong>{planType === 'EXTENDED' ? 'Extended (18 Month)' : 'Standard (12 Month)'}</strong> option. 
+        Residents of <strong>{provinceName}</strong> are subject to {provinceCode === 'QC' ? 'QPIP' : 'Federal EI'} rules.
+      </p>
+      <ul>
+        <li><strong>Income Replacement:</strong> Under this plan, you receive {planType === 'EXTENDED' ? '33%' : '55%'} of your insurable earnings.</li>
+        <li><strong>Max Insurable Earnings:</strong> For 2025, the maximum annual income insured is $66,600. Since you earn {salaryFormatted}, your benefits {salaryVal > 66600 ? 'will be capped at the maximum rate.' : 'will be calculated based on your actual income.'}</li>
+        {hasPartner && (
+            <li><strong>Shared Benefits:</strong> As a couple, you have access to <strong>bonus weeks</strong> of leave that disappear if not used ("use it or lose it"). The calculator above shows how to split these weeks.</li>
+        )}
+      </ul>
+    </div>
+
+  </section>
+</BaseLayout>

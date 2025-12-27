@@ -1,17 +1,15 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { 
-    AreaChart, Area, XAxis, YAxis, CartesianGrid, 
-    Tooltip as RechartsTooltip, ResponsiveContainer
+    BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, 
+    ResponsiveContainer, Cell
 } from 'recharts';
 
-// ==========================================
-//              ICONS
-// ==========================================
+// [KEEP YOUR EXISTING ICON COMPONENTS HERE - IconBase, UsersIcon, etc.]
+// ... (I am abbreviating the icons to save space, keep them exactly as they were)
 const IconBase = ({ size = 20, className = "", children }) => (
     <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>{children}</svg>
 );
-
 const UsersIcon = (props) => (<IconBase {...props}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></IconBase>);
 const MapPinIcon = (props) => (<IconBase {...props}><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></IconBase>);
 const ArrowRightIcon = (props) => (<IconBase {...props}><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></IconBase>);
@@ -83,54 +81,61 @@ function useUrlTab(defaultTab = 'input') {
 // ==========================================
 //              MAIN COMPONENT
 // ==========================================
-export default function ParentalLeave({ isVisible = true, initialProvince = 'ON', initialSalary = 70000 }) {
+export default function ParentalLeave({ 
+    isVisible = true, 
+    initialProvince = 'ON', 
+    initialSalary = 70000,
+    initialPartner = true,
+    initialPlan = 'STANDARD' // 'STANDARD' or 'EXTENDED'
+}) {
     
-    // Helper to get URL params safely
     const getParam = (key) => {
         if (typeof window === 'undefined') return null;
         const params = new URLSearchParams(window.location.search);
         return params.get(key);
     };
 
-    // --- INITIALIZE STATE (Priority: URL Params -> Props -> Defaults) ---
-    const [province, setProvince] = useState(() => {
-        const urlProv = getParam('prov');
-        return urlProv || initialProvince;
-    });
-
+    // --- LAZY STATE INITIALIZATION ---
+    const [province, setProvince] = useState(() => getParam('prov') || initialProvince);
+    
     const [salary, setSalary] = useState(() => {
-        const urlSal = getParam('sal');
-        return urlSal ? parseInt(urlSal, 36) : initialSalary;
+        const val = getParam('sal');
+        return val ? parseInt(val, 36) : initialSalary;
     });
 
     const [partnerSalary, setPartnerSalary] = useState(() => {
-        const urlPsal = getParam('psal');
-        return urlPsal ? parseInt(urlPsal, 36) : 60000;
+        const val = getParam('psal');
+        return val ? parseInt(val, 36) : 60000;
     });
 
     const [hasPartner, setHasPartner] = useState(() => {
-        const urlPart = getParam('part');
-        return urlPart ? urlPart === '1' : true;
+        const val = getParam('part');
+        return val ? val === '1' : initialPartner;
     });
 
     const [planType, setPlanType] = useState(() => {
-        const urlPlan = getParam('plan');
-        return urlPlan === 'ext' ? 'EXTENDED' : 'STANDARD';
+        const val = getParam('plan');
+        if (val) return val === 'ext' ? 'EXTENDED' : 'STANDARD';
+        return initialPlan;
     });
 
     const [p1Maternity, setP1Maternity] = useState(() => {
-        const urlMat = getParam('mat');
-        return urlMat ? urlMat === '1' : true;
+        const val = getParam('mat');
+        return val ? val === '1' : true;
     });
 
+    // Default weeks logic needs to respect plan type
     const [p1Weeks, setP1Weeks] = useState(() => {
-        const urlW = getParam('p1w');
-        return urlW ? parseInt(urlW) : 30;
+        const val = getParam('p1w');
+        if (val) return parseInt(val);
+        // If extended, default to 50 weeks, else 30
+        return initialPlan === 'EXTENDED' ? 50 : 30;
     });
 
     const [p2Weeks, setP2Weeks] = useState(() => {
-        const urlW = getParam('p2w');
-        return urlW ? parseInt(urlW) : 5;
+        const val = getParam('p2w');
+        if (val) return parseInt(val);
+        return 5;
     });
 
     const [activeTab, setActiveTab] = useUrlTab('input');
@@ -139,18 +144,16 @@ export default function ParentalLeave({ isVisible = true, initialProvince = 'ON'
 
     useEffect(() => { setMounted(true); }, []);
 
-    // Helper: Get Current Max Insurable based on province
     const currentMaxInsurable = province === 'QC' ? EI_2025.QC_MAX_INSURABLE : EI_2025.MAX_INSURABLE;
 
     // ==========================================
-    //   SYNC TO URL (Live Update)
+    //   SYNC TO URL
     // ==========================================
     useEffect(() => {
-        if (!mounted) return; // Prevent overwriting URL on hydration
+        if (!mounted) return;
 
         const params = new URLSearchParams(window.location.search);
 
-        // Inputs
         params.set('prov', province);
         if (salary > 0) params.set('sal', salary.toString(36)); else params.delete('sal');
         
@@ -164,12 +167,10 @@ export default function ParentalLeave({ isVisible = true, initialProvince = 'ON'
 
         params.set('plan', planType === 'EXTENDED' ? 'ext' : 'std');
         params.set('mat', p1Maternity ? '1' : '0');
-        
-        // Weeks allocation
         params.set('p1w', p1Weeks);
+        
         if (hasPartner) params.set('p2w', p2Weeks); else params.delete('p2w');
 
-        // View context
         params.set('view', 'parental');
 
         const newUrl = `${window.location.pathname}?${params.toString()}`;
