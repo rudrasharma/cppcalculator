@@ -32,3 +32,75 @@ export const LEAVE_SCENARIOS = [
     { slug: 'standard-solo', plan: 'STANDARD', partner: false, label: "Standard 12-Month Leave (Single Parent)" },
     { slug: 'extended-solo', plan: 'EXTENDED', partner: false, label: "Extended 18-Month Leave (Single Parent)" }
 ];
+
+// ... existing exports ...
+
+export const CPP_SCENARIOS = [
+    // --- TIMING SCENARIOS ---
+    { 
+        slug: 'early-retirement-age-60', 
+        age: 60, income: '65000', years: 40, married: false,
+        label: "Taking CPP Early at Age 60",
+        desc: "Calculate the 36% permanent reduction penalty for starting your pension early."
+    },
+    { 
+        slug: 'standard-retirement-age-65', 
+        age: 65, income: '65000', years: 40, married: false,
+        label: "Standard Retirement at Age 65",
+        desc: "Estimate your standard CPP and OAS payments with no penalties or bonuses."
+    },
+    { 
+        slug: 'deferred-retirement-age-70', 
+        age: 70, income: '65000', years: 40, married: false,
+        label: "Maximum Deferral to Age 70",
+        desc: "See how waiting until 70 increases your monthly pension by 42%."
+    },
+
+    // --- INCOME SCENARIOS ---
+    { 
+        slug: 'max-cpp-contribution', 
+        age: 65, income: '73200', years: 40, married: false, // 2025 YMPE
+        label: "Maximum CPP Contributor",
+        desc: "Scenario for high-income earners who hit the yearly maximum pensionable earnings (YMPE)."
+    },
+    { 
+        slug: 'average-canadian-salary', 
+        age: 65, income: '55000', years: 40, married: false,
+        label: "Average Canadian Income ($55k)",
+        desc: "A realistic estimate for the average Canadian worker retiring today."
+    },
+    { 
+        slug: 'low-income-gis-eligibility', 
+        age: 65, income: '20000', years: 40, married: false,
+        label: "Low Income & GIS Estimate",
+        desc: "Determine if you qualify for the Guaranteed Income Supplement (GIS) top-up."
+    },
+
+    // --- NEWCOMER SCENARIOS ---
+    { 
+        slug: 'newcomer-10-years-residence', 
+        age: 65, income: '45000', years: 10, married: false,
+        label: "Newcomer (10 Years in Canada)",
+        desc: "The minimum residency requirement to qualify for Old Age Security (OAS) in Canada."
+    },
+    { 
+        slug: 'newcomer-20-years-residence', 
+        age: 65, income: '50000', years: 20, married: false,
+        label: "Newcomer (20 Years in Canada)",
+        desc: "Calculate your partial OAS pension (20/40ths) based on 20 years of residency."
+    },
+
+    // --- FAMILY SCENARIOS ---
+    { 
+        slug: 'senior-couple-gis', 
+        age: 65, income: '35000', years: 40, married: true, spouseIncome: '25000',
+        label: "Senior Couple (GIS Eligibility)",
+        desc: "Calculate combined household benefits for a retired couple with modest income."
+    },
+    { 
+        slug: 'stay-at-home-parent', 
+        age: 65, income: '45000', years: 40, married: true, childCount: 2,
+        label: "Stay-at-Home Parent (Child Rearing)",
+        desc: "See how the Child-Rearing Dropout Provision protects your CPP benefit amount."
+    }
+];

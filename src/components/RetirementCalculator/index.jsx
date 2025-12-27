@@ -54,36 +54,103 @@ function useUrlTab(defaultTab = 'input', queryParam = 'step') {
 // ==========================================
 //              MAIN COMPONENT
 // ==========================================
-export default function Calculator({ isVisible = true }) {
+export default function Calculator({ 
+    isVisible = true,
+    // --- NEW: SEO PROPS (Defaults match "Average Canadian") ---
+    initialRetirementAge = 65,
+    initialYearsInCanada = 40,
+    initialIncome = '',     // e.g. '55000'
+    initialMaritalStatus = false,
+    initialSpouseIncome = '',
+    initialChildCount = 0,
+    initialDob = '1985-01-01'
+}) {
+    
     // --- 1. CORE STATE ---
-    const [children, setChildren] = useState([]); 
-    const [dob, setDob] = useState('1985-01-01');
-    const [retirementAge, setRetirementAge] = useState(65);
-    const [yearsInCanada, setYearsInCanada] = useState(40);
+    
+    // Initialize Children based on prop
+    const [children, setChildren] = useState(() => {
+        if (initialChildCount > 0) {
+            return Array.from({ length: initialChildCount }).map((_, i) => ({
+                id: Date.now() + i,
+                birthDate: '1990-01-01', 
+                disability: false
+            }));
+        }
+        return [];
+    });
+
+    // Initialize DOB: URL -> Prop -> Default
+    const [dob, setDob] = useState(() => {
+        if (typeof window !== 'undefined') {
+            const params = new URLSearchParams(window.location.search);
+            if(params.get('d')) return params.get('d').replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3');
+        }
+        return initialDob;
+    });
+
+    const [retirementAge, setRetirementAge] = useState(() => {
+        if (typeof window !== 'undefined') {
+            const params = new URLSearchParams(window.location.search);
+            if(params.get('r')) return parseInt(params.get('r'));
+        }
+        return initialRetirementAge;
+    });
+
+    const [yearsInCanada, setYearsInCanada] = useState(() => {
+        if (typeof window !== 'undefined') {
+            const params = new URLSearchParams(window.location.search);
+            if(params.get('y')) return parseInt(params.get('y'));
+        }
+        return initialYearsInCanada;
+    });
+
     const [earnings, setEarnings] = useState({});
     
-    // USE THE HOOK HERE
     const [activeTab, setActiveTab] = useUrlTab('input', 'step');
-    
     const [mounted, setMounted] = useState(false); 
 
     // --- 2. INPUT STATE & TOGGLES ---
-    const [avgSalaryInput, setAvgSalaryInput] = useState('');
+    
+    // Initialize Income
+    const [avgSalaryInput, setAvgSalaryInput] = useState(() => {
+        if (typeof window !== 'undefined') {
+            const params = new URLSearchParams(window.location.search);
+            if(params.get('s')) return parseInt(params.get('s'), 36).toString();
+        }
+        return initialIncome ? initialIncome.toString() : '';
+    });
+
     const [otherIncome, setOtherIncome] = useState(''); 
     
-    // UX Toggles
-    const [livedInCanadaAllLife, setLivedInCanadaAllLife] = useState(true); 
-    const [isMarried, setIsMarried] = useState(false);
-    const [showChildren, setShowChildren] = useState(false);
+    const [livedInCanadaAllLife, setLivedInCanadaAllLife] = useState(() => {
+        return initialYearsInCanada >= 40;
+    }); 
+
+    const [isMarried, setIsMarried] = useState(() => {
+        if (typeof window !== 'undefined') {
+            const params = new URLSearchParams(window.location.search);
+            if(params.get('m')) return params.get('m') === '1';
+        }
+        return initialMaritalStatus;
+    });
+
+    const [showChildren, setShowChildren] = useState(initialChildCount > 0);
     
-    // Feature: Grid & Tax
     const [showGrid, setShowGrid] = useState(false);
     const [showNet, setShowNet] = useState(false);
     const TAX_RATE = 0.15; 
 
     // Spouse Data
     const [spouseDob, setSpouseDob] = useState('1985-01-01');
-    const [spouseIncome, setSpouseIncome] = useState('');
+    const [spouseIncome, setSpouseIncome] = useState(() => {
+        if (typeof window !== 'undefined') {
+            const params = new URLSearchParams(window.location.search);
+            if(params.get('si')) return parseInt(params.get('si'), 36).toString();
+        }
+        return initialSpouseIncome ? initialSpouseIncome.toString() : '';
+    });
+    
     const [forceAllowance, setForceAllowance] = useState(false);
 
     // --- 3. UI STATE ---
@@ -104,13 +171,11 @@ export default function Calculator({ isVisible = true }) {
     const birthYear = parseInt(dob.split('-')[0]);
 
     // --- 6. LOGIC HOOK ---
-    // Ensure results has a default structure to prevent crashes
     const rawResults = useRetirementMath({
         earnings, dob, retirementAge, yearsInCanada, otherIncome,
         isMarried, spouseDob, spouseIncome, forceAllowance, children
     });
 
-    // Safety: Ensure results object always has the expected keys
     const results = {
         grandTotal: 0,
         years: [],
@@ -119,16 +184,33 @@ export default function Calculator({ isVisible = true }) {
         gis: { total: 0, note: '' },
         breakevenData: [],
         crossovers: {},
-        ...rawResults // Overwrite defaults with actual data if it exists
+        ...rawResults 
     };
 
     // --- 7. HANDLERS ---
     useEffect(() => { setMounted(true); }, []);
-    useEffect(() => { if (livedInCanadaAllLife) setYearsInCanada(40); }, [livedInCanadaAllLife]);
-    useEffect(() => { if (!showChildren) setChildren([]); }, [showChildren]);
+    
+    useEffect(() => { 
+        if (livedInCanadaAllLife && yearsInCanada !== 40) setYearsInCanada(40); 
+    }, [livedInCanadaAllLife]);
+    
+    useEffect(() => { 
+        if (!showChildren && children.length > 0) setChildren([]); 
+    }, [showChildren]);
 
     // ==========================================
-    //   1. LOAD FROM URL (Initial Mount Only)
+    //   FIX: AUTO-GENERATE EARNINGS ON MOUNT
+    // ==========================================
+    useEffect(() => {
+        // If we have an initial income from pSEO props, but the earnings table is empty,
+        // and we have the "years" data from the hook... generate the table automatically.
+        if (initialIncome && Object.keys(earnings).length === 0 && results.years.length > 0) {
+            applyAverageSalary();
+        }
+    }, [initialIncome, results.years.length]); // Depend on years.length to ensure math hook ran
+
+    // ==========================================
+    //   1. LOAD FROM URL
     // ==========================================
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
@@ -157,13 +239,11 @@ export default function Calculator({ isVisible = true }) {
     }, []);
 
     // ==========================================
-    //   2. SYNC TO URL (Live Update)
+    //   2. SYNC TO URL
     // ==========================================
     useEffect(() => {
-        // 1. Get current params (preserve 'step' if it exists)
         const params = new URLSearchParams(window.location.search);
 
-        // 2. Set Data Params
         params.set('d', dob.replace(/-/g,'')); 
         params.set('r', retirementAge);
         params.set('y', yearsInCanada);
@@ -190,10 +270,8 @@ export default function Calculator({ isVisible = true }) {
         if (compressedEarn) params.set('e', compressedEarn);
         else params.delete('e');
 
-        // Optional: track view context
         params.set('view', 'cpp');
 
-        // 3. Update URL without reloading the page
         const newUrl = `${window.location.pathname}?${params.toString()}`;
         window.history.replaceState(null, '', newUrl);
 
@@ -208,7 +286,6 @@ export default function Calculator({ isVisible = true }) {
     };
 
     const handleImport = (importedData) => {
-        // The modal now does the work. We just receive the clean object!
         if (importedData) {
             setEarnings(prev => ({ ...prev, ...importedData })); 
             setShowImport(false); 
@@ -220,35 +297,27 @@ export default function Calculator({ isVisible = true }) {
         if (!avgSalaryInput || avgSalaryInput <= 0) return;
         
         const currentYMPE = getYMPE(CURRENT_YEAR);
-        // Calculate the user's "Peak Earning Power" relative to the average Canadian
         const peakRatio = parseFloat(avgSalaryInput) / currentYMPE;
 
         setEarnings(prev => {
             const newEarnings = { ...prev };
             
-            // Define a simple curve function
             const getAgeFactor = (age) => {
-                if (age < 22) return 0.3;  // Part-time / Student
-                if (age < 25) return 0.6;  // Entry Level
-                if (age < 30) return 0.8;  // Junior/Mid
-                if (age < 35) return 0.9;  // Senior
-                return 1.0;                // Peak (35+)
+                if (age < 22) return 0.3;  
+                if (age < 25) return 0.6;  
+                if (age < 30) return 0.8;  
+                if (age < 35) return 0.9;  
+                return 1.0;                
             };
 
             results.years.forEach(year => {
                 const age = year - birthYear;
-                
-                // Only overwrite if: 
-                // 1. It's a future year (projection)
-                // 2. OR it's a past year that the user hasn't manually entered yet
                 const isFuture = year >= CURRENT_YEAR;
                 const isEmpty = newEarnings[year] === undefined;
 
                 if (isFuture || isEmpty) {
                     const yYMPE = getYMPE(year);
-                    const ageFactor = isFuture ? 1.0 : getAgeFactor(age); // Assume peak for future, curve for past
-                    
-                    // The calculation: Year's Average Wage * Your Peak Ratio * Age Adjustment
+                    const ageFactor = isFuture ? 1.0 : getAgeFactor(age); 
                     newEarnings[year] = Math.round(yYMPE * peakRatio * ageFactor);
                 }
             });
@@ -294,7 +363,6 @@ export default function Calculator({ isVisible = true }) {
     const inflationFactor = useFutureDollars ? Math.pow(1.025, retirementAge - (CURRENT_YEAR - birthYear)) : 1;
     const taxFactor = showNet ? (1 - TAX_RATE) : 1; 
     
-    // --- SAFE CALCULATIONS ---
     const displayTotal = (results.grandTotal || 0) * inflationFactor * taxFactor;
     const displayCPP = (results.cpp.total || 0) * inflationFactor * taxFactor;
     const displayOAS = (results.oas.total || 0) * inflationFactor * taxFactor;
@@ -324,10 +392,8 @@ export default function Calculator({ isVisible = true }) {
                 />
             )}
 
-            {/* MAIN CONTENT */}
             <main className="max-w-5xl mx-auto p-4 md:p-8 w-full">
                 <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-200 overflow-hidden mb-12">
-                    {/* TABS HEADER */}
                     <div className="p-2 bg-slate-50 border-b border-slate-200">
                         <div className="flex bg-slate-200/50 p-1 rounded-xl">
                             <button onClick={() => setActiveTab('input')} className={`flex-1 py-2.5 text-sm font-bold text-center rounded-lg transition-all duration-200 ${activeTab === 'input' ? 'bg-white text-indigo-600 shadow-sm ring-1 ring-slate-200' : 'text-slate-500 hover:text-slate-700'}`}>1. Earnings & Inputs</button>
@@ -358,7 +424,6 @@ export default function Calculator({ isVisible = true }) {
                                     results={results} birthYear={birthYear}
                                 />
 
-                                {/* --- HYBRID: DESKTOP INLINE ACTION BAR --- */}
                                 <div className="hidden md:flex justify-between items-center bg-slate-50 p-6 rounded-3xl border border-slate-200 mt-8">
                                     <div className="flex flex-col">
                                         <span className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Forecast @ Age {retirementAge}</span>
@@ -367,9 +432,7 @@ export default function Calculator({ isVisible = true }) {
                                         </div>
                                     </div>
                                     
-                                    {/* ADDED: Action Buttons Container */}
                                     <div className="flex items-center gap-3">
-                                        {/* NEW SHARE BUTTON */}
                                         <button 
                                             onClick={copyLink}
                                             className="bg-white text-indigo-600 py-4 px-6 rounded-2xl border border-indigo-100 shadow-sm hover:shadow-md hover:bg-indigo-50 transition-all flex items-center gap-2 font-bold text-xs uppercase tracking-wider active:scale-95"
@@ -407,7 +470,6 @@ export default function Calculator({ isVisible = true }) {
                 <div style={{ height: '140px' }}></div> 
             </main>
 
-            {/* FLOATING FOOTER (MOBILE ONLY) */}
             {isVisible && activeTab === 'input' && mounted && createPortal(
                 <div 
                     className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-slate-200 p-3 shadow-[0_-15px_40px_-10px_rgba(0,0,0,0.15)] z-[9999] animate-slide-up"
