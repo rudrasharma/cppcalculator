@@ -1,9 +1,11 @@
 ---
 import '../styles/global.css';
 import ContactButton from '../components/ContactButton';
+// Breadcrumbs import is REMOVED
 
 const { title, description } = Astro.props;
 const currentPath = Astro.url.pathname;
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 
 const TABS = [
   { id: 'cpp', href: '/cpp-oas-calculator', label: 'CPP & OAS', color: 'text-indigo-600', bg: 'bg-indigo-50' },
@@ -11,6 +13,20 @@ const TABS = [
   { id: 'ccb', href: '/child-benefit-calculator', label: 'Family Cash', color: 'text-emerald-600', bg: 'bg-emerald-50' },
   { id: 'budget', href: '/grocery-inflation-calculator', label: 'Budget Def.', color: 'text-amber-600', bg: 'bg-amber-50' },
 ];
+
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": title,
+  "applicationCategory": "FinanceApplication",
+  "operatingSystem": "Web",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "CAD"
+  },
+  "description": description
+};
 ---
 
 <html lang="en">
@@ -19,12 +35,16 @@ const TABS = [
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, viewport-fit=cover" />
     <title>{title} | LoonieFi</title>
     <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalURL} />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:image" content="/android-chrome-192x192.png" />
+
+    {/* Schema Markup */}
+    <script type="application/ld+json" set:html={JSON.stringify(schema)} />
   </head>
 
   <body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col antialiased selection:bg-indigo-100 selection:text-indigo-900">
@@ -56,6 +76,8 @@ const TABS = [
             </div>
         </div>
     </nav>
+    
+    {/* Breadcrumbs Container REMOVED */}
 
     {/* --- MAIN CONTENT SLOT --- */}
     <div class="flex-grow flex flex-col">
@@ -82,10 +104,11 @@ const TABS = [
 
             <span class="text-slate-300 hidden sm:inline">•</span>
 
-            {/* 2. SHARE LINK BUTTON (RESTORED) */}
+            {/* 2. SHARE LINK BUTTON */}
             <button id="share-btn" class="text-slate-500 hover:text-indigo-600 transition-colors flex items-center gap-1">
                 Share Link
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+                {/* ACCESSIBILITY FIX: Added aria-hidden="true" */}
+                <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
             </button>
             <span id="share-toast" class="hidden text-xs text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full animate-fade-in">Copied!</span>
 
@@ -96,14 +119,16 @@ const TABS = [
 
         {/* DISCLAIMER SECTION */}
         <div class="max-w-2xl mx-auto mb-6">
-            <p class="text-[11px] leading-relaxed text-slate-400">
+            {/* ACCESSIBILITY FIX: text-slate-500 */}
+            <p class="text-[11px] leading-relaxed text-slate-500">
                 <strong>Disclaimer:</strong> This tool provides estimates for informational purposes only and does not constitute financial, legal, or tax advice. While we strive for accuracy using official formulas, your actual government benefits (CPP, OAS, CCB) may vary based on official assessments. Please consult a professional financial planner or Service Canada for your specific situation.
             </p>
         </div>
 
         {/* COPYRIGHT */}
         <div class="flex flex-col gap-2 border-t border-slate-100 pt-6">
-            <p class="text-xs text-slate-400">
+            {/* ACCESSIBILITY FIX: text-slate-500 */}
+            <p class="text-xs text-slate-500">
                 © {new Date().getFullYear()} LoonieFi. All rights reserved.
             </p>
             <p class="text-[10px] text-slate-300 uppercase tracking-wider">
