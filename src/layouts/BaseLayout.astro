@@ -45,6 +45,20 @@ const schema = {
 
     {/* Schema Markup */}
     <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+
+    {/* Google Analytics 4 (GA4) */}
+    <script 
+      async 
+      src="https://www.googletagmanager.com/gtag/js?id=G-DS4P8VC6WQ"
+      is:inline
+    ></script>
+    <script is:inline>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-DS4P8VC6WQ');
+    </script>
   </head>
 
   <body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col antialiased selection:bg-indigo-100 selection:text-indigo-900">
@@ -77,8 +91,6 @@ const schema = {
         </div>
     </nav>
     
-    {/* Breadcrumbs Container REMOVED */}
-
     {/* --- MAIN CONTENT SLOT --- */}
     <div class="flex-grow flex flex-col">
         <slot />
