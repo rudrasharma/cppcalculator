@@ -37,6 +37,20 @@ const targetTool = TOOL_MAPPING[frontmatter.category] || { url: '/', label: 'Sta
     <meta property="og:type" content="article" />
     {frontmatter.image && <meta property="og:image" content={frontmatter.image.url} />}
 
+    {/* Google Analytics 4 (GA4) - ADDED HERE */}
+    <script 
+      async 
+      src="https://www.googletagmanager.com/gtag/js?id=G-DS4P8VC6WQ"
+      is:inline
+    ></script>
+    <script is:inline>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-DS4P8VC6WQ');
+    </script>
+
     <style is:global>
       /* Fix "Math Overflow" on mobile */
       .katex-display {
