@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import Calculator from './RetirementCalculator';
+import Calculator from '../features/retirement/components';
 import HouseholdBenefits from './HouseHoldBenefits';
 import ParentalLeave from './ParentalLeave'; 
-import GroceryInflation from './GroceryInflation'; 
+import GroceryInflation from '../features/grocery/components/GroceryInflation'; 
 import '../styles/global.css'
 
 // ICONS

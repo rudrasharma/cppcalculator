@@ -3,7 +3,7 @@ import {
     UserGroupIcon, DollarSignIcon, TrendingUpIcon, WandIcon, UploadIcon, FileTextIcon, RotateCcwIcon, BarChartIcon, ChevronDownIcon, XIcon, CheckIcon
 } from './Icons'; 
 import { Tooltip } from './SharedUI';
-import { CURRENT_YEAR, getYMPE, getYAMPE } from '../../utils/constants';
+import { CURRENT_YEAR, getYMPE, getYAMPE } from '../../../utils/constants';
 
 export default function InputTab({ 
     dob, setDob, retirementAge, setRetirementAge, isMarried, setIsMarried, 

@@ -3,7 +3,7 @@ import { useMemo } from 'react';
 import { 
     getYMPE, getYAMPE, MAX_BASE_CPP_2025, MAX_OAS_2025, 
     OAS_CLAWBACK_THRESHOLD_2025, GIS_PARAMS, CURRENT_YEAR 
-} from '../utils/constants';
+} from '../../../utils/constants';
 
 export const useRetirementMath = ({
     earnings, dob, retirementAge, yearsInCanada, otherIncome,

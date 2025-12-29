@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { CheckIcon, LinkIcon, ArrowRightIcon } from './Icons';
-import { CURRENT_YEAR, getYMPE } from '../../utils/constants';
-import { useRetirementMath } from '../../hooks/useRetirementMath';
-import { compressEarnings, decompressEarnings } from '../../utils/compression';
+import { CURRENT_YEAR, getYMPE } from '../../../utils/constants';
+import { useRetirementMath } from '../hooks/useRetirementMath';
+import { compressEarnings, decompressEarnings } from '../../../utils/compression';
 
 import { AboutModal, ImportModal } from './Modals';
 import InputTab from './InputTab';

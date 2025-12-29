@@ -4,7 +4,7 @@ import {
     XIcon, FileTextIcon, UploadIcon, InfoIcon, CheckIcon, RotateCcwIcon 
 } from './Icons'; 
 // Ensure this path matches your file structure
-import { parseMscaData } from '../../utils/mscaParser'; 
+import { parseMscaData } from '../utils/mscaParser'; 
 
 // --- ABOUT MODAL (Unchanged) ---
 export function AboutModal({ onClose }) {
