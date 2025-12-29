@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import AICopilot from './AICopilot';
-import { useUrlTab } from '../hooks/useUrlTab';
-import { EI_2025 } from '../utils/benefitConstants';
+import AICopilot from '../../../components/AICopilot';
+import { useUrlTab } from '../../../hooks/useUrlTab';
+import { EI_2025 } from '../../../utils/benefitConstants';
 import { 
     ArrowRightIcon, CheckIcon, LinkIcon, CalendarIcon, SparklesIcon,
     UsersIcon
-} from './shared';
-import { IconBase } from './shared/IconBase';
+} from '../../../components/shared';
+import { IconBase } from '../../../components/shared/IconBase';
 
 // Additional icons specific to this component
 const MapPinIcon = React.memo((props) => (

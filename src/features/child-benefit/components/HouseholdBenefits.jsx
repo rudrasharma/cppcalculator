@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { calculateAll } from '../features/child-benefit/utils/benefitEngine';
+import { calculateAll } from '../utils/benefitEngine';
 import HouseholdForm from './HouseholdForm';
 import BenefitResults from './BenefitResults';
 

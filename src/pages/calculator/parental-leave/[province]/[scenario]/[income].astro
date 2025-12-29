@@ -1,7 +1,7 @@
 ---
 // src/pages/calculator/parental-leave/[province]/[scenario]/[income].astro
 import BaseLayout from '../../../../../layouts/BaseLayout.astro';
-import ParentalLeave from '../../../../../components/ParentalLeave.jsx'; // OR src/components/ParentalLeave.jsx depending on your structure
+import ParentalLeave from '../../../../../features/parental-leave/components/ParentalLeave.jsx';
 import { PROVINCES, SALARIES, LEAVE_SCENARIOS } from '../../../../../data/seo-scenarios';
 
 export const prerender = true;

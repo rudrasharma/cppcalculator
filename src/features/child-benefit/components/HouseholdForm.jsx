@@ -8,7 +8,7 @@ import {
     CheckIcon,
     LinkIcon,
     Tooltip
-} from './shared';
+} from '../../../components/shared';
 
 export default function HouseholdForm({
     province,

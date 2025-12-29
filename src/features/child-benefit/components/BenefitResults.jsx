@@ -12,7 +12,7 @@ import {
     ExternalLinkIcon,
     DollarSignIcon,
     Accordion
-} from './shared';
+} from '../../../components/shared';
 
 export default function BenefitResults({
     results,

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Calculator from '../features/retirement/components';
-import HouseholdBenefits from './HouseholdBenefits';
-import ParentalLeave from './ParentalLeave'; 
+import HouseholdBenefits from '../features/child-benefit/components/HouseholdBenefits';
+import ParentalLeave from '../features/parental-leave/components/ParentalLeave'; 
 import GroceryInflation from '../features/grocery/components/GroceryInflation'; 
 import '../styles/global.css'
 
