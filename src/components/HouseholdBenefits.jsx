@@ -5,54 +5,22 @@ import {
     Tooltip as RechartsTooltip, ResponsiveContainer, ReferenceLine, Legend, Label
 } from 'recharts';
 import { calculateAll } from '../features/child-benefit/utils/benefitEngine';
-
-// ==========================================
-//              ICONS
-// ==========================================
-const IconBase = ({ size = 20, className = "", children }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>{children}</svg>
-);
-
-const TrashIcon = (props) => (<IconBase {...props}><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></IconBase>);
-const HelpCircleIcon = (props) => (<IconBase {...props}><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></IconBase>);
-const ChevronDownIcon = (props) => (<IconBase {...props}><polyline points="6 9 12 15 18 9"/></IconBase>);
-const DollarSignIcon = (props) => (<IconBase {...props}><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></IconBase>);
-const TrendingDownIcon = (props) => (<IconBase {...props}><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></IconBase>);
-const UsersIcon = (props) => (<IconBase {...props}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></IconBase>);
-const ArrowRightIcon = (props) => (<IconBase {...props}><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></IconBase>);
-const CalendarIcon = (props) => (<IconBase {...props}><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></IconBase>);
-const ExternalLinkIcon = (props) => (<IconBase {...props}><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></IconBase>);
-const InfoIcon = (props) => (<IconBase {...props}><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></IconBase>);
-const LinkIcon = (props) => (<IconBase {...props}><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></IconBase>);
-const CheckIcon = (props) => (<IconBase {...props}><polyline points="20 6 9 17 4 12"/></IconBase>);
-
-// ==========================================
-//              UI HELPERS
-// ==========================================
-const Tooltip = ({ text }) => (
-    <div className="group/tip relative inline-flex items-center ml-1">
-        <button type="button" className="text-slate-400 hover:text-indigo-600 transition-colors cursor-help">
-            <HelpCircleIcon size={16} />
-        </button>
-        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-4 bg-slate-800 text-slate-50 text-xs rounded-xl shadow-xl opacity-0 group-hover/tip:opacity-100 transition-all duration-200 pointer-events-none z-50 text-center leading-relaxed font-normal border border-slate-700 shadow-indigo-500/10">
-            {text}
-            <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-800"></div>
-        </div>
-    </div>
-);
-
-const Accordion = ({ title, icon: Icon, children, defaultOpen = false }) => (
-    <details className="group bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden mb-4 transition-all duration-300 hover:shadow-md" open={defaultOpen}>
-        <summary className="flex items-center justify-between p-4 cursor-pointer hover:bg-slate-50 transition select-none">
-            <div className="flex items-center gap-4">
-                <div className="text-indigo-600 bg-indigo-50 p-2.5 rounded-lg"><Icon size={20} /></div>
-                <h3 className="font-bold text-slate-800">{title}</h3>
-            </div>
-            <div className="text-slate-400 transition-transform duration-300 group-open:rotate-180"><ChevronDownIcon size={20} /></div>
-        </summary>
-        <div className="p-6 pt-2 border-t border-slate-100 text-sm text-slate-600 leading-relaxed animate-fade-in">{children}</div>
-    </details>
-);
+import {
+    TrashIcon,
+    HelpCircleIcon,
+    ChevronDownIcon,
+    DollarSignIcon,
+    TrendingDownIcon,
+    UsersIcon,
+    ArrowRightIcon,
+    CalendarIcon,
+    ExternalLinkIcon,
+    InfoIcon,
+    LinkIcon,
+    CheckIcon,
+    Tooltip,
+    Accordion
+} from './shared';
 
 // ==========================================
 //              MAIN COMPONENT
