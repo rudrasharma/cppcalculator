@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 // REMOVED 'TrashIcon' to prevent crash. Using 'XIcon' for delete instead.
 import { 
     XIcon, FileTextIcon, UploadIcon, InfoIcon, CheckIcon, RotateCcwIcon 
-} from './Icons'; 
+} from '../../../components/shared'; 
 // Ensure this path matches your file structure
 import { parseMscaData } from '../utils/mscaParser'; 
 

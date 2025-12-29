@@ -1,33 +1,24 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { createPortal } from 'react-dom';
-import { CheckIcon, LinkIcon, ArrowRightIcon } from './Icons';
-import { CURRENT_YEAR, getYMPE } from '../../../utils/constants';
 import { useRetirementMath } from '../hooks/useRetirementMath';
-import { compressEarnings, decompressEarnings } from '../../../utils/compression';
 import { useUrlTab } from '../../../hooks/useUrlTab';
-
+import { applyAverageSalary, calculateDisplayValues, calculateComparisonMessage } from '../utils/retirementHelpers';
+import { loadStateFromUrl, syncStateToUrl } from '../utils/urlSync';
 import { AboutModal, ImportModal } from './Modals';
 import InputTab from './InputTab';
 import ResultsTab from './ResultsTab';
 
-// ==========================================
-//              MAIN COMPONENT
-// ==========================================
 export default function Calculator({ 
     isVisible = true,
-    // --- NEW: SEO PROPS (Defaults match "Average Canadian") ---
     initialRetirementAge = 65,
     initialYearsInCanada = 40,
-    initialIncome = '',     // e.g. '55000'
+    initialIncome = '',
     initialMaritalStatus = false,
     initialSpouseIncome = '',
     initialChildCount = 0,
     initialDob = '1985-01-01'
 }) {
     
-    // --- 1. CORE STATE ---
-    
-    // Initialize Children based on prop
+    // --- CORE STATE ---
     const [children, setChildren] = useState(() => {
         if (initialChildCount > 0) {
             return Array.from({ length: initialChildCount }).map((_, i) => ({
@@ -39,87 +30,33 @@ export default function Calculator({
         return [];
     });
 
-    // Initialize DOB: URL -> Prop -> Default
-    const [dob, setDob] = useState(() => {
-        if (typeof window !== 'undefined') {
-            const params = new URLSearchParams(window.location.search);
-            if(params.get('d')) return params.get('d').replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3');
-        }
-        return initialDob;
-    });
-
-    const [retirementAge, setRetirementAge] = useState(() => {
-        if (typeof window !== 'undefined') {
-            const params = new URLSearchParams(window.location.search);
-            if(params.get('r')) return parseInt(params.get('r'));
-        }
-        return initialRetirementAge;
-    });
-
-    const [yearsInCanada, setYearsInCanada] = useState(() => {
-        if (typeof window !== 'undefined') {
-            const params = new URLSearchParams(window.location.search);
-            if(params.get('y')) return parseInt(params.get('y'));
-        }
-        return initialYearsInCanada;
-    });
-
+    const [dob, setDob] = useState(initialDob);
+    const [retirementAge, setRetirementAge] = useState(initialRetirementAge);
+    const [yearsInCanada, setYearsInCanada] = useState(initialYearsInCanada);
     const [earnings, setEarnings] = useState({});
-    
     const [activeTab, setActiveTab] = useUrlTab('input', 'step');
     const [mounted, setMounted] = useState(false); 
-
-    // --- 2. INPUT STATE & TOGGLES ---
     
-    // Initialize Income
-    const [avgSalaryInput, setAvgSalaryInput] = useState(() => {
-        if (typeof window !== 'undefined') {
-            const params = new URLSearchParams(window.location.search);
-            if(params.get('s')) return parseInt(params.get('s'), 36).toString();
-        }
-        return initialIncome ? initialIncome.toString() : '';
-    });
-
+    // --- INPUT STATE ---
+    const [avgSalaryInput, setAvgSalaryInput] = useState(initialIncome ? initialIncome.toString() : '');
     const [otherIncome, setOtherIncome] = useState(''); 
-    
-    const [livedInCanadaAllLife, setLivedInCanadaAllLife] = useState(() => {
-        return initialYearsInCanada >= 40;
-    }); 
-
-    const [isMarried, setIsMarried] = useState(() => {
-        if (typeof window !== 'undefined') {
-            const params = new URLSearchParams(window.location.search);
-            if(params.get('m')) return params.get('m') === '1';
-        }
-        return initialMaritalStatus;
-    });
-
+    const [livedInCanadaAllLife, setLivedInCanadaAllLife] = useState(initialYearsInCanada >= 40); 
+    const [isMarried, setIsMarried] = useState(initialMaritalStatus);
     const [showChildren, setShowChildren] = useState(initialChildCount > 0);
-    
     const [showGrid, setShowGrid] = useState(false);
     const [showNet, setShowNet] = useState(false);
     const TAX_RATE = 0.15; 
 
-    // Spouse Data
     const [spouseDob, setSpouseDob] = useState('1985-01-01');
-    const [spouseIncome, setSpouseIncome] = useState(() => {
-        if (typeof window !== 'undefined') {
-            const params = new URLSearchParams(window.location.search);
-            if(params.get('si')) return parseInt(params.get('si'), 36).toString();
-        }
-        return initialSpouseIncome ? initialSpouseIncome.toString() : '';
-    });
-    
+    const [spouseIncome, setSpouseIncome] = useState(initialSpouseIncome ? initialSpouseIncome.toString() : '');
     const [forceAllowance, setForceAllowance] = useState(false);
 
-    // --- 3. UI STATE ---
+    // --- UI STATE ---
     const [showAbout, setShowAbout] = useState(false);
     const [useFutureDollars, setUseFutureDollars] = useState(false);
     const [showImport, setShowImport] = useState(false);
     const [importText, setImportText] = useState("");
     const [importError, setImportError] = useState("");
-    
-    // --- 4. CHART & COMPARISON STATE ---
     const [chartSelection, setChartSelection] = useState(null);
     const [lineVisibility, setLineVisibility] = useState({
         Early: true, Standard: true, Deferred: true, Selected: true
@@ -129,7 +66,7 @@ export default function Calculator({
 
     const birthYear = parseInt(dob.split('-')[0]);
 
-    // --- 6. LOGIC HOOK ---
+    // --- CALCULATION HOOK ---
     const rawResults = useRetirementMath({
         earnings, dob, retirementAge, yearsInCanada, otherIncome,
         isMarried, spouseDob, spouseIncome, forceAllowance, children
@@ -146,7 +83,24 @@ export default function Calculator({
         ...rawResults 
     };
 
-    // --- 7. HANDLERS ---
+    // --- DISPLAY CALCULATIONS ---
+    const displayValues = useMemo(() => 
+        calculateDisplayValues(results, useFutureDollars, showNet, retirementAge, birthYear, TAX_RATE),
+        [results, useFutureDollars, showNet, retirementAge, birthYear]
+    );
+
+    // --- COMPARISON LOGIC ---
+    const comparisonData = useMemo(() => 
+        calculateComparisonMessage(
+            comparisonSnapshot, 
+            retirementAge, 
+            results.breakevenData, 
+            comparisonSnapshot?.breakevenData || []
+        ),
+        [comparisonSnapshot, retirementAge, results.breakevenData]
+    );
+
+    // --- EFFECTS ---
     useEffect(() => { setMounted(true); }, []);
     
     useEffect(() => { 
@@ -157,86 +111,50 @@ export default function Calculator({
         if (!showChildren && children.length > 0) setChildren([]); 
     }, [showChildren]);
 
-    // ==========================================
-    //   FIX: AUTO-GENERATE EARNINGS ON MOUNT
-    // ==========================================
     useEffect(() => {
-        // If we have an initial income from pSEO props, but the earnings table is empty,
-        // and we have the "years" data from the hook... generate the table automatically.
         if (initialIncome && Object.keys(earnings).length === 0 && results.years.length > 0) {
-            applyAverageSalary();
+            const newEarnings = applyAverageSalary(earnings, avgSalaryInput, results.years, birthYear);
+            setEarnings(newEarnings);
         }
-    }, [initialIncome, results.years.length]); // Depend on years.length to ensure math hook ran
+    }, [initialIncome, results.years.length, avgSalaryInput, birthYear]);
 
-    // ==========================================
-    //   1. LOAD FROM URL
-    // ==========================================
+    // --- URL SYNC ---
     useEffect(() => {
-        const params = new URLSearchParams(window.location.search);
-        if (params.toString()) {
-            if (params.get('d')) setDob(params.get('d').replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3'));
-            if (params.get('r')) setRetirementAge(parseInt(params.get('r')));
-            const yic = params.get('y');
-            if (yic) {
-                const yicVal = parseInt(yic);
-                setYearsInCanada(yicVal);
-                if (yicVal < 40) setLivedInCanadaAllLife(false);
-            }
-            if (params.get('s')) setAvgSalaryInput(parseInt(params.get('s'), 36).toString());
-            if (params.get('o')) setOtherIncome(parseInt(params.get('o'), 36).toString());
-            if (params.get('m') === '1') setIsMarried(true);
-            if (params.get('sd')) setSpouseDob(params.get('sd').replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3'));
-            if (params.get('si')) setSpouseIncome(parseInt(params.get('si'), 36).toString());
-            if (params.get('fa') === '1') setForceAllowance(true);
-            const earningsStr = params.get('e');
-            const dobParam = params.get('d');
-            if (earningsStr && dobParam) {
-                const bYear = parseInt(dobParam.substring(0, 4));
-                setEarnings(decompressEarnings(earningsStr, bYear));
-            }
-        }
+        const urlState = loadStateFromUrl({
+            dob: initialDob,
+            retirementAge: initialRetirementAge,
+            yearsInCanada: initialYearsInCanada,
+            avgSalaryInput: initialIncome ? initialIncome.toString() : '',
+            otherIncome: '',
+            isMarried: initialMaritalStatus,
+            spouseDob: '1985-01-01',
+            spouseIncome: initialSpouseIncome ? initialSpouseIncome.toString() : '',
+            forceAllowance: false,
+            earnings: {},
+            livedInCanadaAllLife: initialYearsInCanada >= 40
+        });
+        
+        setDob(urlState.dob);
+        setRetirementAge(urlState.retirementAge);
+        setYearsInCanada(urlState.yearsInCanada);
+        setLivedInCanadaAllLife(urlState.livedInCanadaAllLife);
+        setAvgSalaryInput(urlState.avgSalaryInput);
+        setOtherIncome(urlState.otherIncome);
+        setIsMarried(urlState.isMarried);
+        setSpouseDob(urlState.spouseDob);
+        setSpouseIncome(urlState.spouseIncome);
+        setForceAllowance(urlState.forceAllowance);
+        setEarnings(urlState.earnings);
     }, []);
 
-    // ==========================================
-    //   2. SYNC TO URL
-    // ==========================================
     useEffect(() => {
-        const params = new URLSearchParams(window.location.search);
-
-        params.set('d', dob.replace(/-/g,'')); 
-        params.set('r', retirementAge);
-        params.set('y', yearsInCanada);
-
-        if (avgSalaryInput) params.set('s', parseInt(avgSalaryInput).toString(36));
-        else params.delete('s');
-
-        if (otherIncome) params.set('o', parseInt(otherIncome).toString(36));
-        else params.delete('o');
-
-        if (isMarried) {
-            params.set('m', '1');
-            params.set('sd', spouseDob.replace(/-/g,''));
-            if (spouseIncome) params.set('si', parseInt(spouseIncome).toString(36));
-            if (forceAllowance) params.set('fa', '1');
-        } else {
-             params.delete('m');
-             params.delete('sd');
-             params.delete('si');
-             params.delete('fa');
-        }
-
-        const compressedEarn = compressEarnings(earnings, birthYear);
-        if (compressedEarn) params.set('e', compressedEarn);
-        else params.delete('e');
-
-        params.set('view', 'cpp');
-
-        const newUrl = `${window.location.pathname}?${params.toString()}`;
-        window.history.replaceState(null, '', newUrl);
-
+        syncStateToUrl({
+            dob, retirementAge, yearsInCanada, avgSalaryInput, otherIncome,
+            isMarried, spouseDob, spouseIncome, forceAllowance, earnings
+        }, birthYear);
     }, [dob, retirementAge, yearsInCanada, avgSalaryInput, otherIncome, isMarried, spouseDob, spouseIncome, forceAllowance, earnings, birthYear]);
 
-
+    // --- HANDLERS ---
     const copyLink = useCallback(() => {
         navigator.clipboard.writeText(window.location.href).then(() => {
             setCopySuccess(true);
@@ -252,37 +170,10 @@ export default function Calculator({
         }
     };
     
-    const applyAverageSalary = useCallback(() => {
-        if (!avgSalaryInput || avgSalaryInput <= 0) return;
-        
-        const currentYMPE = getYMPE(CURRENT_YEAR);
-        const peakRatio = parseFloat(avgSalaryInput) / currentYMPE;
-
-        setEarnings(prev => {
-            const newEarnings = { ...prev };
-            
-            const getAgeFactor = (age) => {
-                if (age < 22) return 0.3;  
-                if (age < 25) return 0.6;  
-                if (age < 30) return 0.8;  
-                if (age < 35) return 0.9;  
-                return 1.0;                
-            };
-
-            results.years.forEach(year => {
-                const age = year - birthYear;
-                const isFuture = year >= CURRENT_YEAR;
-                const isEmpty = newEarnings[year] === undefined;
-
-                if (isFuture || isEmpty) {
-                    const yYMPE = getYMPE(year);
-                    const ageFactor = isFuture ? 1.0 : getAgeFactor(age); 
-                    newEarnings[year] = Math.round(yYMPE * peakRatio * ageFactor);
-                }
-            });
-            return newEarnings;
-        });
-    }, [avgSalaryInput, results.years, birthYear]);
+    const handleApplyAverageSalary = useCallback(() => {
+        const newEarnings = applyAverageSalary(earnings, avgSalaryInput, results.years, birthYear);
+        setEarnings(newEarnings);
+    }, [earnings, avgSalaryInput, results.years, birthYear]);
 
     const saveComparison = () => {
         setComparisonSnapshot({
@@ -293,44 +184,6 @@ export default function Calculator({
     };
     
     const clearComparison = () => setComparisonSnapshot(null);
-
-    let comparisonMsg = null;
-    if (comparisonSnapshot && comparisonSnapshot.age !== retirementAge) {
-        const currentData = results.breakevenData;
-        const snapshotData = comparisonSnapshot.breakevenData;
-        const isCurrentLater = retirementAge > comparisonSnapshot.age;
-        const lateAge = isCurrentLater ? retirementAge : comparisonSnapshot.age;
-        const earlyAge = isCurrentLater ? comparisonSnapshot.age : retirementAge;
-        let foundCrossover = null;
-
-        for (let i = 0; i < currentData.length; i++) {
-            const age = currentData[i].age;
-            if (age <= lateAge) continue; 
-            const currentTotal = currentData[i].Selected;
-            const snapshotTotal = snapshotData.find(d => d.age === age)?.Selected || 0;
-            if (isCurrentLater) { if (currentTotal > snapshotTotal) { foundCrossover = age; break; } } 
-            else { if (snapshotTotal > currentTotal) { foundCrossover = age; break; } }
-        }
-
-        if (foundCrossover) {
-            comparisonMsg = <span className="text-slate-700"><strong>Age {lateAge}</strong> beats <strong>Age {earlyAge}</strong> if you live past <span className="text-lg font-bold text-indigo-700">{foundCrossover}</span>.</span>;
-        } else {
-            comparisonMsg = <span className="text-slate-400 italic"><strong>Age {lateAge}</strong> never catches up to <strong>Age {earlyAge}</strong> by age 95.</span>;
-        }
-    }
-
-    const inflationFactor = useFutureDollars ? Math.pow(1.025, retirementAge - (CURRENT_YEAR - birthYear)) : 1;
-    const taxFactor = showNet ? (1 - TAX_RATE) : 1; 
-    
-    const displayTotal = (results.grandTotal || 0) * inflationFactor * taxFactor;
-    const displayCPP = (results.cpp.total || 0) * inflationFactor * taxFactor;
-    const displayOAS = (results.oas.total || 0) * inflationFactor * taxFactor;
-    const displayGIS = (results.gis.total || 0) * inflationFactor * taxFactor;
-
-    const totalRaw = displayTotal || 1; 
-    const cppPerc = (displayCPP / totalRaw) * 100;
-    const oasPerc = (displayOAS / totalRaw) * 100;
-    const gisPerc = (displayGIS / totalRaw) * 100;
 
     const hasEarnings = Object.keys(earnings).length > 0;
 
@@ -362,64 +215,42 @@ export default function Calculator({
 
                     <div className="p-6 md:p-8">
                         {activeTab === 'input' && (
-                            <>
-                                <InputTab 
-                                    dob={dob} setDob={setDob}
-                                    retirementAge={retirementAge} setRetirementAge={setRetirementAge}
-                                    isMarried={isMarried} setIsMarried={setIsMarried}
-                                    spouseDob={spouseDob} setSpouseDob={setSpouseDob}
-                                    spouseIncome={spouseIncome} setSpouseIncome={setSpouseIncome}
-                                    showChildren={showChildren} setShowChildren={setShowChildren}
-                                    children={children} setChildren={setChildren}
-                                    livedInCanadaAllLife={livedInCanadaAllLife} setLivedInCanadaAllLife={setLivedInCanadaAllLife}
-                                    yearsInCanada={yearsInCanada} setYearsInCanada={setYearsInCanada}
-                                    otherIncome={otherIncome} setOtherIncome={setOtherIncome}
-                                    earnings={earnings} setEarnings={setEarnings}
-                                    avgSalaryInput={avgSalaryInput} setAvgSalaryInput={setAvgSalaryInput}
-                                    applyAverageSalary={applyAverageSalary}
-                                    setShowImport={setShowImport}
-                                    hasEarnings={hasEarnings}
-                                    showGrid={showGrid} setShowGrid={setShowGrid}
-                                    results={results} birthYear={birthYear}
-                                />
-
-                                <div className="hidden md:flex justify-between items-center bg-slate-50 p-6 rounded-3xl border border-slate-200 mt-8">
-                                    <div className="flex flex-col">
-                                        <span className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Forecast @ Age {retirementAge}</span>
-                                        <div className="text-4xl font-black text-slate-900 tracking-tighter">
-                                            ${displayTotal.toLocaleString('en-CA', { maximumFractionDigits: 0 })} <span className="text-sm text-slate-400 font-bold">/ mo</span>
-                                        </div>
-                                    </div>
-                                    
-                                    <div className="flex items-center gap-3">
-                                        <button 
-                                            onClick={copyLink}
-                                            className="bg-white text-indigo-600 py-4 px-6 rounded-2xl border border-indigo-100 shadow-sm hover:shadow-md hover:bg-indigo-50 transition-all flex items-center gap-2 font-bold text-xs uppercase tracking-wider active:scale-95"
-                                        >
-                                            {copySuccess ? <CheckIcon size={18}/> : <LinkIcon size={18}/>}
-                                            {copySuccess ? 'Copied!' : 'Share'}
-                                        </button>
-
-                                        <button 
-                                            onClick={() => { setActiveTab('results'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} 
-                                            className="bg-indigo-600 hover:bg-indigo-700 text-white font-black py-4 px-12 rounded-2xl shadow-xl shadow-indigo-200 transition-all transform hover:-translate-y-1 active:scale-95 flex items-center gap-3 uppercase tracking-widest text-xs"
-                                        >
-                                            Analyze Forecast <ArrowRightIcon size={20} />
-                                        </button>
-                                    </div>
-                                </div>
-                            </>
+                            <InputTab 
+                                dob={dob} setDob={setDob}
+                                retirementAge={retirementAge} setRetirementAge={setRetirementAge}
+                                isMarried={isMarried} setIsMarried={setIsMarried}
+                                spouseDob={spouseDob} setSpouseDob={setSpouseDob}
+                                spouseIncome={spouseIncome} setSpouseIncome={setSpouseIncome}
+                                showChildren={showChildren} setShowChildren={setShowChildren}
+                                children={children} setChildren={setChildren}
+                                livedInCanadaAllLife={livedInCanadaAllLife} setLivedInCanadaAllLife={setLivedInCanadaAllLife}
+                                yearsInCanada={yearsInCanada} setYearsInCanada={setYearsInCanada}
+                                otherIncome={otherIncome} setOtherIncome={setOtherIncome}
+                                earnings={earnings} setEarnings={setEarnings}
+                                avgSalaryInput={avgSalaryInput} setAvgSalaryInput={setAvgSalaryInput}
+                                applyAverageSalary={handleApplyAverageSalary}
+                                setShowImport={setShowImport}
+                                hasEarnings={hasEarnings}
+                                showGrid={showGrid} setShowGrid={setShowGrid}
+                                results={results} birthYear={birthYear}
+                                displayTotal={displayValues.displayTotal}
+                                copyLink={copyLink}
+                                copySuccess={copySuccess}
+                                setActiveTab={setActiveTab}
+                                isVisible={isVisible}
+                                mounted={mounted}
+                            />
                         )}
 
                         {activeTab === 'results' && (
                             <ResultsTab 
                                 results={results} hasEarnings={hasEarnings} setActiveTab={setActiveTab} birthYear={birthYear}
                                 copyLink={copyLink} copySuccess={copySuccess}
-                                displayTotal={displayTotal} displayCPP={displayCPP} displayOAS={displayOAS} displayGIS={displayGIS}
-                                cppPerc={cppPerc} oasPerc={oasPerc} gisPerc={gisPerc}
+                                displayTotal={displayValues.displayTotal} displayCPP={displayValues.displayCPP} displayOAS={displayValues.displayOAS} displayGIS={displayValues.displayGIS}
+                                cppPerc={displayValues.cppPerc} oasPerc={displayValues.oasPerc} gisPerc={displayValues.gisPerc}
                                 retirementAge={retirementAge} setRetirementAge={setRetirementAge}
-                                comparisonSnapshot={comparisonSnapshot} saveComparison={saveComparison} clearComparison={clearComparison} comparisonMsg={comparisonMsg}
-                                inflationFactor={inflationFactor} taxFactor={taxFactor}
+                                comparisonSnapshot={comparisonSnapshot} saveComparison={saveComparison} clearComparison={clearComparison} comparisonData={comparisonData}
+                                inflationFactor={displayValues.inflationFactor} taxFactor={displayValues.taxFactor}
                                 chartSelection={chartSelection} setChartSelection={setChartSelection}
                                 lineVisibility={lineVisibility} setLineVisibility={setLineVisibility}
                             />
@@ -428,45 +259,6 @@ export default function Calculator({
                 </div>
                 <div style={{ height: '140px' }}></div> 
             </main>
-
-            {isVisible && activeTab === 'input' && mounted && createPortal(
-                <div 
-                    className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-slate-200 p-3 shadow-[0_-15px_40px_-10px_rgba(0,0,0,0.15)] z-[9999] animate-slide-up"
-                    style={{ width: '100%' }}
-                >
-                    <div className="max-w-5xl mx-auto flex items-center justify-between gap-4">
-                        <div className="flex flex-col pl-2">
-                            <div className="flex items-baseline gap-1.5">
-                                <span className="text-3xl font-black text-slate-900 leading-none tracking-tighter">
-                                    ${displayTotal.toLocaleString('en-CA', { maximumFractionDigits: 0 })}
-                                </span>
-                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">/mo</span>
-                            </div>
-                            <span className="text-[9px] font-black text-indigo-500 uppercase tracking-widest leading-none mt-2 drop-shadow-sm">Forecast @ Age {retirementAge}</span>
-                        </div>
-                        
-                        <div className="flex items-center gap-2">
-                            <button 
-                                onClick={copyLink}
-                                className="p-4 rounded-2xl border-2 border-slate-100 text-slate-500 hover:bg-slate-50 active:bg-slate-200 transition-all flex items-center justify-center shadow-sm"
-                            >
-                                {copySuccess ? <CheckIcon size={22} className="text-emerald-500" /> : <LinkIcon size={22} />}
-                            </button>
-                            <button 
-                                onClick={() => {
-                                    setActiveTab('results');
-                                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                                }} 
-                                className="bg-indigo-600 hover:bg-indigo-700 text-white font-black py-4 px-6 rounded-2xl shadow-xl shadow-indigo-100 transition-all flex items-center gap-3 active:scale-95"
-                            >
-                                <span className="text-[10px] uppercase tracking-[0.2em] font-black">Analyze</span>
-                                <ArrowRightIcon size={20} />
-                            </button>
-                        </div>
-                    </div>
-                </div>,
-                document.body 
-            )}
         </div>
     );
 }

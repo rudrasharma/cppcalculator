@@ -4,19 +4,19 @@ import {
 } from 'recharts';
 import { 
     CheckIcon, LinkIcon, ScaleIcon, XIcon, TrendingUpIcon, HomeIcon, HeartHandshakeIcon, BarChartIcon, RotateCcwIcon, InfoIcon,
-    CalculatorIcon, FilterIcon, BookOpenIcon, ExternalLinkIcon 
-} from './Icons'; 
-import { Tooltip, Accordion } from './SharedUI';
+    CalculatorIcon, FilterIcon, BookOpenIcon, ExternalLinkIcon,
+    Tooltip, Accordion
+} from '../../../components/shared';
 
 export default function ResultsTab({ 
     results, hasEarnings, setActiveTab, copyLink, copySuccess, 
     displayTotal = 0, displayCPP = 0, displayOAS = 0, displayGIS = 0, 
     cppPerc = 0, oasPerc = 0, gisPerc = 0, 
     retirementAge, setRetirementAge, 
-    comparisonSnapshot, saveComparison, clearComparison, comparisonMsg, 
+    comparisonSnapshot, saveComparison, clearComparison, comparisonData, 
     inflationFactor = 1, taxFactor = 1,
     chartSelection, setChartSelection, lineVisibility, setLineVisibility,
-    birthYear // <--- 1. ADDED BIRTHYEAR PROP
+    birthYear
 }) {
     
     const handleLegendClick = (e) => {
@@ -171,7 +171,17 @@ export default function ResultsTab({
                                     </div>
                                 </div>
                                 <div className="py-4 md:py-6 font-bold text-indigo-900 leading-tight text-xs md:text-sm">
-                                    {comparisonSnapshot.age === retirementAge ? "Identical Scenarios" : comparisonMsg}
+                                    {comparisonSnapshot.age === retirementAge ? "Identical Scenarios" : comparisonData && (
+                                        comparisonData.hasCrossover ? (
+                                            <span className="text-slate-700">
+                                                <strong>Age {comparisonData.lateAge}</strong> beats <strong>Age {comparisonData.earlyAge}</strong> if you live past <span className="text-lg font-bold text-indigo-700">{comparisonData.foundCrossover}</span>.
+                                            </span>
+                                        ) : (
+                                            <span className="text-slate-400 italic">
+                                                <strong>Age {comparisonData.lateAge}</strong> never catches up to <strong>Age {comparisonData.earlyAge}</strong> by age 95.
+                                            </span>
+                                        )
+                                    )}
                                 </div>
                             </div>
                         </div>

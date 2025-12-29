@@ -1,8 +1,9 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { 
-    UserGroupIcon, DollarSignIcon, TrendingUpIcon, WandIcon, UploadIcon, FileTextIcon, RotateCcwIcon, BarChartIcon, ChevronDownIcon, XIcon, CheckIcon
-} from './Icons'; 
-import { Tooltip } from './SharedUI';
+    UserGroupIcon, DollarSignIcon, TrendingUpIcon, WandIcon, UploadIcon, FileTextIcon, RotateCcwIcon, BarChartIcon, ChevronDownIcon, XIcon, CheckIcon, LinkIcon, ArrowRightIcon,
+    Tooltip
+} from '../../../components/shared';
 import { CURRENT_YEAR, getYMPE, getYAMPE } from '../../../utils/constants';
 
 export default function InputTab({ 
@@ -13,7 +14,13 @@ export default function InputTab({
     otherIncome, setOtherIncome,
     earnings, avgSalaryInput, setAvgSalaryInput, applyAverageSalary,
     setShowImport, setEarnings, hasEarnings,
-    showGrid, setShowGrid, results, birthYear
+    showGrid, setShowGrid, results, birthYear,
+    displayTotal,
+    copyLink,
+    copySuccess,
+    setActiveTab,
+    isVisible,
+    mounted
 }) {
 
     const handleEarningChange = (year, value) => setEarnings(prev => ({ ...prev, [year]: value }));
@@ -30,6 +37,7 @@ export default function InputTab({
     };
 
     return (
+        <>
         <div className="animate-fade-in space-y-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
                 {/* COLUMN 1: PROFILE & FAMILY */}
@@ -322,6 +330,74 @@ export default function InputTab({
                     </div>
                 )}
             </div>
+
+            {/* --- DESKTOP INLINE ACTION BAR --- */}
+            <div className="hidden md:flex justify-between items-center bg-slate-50 p-6 rounded-3xl border border-slate-200 mt-8">
+                <div className="flex flex-col">
+                    <span className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Forecast @ Age {retirementAge}</span>
+                    <div className="text-4xl font-black text-slate-900 tracking-tighter">
+                        ${displayTotal.toLocaleString('en-CA', { maximumFractionDigits: 0 })} <span className="text-sm text-slate-400 font-bold">/ mo</span>
+                    </div>
+                </div>
+                
+                <div className="flex items-center gap-3">
+                    <button 
+                        onClick={copyLink}
+                        className="bg-white text-indigo-600 py-4 px-6 rounded-2xl border border-indigo-100 shadow-sm hover:shadow-md hover:bg-indigo-50 transition-all flex items-center gap-2 font-bold text-xs uppercase tracking-wider active:scale-95"
+                    >
+                        {copySuccess ? <CheckIcon size={18}/> : <LinkIcon size={18}/>}
+                        {copySuccess ? 'Copied!' : 'Share'}
+                    </button>
+
+                    <button 
+                        onClick={() => { setActiveTab('results'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} 
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white font-black py-4 px-12 rounded-2xl shadow-xl shadow-indigo-200 transition-all transform hover:-translate-y-1 active:scale-95 flex items-center gap-3 uppercase tracking-widest text-xs"
+                    >
+                        Analyze Forecast <ArrowRightIcon size={20} />
+                    </button>
+                </div>
+            </div>
         </div>
+
+        {/* --- MOBILE FLOATING FOOTER --- */}
+        {isVisible && mounted && createPortal(
+            <div 
+                className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-slate-200 p-3 shadow-[0_-15px_40px_-10px_rgba(0,0,0,0.15)] z-[9999] animate-slide-up"
+                style={{ width: '100%' }}
+            >
+                <div className="max-w-5xl mx-auto flex items-center justify-between gap-4">
+                    <div className="flex flex-col pl-2">
+                        <div className="flex items-baseline gap-1.5">
+                            <span className="text-3xl font-black text-slate-900 leading-none tracking-tighter">
+                                ${displayTotal.toLocaleString('en-CA', { maximumFractionDigits: 0 })}
+                            </span>
+                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">/mo</span>
+                        </div>
+                        <span className="text-[9px] font-black text-indigo-500 uppercase tracking-widest leading-none mt-2 drop-shadow-sm">Forecast @ Age {retirementAge}</span>
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                        <button 
+                            onClick={copyLink}
+                            className="p-4 rounded-2xl border-2 border-slate-100 text-slate-500 hover:bg-slate-50 active:bg-slate-200 transition-all flex items-center justify-center shadow-sm"
+                        >
+                            {copySuccess ? <CheckIcon size={22} className="text-emerald-500" /> : <LinkIcon size={22} />}
+                        </button>
+                        <button 
+                            onClick={() => {
+                                setActiveTab('results');
+                                window.scrollTo({ top: 0, behavior: 'smooth' });
+                            }} 
+                            className="bg-indigo-600 hover:bg-indigo-700 text-white font-black py-4 px-6 rounded-2xl shadow-xl shadow-indigo-100 transition-all flex items-center gap-3 active:scale-95"
+                        >
+                            <span className="text-[10px] uppercase tracking-[0.2em] font-black">Analyze</span>
+                            <ArrowRightIcon size={20} />
+                        </button>
+                    </div>
+                </div>
+            </div>,
+            document.body 
+        )}
+        </>
     );
 }
