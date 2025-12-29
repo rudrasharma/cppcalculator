@@ -1,0 +1,22 @@
+module.exports = {
+  printWidth: 100,
+  tabWidth: 4,
+  useTabs: false,
+  semi: true,
+  singleQuote: true,
+  trailingComma: 'es5',
+  bracketSpacing: true,
+  arrowParens: 'always',
+  plugins: [
+    'prettier-plugin-astro',
+    'prettier-plugin-tailwindcss'
+  ],
+  overrides: [
+    {
+      files: '*.astro',
+      options: {
+        parser: 'astro',
+      },
+    },
+  ],
+};

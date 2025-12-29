@@ -1,4 +1,4 @@
-import { EI_2025 } from '../../../utils/benefitConstants';
+import { EI_2025 } from '../../child-benefit/utils/constants.js';
 
 /**
  * Calculate parental leave benefits and totals
@@ -112,4 +112,3 @@ export const getMaxWeeks = (province, planType) => {
 export const isBonusWeeksActive = (combinedWeeks, individualMax) => {
     return combinedWeeks > individualMax;
 };
-

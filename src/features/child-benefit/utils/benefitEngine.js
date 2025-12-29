@@ -168,4 +168,3 @@ export const calculateAll = (netInc = 0, childList = [], isShared = false, provC
     const total = federalNet + provNet + gstTotal + caip;
     return { federal: federalNet, provincial: provNet, gst: gstTotal, caip, total, monthly: total / 12, provName };
 };
-
