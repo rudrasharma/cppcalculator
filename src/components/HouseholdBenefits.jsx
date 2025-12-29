@@ -1,26 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { createPortal } from 'react-dom';
-import { 
-    AreaChart, Area, XAxis, YAxis, CartesianGrid, 
-    Tooltip as RechartsTooltip, ResponsiveContainer, ReferenceLine, Legend, Label
-} from 'recharts';
 import { calculateAll } from '../features/child-benefit/utils/benefitEngine';
-import {
-    TrashIcon,
-    HelpCircleIcon,
-    ChevronDownIcon,
-    DollarSignIcon,
-    TrendingDownIcon,
-    UsersIcon,
-    ArrowRightIcon,
-    CalendarIcon,
-    ExternalLinkIcon,
-    InfoIcon,
-    LinkIcon,
-    CheckIcon,
-    Tooltip,
-    Accordion
-} from './shared';
+import HouseholdForm from './HouseholdForm';
+import BenefitResults from './BenefitResults';
 
 // ==========================================
 //              MAIN COMPONENT
@@ -184,272 +165,41 @@ export default function HouseholdBenefits({
 
                     <div className="p-4 md:p-10">
                         {activeTab === 'input' && (
-                            <div className="animate-fade-in space-y-10">
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-10">
-                                    <div className="space-y-6">
-                                        <div className="flex items-center gap-2 text-indigo-600 font-black uppercase text-[10px] tracking-widest"><DollarSignIcon size={16} /> Household Profile</div>
-                                        <div className="bg-slate-50 p-5 md:p-6 rounded-3xl space-y-5 border border-slate-100 shadow-sm">
-                                            <div>
-                                                <label className="text-xs font-black text-slate-700 block mb-1.5 uppercase tracking-tighter">Province</label>
-                                                {/* FIX: ADDED MISSING PROVINCES TO DROPDOWN */}
-                                                <select value={province} onChange={(e) => setProvince(e.target.value)} className="w-full p-3 bg-white border border-slate-200 rounded-2xl text-sm outline-none shadow-sm focus:ring-2 focus:ring-indigo-500 transition-all font-medium">
-                                                    <option value="ON">Ontario (ON)</option>
-                                                    <option value="AB">Alberta (AB)</option>
-                                                    <option value="BC">British Columbia (BC)</option>
-                                                    <option value="QC">Quebec (QC)</option>
-                                                    <option value="SK">Saskatchewan (SK)</option>
-                                                    <option value="MB">Manitoba (MB)</option>
-                                                    <option value="NS">Nova Scotia (NS)</option>
-                                                    <option value="NB">New Brunswick (NB)</option>
-                                                    <option value="NL">Newfoundland (NL)</option>
-                                                    <option value="PE">Prince Edward Island (PE)</option>
-                                                    <option value="OTHER">Other Provinces</option>
-                                                </select>
-                                            </div>
-                                            <div>
-                                                <label className="text-xs font-black text-slate-700 block mb-1.5 uppercase tracking-tighter">Marital Status</label>
-                                                <select value={maritalStatus} onChange={(e) => setMaritalStatus(e.target.value)} className="w-full p-3 bg-white border border-slate-200 rounded-2xl text-sm outline-none shadow-sm focus:ring-2 focus:ring-indigo-500 transition-all font-medium">
-                                                    <option value="MARRIED">Married / Common-Law</option><option value="SINGLE">Single Parent</option>
-                                                </select>
-                                            </div>
-                                            <div>
-                                                <label className="text-xs font-bold text-slate-400 uppercase mb-1 block">Net Household Income</label>
-                                                <div className="relative group">
-                                                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 font-bold group-focus-within:text-indigo-500 transition-colors">$</span>
-                                                    <input type="number" value={grossAfni} onChange={(e) => setGrossAfni(parseInt(e.target.value)||0)} className="w-full pl-9 p-3 bg-white border border-slate-200 rounded-2xl font-mono text-xl font-black text-slate-800 focus:ring-2 focus:ring-indigo-500 outline-none transition-all" />
-                                                </div>
-                                            </div>
-                                            <div className="space-y-3 pt-2">
-                                                <label className="flex items-center gap-3 cursor-pointer bg-white p-3 rounded-2xl border border-slate-200 text-sm font-bold transition-all hover:border-indigo-200 shadow-sm group">
-                                                    <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${sharedCustody ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-slate-300 bg-slate-50'}`}>
-                                                        <input type="checkbox" checked={sharedCustody} onChange={(e) => setSharedCustody(e.target.checked)} className="sr-only" />
-                                                        {sharedCustody && <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><polyline points="20 6 9 17 4 12"/></svg>}
-                                                    </div>
-                                                    <div className="flex flex-col"><span className="leading-none group-hover:text-indigo-600 transition-colors">Shared Custody?</span><span className="text-[9px] text-slate-400 uppercase font-black tracking-wider mt-1">40-60% split</span></div>
-                                                </label>
-                                                {province !== 'QC' && (
-                                                <label className="flex items-center gap-3 cursor-pointer bg-white p-3 rounded-2xl border border-slate-200 text-sm font-bold transition-all hover:border-emerald-200 shadow-sm group">
-                                                    <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${isRural ? 'bg-emerald-600 border-emerald-600 text-white' : 'border-slate-300 bg-slate-50'}`}>
-                                                        <input type="checkbox" checked={isRural} onChange={(e) => setIsRural(e.target.checked)} className="sr-only" />
-                                                        {isRural && <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4"><polyline points="20 6 9 17 4 12"/></svg>}
-                                                    </div>
-                                                    <div className="flex flex-col"><span className="leading-none group-hover:text-emerald-600 transition-colors">Rural Area?</span><span className="text-[9px] text-slate-400 uppercase font-black tracking-wider mt-1">+20% Carbon Rebate</span></div>
-                                                </label>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Children Column */}
-                                    <div className="md:col-span-2 space-y-6">
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex items-center gap-2 text-emerald-600 font-black uppercase text-[10px] tracking-widest"><UsersIcon size={16} /> Children</div>
-                                            <button onClick={addChild} className="bg-emerald-600 text-white font-black px-4 py-2 md:px-6 md:py-2.5 rounded-2xl hover:bg-emerald-700 transition shadow-lg shadow-emerald-200 text-xs md:text-sm flex items-center gap-2 transform active:scale-95">+ Add Child</button>
-                                        </div>
-                                        <div className="grid gap-5">
-                                            {children.map((child, idx) => (
-                                                <div key={child.id} className="bg-white p-5 md:p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col sm:flex-row gap-6 md:gap-8 items-center group hover:border-emerald-300 transition-all relative">
-                                                    <div className="bg-emerald-50 text-emerald-600 w-12 h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center font-black text-lg md:text-xl shrink-0 border-2 border-emerald-100">{idx + 1}</div>
-                                                    <div className="flex-1 w-full">
-                                                        <div className="flex justify-between mb-4">
-                                                            <label className="text-xs font-black text-slate-400 uppercase tracking-widest">Child Age: <span className="text-slate-900 text-xl">{child.age}</span></label>
-                                                            <div className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-600 text-[9px] md:text-[10px] font-black uppercase tracking-tighter shadow-inner border border-emerald-100">
-                                                                {child.age < 6 ? "Max Rate" : "Std Rate"}
-                                                            </div>
-                                                        </div>
-                                                        <input type="range" min="0" max="18" value={child.age} onChange={(e) => updateChild(child.id, 'age', parseInt(e.target.value))} className="w-full h-2.5 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-emerald-500" />
-                                                    </div>
-                                                    <div className="flex flex-col sm:flex-row items-center gap-4 shrink-0 bg-slate-50/50 p-3 rounded-2xl border border-slate-100 w-full sm:w-auto">
-                                                        <label className="flex items-center gap-3 cursor-pointer select-none group/dis w-full sm:w-auto">
-                                                            <input type="checkbox" checked={child.disability} onChange={(e) => updateChild(child.id, 'disability', e.target.checked)} className="w-6 h-6 text-emerald-600 rounded-lg border-slate-300" />
-                                                            <div className="flex flex-col">
-                                                                <span className="text-xs font-black text-slate-700 group-hover/dis:text-emerald-600 transition-colors">Disability (DTC)</span>
-                                                                <span className="text-[9px] text-slate-400 font-bold uppercase tracking-tighter">Required T2201 <Tooltip text="Requires an approved Form T2201 (Disability Tax Credit Certificate) on file with the CRA. This adds up to $3,411 per year per child." /></span>
-                                                            </div>
-                                                        </label>
-                                                        <div className="w-full h-px sm:w-px sm:h-8 bg-slate-200"></div>
-                                                        <button onClick={() => removeChild(child.id)} className="text-slate-300 hover:text-rose-500 p-2 transition-all transform hover:scale-110 active:scale-90 w-full sm:w-auto flex justify-center"><TrashIcon size={22}/></button>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                            {children.length === 0 && <div className="text-center p-10 md:p-20 border-2 border-dashed rounded-[2.5rem] text-slate-400 font-black uppercase tracking-widest text-xs bg-slate-50/50">Add a child to begin estimating CCB Support</div>}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* --- HYBRID: DESKTOP INLINE ACTION --- */}
-                                <div className="hidden md:flex justify-between items-center bg-slate-50 p-6 rounded-3xl border border-slate-200">
-                                    <div className="flex flex-col">
-                                        <span className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Estimated Annual Benefit</span>
-                                        <div className="text-4xl font-black text-slate-900 tracking-tighter">
-                                            ${Math.round(results.total).toLocaleString()} <span className="text-sm text-slate-400 font-bold">/ yr</span>
-                                        </div>
-                                    </div>
-                                    
-                                    <div className="flex items-center gap-3">
-                                        {/* ADDED SHARE BUTTON */}
-                                        <button 
-                                            onClick={copyLink}
-                                            className="bg-white text-indigo-600 py-4 px-6 rounded-2xl border border-indigo-100 shadow-sm hover:shadow-md hover:bg-indigo-50 transition-all flex items-center gap-2 font-bold text-xs uppercase tracking-wider active:scale-95"
-                                        >
-                                            {copySuccess ? <CheckIcon size={18}/> : <LinkIcon size={18}/>}
-                                            {copySuccess ? 'Copied!' : 'Share'}
-                                        </button>
-
-                                        <button 
-                                            onClick={() => { setActiveTab('results'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} 
-                                            className="bg-indigo-600 hover:bg-indigo-700 text-white font-black py-4 px-12 rounded-2xl shadow-xl shadow-indigo-200 transition-all transform hover:-translate-y-1 active:scale-95 flex items-center gap-3 uppercase tracking-widest text-xs"
-                                        >
-                                            View Full Breakdown <ArrowRightIcon size={20} />
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
+                            <HouseholdForm
+                                province={province}
+                                setProvince={setProvince}
+                                maritalStatus={maritalStatus}
+                                setMaritalStatus={setMaritalStatus}
+                                grossAfni={grossAfni}
+                                setGrossAfni={setGrossAfni}
+                                sharedCustody={sharedCustody}
+                                setSharedCustody={setSharedCustody}
+                                isRural={isRural}
+                                setIsRural={setIsRural}
+                                children={children}
+                                addChild={addChild}
+                                removeChild={removeChild}
+                                updateChild={updateChild}
+                                results={results}
+                                copyLink={copyLink}
+                                copySuccess={copySuccess}
+                                setActiveTab={setActiveTab}
+                                isVisible={isVisible}
+                                mounted={mounted}
+                            />
                         )}
 
                         {activeTab === 'results' && (
-                            <div className="animate-fade-in space-y-8 md:space-y-10">
-                                {/* Result Hero */}
-                                <div className="bg-slate-900 rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-10 text-white relative overflow-hidden shadow-2xl ring-1 ring-white/10">
-                                    <div className="absolute top-0 right-0 -mr-20 -mt-20 w-60 h-60 md:w-96 md:h-96 bg-emerald-500/20 rounded-full blur-[80px] md:blur-[100px] pointer-events-none"></div>
-                                    <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-60 h-60 md:w-96 md:h-96 bg-indigo-500/20 rounded-full blur-[80px] md:blur-[100px] pointer-events-none"></div>
-                                    
-                                    <div className="relative z-10 grid md:grid-cols-2 gap-8 md:gap-12 items-center">
-                                        <div className="text-center md:text-left">
-                                            <h2 className="text-emerald-400 text-[10px] font-black uppercase tracking-[0.3em] mb-3">Total Estimated Support</h2>
-                                            <div className="flex items-baseline justify-center md:justify-start gap-2 flex-wrap">
-                                                <span className="text-5xl md:text-7xl font-black tracking-tighter drop-shadow-xl">${results.total.toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
-                                                <span className="text-slate-400 text-lg md:text-xl font-bold tracking-tight">/ year</span>
-                                            </div>
-                                            <div className="mt-6 flex flex-col gap-2">
-                                                <p className="text-slate-400 text-sm font-bold tracking-tight flex items-center justify-center md:justify-start gap-2 bg-white/5 inline-flex self-center md:self-start px-4 py-2 rounded-full border border-white/5">
-                                                    <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                                                    ~${Math.round(results.monthly).toLocaleString()} Average Monthly Support
-                                                </p>
-                                                <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest pl-0 md:pl-4 mt-2">Non-taxable federal & provincial assistance</p>
-                                            </div>
-                                        </div>
-                                        <div className="bg-white/5 rounded-[1.5rem] md:rounded-[2rem] p-5 md:p-8 border border-white/10 backdrop-blur-xl shadow-inner">
-                                            <div className="flex h-4 md:h-6 w-full rounded-full overflow-hidden bg-white/10 p-1 mb-4 md:mb-6">
-                                                <div style={{ width: `${(results.federal/results.total)*100}%` }} className="bg-blue-500 rounded-full mr-0.5 shadow-lg shadow-blue-500/50"></div>
-                                                <div style={{ width: `${(results.provincial/results.total)*100}%` }} className="bg-emerald-500 rounded-full mr-0.5 shadow-lg shadow-emerald-500/50"></div>
-                                                <div style={{ width: `${((results.gst + results.caip)/results.total)*100}%` }} className="bg-indigo-500 rounded-full"></div>
-                                            </div>
-                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
-                                                <div className="flex items-center gap-3 text-[10px] font-black uppercase text-slate-300 tracking-tighter"><div className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-sm"></div> Federal CCB</div>
-                                                <div className="flex items-center gap-3 text-[10px] font-black uppercase text-slate-300 tracking-tighter"><div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm"></div> {results.provName}</div>
-                                                <div className="flex items-center gap-3 text-[10px] font-black uppercase text-slate-300 tracking-tighter"><div className="w-2.5 h-2.5 rounded-full bg-indigo-500 shadow-sm"></div> GST & Carbon Credits</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                    {/* Phase out Chart */}
-                                    <div className="bg-white p-4 md:p-8 rounded-[2rem] md:rounded-[2.5rem] border border-slate-200 shadow-sm relative overflow-hidden">
-                                        <h3 className="font-black text-slate-800 mb-6 md:mb-8 flex items-center gap-2 uppercase tracking-widest text-[10px]"><TrendingDownIcon size={18} className="text-indigo-600"/> Income Phase-out Curve</h3>
-                                        <div className="h-[250px] md:h-[320px] w-full -ml-4 md:ml-0">
-                                            <ResponsiveContainer width="100%" height="100%">
-                                                <AreaChart data={chartData} margin={{ top: 20, right: 10, left: 0, bottom: 20 }}>
-                                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                                                    <XAxis dataKey="income" fontSize={10} tickFormatter={v => `$${v/1000}k`} axisLine={false} tickLine={false}>
-                                                        <Label value="Net Income" offset={-15} position="insideBottom" fontSize={10} fontWeight="900" fill="#94a3b8" />
-                                                    </XAxis>
-                                                    <YAxis fontSize={10} axisLine={false} tickLine={false} tickFormatter={v => `$${v/1000}k`} />
-                                                    <RechartsTooltip 
-                                                        contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '15px', color: '#f8fafc', fontWeight: 'bold', fontSize: '11px' }}
-                                                        formatter={(v, name) => [`$${v.toLocaleString()}`, name]} 
-                                                        labelFormatter={(l) => `Income: $${l.toLocaleString()}`}
-                                                    />
-                                                    <Legend verticalAlign="top" align="right" height={36} iconType="circle" wrapperStyle={{ fontSize: '9px', fontWeight: '900', textTransform: 'uppercase', paddingBottom: '10px' }} />
-                                                    <Area type="monotone" dataKey="CCB" name="Fed CCB" stackId="1" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.6} />
-                                                    <Area type="monotone" dataKey="Provincial" name="Provincial" stackId="1" stroke="#10b981" fill="#10b981" fillOpacity={0.6} />
-                                                    <Area type="monotone" dataKey="Credits" name="GST/Carbon" stackId="1" stroke="#6366f1" fill="#6366f1" fillOpacity={0.6} />
-                                                    <ReferenceLine x={afni} stroke="#6366f1" strokeDasharray="8 8" label={{ position: 'top', value: 'YOU', fill: '#6366f1', fontSize: 10, fontWeight: '900' }} />
-                                                </AreaChart>
-                                            </ResponsiveContainer>
-                                        </div>
-                                    </div>
-
-                                    {/* Monthly Schedule */}
-                                    <div className="bg-white p-5 md:p-8 rounded-[2rem] md:rounded-[2.5rem] border border-slate-200 shadow-sm flex flex-col">
-                                        <h3 className="font-black text-slate-800 mb-6 md:mb-8 flex items-center gap-2 uppercase tracking-widest text-[10px]"><CalendarIcon size={18} className="text-indigo-600"/> Payment Schedule</h3>
-                                        <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 flex-1">
-                                            {paymentSchedule.map((item, idx) => (
-                                                <div key={idx} className={`p-3 md:p-4 rounded-[1rem] md:rounded-[1.5rem] border text-center transition-all flex flex-col justify-center items-center shadow-sm ${item.isQuarterly ? 'bg-indigo-50 border-indigo-100 ring-2 ring-indigo-500/10' : 'bg-slate-50 border-slate-100'}`}>
-                                                    <div className="text-[8px] md:text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">{item.month}</div>
-                                                    <div className={`text-sm md:text-base font-black tracking-tighter ${item.isQuarterly ? 'text-indigo-600' : 'text-slate-800'}`}>${Math.round(item.total)}</div>
-                                                    {item.isQuarterly && <div className="text-[6px] md:text-[7px] font-black text-indigo-400 uppercase tracking-tighter mt-1">+Bonus</div>}
-                                                </div>
-                                            ))}
-                                        </div>
-                                        <div className="mt-6 md:mt-8 p-4 bg-slate-900 rounded-2xl flex items-center gap-3 border-2 border-indigo-500/20">
-                                            <div className="p-2 bg-white/10 rounded-lg text-indigo-400"><InfoIcon size={16}/></div>
-                                            <p className="text-[9px] text-slate-300 font-bold uppercase tracking-widest leading-relaxed">
-                                                CCB/Provincial: 20th <br/>
-                                                GST: 5th | Carbon: 15th (Quarterly)
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* FAQ Section */}
-                                <div className="max-w-3xl mx-auto w-full space-y-4">
-                                    <Accordion title="Understanding Net Income (AFNI)" icon={HelpCircleIcon}>
-                                        <p>Your <strong>Adjusted Family Net Income</strong> is the primary driver of benefit reductions (clawbacks). For the benefit year of July 2025 to June 2026, the government looks at your <strong>2024 Tax Return</strong>. Specifically, it uses <strong>Line 23600</strong> (Net Income) minus any UCCB or RDSP income received.</p>
-                                    </Accordion>
-                                    <Accordion title="Shared Custody Rules" icon={UsersIcon}>
-                                        <p>If you have a 40-60% shared custody arrangement that has been registered with the CRA, each parent receives exactly <strong>50% of the benefit amount</strong> they would have received if the child lived with them full-time. The amount is calculated based on each parent's individual household income.</p>
-                                    </Accordion>
-                                    <Accordion title="Official CRA Resources" icon={ExternalLinkIcon}>
-                                        <div className="flex flex-col gap-4">
-                                            <a href="https://www.canada.ca/en/revenue-agency/services/child-family-benefits/canada-child-benefit-overview.html" target="_blank" className="flex items-center justify-between p-4 bg-indigo-50 rounded-2xl group transition-all hover:bg-indigo-100">
-                                                <div className="flex items-center gap-3"><DollarSignIcon className="text-indigo-600" /> <span className="font-bold text-indigo-900 text-sm">CRA CCB Overview</span></div>
-                                                <ExternalLinkIcon size={16} className="text-indigo-400 group-hover:translate-x-1 transition-transform" />
-                                            </a>
-                                            <a href="https://www.canada.ca/en/revenue-agency/services/child-family-benefits/goods-services-tax-harmonized-sales-tax-credit.html" target="_blank" className="flex items-center justify-between p-4 bg-emerald-5 rounded-2xl group transition-all hover:bg-emerald-100">
-                                                <div className="flex items-center gap-3"><DollarSignIcon className="text-emerald-600" /> <span className="font-bold text-emerald-900 text-sm">GST/HST Credit Rules</span></div>
-                                                <ExternalLinkIcon size={16} className="text-emerald-400 group-hover:translate-x-1 transition-transform" />
-                                            </a>
-                                        </div>
-                                    </Accordion>
-                                </div>
-                            </div>
+                            <BenefitResults
+                                results={results}
+                                chartData={chartData}
+                                paymentSchedule={paymentSchedule}
+                                afni={afni}
+                            />
                         )}
                     </div>
                 </div>
             </main>
-
-            {/* HYBRID: MOBILE FLOATING FOOTER */}
-            {isVisible && activeTab === 'input' && mounted && createPortal(
-                <div 
-                    className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200 p-4 md:p-5 z-[9999] animate-slide-up shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)]" 
-                    style={{ width: '100%' }}
-                >
-                    <div className="max-w-5xl mx-auto flex items-center justify-between gap-4 md:gap-6">
-                        <div className="flex flex-col">
-                            <span className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-1">Est. Total Benefits</span>
-                            <div className="flex items-baseline gap-1.5">
-                                <span className="text-3xl md:text-4xl font-black text-slate-900 tracking-tighter">
-                                    ${Math.round(results.total).toLocaleString()}
-                                </span>
-                                <span className="text-xs font-black text-slate-400 uppercase">/ yr</span>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-3">
-                             <button onClick={copyLink} className="bg-white text-indigo-600 p-3 md:py-4 md:px-6 rounded-[1.2rem] md:rounded-[1.5rem] border border-indigo-100 shadow-lg shadow-indigo-100/50 transition-all hover:bg-indigo-50 active:scale-95 flex items-center justify-center gap-2">
-                               {copySuccess ? <CheckIcon size={20}/> : <LinkIcon size={20}/>}
-                               <span className="hidden md:inline font-bold text-xs uppercase tracking-wider">{copySuccess ? 'Copied' : 'Share'}</span>
-                             </button>
-                            
-                            <button onClick={() => { setActiveTab('results'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="bg-indigo-600 hover:bg-indigo-700 text-white font-black py-3 px-6 md:py-4 md:px-12 rounded-[1.2rem] md:rounded-[1.5rem] shadow-xl shadow-indigo-200 transition-all flex items-center gap-2 transform active:scale-95 whitespace-nowrap uppercase tracking-widest text-[10px]">
-                                View Full Breakdown <ArrowRightIcon size={18} />
-                            </button>
-                        </div>
-                    </div>
-                </div>,
-                document.body 
-            )}
         </div>
     );
 }
