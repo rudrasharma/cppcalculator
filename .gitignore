@@ -22,3 +22,11 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# Testing
+coverage/
+.nyc_output/
+*.lcov
+
+# Jest
+.jest-cache/
