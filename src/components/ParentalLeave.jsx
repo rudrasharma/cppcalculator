@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
+// --- 1. IMPORT THE AI COPILOT ---
+import AICopilot from './AICopilot';
+
 import { 
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, 
     ResponsiveContainer, Cell
@@ -148,7 +151,7 @@ export default function ParentalLeave({
     const currentMaxInsurable = province === 'QC' ? EI_2025.QC_MAX_INSURABLE : EI_2025.MAX_INSURABLE;
 
     // ==========================================
-    //   SYNC TO URL (Live Update)
+    //    SYNC TO URL (Live Update)
     // ==========================================
     useEffect(() => {
         if (!mounted) return;
@@ -206,6 +209,24 @@ export default function ParentalLeave({
         } else {
             if (newWeeks + p1Weeks > pool) setP1Weeks(Math.max(0, pool - newWeeks));
             setP2Weeks(newWeeks);
+        }
+    };
+
+    // ==========================================
+    //    2. HANDLE AI UPDATES (COPILOT)
+    // ==========================================
+    const handleAIUpdate = (args) => {
+        if (args.province) setProvince(args.province);
+        if (args.annual_income) setSalary(args.annual_income);
+        if (args.partner_income) {
+            setPartnerSalary(args.partner_income);
+            setHasPartner(true); // If AI sets partner income, assume partner exists
+        }
+        if (typeof args.has_partner !== 'undefined') {
+            setHasPartner(args.has_partner);
+        }
+        if (args.plan_type) {
+            setPlanType(args.plan_type);
         }
     };
 
@@ -299,7 +320,6 @@ export default function ParentalLeave({
                                         <div className="bg-slate-50 p-5 rounded-3xl border border-slate-100 shadow-sm space-y-4">
                                             <div>
                                                 <label className="text-xs font-black text-slate-700 block mb-1.5 uppercase tracking-tighter">Province</label>
-                                                {/* FIX: Added missing provinces so 'SK', 'MB', 'NS' etc. select correctly */}
                                                 <select value={province} onChange={(e) => setProvince(e.target.value)} className="w-full p-3 bg-white border border-slate-200 rounded-2xl text-sm focus:ring-2 focus:ring-rose-500 outline-none shadow-sm font-medium">
                                                     <option value="ON">Ontario (EI)</option>
                                                     <option value="BC">British Columbia (EI)</option>
@@ -668,6 +688,23 @@ export default function ParentalLeave({
                     </div>
                 </div>,
                 document.body 
+            )}
+
+            {/* --- 3. THE AI COPILOT FLOATING WIDGET (PORTAL FIX) --- */}
+            {mounted && createPortal(
+                <AICopilot 
+                    context={{
+                        province,
+                        salary,
+                        partnerSalary,
+                        planType,
+                        hasPartner,
+                        p1Weeks,
+                        p2Weeks
+                    }}
+                    onUpdateCalculator={handleAIUpdate}
+                />,
+                document.body
             )}
         </div>
     );
