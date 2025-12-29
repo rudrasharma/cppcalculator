@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Calculator from '../features/retirement/components';
-import HouseholdBenefits from './HouseHoldBenefits';
+import HouseholdBenefits from './HouseholdBenefits';
 import ParentalLeave from './ParentalLeave'; 
 import GroceryInflation from '../features/grocery/components/GroceryInflation'; 
 import '../styles/global.css'
@@ -67,7 +67,7 @@ export default function CalculatorSuite() {
     return 'landing';
   }); 
 
-  const activeTabInfo = TABS.find(t => t.id === view);
+  const activeTabInfo = useMemo(() => TABS.find(t => t.id === view), [view]);
 
   useEffect(() => {
     const handlePopState = () => {
@@ -79,14 +79,14 @@ export default function CalculatorSuite() {
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
-  const changeView = (newView) => {
+  const changeView = useCallback((newView) => {
     setView(newView);
     localStorage.setItem('loonie_pref_view', newView);
     const url = new URL(window.location);
     if (newView === 'landing') url.searchParams.delete('view');
     else url.searchParams.set('view', newView);
     window.history.pushState({}, '', url);
-  };
+  }, []);
 
   return (
     // FIX 1: Removed 'min-h-screen'. Added 'flex flex-col h-full' to allow Index.astro to manage height.

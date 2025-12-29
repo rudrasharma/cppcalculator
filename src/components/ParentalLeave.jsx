@@ -1,87 +1,58 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-// --- 1. IMPORT THE AI COPILOT ---
 import AICopilot from './AICopilot';
-
+import { useUrlTab } from '../hooks/useUrlTab';
+import { EI_2025 } from '../utils/benefitConstants';
 import { 
-    BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, 
-    ResponsiveContainer, Cell
-} from 'recharts';
+    ArrowRightIcon, CheckIcon, LinkIcon, CalendarIcon, SparklesIcon,
+    UsersIcon
+} from './shared';
+import { IconBase } from './shared/IconBase';
 
-// ==========================================
-//              ICONS
-// ==========================================
-const IconBase = ({ size = 20, className = "", children }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>{children}</svg>
-);
+// Additional icons specific to this component
+const MapPinIcon = React.memo((props) => (
+    <IconBase {...props}>
+        <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
+        <circle cx="12" cy="10" r="3"/>
+    </IconBase>
+));
 
-const UsersIcon = (props) => (<IconBase {...props}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></IconBase>);
-const MapPinIcon = (props) => (<IconBase {...props}><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></IconBase>);
-const ArrowRightIcon = (props) => (<IconBase {...props}><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></IconBase>);
-const SlidersIcon = (props) => (<IconBase {...props}><line x1="4" x2="4" y1="21" y2="14"/><line x1="4" x2="4" y1="10" y2="3"/><line x1="12" x2="12" y1="21" y2="12"/><line x1="12" x2="12" y1="8" y2="3"/><line x1="20" x2="20" y1="21" y2="16"/><line x1="20" x2="20" y1="12" y2="3"/><line x1="2" x2="6" y1="14" y2="14"/><line x1="10" x2="14" y1="8" y2="8"/><line x1="18" x2="22" y1="16" y2="16"/></IconBase>);
-const CheckCircleIcon = (props) => (<IconBase {...props}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></IconBase>);
-const SparklesIcon = (props) => (<IconBase {...props}><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></IconBase>);
-const CalendarIcon = (props) => (<IconBase {...props}><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></IconBase>);
-const WalletIcon = (props) => (<IconBase {...props}><path d="M20 7h-7"/><path d="M14 11h6"/><path d="m20 7 2 2-2 2"/><path d="M5 20h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-3"/><path d="M7 2v16"/><path d="M3 11h4"/></IconBase>);
-const LinkIcon = (props) => (<IconBase {...props}><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></IconBase>);
-const CheckIcon = (props) => (<IconBase {...props}><polyline points="20 6 9 17 4 12"/></IconBase>);
+const SlidersIcon = React.memo((props) => (
+    <IconBase {...props}>
+        <line x1="4" x2="4" y1="21" y2="14"/>
+        <line x1="4" x2="4" y1="10" y2="3"/>
+        <line x1="12" x2="12" y1="21" y2="12"/>
+        <line x1="12" x2="12" y1="8" y2="3"/>
+        <line x1="20" x2="20" y1="21" y2="16"/>
+        <line x1="20" x2="20" y1="12" y2="3"/>
+        <line x1="2" x2="6" y1="14" y2="14"/>
+        <line x1="10" x2="14" y1="8" y2="8"/>
+        <line x1="18" x2="22" y1="16" y2="16"/>
+    </IconBase>
+));
 
-// ==========================================
-//              CONSTANTS
-// ==========================================
-const EI_2025 = {
-    MAX_INSURABLE: 66600, // 2025 Projected
-    QC_MAX_INSURABLE: 98000, 
-    
-    STD_RATE: 0.55,
-    EXT_RATE: 0.33,
-    MAX_WEEKLY_STD: 705, 
-    MAX_WEEKLY_EXT: 423, 
-    
-    // Parental Limits
-    STD_INDIVIDUAL_MAX: 35,
-    STD_COMBINED_MAX: 40,
-    EXT_INDIVIDUAL_MAX: 61,
-    EXT_COMBINED_MAX: 69,
-};
+const CheckCircleIcon = React.memo((props) => (
+    <IconBase {...props}>
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+        <polyline points="22 4 12 14.01 9 11.01"/>
+    </IconBase>
+));
 
-// ==========================================
-//        HOOK: SYNC TABS WITH URL
-// ==========================================
-function useUrlTab(defaultTab = 'input') {
-    const [activeTab, setActiveTabState] = useState(() => {
-        if (typeof window !== 'undefined') {
-            const params = new URLSearchParams(window.location.search);
-            return params.get('step') || defaultTab;
-        }
-        return defaultTab;
-    });
+const WalletIcon = React.memo((props) => (
+    <IconBase {...props}>
+        <path d="M20 7h-7"/>
+        <path d="M14 11h6"/>
+        <path d="m20 7 2 2-2 2"/>
+        <path d="M5 20h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-3"/>
+        <path d="M7 2v16"/>
+        <path d="M3 11h4"/>
+    </IconBase>
+));
 
-    useEffect(() => {
-        const handlePopState = () => {
-            const params = new URLSearchParams(window.location.search);
-            const step = params.get('step');
-            setActiveTabState(step || defaultTab);
-        };
-        window.addEventListener('popstate', handlePopState);
-        return () => window.removeEventListener('popstate', handlePopState);
-    }, [defaultTab]);
-
-    const setActiveTab = (newTab) => {
-        setActiveTabState(newTab);
-        const url = new URL(window.location);
-        if (newTab === defaultTab) url.searchParams.delete('step');
-        else url.searchParams.set('step', newTab);
-        
-        window.history.pushState({}, '', url);
-        
-        if (newTab === 'results') {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-    };
-
-    return [activeTab, setActiveTab];
-}
+MapPinIcon.displayName = 'MapPinIcon';
+SlidersIcon.displayName = 'SlidersIcon';
+CheckCircleIcon.displayName = 'CheckCircleIcon';
+WalletIcon.displayName = 'WalletIcon';
 
 // ==========================================
 //              MAIN COMPONENT
@@ -141,14 +112,17 @@ export default function ParentalLeave({
         return 5;
     });
 
-    const [activeTab, setActiveTab] = useUrlTab('input');
+    const [activeTab, setActiveTab] = useUrlTab('input', 'step');
     const [copySuccess, setCopySuccess] = useState(false);
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => { setMounted(true); }, []);
 
     // Helper: Get Current Max Insurable based on province
-    const currentMaxInsurable = province === 'QC' ? EI_2025.QC_MAX_INSURABLE : EI_2025.MAX_INSURABLE;
+    const currentMaxInsurable = useMemo(() => 
+        province === 'QC' ? EI_2025.QC_MAX_INSURABLE : EI_2025.MAX_INSURABLE,
+        [province]
+    );
 
     // ==========================================
     //    SYNC TO URL (Live Update)
@@ -190,10 +164,10 @@ export default function ParentalLeave({
         if (p1Weeks > indMax) setP1Weeks(indMax);
         if (p2Weeks > indMax) setP2Weeks(indMax);
         if (!hasPartner) setP2Weeks(0);
-    }, [planType, hasPartner]);
+    }, [planType, hasPartner, mounted, p1Weeks, p2Weeks]);
 
     // --- SLIDER LOGIC ---
-    const handleWeeksChange = (parent, val) => {
+    const handleWeeksChange = useCallback((parent, val) => {
         const isExtended = planType === 'EXTENDED';
         const indMax = isExtended ? EI_2025.EXT_INDIVIDUAL_MAX : EI_2025.STD_INDIVIDUAL_MAX;
         const combinedMax = isExtended ? EI_2025.EXT_COMBINED_MAX : EI_2025.STD_COMBINED_MAX;
@@ -210,12 +184,12 @@ export default function ParentalLeave({
             if (newWeeks + p1Weeks > pool) setP1Weeks(Math.max(0, pool - newWeeks));
             setP2Weeks(newWeeks);
         }
-    };
+    }, [planType, hasPartner, p1Weeks, p2Weeks]);
 
     // ==========================================
     //    2. HANDLE AI UPDATES (COPILOT)
     // ==========================================
-    const handleAIUpdate = (args) => {
+    const handleAIUpdate = useCallback((args) => {
         if (args.province) setProvince(args.province);
         if (args.annual_income) setSalary(args.annual_income);
         if (args.partner_income) {
@@ -228,7 +202,7 @@ export default function ParentalLeave({
         if (args.plan_type) {
             setPlanType(args.plan_type);
         }
-    };
+    }, []);
 
     // --- CALCULATION LOGIC ---
     const results = useMemo(() => {
@@ -274,24 +248,26 @@ export default function ParentalLeave({
         return data;
     }, [province, salary, partnerSalary, hasPartner, planType, p1Weeks, p2Weeks, p1Maternity]);
 
-    // Helpers
-    const getMaxWeeks = () => {
+    // Helpers - Memoized for performance
+    const combinedWeeks = useMemo(() => p1Weeks + p2Weeks, [p1Weeks, p2Weeks]);
+    const individualMax = useMemo(() => {
+        if (province === 'QC') return 32; 
+        return planType === 'EXTENDED' ? 61 : 35;
+    }, [province, planType]);
+    
+    const maxWeeks = useMemo(() => {
         if (province === 'QC') return 32 + 5; 
         return planType === 'EXTENDED' ? 69 : 40;
-    };
-    const getIndividualMax = () => {
-         if (province === 'QC') return 32; 
-         return planType === 'EXTENDED' ? 61 : 35;
-    };
-    const combinedWeeks = p1Weeks + p2Weeks;
-    const bonusWeeksActive = combinedWeeks > getIndividualMax();
+    }, [province, planType]);
+    
+    const bonusWeeksActive = useMemo(() => combinedWeeks > individualMax, [combinedWeeks, individualMax]);
 
-    const copyLink = () => {
+    const copyLink = useCallback(() => {
         navigator.clipboard.writeText(window.location.href).then(() => { 
             setCopySuccess(true); 
             setTimeout(() => setCopySuccess(false), 2000); 
         });
-    };
+    }, []);
 
     return (
         <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-rose-100" style={{ paddingBottom: activeTab === 'input' ? '100px' : '40px' }}>
@@ -440,9 +416,9 @@ export default function ParentalLeave({
                                                     </div>
                                                     <div className="h-3 bg-slate-800 rounded-full overflow-hidden flex border border-white/5 relative">
                                                         {/* Marker for the Bonus Threshold */}
-                                                        <div className="absolute top-0 bottom-0 w-0.5 bg-slate-900 z-20 opacity-50" style={{ left: `${(getIndividualMax() / getMaxWeeks()) * 100}%` }}></div>
-                                                        <div style={{ width: `${(p1Weeks / getMaxWeeks()) * 100}%` }} className="bg-indigo-500 transition-all duration-300 z-10"></div>
-                                                        <div style={{ width: `${(p2Weeks / getMaxWeeks()) * 100}%` }} className={`transition-all duration-300 z-10 ${bonusWeeksActive ? 'bg-emerald-400 shadow-[0_0_15px_rgba(52,211,153,0.5)]' : 'bg-emerald-600'}`}></div>
+                                                        <div className="absolute top-0 bottom-0 w-0.5 bg-slate-900 z-20 opacity-50" style={{ left: `${(individualMax / maxWeeks) * 100}%` }}></div>
+                                                        <div style={{ width: `${(p1Weeks / maxWeeks) * 100}%` }} className="bg-indigo-500 transition-all duration-300 z-10"></div>
+                                                        <div style={{ width: `${(p2Weeks / maxWeeks) * 100}%` }} className={`transition-all duration-300 z-10 ${bonusWeeksActive ? 'bg-emerald-400 shadow-[0_0_15px_rgba(52,211,153,0.5)]' : 'bg-emerald-600'}`}></div>
                                                     </div>
                                                 </div>
 
@@ -459,7 +435,7 @@ export default function ParentalLeave({
                                                         <input 
                                                             type="range" 
                                                             min="0" 
-                                                            max={getIndividualMax()} 
+                                                            max={individualMax} 
                                                             value={p1Weeks} 
                                                             onChange={(e) => handleWeeksChange(1, e.target.value)}
                                                             className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-indigo-500 hover:accent-indigo-400 transition-all"
@@ -478,7 +454,7 @@ export default function ParentalLeave({
                                                         <input 
                                                             type="range" 
                                                             min="0" 
-                                                            max={getIndividualMax()} 
+                                                            max={individualMax} 
                                                             value={p2Weeks} 
                                                             onChange={(e) => handleWeeksChange(2, e.target.value)}
                                                             className={`w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer hover:accent-emerald-400 transition-all ${bonusWeeksActive ? 'accent-emerald-400' : 'accent-emerald-600'}`}
@@ -489,8 +465,8 @@ export default function ParentalLeave({
                                                 {/* Total Check */}
                                                 <div className="bg-white/5 rounded-xl p-4 flex justify-between items-center text-xs border border-white/5">
                                                     <span className="text-slate-400 font-bold">Total Shared Weeks</span>
-                                                    <span className={`font-black text-base ${p1Weeks + p2Weeks === getMaxWeeks() ? 'text-emerald-400' : 'text-white'}`}>
-                                                        {p1Weeks + p2Weeks} / {getMaxWeeks()}
+                                                    <span className={`font-black text-base ${combinedWeeks === maxWeeks ? 'text-emerald-400' : 'text-white'}`}>
+                                                        {combinedWeeks} / {maxWeeks}
                                                     </span>
                                                 </div>
                                             </div>

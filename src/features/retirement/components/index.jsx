@@ -1,55 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { CheckIcon, LinkIcon, ArrowRightIcon } from './Icons';
 import { CURRENT_YEAR, getYMPE } from '../../../utils/constants';
 import { useRetirementMath } from '../hooks/useRetirementMath';
 import { compressEarnings, decompressEarnings } from '../../../utils/compression';
+import { useUrlTab } from '../../../hooks/useUrlTab';
 
 import { AboutModal, ImportModal } from './Modals';
 import InputTab from './InputTab';
 import ResultsTab from './ResultsTab';
-
-// ==========================================
-//          HOOK: SYNC TABS WITH URL
-// ==========================================
-function useUrlTab(defaultTab = 'input', queryParam = 'step') {
-    const [activeTab, setActiveTabState] = useState(() => {
-        if (typeof window !== 'undefined') {
-            const params = new URLSearchParams(window.location.search);
-            return params.get(queryParam) || defaultTab;
-        }
-        return defaultTab;
-    });
-
-    useEffect(() => {
-        const handlePopState = () => {
-            const params = new URLSearchParams(window.location.search);
-            const step = params.get(queryParam);
-            setActiveTabState(step || defaultTab);
-        };
-        window.addEventListener('popstate', handlePopState);
-        return () => window.removeEventListener('popstate', handlePopState);
-    }, [defaultTab, queryParam]);
-
-    const setActiveTab = (newTab) => {
-        setActiveTabState(newTab);
-        const url = new URL(window.location);
-        
-        if (newTab === defaultTab) {
-             url.searchParams.delete(queryParam);
-        } else {
-             url.searchParams.set(queryParam, newTab);
-        }
-        
-        window.history.pushState({}, '', url);
-        
-        if (newTab === 'results') {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-    };
-
-    return [activeTab, setActiveTab];
-}
 
 // ==========================================
 //              MAIN COMPONENT
@@ -278,12 +237,12 @@ export default function Calculator({
     }, [dob, retirementAge, yearsInCanada, avgSalaryInput, otherIncome, isMarried, spouseDob, spouseIncome, forceAllowance, earnings, birthYear]);
 
 
-    const copyLink = () => {
+    const copyLink = useCallback(() => {
         navigator.clipboard.writeText(window.location.href).then(() => {
             setCopySuccess(true);
             setTimeout(() => setCopySuccess(false), 2000);
         });
-    };
+    }, []);
 
     const handleImport = (importedData) => {
         if (importedData) {
@@ -293,7 +252,7 @@ export default function Calculator({
         }
     };
     
-    const applyAverageSalary = () => {
+    const applyAverageSalary = useCallback(() => {
         if (!avgSalaryInput || avgSalaryInput <= 0) return;
         
         const currentYMPE = getYMPE(CURRENT_YEAR);
@@ -323,7 +282,7 @@ export default function Calculator({
             });
             return newEarnings;
         });
-    };
+    }, [avgSalaryInput, results.years, birthYear]);
 
     const saveComparison = () => {
         setComparisonSnapshot({
