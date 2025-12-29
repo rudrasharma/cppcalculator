@@ -51,7 +51,7 @@ category: "inflation"
 
 If you feel like your $100 grocery bill buys half of what it used to, you aren't imagining things. While the Bank of Canada aims for a 2% "All-Items" inflation target, food prices in late 2025 have been behaving very differently.
 
-As of November 2025, grocery inflation hit **4.7%**—its highest level in nearly two years. Furthermore, **Canada’s Food Price Report 2026** predicts that a typical family of four will spend nearly **$1,000 more** on groceries next year, bringing the annual total to over **$17,500**.
+As of November 2025, grocery inflation hit **4.7%**—its highest level in nearly two years. Furthermore, **Canada's Food Price Report 2026** predicts that a typical family of four will spend nearly **&#36;1,000 more** on groceries next year, bringing the annual total to over **&#36;17,500**.
 
 We built the **Budget Defense Tool** to move beyond generic news headlines and show you the long-term impact of these spikes on your specific household.
 
@@ -76,9 +76,9 @@ Because food inflation is volatile, we don't just use one number. We blend the *
 
 For every item you add to your cart, we apply this calculation:
 
-$$
-FV = (PV \times PF) \times (1 + r)^n
-$$
+**FV = (PV × PF) × (1 + r)^n**
+
+Where:
 
 * **PV (Present Value):** The current national average price.
 * **PF (Provincial Factor):** A multiplier based on regional price gaps (e.g., 1.05 for Alberta).
@@ -93,14 +93,14 @@ Meet Sarah in **Ontario**. She audits a simple breakfast basket: **Eggs, Coffee,
     * Eggs (Dozen): $4.76
     * Coffee (300g): $5.61 (Currently up **27.8%** year-over-year due to weather and tariffs)
     * Bread (675g): $3.53
-    * **Total: $13.90**
+    * **Total: &#36;13.90**
 
 2.  **The Inflation Variables (5-Year Forecast):**
-    * Coffee remains a "hot" item due to adverse weather in growing regions like Brazil.
+    * Coffee remains a "hot" item due to adverse weather in growing regions like Brazil, maintaining its high inflation rate.
     * Eggs and Bread are steadier, tracking closer to the core 4% average.
 
 3.  **The 2030 Result:**
-    * Even with Ontario's adjustments, Sarah’s breakfast basket is projected to jump to **$28.45**.
+    * Even with Ontario's adjustments, Sarah's breakfast basket is projected to jump to **&#36;28.45**.
     * Her **Personal Inflation Rate** is much higher than the headline CPI because her basket contains high-volatility items.
 
 

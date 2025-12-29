@@ -1,39 +1,79 @@
 ---
-import '../styles/global.css';
+/**
+ * 404 Error Page
+ * Provides a user-friendly error page with navigation back to the main site
+ */
+
+interface Props {}
 
 const SITE_TITLE = "Page Not Found | LoonieFi";
+const SITE_DESCRIPTION = "The page you're looking for doesn't exist. Return to LoonieFi calculators.";
+const canonicalURL = new URL('/404', Astro.site || Astro.url.origin);
 ---
 
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
     <title>{SITE_TITLE}</title>
+    <meta name="description" content={SITE_DESCRIPTION} />
+    <link rel="canonical" href={canonicalURL} />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    
+    {/* Open Graph Tags */}
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={SITE_TITLE} />
+    <meta property="og:description" content={SITE_DESCRIPTION} />
+    <meta property="og:url" content={canonicalURL} />
+    
+    {/* Twitter Card Tags */}
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content={SITE_TITLE} />
+    <meta name="twitter:description" content={SITE_DESCRIPTION} />
   </head>
 
   <body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col items-center justify-center p-6 text-center antialiased">
     
-    <div class="bg-white p-8 md:p-12 rounded-[2.5rem] shadow-2xl shadow-indigo-100 border border-slate-100 max-w-lg w-full">
-        <div class="mb-6 relative inline-block">
-             <div class="absolute inset-0 bg-indigo-100 rounded-full blur-xl opacity-50 animate-pulse"></div>
-             <img src="/android-chrome-192x192.png" alt="LoonieFi" class="relative w-24 h-24 mx-auto rounded-full shadow-sm" />
-        </div>
+    <main class="bg-white p-8 md:p-12 rounded-[2.5rem] shadow-2xl shadow-indigo-100 border border-slate-100 max-w-lg w-full">
+      <div class="mb-6 relative inline-block">
+        <div class="absolute inset-0 bg-indigo-100 rounded-full blur-xl opacity-50 animate-pulse" aria-hidden="true"></div>
+        <img 
+          src="/android-chrome-192x192.png" 
+          alt="LoonieFi Logo" 
+          width="96"
+          height="96"
+          class="relative mx-auto rounded-full shadow-sm" 
+        />
+      </div>
 
-        <h1 className="text-6xl font-black text-indigo-600 mb-2 tracking-tighter">404</h1>
-        <h2 class="text-2xl font-bold text-slate-900 mb-4">Wrong Turn?</h2>
-        <p class="text-slate-500 mb-8 font-medium leading-relaxed">
-            We couldn't find that page. It might have been moved, or you might have typed the URL incorrectly.
-        </p>
+      <h1 class="text-6xl font-black text-indigo-600 mb-2 tracking-tighter">404</h1>
+      <h2 class="text-2xl font-bold text-slate-900 mb-4">Wrong Turn?</h2>
+      <p class="text-slate-500 mb-8 font-medium leading-relaxed">
+        We couldn't find that page. It might have been moved, or you might have typed the URL incorrectly.
+      </p>
 
-        <a href="/" class="block w-full py-4 bg-slate-900 text-white rounded-2xl font-bold hover:bg-slate-800 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg shadow-slate-200">
-            Return to Calculators
-        </a>
-    </div>
+      <a 
+        href="/" 
+        class="block w-full py-4 bg-slate-900 text-white rounded-2xl font-bold hover:bg-slate-800 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg shadow-slate-200 text-center"
+        aria-label="Return to LoonieFi calculators homepage"
+      >
+        Return to Calculators
+      </a>
+    </main>
 
-    <div class="mt-8 text-slate-400 text-xs font-medium">
-        Error Code: 404_LOONIE_MISSING
-    </div>
+    <footer class="mt-8 text-slate-400 text-xs font-medium">
+      Error Code: 404_LOONIE_MISSING
+    </footer>
 
   </body>
 </html>
+
+<style>
+  html,
+  body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+  }
+</style>

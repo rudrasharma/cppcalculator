@@ -29,13 +29,39 @@ export async function getStaticPaths() {
 
 const { provinceCode, provinceName, scenario } = Astro.props;
 
-const title = `${scenario.label} in ${provinceName} | 2025 Grocery Inflation`;
-const description = `Calculate the future cost of a ${scenario.label.toLowerCase()} in ${provinceName}. ${scenario.desc}`;
+const title = `${scenario.label} in ${provinceName} | 2025 Grocery Inflation | LoonieFi`;
+const description = `Calculate the future cost of a ${scenario.label.toLowerCase()} in ${provinceName}. ${scenario.desc} Forecast your grocery budget with provincial inflation data.`;
+const canonicalURL = new URL(`/calculator/grocery-inflation/${provinceCode.toLowerCase()}/${scenario.slug}`, Astro.site || Astro.url.origin);
+
+// Schema.org structured data
+const calculatorSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": title,
+  "description": description,
+  "url": canonicalURL.toString(),
+  "applicationCategory": "FinanceApplication",
+  "operatingSystem": "Web",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "CAD"
+  },
+  "featureList": [
+    "Grocery inflation forecasting",
+    "Provincial inflation rates",
+    "Purchasing power calculator",
+    "Multi-year projections"
+  ]
+};
 ---
 
 <BaseLayout title={title} description={description}>
-  <section class="py-12 px-4 max-w-6xl mx-auto">
-    <div class="text-center mb-10">
+  <script type="application/ld+json" set:html={JSON.stringify(calculatorSchema)} />
+  
+  <main>
+    <section class="py-12 px-4 max-w-6xl mx-auto">
+      <header class="text-center mb-10">
         <h1 class="text-3xl md:text-4xl font-black text-slate-900 mb-4">
             {scenario.label} in <span class="text-indigo-600">{provinceName}</span>
         </h1>
@@ -60,5 +86,6 @@ const description = `Calculate the future cost of a ${scenario.label.toLowerCase
             While the Bank of Canada targets 2% inflation, grocery categories like <strong>Meat</strong> and <strong>Dairy</strong> often see higher volatility due to supply chain costs and carbon pricing. This "basket approach" gives you a more realistic personal inflation rate than the generic CPI number.
         </p>
     </div>
-  </section>
+    </section>
+  </main>
 </BaseLayout>

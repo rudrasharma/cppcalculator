@@ -16,13 +16,39 @@ export async function getStaticPaths() {
 const { scenario } = Astro.props;
 
 const incomeFormatted = new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD', maximumFractionDigits: 0 }).format(parseInt(scenario.income));
-const title = `${scenario.label} - CPP & OAS Calculator 2025`;
-const description = `${scenario.desc} Based on ${scenario.years} years of residence and avg annual earnings of ${incomeFormatted}.`;
+const title = `${scenario.label} - CPP & OAS Calculator 2025 | LoonieFi`;
+const description = `${scenario.desc} Based on ${scenario.years} years of residence and avg annual earnings of ${incomeFormatted}. Calculate your retirement benefits with this pre-filled scenario.`;
+const canonicalURL = new URL(`/calculator/cpp-oas/${scenario.slug}`, Astro.site || Astro.url.origin);
+
+// Schema.org structured data for calculator page
+const calculatorSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": title,
+  "description": description,
+  "url": canonicalURL.toString(),
+  "applicationCategory": "FinanceApplication",
+  "operatingSystem": "Web",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "CAD"
+  },
+  "featureList": [
+    "CPP calculation",
+    "OAS calculation",
+    "GIS estimation",
+    "Retirement age adjustment",
+    "Enhanced CPP Tier 2"
+  ]
+};
 ---
 
 <BaseLayout title={title} description={description}>
+  <script type="application/ld+json" set:html={JSON.stringify(calculatorSchema)} />
   
-  <section class="py-12 px-4 max-w-6xl mx-auto">
+  <main>
+    <section class="py-12 px-4 max-w-6xl mx-auto">
     <div class="text-center mb-10">
         <h1 class="text-3xl md:text-4xl font-black text-slate-900 mb-4">
             {scenario.label}
@@ -72,6 +98,6 @@ const description = `${scenario.desc} Based on ${scenario.years} years of reside
           </div>
       </div>
     </div>
-
-  </section>
+    </section>
+  </main>
 </BaseLayout>

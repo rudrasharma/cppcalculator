@@ -1,62 +1,77 @@
 ---
+/**
+ * Child Benefit Calculator Page
+ * Main page for the Canada Child Benefit calculator
+ */
+
 import BaseLayout from '../layouts/BaseLayout.astro';
 import HouseholdBenefits from '../features/child-benefit/components/HouseholdBenefits.jsx';
+
+interface Props {}
+
+const title = "Canada Child Benefit (CCB) Calculator 2025";
+const description = "Estimate your monthly Canada Child Benefit (CCB) and provincial family payments for the July 2025 to June 2026 benefit year.";
 ---
 
 <BaseLayout 
-  title="Canada Child Benefit (CCB) Calculator 2025" 
-  description="Estimate your monthly Canada Child Benefit (CCB) and provincial family payments for the July 2025 to June 2026 benefit year."
+  title={title} 
+  description={description}
 >
   
   {/* TITLE SECTION with Trust Badge */}
-  <div class="max-w-6xl mx-auto px-4 pt-8 text-center md:text-left animate-fade-in">
+  <header class="max-w-6xl mx-auto px-4 pt-8 text-center md:text-left animate-fade-in">
     <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-        <div>
-            <h1 class="text-2xl font-black text-slate-900 flex items-center gap-2 justify-center md:justify-start">
-              Household Benefits Estimator
-            </h1>
-            <p class="text-slate-500 text-sm font-medium">
-              CCB, Trillium, Carbon Rebate & GST Credits
-            </p>
-        </div>
+      <div>
+        <h1 class="text-2xl font-black text-slate-900 flex items-center gap-2 justify-center md:justify-start">
+          Household Benefits Estimator
+        </h1>
+        <p class="text-slate-500 text-sm font-medium">
+          CCB, Trillium, Carbon Rebate & GST Credits
+        </p>
+      </div>
 
-        {/* TRUST BADGE SPECIFIC TO CCB DATA */}
-        <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 border border-slate-200">
-            <div class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
-            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                Data: CRA Indexed Rates (July 2025)
-            </span>
-        </div>
+      {/* TRUST BADGE SPECIFIC TO CCB DATA */}
+      <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 border border-slate-200">
+        <div class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" aria-hidden="true"></div>
+        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+          Data: CRA Indexed Rates (July 2025)
+        </span>
+      </div>
     </div>
-  </div>
+  </header>
 
   {/* REACT COMPONENT */}
   <main class="flex-grow flex flex-col justify-center w-full animate-fade-in">
-    {/* client:only="react" ensures all the interactive charts and sliders work immediately */}
     <HouseholdBenefits client:only="react" isVisible={true} />
   </main>
-{/* pSEO LINK SECTION */}
-  <div class="max-w-3xl mx-auto px-6 pt-12 pb-4 text-center">
+
+  {/* pSEO LINK SECTION */}
+  <section class="max-w-3xl mx-auto px-6 pt-12 pb-4 text-center">
     <div class="bg-slate-50 border border-slate-100 rounded-2xl p-6">
-        <p class="text-xs font-black text-slate-400 uppercase tracking-widest mb-3">Looking for specific family examples?</p>
-        <a 
-            href="/calculator/child-benefit/browse" 
-            class="inline-flex items-center gap-2 text-sm font-bold text-emerald-600 hover:text-emerald-700 transition-colors hover:underline"
-        >
-            Browse Benefits by Province & Family Size
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-        </a>
+      <p class="text-xs font-black text-slate-400 uppercase tracking-widest mb-3">Looking for specific family examples?</p>
+      <a 
+        href="/calculator/child-benefit/browse" 
+        class="inline-flex items-center gap-2 text-sm font-bold text-emerald-600 hover:text-emerald-700 transition-colors hover:underline"
+        aria-label="Browse child benefit examples by province and family size"
+      >
+        Browse Benefits by Province & Family Size
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+          <polyline points="12 5 19 12 12 19"></polyline>
+        </svg>
+      </a>
     </div>
-  </div>
+  </section>
+
   {/* SEO CONTENT SECTION */}
   <section class="max-w-3xl mx-auto px-6 py-12 text-slate-600 leading-relaxed text-sm">
-      <h2 class="text-lg font-bold text-slate-900 mb-4">When do CCB payments change?</h2>
-      <p class="mb-4">
-          The Canada Child Benefit (CCB) is recalculated every July based on your "Adjusted Family Net Income" (AFNI) from the previous year's tax return. For example, payments starting in <strong>July 2025</strong> are based on your <strong>2024 Tax Return</strong>.
-      </p>
-      <p>
-          This calculator uses the latest indexation rates (announced late 2024) to forecast exactly how much your family will receive in the upcoming benefit year.
-      </p>
+    <h2 class="text-lg font-bold text-slate-900 mb-4">When do CCB payments change?</h2>
+    <p class="mb-4">
+      The Canada Child Benefit (CCB) is recalculated every July based on your "Adjusted Family Net Income" (AFNI) from the previous year's tax return. For example, payments starting in <strong>July 2025</strong> are based on your <strong>2024 Tax Return</strong>.
+    </p>
+    <p>
+      This calculator uses the latest indexation rates (announced late 2024) to forecast exactly how much your family will receive in the upcoming benefit year.
+    </p>
   </section>
 
 </BaseLayout>

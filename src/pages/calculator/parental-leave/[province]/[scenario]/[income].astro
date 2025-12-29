@@ -46,14 +46,39 @@ const { provinceCode, provinceName, salaryVal, scenarioLabel, planType, hasPartn
 
 const salaryFormatted = new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD', maximumFractionDigits: 0 }).format(salaryVal);
 const durationText = planType === 'EXTENDED' ? '18 months' : '12 months';
-const title = `${durationText} Parental Leave Calculator ${provinceName} (${salaryFormatted}) | 2025 Guide`;
-const description = `Calculate your ${scenarioLabel.toLowerCase()} benefits in ${provinceName}. See weekly EI payments for a ${salaryFormatted} income under the ${planType.toLowerCase()} plan.`;
+const title = `${durationText} Parental Leave Calculator ${provinceName} (${salaryFormatted}) | 2025 Guide | LoonieFi`;
+const description = `Calculate your ${scenarioLabel.toLowerCase()} benefits in ${provinceName}. See weekly EI payments for a ${salaryFormatted} income under the ${planType.toLowerCase()} plan. Estimate your maternity and parental leave benefits.`;
+const canonicalURL = new URL(`/calculator/parental-leave/${provinceCode.toLowerCase()}/${scenarioLabel.toLowerCase().replace(/\s+/g, '-')}/${salaryVal}`, Astro.site || Astro.url.origin);
+
+// Schema.org structured data
+const calculatorSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": title,
+  "description": description,
+  "url": canonicalURL.toString(),
+  "applicationCategory": "FinanceApplication",
+  "operatingSystem": "Web",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "CAD"
+  },
+  "featureList": [
+    "EI maternity benefits",
+    "EI parental benefits",
+    "Standard vs Extended plans",
+    "Province-specific calculations"
+  ]
+};
 ---
 
 <BaseLayout title={title} description={description}>
+  <script type="application/ld+json" set:html={JSON.stringify(calculatorSchema)} />
   
-  <section class="py-12 px-4 max-w-5xl mx-auto">
-    <div class="text-center mb-10">
+  <main>
+    <section class="py-12 px-4 max-w-5xl mx-auto">
+      <header class="text-center mb-10">
         <h1 class="text-3xl md:text-4xl font-black text-slate-900 mb-4">
             {scenarioLabel} in <span class="text-rose-600">{provinceName}</span>
         </h1>
@@ -84,6 +109,6 @@ const description = `Calculate your ${scenarioLabel.toLowerCase()} benefits in $
         )}
       </ul>
     </div>
-
-  </section>
+    </section>
+  </main>
 </BaseLayout>

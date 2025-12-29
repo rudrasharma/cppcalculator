@@ -77,9 +77,7 @@ This is the "base" layer of the benefit. You get this simply for being a low-to-
 
 If your income is below the threshold, you get the full amount. Once you cross that line, the government reduces your benefit by 4 cents for every dollar earned.
 
-$$
-\text{OSTC Benefit} = (\text{\$371} \times \text{People}) - [(\text{Family Net Income} - \text{Threshold}) \times 0.04]
-$$
+**OSTC Benefit = ($371 × People) - [(Family Net Income - Threshold) × 0.04]**
 
 ## Component 2: The Energy & Property Tax Credit (OEPTC)
 

@@ -3,28 +3,23 @@ import mdx from '@astrojs/mdx';
 import react from '@astrojs/react';
 import tailwind from '@astrojs/tailwind';
 import cloudflare from '@astrojs/cloudflare';
-
-// Import the math plugins
-import remarkMath from 'remark-math';
-import rehypeKatex from 'rehype-katex';
-
 import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
   site: 'https://looniefi.ca',
-  // 1. Force math support for standard .md files
+  // Markdown configuration (no math plugins needed)
   markdown: {
-    remarkPlugins: [remarkMath],
-    rehypePlugins: [rehypeKatex],
+    remarkPlugins: [],
+    rehypePlugins: [],
   },
 
   integrations: [
     react(),
     tailwind(),
-    // 2. Force math support for .mdx files
+    // MDX configuration (no math plugins needed)
     mdx({
-      remarkPlugins: [remarkMath],
-      rehypePlugins: [rehypeKatex],
+      remarkPlugins: [],
+      rehypePlugins: [],
     }),
     sitemap(),
   ],

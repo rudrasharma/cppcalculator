@@ -78,12 +78,10 @@ This means for every **$1.00** of income you earn (from CPP, RRSPs, or a part-ti
 
 Let's look at the math for a single senior in 2025.
 
-* **Max Monthly GIS:** ~$1,085$
-* **Clawback Rate:** $50\%$
+* **Max Monthly GIS:** ~$1,085
+* **Clawback Rate:** 50%
 
-$$
-\text{Monthly GIS} = \text{Max Benefit} - \left( \frac{\text{Annual Income}}{12} \times 0.50 \right)
-$$
+**Monthly GIS = Max Benefit - (Annual Income ÷ 12 × 0.50)**
 
 ### Example: The "GIS Trap"
 
@@ -93,20 +91,14 @@ How does this affect his GIS?
 
 1.  **Calculate Non-OAS Income:**
     Arthur's income for GIS purposes includes his CPP and his RRSP withdrawal.
-    $$
-    \$600 \text{ (CPP)} + \$200 \text{ (RRSP)} = \$800 \text{ / month}
-    $$
+    **$600 (CPP) + $200 (RRSP) = $800 / month**
 
 2.  **Calculate the Clawback:**
     The government reduces his GIS by 50 cents for every dollar of that $800.
-    $$
-    \$800 \times 0.50 = \$400 \text{ reduction}
-    $$
+    **$800 × 0.50 = $400 reduction**
 
 3.  **Final GIS Payment:**
-    $$
-    \$1,085 \text{ (Max)} - \$400 \text{ (Clawback)} = \$685
-    $$
+    **$1,085 (Max) - $400 (Clawback) = $685**
 
 **The Result:** Arthur withdrew $200 from his RRSP, but he lost $100 in GIS benefits because of it. His "effective tax rate" on that RRSP withdrawal is 50%, even if he pays zero income tax!
 

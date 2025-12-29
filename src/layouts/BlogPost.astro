@@ -1,43 +1,98 @@
 ---
-// src/layouts/BlogPost.astro
+/**
+ * Blog Post Layout
+ * Layout for individual blog post pages
+ */
+
+interface Props {
+  frontmatter: {
+    title: string;
+    description: string;
+    pubDate: string;
+    category?: string;
+    image?: {
+      url: string;
+    };
+  };
+}
+
 const { frontmatter } = Astro.props;
 
-// 1. SMART ROUTING: Map blog categories to specific tools
-const TOOL_MAPPING = {
+// Map blog categories to specific tools
+const TOOL_MAPPING: Record<string, { url: string; label: string }> = {
   'parental': { url: '/parental-leave-calculator', label: 'Calculate Your Leave' },
   'cpp': { url: '/cpp-oas-calculator', label: 'Estimate Your Pension' },
   'ccb': { url: '/child-benefit-calculator', label: 'Calculate Child Benefits' },
   'inflation': { url: '/grocery-inflation-calculator', label: 'Audit Your Grocery Bill' },
 };
 
-// Default fallbacks if no category matches
-const targetTool = TOOL_MAPPING[frontmatter.category] || { url: '/', label: 'Start a Calculation' };
+const targetTool = TOOL_MAPPING[frontmatter.category || ''] || { url: '/', label: 'Start a Calculation' };
+const canonicalURL = new URL(Astro.url.pathname, Astro.site || Astro.url.origin);
+
+// Schema.org Article structured data
+const articleSchema = {
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": frontmatter.title,
+  "description": frontmatter.description,
+  "datePublished": frontmatter.pubDate,
+  "dateModified": frontmatter.pubDate,
+  "author": {
+    "@type": "Organization",
+    "name": "LoonieFi",
+    "url": Astro.site || Astro.url.origin
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "LoonieFi",
+    "logo": {
+      "@type": "ImageObject",
+      "url": new URL('/android-chrome-192x192.png', Astro.site || Astro.url.origin).toString()
+    }
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": canonicalURL.toString()
+  },
+  "articleSection": frontmatter.category || "General",
+  ...(frontmatter.image && {
+    "image": frontmatter.image.url
+  })
+};
 ---
 
+<!doctype html>
 <html lang="en">
   <head>
-    {/* MATH SUPPORT (Katex) */}
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.css"
-      integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV"
-      crossorigin="anonymous"
-    >
-    
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
     
-    {/* DYNAMIC SEO */}
+    {/* SEO Meta Tags */}
     <title>{frontmatter.title} | LoonieFi Guides</title>
     <meta name="description" content={frontmatter.description} />
+    <link rel="canonical" href={canonicalURL} />
     
-    {/* OPEN GRAPH (Sharing Cards) */}
+    {/* Open Graph Tags */}
+    <meta property="og:type" content="article" />
     <meta property="og:title" content={frontmatter.title} />
     <meta property="og:description" content={frontmatter.description} />
-    <meta property="og:type" content="article" />
+    <meta property="og:url" content={canonicalURL} />
     {frontmatter.image && <meta property="og:image" content={frontmatter.image.url} />}
+    
+    {/* Twitter Card Tags */}
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={frontmatter.title} />
+    <meta name="twitter:description" content={frontmatter.description} />
+    {frontmatter.image ? (
+      <meta name="twitter:image" content={frontmatter.image.url} />
+    ) : (
+      <meta name="twitter:image" content={new URL('/android-chrome-192x192.png', Astro.site || Astro.url.origin).toString()} />
+    )}
+    
+    {/* Schema.org Structured Data */}
+    <script type="application/ld+json" set:html={JSON.stringify(articleSchema)} />
 
-    {/* Google Analytics 4 (GA4) - ADDED HERE */}
+    {/* Google Analytics 4 (GA4) */}
     <script 
       async 
       src="https://www.googletagmanager.com/gtag/js?id=G-DS4P8VC6WQ"
@@ -47,33 +102,22 @@ const targetTool = TOOL_MAPPING[frontmatter.category] || { url: '/', label: 'Sta
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-
       gtag('config', 'G-DS4P8VC6WQ');
     </script>
 
     <style is:global>
-      /* Fix "Math Overflow" on mobile */
-      .katex-display {
-        overflow-x: auto;
-        overflow-y: hidden;
-        max-width: 100%;
-        padding: 1em 0;
-        margin: 1em 0;
-      }
-      /* Custom scrollbar for math blocks */
-      .katex-display::-webkit-scrollbar { height: 4px; }
-      .katex-display::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 4px; }
+      /* No math-specific styles needed */
     </style>  
   </head>
 
   <body class="bg-slate-50 text-slate-800 font-sans min-h-screen selection:bg-indigo-100 selection:text-indigo-900">
     
     {/* Navigation Bar */}
-    <nav class="w-full bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50">
+    <nav class="w-full bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50" role="navigation" aria-label="Blog navigation">
       <div class="max-w-3xl mx-auto px-6 h-16 flex items-center justify-between">
-        <a href="/" class="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <img src="/android-chrome-192x192.png" alt="LoonieFi" class="h-8 w-8 rounded-full shadow-sm" />
-            <span class="font-bold text-slate-900 tracking-tight">LoonieFi</span>
+        <a href="/" class="flex items-center gap-2 hover:opacity-80 transition-opacity" aria-label="Return to LoonieFi homepage">
+          <img src="/android-chrome-192x192.png" alt="LoonieFi Logo" class="h-8 w-8 rounded-full shadow-sm" width="32" height="32" />
+          <span class="font-bold text-slate-900 tracking-tight">LoonieFi</span>
         </a>
         <a href="/" class="text-xs font-bold text-slate-500 hover:text-indigo-600 uppercase tracking-widest transition-colors">
           View All Tools →
@@ -88,11 +132,11 @@ const targetTool = TOOL_MAPPING[frontmatter.category] || { url: '/', label: 'Sta
         <header class="mb-10 border-b border-slate-100 pb-10">
           <div class="flex items-center gap-3 text-sm text-slate-400 mb-6 font-medium">
             <time datetime={frontmatter.pubDate}>
-                {new Date(frontmatter.pubDate).toLocaleDateString('en-CA', { year: 'numeric', month: 'long', day: 'numeric' })}
+              {new Date(frontmatter.pubDate).toLocaleDateString('en-CA', { year: 'numeric', month: 'long', day: 'numeric' })}
             </time>
-            <span>•</span>
+            <span aria-hidden="true">•</span>
             <span class="bg-indigo-50 text-indigo-600 px-3 py-1 rounded-full font-bold text-[10px] uppercase tracking-widest">
-                {frontmatter.category || "Guide"}
+              {frontmatter.category || "Guide"}
             </span>
           </div>
           <h1 class="text-3xl md:text-5xl font-black text-slate-900 leading-tight mb-6 tracking-tight">
@@ -103,7 +147,7 @@ const targetTool = TOOL_MAPPING[frontmatter.category] || { url: '/', label: 'Sta
           </p>
         </header>
 
-        {/* Content Area - Using 'prose-indigo' to match brand */}
+        {/* Content Area */}
         <div class="prose prose-lg prose-indigo max-w-none 
           prose-headings:font-black prose-headings:text-slate-900 prose-headings:tracking-tight
           prose-p:text-slate-600 prose-p:leading-relaxed
@@ -116,20 +160,25 @@ const targetTool = TOOL_MAPPING[frontmatter.category] || { url: '/', label: 'Sta
       </article>
 
       {/* DYNAMIC FOOTER CTA */}
-      <div class="mt-16 text-center bg-slate-900 rounded-[2.5rem] p-10 md:p-16 relative overflow-hidden shadow-2xl">
-        <div class="absolute top-0 right-0 w-64 h-64 bg-indigo-500/20 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+      <section class="mt-16 text-center bg-slate-900 rounded-[2.5rem] p-10 md:p-16 relative overflow-hidden shadow-2xl">
+        <div class="absolute top-0 right-0 w-64 h-64 bg-indigo-500/20 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" aria-hidden="true"></div>
         <div class="relative z-10">
-            <h3 class="text-2xl font-black text-white mb-4">Run the numbers for yourself</h3>
-            <p class="text-slate-400 mb-8 max-w-lg mx-auto">
-                Stop guessing. Use our privacy-first {frontmatter.category ? frontmatter.category.toUpperCase() : ''} calculator to get an exact estimate based on the logic in this article.
-            </p>
-            <a href={targetTool.url} class="inline-flex items-center justify-center px-8 py-4 text-sm font-black uppercase tracking-widest rounded-2xl text-white bg-indigo-600 hover:bg-indigo-500 shadow-xl shadow-indigo-900/50 transition-all transform hover:-translate-y-1">
-                {targetTool.label}
-            </a>
+          <h2 class="text-2xl font-black text-white mb-4">Run the numbers for yourself</h2>
+          <p class="text-slate-400 mb-8 max-w-lg mx-auto">
+            Stop guessing. Use our privacy-first {frontmatter.category ? frontmatter.category.toUpperCase() : ''} calculator to get an exact estimate based on the logic in this article.
+          </p>
+          <a 
+            href={targetTool.url} 
+            class="inline-flex items-center justify-center px-8 py-4 text-sm font-black uppercase tracking-widest rounded-2xl text-white bg-indigo-600 hover:bg-indigo-500 shadow-xl shadow-indigo-900/50 transition-all transform hover:-translate-y-1"
+            aria-label={`${targetTool.label} - ${frontmatter.category || 'calculator'}`}
+          >
+            {targetTool.label}
+          </a>
         </div>
-      </div>
+      </section>
 
     </main>
+
 
   </body>
 </html>

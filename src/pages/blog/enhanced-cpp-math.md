@@ -81,25 +81,19 @@ To calculate your benefits, we need baseline numbers. We use estimated 2025 figu
 **Step 1: Calculate Base CPP (The Career Average)**
 Michael didn't hit the max every year. Our calculator looks at his longitudinal history and determines his "Average Point Score" is 0.80 (or 80%).
 
-$$
-\$1,364.60 \text{ (Max Base)} \times 0.80 \text{ (Avg Score)} = \$1,091.68 \text{ (Unadjusted Base)}
-$$
+**$1,364.60 (Max Base) × 0.80 (Avg Score) = $1,091.68 (Unadjusted Base)**
 
 **Step 2: Calculate Enhanced CPP (Tier 2)**
 Because Michael is retiring at 60 in 2025, he barely participated in the Tier 2 enhancement phase (which only started really kicking in during 2024/2025). His Tier 2 contributions are negligible.
 
-$$
-\text{Enhanced Portion} \approx \$0
-$$
+**Enhanced Portion ≈ $0**
 
 **Step 3: Apply the Age Penalty**
 This is the big one. For every month before age 65 you take CPP, you permanently lose **0.6%**.
 * Months early: 60 months (5 years)
-* Total penalty: $60 \times 0.6\% = 36\%$ reduction.
+* Total penalty: 60 × 0.6% = 36% reduction.
 
-$$
-\$1,091.68 \times (1.00 - 0.36) = \$698.67
-$$
+**$1,091.68 × (1.00 - 0.36) = $698.67**
 
 **Step 4: OAS Calculation**
 OAS is not available until age 65.
@@ -125,18 +119,14 @@ OAS is not available until age 65.
 **Step 1: Calculate Base CPP**
 Because Sarah maxed out the YMPE every year, her "Average Point Score" is 1.0 (100%).
 
-$$
-\$1,364.60 \times 1.0 = \$1,364.60 \text{ (Unadjusted Base)}
-$$
+**$1,364.60 × 1.0 = $1,364.60 (Unadjusted Base)**
 
 **Step 2: Calculate Enhanced CPP (Tier 2)**
 This is the new math. For the years 2024 and beyond where she worked, she earned income *above* the YMPE ($71,300) and hit the new YAMPE ceiling ($81,100).
 
 Our calculator sums up that extra income and applies an actuarial factor to determine how much monthly income that buys her.
 
-$$
-\text{Total Unadjusted CPP} = \$1,364.60 \text{ (Base)} + \$25.00 \text{ (Enhanced)} = \$1,389.60
-$$
+**Total Unadjusted CPP = $1,364.60 (Base) + $25.00 (Enhanced) = $1,389.60**
 
 **Step 3: Apply Age Adjustment**
 Sarah is retiring exactly at 65. The adjustment factor is 0.
@@ -169,47 +159,33 @@ Like Sarah, Robert has a perfect record. He also worked longer during the "Enhan
 **Step 3: Apply CPP Age Bonus**
 For every month after 65 you delay CPP, you gain a permanent **0.7%** boost (up to age 70).
 * Months delayed: 60 months.
-* Total Bonus: $60 \times 0.7\% = 42\%$ increase.
+* Total Bonus: 60 × 0.7% = 42% increase.
 
-$$
-\$1,410.00 \times 1.42 = \$2,002.20 \text{ (Final Monthly CPP)}
-$$
+**$1,410.00 × 1.42 = $2,002.20 (Final Monthly CPP)**
 
 **Step 4: Calculate Gross OAS & Deferral Bonus**
 OAS also has a deferral bonus of **0.6%** per month after 65.
-* Total Bonus: $60 \times 0.6\% = 36\%$ increase.
+* Total Bonus: 60 × 0.6% = 36% increase.
 
-$$
-\$727.67 \text{ (Base OAS)} \times 1.36 = \$989.63 \text{ (Gross Monthly OAS)}
-$$
+**$727.67 (Base OAS) × 1.36 = $989.63 (Gross Monthly OAS)**
 
 **Step 5: The OAS Recovery Tax (Clawback)**
 This is where Robert gets hit. The government reduces OAS by 15 cents for every dollar your "Net World Income" exceeds the threshold ($90,997).
 
 1. **Calculate Total Net Income:**
-$$
-\$85,000 \text{ (RRSP)} + (\$2,002.20 \times 12 \text{ CPP}) + (\$989.63 \times 12 \text{ OAS}) = \$120,901
-$$
+**$85,000 (RRSP) + ($2,002.20 × 12 CPP) + ($989.63 × 12 OAS) = $120,901**
 
 2. **Calculate Income Above Threshold:**
-$$
-\$120,901 - \$90,997 \text{ (Threshold)} = \$29,904 \text{ Excess}
-$$
+**$120,901 - $90,997 (Threshold) = $29,904 Excess**
 
 3. **Calculate Annual Clawback (15%):**
-$$
-\$29,904 \times 0.15 = \$4,485.60
-$$
+**$29,904 × 0.15 = $4,485.60**
 
 4. **Calculate Monthly Clawback:**
-$$
-\$4,485.60 / 12 = \mathbf{-\$373.80} \text{ per month}
-$$
+**$4,485.60 ÷ 12 = -$373.80 per month**
 
 5. **Final Net OAS:**
-$$
-\$989.63 \text{ (Gross)} - \$373.80 \text{ (Clawback)} = \$615.83
-$$
+**$989.63 (Gross) - $373.80 (Clawback) = $615.83**
 
 ### Robert's Final Monthly Result:
 * **CPP:** **$2,002.20** (Huge bonus for waiting)
