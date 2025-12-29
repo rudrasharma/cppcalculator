@@ -1,7 +1,8 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
 import { 
-    ArrowRightIcon, CheckIcon, LinkIcon, SparklesIcon, UsersIcon
+    ArrowRightIcon, CheckIcon, LinkIcon, SparklesIcon, UsersIcon, CheckCircleIcon,
+    MoneyInput, NativeSelect, RangeSlider
 } from '../../../components/shared';
 import { IconBase } from '../../../components/shared/IconBase';
 
@@ -27,16 +28,8 @@ const SlidersIcon = React.memo((props) => (
     </IconBase>
 ));
 
-const CheckCircleIcon = React.memo((props) => (
-    <IconBase {...props}>
-        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-        <polyline points="22 4 12 14.01 9 11.01"/>
-    </IconBase>
-));
-
 MapPinIcon.displayName = 'MapPinIcon';
 SlidersIcon.displayName = 'SlidersIcon';
-CheckCircleIcon.displayName = 'CheckCircleIcon';
 
 export default function ParentalLeaveForm({
     province,
@@ -78,22 +71,24 @@ export default function ParentalLeaveForm({
                     <div className="space-y-4">
                         <div className="flex items-center gap-2 text-rose-600 font-black uppercase text-[10px] tracking-widest"><MapPinIcon size={16} /> Location & Plan</div>
                         <div className="bg-slate-50 p-5 rounded-3xl border border-slate-100 shadow-sm space-y-4">
-                            <div>
-                                <label className="text-xs font-black text-slate-700 block mb-1.5 uppercase tracking-tighter">Province</label>
-                                <select value={province} onChange={(e) => setProvince(e.target.value)} className="w-full p-3 bg-white border border-slate-200 rounded-2xl text-sm focus:ring-2 focus:ring-rose-500 outline-none shadow-sm font-medium">
-                                    <option value="ON">Ontario (EI)</option>
-                                    <option value="BC">British Columbia (EI)</option>
-                                    <option value="AB">Alberta (EI)</option>
-                                    <option value="QC">Quebec (QPIP)</option>
-                                    <option value="NS">Nova Scotia (EI)</option>
-                                    <option value="NB">New Brunswick (EI)</option>
-                                    <option value="MB">Manitoba (EI)</option>
-                                    <option value="SK">Saskatchewan (EI)</option>
-                                    <option value="PE">PEI (EI)</option>
-                                    <option value="NL">Newfoundland (EI)</option>
-                                    <option value="OTHER">Territories / Other (EI)</option>
-                                </select>
-                            </div>
+                            <NativeSelect
+                                label="Province"
+                                value={province}
+                                onChange={(e) => setProvince(e.target.value)}
+                                options={[
+                                    { label: 'Ontario (EI)', value: 'ON' },
+                                    { label: 'British Columbia (EI)', value: 'BC' },
+                                    { label: 'Alberta (EI)', value: 'AB' },
+                                    { label: 'Quebec (QPIP)', value: 'QC' },
+                                    { label: 'Nova Scotia (EI)', value: 'NS' },
+                                    { label: 'New Brunswick (EI)', value: 'NB' },
+                                    { label: 'Manitoba (EI)', value: 'MB' },
+                                    { label: 'Saskatchewan (EI)', value: 'SK' },
+                                    { label: 'PEI (EI)', value: 'PE' },
+                                    { label: 'Newfoundland (EI)', value: 'NL' },
+                                    { label: 'Territories / Other (EI)', value: 'OTHER' }
+                                ]}
+                            />
                             <div>
                                 <label className="text-xs font-black text-slate-700 block mb-1.5 uppercase tracking-tighter">Plan Type</label>
                                 <div className="grid grid-cols-2 gap-3">
@@ -120,15 +115,16 @@ export default function ParentalLeaveForm({
                             {/* P1 */}
                             <div>
                                 <div className="flex justify-between items-end mb-1.5">
-                                    <label className="text-xs font-bold text-slate-400 uppercase">Parent 1 (Birth)</label>
+                                    <div></div>
                                     <button onClick={() => setSalary(currentMaxInsurable)} className="text-[10px] bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-md font-bold hover:bg-indigo-100 transition-colors">
                                         Set Max (${currentMaxInsurable.toLocaleString()})
                                     </button>
                                 </div>
-                                <div className="relative group">
-                                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 font-bold group-focus-within:text-indigo-500 transition-colors">$</span>
-                                    <input type="number" value={salary} onChange={(e) => setSalary(parseInt(e.target.value)||0)} className="w-full pl-8 p-3 bg-slate-50 border border-slate-200 rounded-2xl font-mono text-lg font-black focus:ring-2 focus:ring-indigo-500 outline-none transition-all" />
-                                </div>
+                                <MoneyInput
+                                    label="Parent 1 (Birth)"
+                                    value={salary || ''}
+                                    onChange={(value) => setSalary(parseInt(value) || 0)}
+                                />
                             </div>
                             {/* P2 */}
                             <div className="pt-4 border-t border-slate-100">
@@ -143,15 +139,16 @@ export default function ParentalLeaveForm({
                                 {hasPartner && (
                                     <div className="animate-fade-in">
                                         <div className="flex justify-between items-end mb-1.5">
-                                            <label className="text-xs font-bold text-slate-400 uppercase">Parent 2 (Non-Birth)</label>
+                                            <div></div>
                                             <button onClick={() => setPartnerSalary(currentMaxInsurable)} className="text-[10px] bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-md font-bold hover:bg-emerald-100 transition-colors">
                                                 Set Max (${currentMaxInsurable.toLocaleString()})
                                             </button>
                                         </div>
-                                        <div className="relative group">
-                                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 font-bold group-focus-within:text-emerald-500 transition-colors">$</span>
-                                            <input type="number" value={partnerSalary} onChange={(e) => setPartnerSalary(parseInt(e.target.value)||0)} className="w-full pl-8 p-3 bg-slate-50 border border-slate-200 rounded-2xl font-mono text-lg font-black focus:ring-2 focus:ring-emerald-500 outline-none transition-all" />
-                                        </div>
+                                        <MoneyInput
+                                            label="Parent 2 (Non-Birth)"
+                                            value={partnerSalary || ''}
+                                            onChange={(value) => setPartnerSalary(parseInt(value) || 0)}
+                                        />
                                     </div>
                                 )}
                             </div>
@@ -208,40 +205,32 @@ export default function ParentalLeaveForm({
 
                                 <div className="space-y-6">
                                     {/* Parent 1 Slider */}
-                                    <div className="space-y-3">
-                                        <div className="flex justify-between text-sm items-end">
-                                            <div className="flex flex-col">
-                                                <span className="font-bold text-indigo-300">Parent 1 (Birth)</span>
-                                                <span className="text-[10px] text-indigo-300/60 uppercase font-bold tracking-wider">Parental Weeks</span>
-                                            </div>
-                                            <span className="font-black text-2xl tabular-nums">{p1Weeks}</span>
-                                        </div>
-                                        <input 
-                                            type="range" 
-                                            min="0" 
-                                            max={individualMax} 
-                                            value={p1Weeks} 
+                                    <div>
+                                        <RangeSlider
+                                            label="Parent 1 (Birth)"
+                                            subLabel="Parental Weeks"
+                                            value={p1Weeks}
                                             onChange={(e) => handleWeeksChange(1, e.target.value)}
-                                            className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-indigo-500 hover:accent-indigo-400 transition-all"
+                                            min={0}
+                                            max={individualMax}
+                                            step={1}
+                                            accentColor="indigo-500"
+                                            className="[&_label]:text-indigo-300 [&_label]:text-sm [&_div>div>div]:text-indigo-300/60 [&_div>div>div]:text-[10px] [&_span:last-child]:text-white [&_span:last-child]:text-2xl [&_input]:bg-slate-700 [&_input]:h-2"
                                         />
                                     </div>
 
                                     {/* Parent 2 Slider */}
-                                    <div className={`space-y-3 transition-all duration-300 ${!hasPartner ? 'opacity-30 pointer-events-none blur-sm grayscale' : ''}`}>
-                                        <div className="flex justify-between text-sm items-end">
-                                            <div className="flex flex-col">
-                                                <span className="font-bold text-emerald-300">Parent 2 (Non-Birth)</span>
-                                                <span className="text-[10px] text-emerald-300/60 uppercase font-bold tracking-wider">Parental Weeks</span>
-                                            </div>
-                                            <span className="font-black text-2xl tabular-nums">{p2Weeks}</span>
-                                        </div>
-                                        <input 
-                                            type="range" 
-                                            min="0" 
-                                            max={individualMax} 
-                                            value={p2Weeks} 
+                                    <div className={`transition-all duration-300 ${!hasPartner ? 'opacity-30 pointer-events-none blur-sm grayscale' : ''}`}>
+                                        <RangeSlider
+                                            label="Parent 2 (Non-Birth)"
+                                            subLabel="Parental Weeks"
+                                            value={p2Weeks}
                                             onChange={(e) => handleWeeksChange(2, e.target.value)}
-                                            className={`w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer hover:accent-emerald-400 transition-all ${bonusWeeksActive ? 'accent-emerald-400' : 'accent-emerald-600'}`}
+                                            min={0}
+                                            max={individualMax}
+                                            step={1}
+                                            accentColor={bonusWeeksActive ? 'emerald-400' : 'emerald-600'}
+                                            className="[&_label]:text-emerald-300 [&_label]:text-sm [&_div>div>div]:text-emerald-300/60 [&_div>div>div]:text-[10px] [&_span:last-child]:text-white [&_span:last-child]:text-2xl [&_input]:bg-slate-700 [&_input]:h-2"
                                         />
                                     </div>
                                 </div>

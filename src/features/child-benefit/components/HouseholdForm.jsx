@@ -7,7 +7,10 @@ import {
     ArrowRightIcon,
     CheckIcon,
     LinkIcon,
-    Tooltip
+    Tooltip,
+    MoneyInput,
+    NativeSelect,
+    RangeSlider
 } from '../../../components/shared';
 
 export default function HouseholdForm({
@@ -39,36 +42,38 @@ export default function HouseholdForm({
                     <div className="space-y-6">
                         <div className="flex items-center gap-2 text-indigo-600 font-black uppercase text-[10px] tracking-widest"><DollarSignIcon size={16} /> Household Profile</div>
                         <div className="bg-slate-50 p-5 md:p-6 rounded-3xl space-y-5 border border-slate-100 shadow-sm">
-                            <div>
-                                <label className="text-xs font-black text-slate-700 block mb-1.5 uppercase tracking-tighter">Province</label>
-                                {/* FIX: ADDED MISSING PROVINCES TO DROPDOWN */}
-                                <select value={province} onChange={(e) => setProvince(e.target.value)} className="w-full p-3 bg-white border border-slate-200 rounded-2xl text-sm outline-none shadow-sm focus:ring-2 focus:ring-indigo-500 transition-all font-medium">
-                                    <option value="ON">Ontario (ON)</option>
-                                    <option value="AB">Alberta (AB)</option>
-                                    <option value="BC">British Columbia (BC)</option>
-                                    <option value="QC">Quebec (QC)</option>
-                                    <option value="SK">Saskatchewan (SK)</option>
-                                    <option value="MB">Manitoba (MB)</option>
-                                    <option value="NS">Nova Scotia (NS)</option>
-                                    <option value="NB">New Brunswick (NB)</option>
-                                    <option value="NL">Newfoundland (NL)</option>
-                                    <option value="PE">Prince Edward Island (PE)</option>
-                                    <option value="OTHER">Other Provinces</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label className="text-xs font-black text-slate-700 block mb-1.5 uppercase tracking-tighter">Marital Status</label>
-                                <select value={maritalStatus} onChange={(e) => setMaritalStatus(e.target.value)} className="w-full p-3 bg-white border border-slate-200 rounded-2xl text-sm outline-none shadow-sm focus:ring-2 focus:ring-indigo-500 transition-all font-medium">
-                                    <option value="MARRIED">Married / Common-Law</option><option value="SINGLE">Single Parent</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label className="text-xs font-bold text-slate-400 uppercase mb-1 block">Net Household Income</label>
-                                <div className="relative group">
-                                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 font-bold group-focus-within:text-indigo-500 transition-colors">$</span>
-                                    <input type="number" value={grossAfni} onChange={(e) => setGrossAfni(parseInt(e.target.value)||0)} className="w-full pl-9 p-3 bg-white border border-slate-200 rounded-2xl font-mono text-xl font-black text-slate-800 focus:ring-2 focus:ring-indigo-500 outline-none transition-all" />
-                                </div>
-                            </div>
+                            <NativeSelect
+                                label="Province"
+                                value={province}
+                                onChange={(e) => setProvince(e.target.value)}
+                                options={[
+                                    { label: 'Ontario (ON)', value: 'ON' },
+                                    { label: 'Alberta (AB)', value: 'AB' },
+                                    { label: 'British Columbia (BC)', value: 'BC' },
+                                    { label: 'Quebec (QC)', value: 'QC' },
+                                    { label: 'Saskatchewan (SK)', value: 'SK' },
+                                    { label: 'Manitoba (MB)', value: 'MB' },
+                                    { label: 'Nova Scotia (NS)', value: 'NS' },
+                                    { label: 'New Brunswick (NB)', value: 'NB' },
+                                    { label: 'Newfoundland (NL)', value: 'NL' },
+                                    { label: 'Prince Edward Island (PE)', value: 'PE' },
+                                    { label: 'Other Provinces', value: 'OTHER' }
+                                ]}
+                            />
+                            <NativeSelect
+                                label="Marital Status"
+                                value={maritalStatus}
+                                onChange={(e) => setMaritalStatus(e.target.value)}
+                                options={[
+                                    { label: 'Married / Common-Law', value: 'MARRIED' },
+                                    { label: 'Single Parent', value: 'SINGLE' }
+                                ]}
+                            />
+                            <MoneyInput
+                                label="Net Household Income"
+                                value={grossAfni || ''}
+                                onChange={(value) => setGrossAfni(parseInt(value) || 0)}
+                            />
                             <div className="space-y-3 pt-2">
                                 <label className="flex items-center gap-3 cursor-pointer bg-white p-3 rounded-2xl border border-slate-200 text-sm font-bold transition-all hover:border-indigo-200 shadow-sm group">
                                     <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${sharedCustody ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-slate-300 bg-slate-50'}`}>
@@ -101,13 +106,20 @@ export default function HouseholdForm({
                                 <div key={child.id} className="bg-white p-5 md:p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col sm:flex-row gap-6 md:gap-8 items-center group hover:border-emerald-300 transition-all relative">
                                     <div className="bg-emerald-50 text-emerald-600 w-12 h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center font-black text-lg md:text-xl shrink-0 border-2 border-emerald-100">{idx + 1}</div>
                                     <div className="flex-1 w-full">
-                                        <div className="flex justify-between mb-4">
-                                            <label className="text-xs font-black text-slate-400 uppercase tracking-widest">Child Age: <span className="text-slate-900 text-xl">{child.age}</span></label>
+                                        <div className="flex justify-between items-center mb-2">
                                             <div className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-600 text-[9px] md:text-[10px] font-black uppercase tracking-tighter shadow-inner border border-emerald-100">
                                                 {child.age < 6 ? "Max Rate" : "Std Rate"}
                                             </div>
                                         </div>
-                                        <input type="range" min="0" max="18" value={child.age} onChange={(e) => updateChild(child.id, 'age', parseInt(e.target.value))} className="w-full h-2.5 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-emerald-500" />
+                                        <RangeSlider
+                                            label="Child Age"
+                                            value={child.age}
+                                            onChange={(e) => updateChild(child.id, 'age', parseInt(e.target.value))}
+                                            min={0}
+                                            max={18}
+                                            step={1}
+                                            accentColor="emerald-500"
+                                        />
                                     </div>
                                     <div className="flex flex-col sm:flex-row items-center gap-4 shrink-0 bg-slate-50/50 p-3 rounded-2xl border border-slate-100 w-full sm:w-auto">
                                         <label className="flex items-center gap-3 cursor-pointer select-none group/dis w-full sm:w-auto">

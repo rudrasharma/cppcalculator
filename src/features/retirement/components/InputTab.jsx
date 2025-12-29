@@ -2,7 +2,7 @@ import React from 'react';
 import { createPortal } from 'react-dom';
 import { 
     UserGroupIcon, DollarSignIcon, TrendingUpIcon, WandIcon, UploadIcon, FileTextIcon, RotateCcwIcon, BarChartIcon, ChevronDownIcon, XIcon, CheckIcon, LinkIcon, ArrowRightIcon,
-    Tooltip
+    Tooltip, MoneyInput, RangeSlider
 } from '../../../components/shared';
 import { CURRENT_YEAR, getYMPE, getYAMPE } from '../../../utils/constants';
 
@@ -53,14 +53,17 @@ export default function InputTab({
                             <input type="date" value={dob} onChange={(e) => setDob(e.target.value)} className="w-full p-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all shadow-sm" />
                         </div>
                         
-                        <div>
-                            <div className="flex justify-between items-center mb-3">
-                                <label className="text-sm font-bold text-slate-700">Target Retirement Age <Tooltip text="The age you plan to start collecting CPP and OAS. Start as early as 60 or as late as 70." /></label>
-                                <span className="bg-indigo-600 text-white text-xs font-bold px-2.5 py-1 rounded-lg shadow-sm">Age {retirementAge}</span>
-                            </div>
-                            <input type="range" min="60" max="70" step="1" value={retirementAge} onChange={(e) => setRetirementAge(parseInt(e.target.value))} className="w-full h-2.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600" />
-                            <div className="flex justify-between text-[10px] text-slate-400 mt-2 font-bold uppercase tracking-widest px-1"><span>Early (60)</span><span>Standard (65)</span><span>Deferred (70)</span></div>
-                        </div>
+                        <RangeSlider
+                            label="Target Retirement Age"
+                            subLabel="The age you plan to start collecting CPP and OAS. Start as early as 60 or as late as 70."
+                            value={retirementAge}
+                            onChange={(e) => setRetirementAge(parseInt(e.target.value))}
+                            min={60}
+                            max={70}
+                            step={1}
+                            accentColor="indigo-600"
+                        />
+                        <div className="flex justify-between text-[10px] text-slate-400 mt-2 font-bold uppercase tracking-widest px-1"><span>Early (60)</span><span>Standard (65)</span><span>Deferred (70)</span></div>
                     </div>
 
                     <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
@@ -78,16 +81,13 @@ export default function InputTab({
                                     <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1.5">Spouse Birth Date</label>
                                     <input type="date" value={spouseDob} onChange={(e) => setSpouseDob(e.target.value)} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500 transition-all" />
                                 </div>
-                                <div>
-                                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1.5">
-                                        Spouse Annual Retirement Income
-                                        <Tooltip text="Estimate their total annual taxable income in retirement (CPP, Pensions, RRIF). Exclude OAS and GIS. Helps determine household GIS." />
-                                    </label>
-                                    <div className="relative">
-                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm font-mono">$</span>
-                                        <input type="number" value={spouseIncome} onChange={(e) => setSpouseIncome(e.target.value)} className="w-full pl-8 p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500 transition-all font-mono" placeholder="0" />
-                                    </div>
-                                </div>
+                                <MoneyInput
+                                    label="Spouse Annual Retirement Income"
+                                    subLabel="Estimate their total annual taxable income in retirement (CPP, Pensions, RRIF). Exclude OAS and GIS. Helps determine household GIS."
+                                    value={spouseIncome || ''}
+                                    onChange={(value) => setSpouseIncome(value)}
+                                    className="[&_label]:text-[10px] [&_label]:text-slate-500"
+                                />
                             </div>
                         )}
 
@@ -141,17 +141,13 @@ export default function InputTab({
                             </div>
                         )}
 
-                        <div>
-                            <label className="flex items-center text-sm font-bold text-slate-700 mb-2 leading-none gap-1">
-                                Personal Retirement Income (Taxable)
-                                <Tooltip text="Estimate your annual taxable income in retirement (excluding OAS/GIS). Includes workplace pensions, RRSP/RRIF withdrawals, and interest. Used for the OAS Recovery Tax calculation." />
-                            </label>
-                            <div className="relative">
-                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm font-mono">$</span>
-                                <input type="number" placeholder="0" value={otherIncome} onChange={(e) => setOtherIncome(e.target.value)} className="w-full pl-8 p-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all shadow-sm font-mono" />
-                            </div>
-                            <p className="text-[10px] text-slate-400 mt-2 font-medium">Do not include TFSA withdrawals.</p>
-                        </div>
+                        <MoneyInput
+                            label="Personal Retirement Income (Taxable)"
+                            subLabel="Estimate your annual taxable income in retirement (excluding OAS/GIS). Includes workplace pensions, RRSP/RRIF withdrawals, and interest. Used for the OAS Recovery Tax calculation."
+                            value={otherIncome || ''}
+                            onChange={(value) => setOtherIncome(value)}
+                        />
+                        <p className="text-[10px] text-slate-400 mt-2 font-medium">Do not include TFSA withdrawals.</p>
                     </div>
                 </div>
             </div>
@@ -183,13 +179,17 @@ export default function InputTab({
 
                     <div className="bg-slate-50 border border-slate-200 p-5 rounded-3xl flex flex-wrap gap-6 items-end shadow-sm">
                         <div className="flex-1 min-w-[280px]">
-                            <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2.5">Generate Forecast from Salary</label>
                             <div className="flex gap-3">
-                                <div className="relative w-full">
-                                    <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm font-mono">$</span>
-                                    <input id="salary-input" type="number" placeholder="65000" value={avgSalaryInput} onChange={(e) => setAvgSalaryInput(e.target.value)} className="w-full pl-8 p-3 bg-white border border-slate-300 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none shadow-inner font-mono" />
+                                <div className="flex-1">
+                                    <MoneyInput
+                                        id="salary-input"
+                                        label="Generate Forecast from Salary"
+                                        value={avgSalaryInput || ''}
+                                        onChange={(value) => setAvgSalaryInput(value)}
+                                        className="[&_label]:text-xs [&_label]:text-slate-500 [&_label]:uppercase [&_label]:tracking-widest [&_input]:bg-white [&_input]:border-slate-300 [&_input]:shadow-inner [&_input]:text-sm"
+                                    />
                                 </div>
-                                <button onClick={applyAverageSalary} className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-3 rounded-xl text-sm font-bold flex items-center gap-2 transition-all shadow-lg shadow-indigo-100 whitespace-nowrap"><WandIcon size={18} /> {hasEarnings ? "Fill History" : "Generate All"}</button>
+                                <button onClick={applyAverageSalary} className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-3 rounded-xl text-sm font-bold flex items-center gap-2 transition-all shadow-lg shadow-indigo-100 whitespace-nowrap self-end"><WandIcon size={18} /> {hasEarnings ? "Fill History" : "Generate All"}</button>
                             </div>
                         </div>
                         <div className="w-px bg-slate-200 self-stretch mx-1 hidden md:block"></div>
