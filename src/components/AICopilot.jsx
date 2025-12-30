@@ -39,7 +39,7 @@ export default function AICopilot({ context, onUpdateCalculator, mode }) {
             } else if (activePage === 'parental-leave') {
                 greeting = "Hi! I can help with Maternity & Parental Leave. Try 'I make $75k in Ontario' or 'Switch to Extended'.";
             } else if (activePage === 'cpp') {
-                greeting = "Hi! I can help with CPP/OAS. Paste your Service Canada table or ask 'Estimate my pension'.";
+                greeting = "Hi! I can help with CPP/OAS. Try 'I am 50 years old and i want to retire at 65'.";
             }
             
             setMessages([{ role: 'assistant', content: greeting }]);
