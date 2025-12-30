@@ -3,7 +3,9 @@ export const POST = async ({ request, locals }) => {
   try {
     const { messages, context } = await request.json();
 
-    // 1. Load API Key (Switched to GROQ)
+    // ==========================================
+    // 1. LOAD API KEY (GROQ)
+    // ==========================================
     let apiKey = import.meta.env.GROQ_API_KEY;
     if (!apiKey && locals && locals.runtime && locals.runtime.env) {
       apiKey = locals.runtime.env.GROQ_API_KEY;
@@ -12,18 +14,75 @@ export const POST = async ({ request, locals }) => {
       return new Response(JSON.stringify({ error: "Missing GROQ_API_KEY" }), { status: 500 });
     }
 
-    // 2. Define Brains (Prompts & Tools in OpenAI Format)
-    // Groq/OpenAI use a slightly different structure for tools than Gemini
+    // ==========================================
+    // 2. DEFINE BRAINS (Prompts & Tools)
+    // ==========================================
+    const currentYear = new Date().getFullYear();
+    
     const PROMPTS_AND_TOOLS = {
+      
+      // --- RETIREMENT CALCULATOR (CPP/OAS) ---
+      "cpp": {
+        system_instruction: (context) => `
+          You are LoonieFi's friendly expert on Canadian Retirement (CPP, OAS, GIS).
+          Current Year: ${currentYear}
+          
+          YOUR GOALS:
+          1. **Update Data**: If the user provides info (age, salary, etc.), call 'update_retirement_calculator'.
+          2. **Answer Questions**: If the user asks about retirement concepts, answer them clearly.
+
+          CRITICAL RULES FOR DATA:
+          - **Age**: Convert "I am 60" -> dob: "${currentYear - 60}-01-01".
+          - **Salary History**: If the user describes complex raises (e.g., "2% raise for 30 years"), **IGNORE the math**. Just use their *current/final* salary as 'avgSalaryInput'. Do NOT try to generate a historical table unless they paste one.
+          - **Confirmation**: If you call the tool, add a short text confirmation like "I've updated your age and salary."
+
+          EXAMPLES:
+          User: "I am 60 years old."
+          Assistant: Call Tool { "dob": "${currentYear - 60}-01-01" } + "I've updated your age to 60."
+
+          User: "What is the max CPP payout?"
+          Assistant: "For 2025, the maximum monthly CPP retirement pension is approx $1,364 at age 65..."
+        `,
+        tools: [{
+          type: "function",
+          function: {
+            name: "update_retirement_calculator",
+            description: "Updates form values.",
+            parameters: {
+              type: "object",
+              properties: {
+                retirementAge: { type: "number" },
+                dob: { type: "string", description: "YYYY-MM-DD" },
+                yearsInCanada: { type: "number" },
+                avgSalaryInput: { type: "number" },
+                isMarried: { type: "boolean" },
+                spouseDob: { type: "string" },
+                spouseIncome: { type: "number" },
+                childCount: { type: "number" },
+                earnings: { type: "object", additionalProperties: { type: "number" } },
+                action: { type: "string", enum: ["SHOW_RESULTS"] }
+              },
+              required: []
+            }
+          }
+        }]
+      },
+
+      // --- PARENTAL LEAVE CALCULATOR ---
       "parental-leave": {
         system_instruction: (context) => `
           You are LoonieFi's expert on Canadian Maternity & Parental Leave.
-          Context: ${JSON.stringify(context)}
           
-          RULES:
-          - Parent 1 (annual_income) = Birth Parent (Mother). Parent 2 = Partner.
-          - If user gives data, CALL 'update_parental_calculator'.
-          - ALWAYS output a friendly text summary explaining what you changed.
+          GOALS:
+          1. **Update Form**: If the user provides income/province, call 'update_parental_calculator'.
+          2. **Answer Questions**: Explain policies (Standard vs Extended, Quebec vs Federal) using your internal knowledge. **DO NOT SEARCH.**
+          
+          KNOWLEDGE BASE:
+          - **Quebec (QPIP)**: Has its own plan with higher benefits (up to ~75-70% income) and a higher insurable earnings cap than the Federal EI used in Ontario.
+          - **Federal EI**: Standard is 55% of income.
+          
+          DATA RULES:
+          - Map Province names to codes (e.g., Alberta -> AB).
         `,
         tools: [{
           type: "function",
@@ -37,26 +96,29 @@ export const POST = async ({ request, locals }) => {
                 annual_income: { type: "number" },
                 partner_income: { type: "number" },
                 has_partner: { type: "boolean" },
-                plan_type: { type: "string", enum: ["STANDARD", "EXTENDED"] }
+                plan_type: { type: "string", enum: ["STANDARD", "EXTENDED"] },
+                p1_weeks: { type: "number" },
+                p2_weeks: { type: "number" }
               },
               required: []
             }
           }
         }]
       },
+
+      // --- HOUSEHOLD BENEFITS CALCULATOR ---
       "household": {
         system_instruction: (context) => `
           You are LoonieFi's expert on Canadian Household Benefits (CCB, GST).
-          Context: ${JSON.stringify(context)}.
           
-          RULES:
-          - Province: Map names to codes (Manitoba -> MB).
-          - Children: If user lists ages, use them.
-          
-          BEHAVIOR:
-          - If data is given, CALL 'update_household_calculator'.
-          - ALWAYS provide a text response. If you update the form, say "I've updated your household..."
-          - If asked a question (e.g. "What is the max CCB?"), answer it.
+          GOALS:
+          1. **Update Form**: If the user describes their family (kids, income), call 'update_household_calculator'.
+          2. **Answer Questions**: Use your internal knowledge to define tax forms and benefits. **DO NOT SEARCH.**
+
+          KNOWLEDGE BASE:
+          - **T2201**: This is the Disability Tax Credit Certificate. It is required to claim the Child Disability Benefit (CDB).
+          - **CCB**: Canada Child Benefit (tax-free monthly payment).
+          - **GST/HST Credit**: Quarterly payment for low/modest incomes.
         `,
         tools: [{
           type: "function",
@@ -87,20 +149,21 @@ export const POST = async ({ request, locals }) => {
       }
     };
 
-    // 3. Select Config based on Page
+    // ==========================================
+    // 3. SELECT CONFIG & PREPARE CONVERSATION
+    // ==========================================
     const page = context?.page || "parental-leave"; 
     const config = PROMPTS_AND_TOOLS[page] || PROMPTS_AND_TOOLS["parental-leave"];
 
-    // 4. Prepare Messages (Inject System Prompt)
-    const systemMessage = {
-      role: "system",
-      content: config.system_instruction(context)
-    };
-    
-    // Ensure we don't duplicate system messages if the frontend sends them
-    const conversation = [systemMessage, ...messages.filter(m => m.role !== "system")];
+    // Filter system messages to keep context clean
+    const conversation = [
+      { role: "system", content: config.system_instruction(context) },
+      ...messages.filter(m => m.role !== "system")
+    ];
 
-    // 5. Call Groq (OpenAI Compatible Endpoint)
+    // ==========================================
+    // 4. CALL GROQ API
+    // ==========================================
     const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -108,11 +171,11 @@ export const POST = async ({ request, locals }) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "llama-3.1-8b-instant", // High speed, free tier friendly
+        model: "llama-3.1-8b-instant", 
         messages: conversation,
         tools: config.tools,
-        tool_choice: "auto", // Let the model decide to call tool or talk
-        temperature: 0.7,
+        tool_choice: "auto", // Allows chatting OR tool use
+        temperature: 0.6,    // Creative enough to explain concepts
         max_tokens: 1024
       }),
     });
@@ -120,11 +183,13 @@ export const POST = async ({ request, locals }) => {
     const data = await response.json();
 
     if (data.error) {
+      console.error("Groq API Error:", data.error);
       throw new Error(data.error.message);
     }
 
-    // 6. Return Data (Groq response is already in the correct format)
-    // We just pass it through directly to the frontend
+    // ==========================================
+    // 5. RETURN RESPONSE
+    // ==========================================
     return new Response(JSON.stringify(data), { status: 200 });
 
   } catch (error) {

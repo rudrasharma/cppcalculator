@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import AICopilot from '../../../components/AICopilot'; // <--- NEW IMPORT
 import { useRetirementMath } from '../hooks/useRetirementMath';
 import { useUrlTab } from '../../../hooks/useUrlTab';
 import { applyAverageSalary, calculateDisplayValues, calculateComparisonMessage } from '../utils/retirementHelpers';
@@ -184,8 +185,64 @@ export default function Calculator({
     };
     
     const clearComparison = () => setComparisonSnapshot(null);
-
     const hasEarnings = Object.keys(earnings).length > 0;
+
+    // ==========================================
+    //    AI COPILOT INTEGRATION
+    // ==========================================
+    const handleAIUpdate = useCallback((updates) => {
+        console.log("AI Updates Received:", updates);
+
+        if (updates.retirementAge) setRetirementAge(Number(updates.retirementAge));
+        if (updates.dob) setDob(updates.dob);
+        if (updates.spouseDob) setSpouseDob(updates.spouseDob);
+        
+        // Boolean toggles
+        if (typeof updates.isMarried !== 'undefined') setIsMarried(updates.isMarried);
+        if (typeof updates.livedInCanadaAllLife !== 'undefined') setLivedInCanadaAllLife(updates.livedInCanadaAllLife);
+        
+        // Complex numeric inputs
+        if (updates.yearsInCanada) setYearsInCanada(Number(updates.yearsInCanada));
+        if (updates.avgSalaryInput) setAvgSalaryInput(String(updates.avgSalaryInput));
+        if (updates.spouseIncome) setSpouseIncome(String(updates.spouseIncome));
+        if (updates.otherIncome) setOtherIncome(String(updates.otherIncome));
+
+        // Earnings Table Merging (Handling MSCA Pastes)
+        if (updates.earnings) {
+            setEarnings(prev => ({ ...prev, ...updates.earnings }));
+            // If we have real data, we might want to clear the 'avg salary' field to avoid confusion
+            if (!updates.avgSalaryInput) setAvgSalaryInput(''); 
+        }
+
+        // Child logic
+        if (typeof updates.childCount === 'number') {
+            setShowChildren(updates.childCount > 0);
+            setChildren(prev => {
+                const currentCount = prev.length;
+                if (updates.childCount > currentCount) {
+                    const newKids = Array.from({ length: updates.childCount - currentCount }).map((_, i) => ({
+                        id: Date.now() + i,
+                        birthDate: '2015-01-01', 
+                        disability: false
+                    }));
+                    return [...prev, ...newKids];
+                } else if (updates.childCount < currentCount) {
+                    return prev.slice(0, updates.childCount);
+                }
+                return prev;
+            });
+        }
+        
+        if (updates.action === 'SHOW_RESULTS') {
+            setActiveTab('results');
+        }
+    }, []);
+
+    const aiContext = useMemo(() => ({
+        dob, retirementAge, isMarried, yearsInCanada, 
+        hasEarningsData: hasEarnings,
+        earningsCount: Object.keys(earnings).length
+    }), [dob, retirementAge, isMarried, yearsInCanada, hasEarnings, earnings]);
 
     return (
         <div 
@@ -259,6 +316,16 @@ export default function Calculator({
                 </div>
                 <div style={{ height: '140px' }}></div> 
             </main>
+
+            {/* --- AI COPILOT --- */}
+            {mounted && (
+                <AICopilot
+                    mode="cpp" 
+                    agentName="Retirement Copilot"
+                    context={aiContext}
+                    onUpdateCalculator={handleAIUpdate}
+                />
+            )}
         </div>
     );
 }
