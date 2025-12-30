@@ -29,7 +29,7 @@ export const POST = async ({ request, locals }) => {
           
           YOUR GOALS:
           1. **Update Data**: If the user provides info, call 'update_retirement_calculator'.
-          2. **Answer Questions**: Explain retirement concepts clearly using your internal knowledge.
+          2. **Answer Questions**: Explain retirement concepts clearly.
 
           CRITICAL RULES FOR DATA:
           - **Age**: "I am 90" -> dob: "${currentYear - 90}-01-01".
@@ -79,7 +79,7 @@ export const POST = async ({ request, locals }) => {
           
           GOALS:
           1. **Update Form**: If the user provides income/province, call 'update_parental_calculator'.
-          2. **Answer Questions**: Explain policies (Standard vs Extended, Quebec vs Federal) using your internal knowledge.
+          2. **Answer Questions**: Explain policies (Standard vs Extended, Quebec vs Federal).
           
           DATA RULES:
           - Map Province names to codes (e.g., Alberta -> AB).
@@ -113,7 +113,7 @@ export const POST = async ({ request, locals }) => {
           
           GOALS:
           1. **Update Form**: If the user describes their family (kids, income), call 'update_household_calculator'.
-          2. **Answer Questions**: Explain tax forms and benefits using your internal knowledge.
+          2. **Answer Questions**: Explain tax forms and benefits.
         `,
         tools: [{
           type: "function",
