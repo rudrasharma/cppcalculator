@@ -28,20 +28,20 @@ export const POST = async ({ request, locals }) => {
           Current Year: ${currentYear}
           
           YOUR GOALS:
-          1. **Update Data**: If the user provides info (age, salary, etc.), call 'update_retirement_calculator'.
-          2. **Answer Questions**: If the user asks about retirement concepts, answer them clearly.
+          1. **Update Data**: If the user provides info, call 'update_retirement_calculator'.
+          2. **Answer Questions**: Explain retirement concepts clearly using your internal knowledge.
 
           CRITICAL RULES FOR DATA:
-          - **Age**: Convert "I am 60" -> dob: "${currentYear - 60}-01-01".
-          - **Salary History**: If the user describes complex raises (e.g., "2% raise for 30 years"), **IGNORE the math**. Just use their *current/final* salary as 'avgSalaryInput'. Do NOT try to generate a historical table unless they paste one.
-          - **Confirmation**: If you call the tool, add a short text confirmation like "I've updated your age and salary."
+          - **Age**: "I am 90" -> dob: "${currentYear - 90}-01-01".
+          - **Retirement Age**: "Retired 30 years ago" (at age 60) -> retirementAge: 60.
+          - **Earnings**: The 'earnings' object is STRICTLY for { "Year": Amount }. 
+            - **NEVER** infer a table from "worked 30 years". 
+            - If user says "Retired 30 years ago", ONLY update dates. Leave earnings empty.
+            - If user describes complex raises (e.g. "2% for 30 years"), **IGNORE THE MATH**. Just use their current/final salary as 'avgSalaryInput'.
 
           EXAMPLES:
-          User: "I am 60 years old."
-          Assistant: Call Tool { "dob": "${currentYear - 60}-01-01" } + "I've updated your age to 60."
-
-          User: "What is the max CPP payout?"
-          Assistant: "For 2025, the maximum monthly CPP retirement pension is approx $1,364 at age 65..."
+          User: "I am 90 and retired 30 years ago."
+          Assistant: Call Tool { "dob": "${currentYear - 90}-01-01", "retirementAge": 60 } + "I've updated your age."
         `,
         tools: [{
           type: "function",
@@ -52,14 +52,18 @@ export const POST = async ({ request, locals }) => {
               type: "object",
               properties: {
                 retirementAge: { type: "number" },
-                dob: { type: "string", description: "YYYY-MM-DD" },
+                dob: { type: "string" },
                 yearsInCanada: { type: "number" },
                 avgSalaryInput: { type: "number" },
                 isMarried: { type: "boolean" },
                 spouseDob: { type: "string" },
                 spouseIncome: { type: "number" },
                 childCount: { type: "number" },
-                earnings: { type: "object", additionalProperties: { type: "number" } },
+                earnings: { 
+                  type: "object", 
+                  description: "Dictionary of historical earnings. Key=Year (string), Value=Amount (number).",
+                  additionalProperties: { type: "number" } 
+                },
                 action: { type: "string", enum: ["SHOW_RESULTS"] }
               },
               required: []
@@ -75,11 +79,7 @@ export const POST = async ({ request, locals }) => {
           
           GOALS:
           1. **Update Form**: If the user provides income/province, call 'update_parental_calculator'.
-          2. **Answer Questions**: Explain policies (Standard vs Extended, Quebec vs Federal) using your internal knowledge. **DO NOT SEARCH.**
-          
-          KNOWLEDGE BASE:
-          - **Quebec (QPIP)**: Has its own plan with higher benefits (up to ~75-70% income) and a higher insurable earnings cap than the Federal EI used in Ontario.
-          - **Federal EI**: Standard is 55% of income.
+          2. **Answer Questions**: Explain policies (Standard vs Extended, Quebec vs Federal) using your internal knowledge.
           
           DATA RULES:
           - Map Province names to codes (e.g., Alberta -> AB).
@@ -113,12 +113,7 @@ export const POST = async ({ request, locals }) => {
           
           GOALS:
           1. **Update Form**: If the user describes their family (kids, income), call 'update_household_calculator'.
-          2. **Answer Questions**: Use your internal knowledge to define tax forms and benefits. **DO NOT SEARCH.**
-
-          KNOWLEDGE BASE:
-          - **T2201**: This is the Disability Tax Credit Certificate. It is required to claim the Child Disability Benefit (CDB).
-          - **CCB**: Canada Child Benefit (tax-free monthly payment).
-          - **GST/HST Credit**: Quarterly payment for low/modest incomes.
+          2. **Answer Questions**: Explain tax forms and benefits using your internal knowledge.
         `,
         tools: [{
           type: "function",
@@ -155,7 +150,6 @@ export const POST = async ({ request, locals }) => {
     const page = context?.page || "parental-leave"; 
     const config = PROMPTS_AND_TOOLS[page] || PROMPTS_AND_TOOLS["parental-leave"];
 
-    // Filter system messages to keep context clean
     const conversation = [
       { role: "system", content: config.system_instruction(context) },
       ...messages.filter(m => m.role !== "system")
@@ -174,8 +168,8 @@ export const POST = async ({ request, locals }) => {
         model: "llama-3.1-8b-instant", 
         messages: conversation,
         tools: config.tools,
-        tool_choice: "auto", // Allows chatting OR tool use
-        temperature: 0.6,    // Creative enough to explain concepts
+        tool_choice: "auto", 
+        temperature: 0.6, // High enough to answer "What is T2201" creatively
         max_tokens: 1024
       }),
     });
