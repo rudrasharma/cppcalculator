@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { calculateAll } from '../utils/benefitEngine';
 import HouseholdForm from './HouseholdForm';
 import BenefitResults from './BenefitResults';
+import AICopilot from '../../../components/AICopilot';
 
 // ==========================================
 //              MAIN COMPONENT
@@ -10,7 +11,7 @@ export default function HouseholdBenefits({
     isVisible = true, 
     initialProvince = 'ON', 
     initialIncome = 65000,
-    initialMaritalStatus = 'MARRIED',
+    initialMaritalStatus = 'MARRIED', 
     initialChildCount = 2 
 }) {
     
@@ -102,6 +103,24 @@ export default function HouseholdBenefits({
     const removeChild = (id) => setChildren(children.filter(c => c.id !== id));
     const updateChild = (id, field, value) => {
         setChildren(prev => prev.map(c => c.id === id ? { ...c, [field]: value } : c));
+    };
+
+    // --- AI HANDLER (ADDED) ---
+    const handleAIUpdate = (data) => {
+        if (data.province) setProvince(data.province);
+        if (data.marital_status) setMaritalStatus(data.marital_status);
+        if (data.income !== undefined) setGrossAfni(data.income);
+        if (data.shared_custody !== undefined) setSharedCustody(data.shared_custody);
+        if (data.is_rural !== undefined) setIsRural(data.is_rural);
+        
+        if (data.children && Array.isArray(data.children)) {
+            const newKids = data.children.map((k, i) => ({
+                id: Date.now() + i, 
+                age: k.age,
+                disability: k.disability || false
+            }));
+            setChildren(newKids);
+        }
     };
 
     const results = useMemo(() => calculateAll(afni, children, sharedCustody, province, maritalStatus, isRural), [afni, children, sharedCustody, province, maritalStatus, isRural]);
@@ -200,6 +219,21 @@ export default function HouseholdBenefits({
                     </div>
                 </div>
             </main>
+
+            {/* AI COPILOT (ADDED) */}
+            <AICopilot 
+                context={{ 
+                    page: 'household', 
+                    province, 
+                    maritalStatus, 
+                    income: grossAfni, 
+                    children, 
+                    sharedCustody,
+                    isRural 
+                }}
+                onUpdateCalculator={handleAIUpdate}
+            />
+
         </div>
     );
 }
