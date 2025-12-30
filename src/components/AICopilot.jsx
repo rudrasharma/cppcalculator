@@ -32,7 +32,7 @@ export default function AICopilot({ context, onUpdateCalculator }) {
             let greeting = "Hi! I can help you estimate your EI benefits.";
             
             if (context?.page === 'household') {
-                greeting = "Hi! I can help with CCB, GST, and Child Benefits. Try 'I have 3 kids' or 'Estimate my payments'.";
+                greeting = "Hi! I can help estimate your GST and CCB. Try 'I have 3 kids' or 'Estimate my payments'.";
             } else if (context?.page === 'parental-leave') {
                 greeting = "Hi! I can help with Maternity & Parental Leave. Try 'I make $75k in Ontario' or 'Switch to Extended'.";
             }
@@ -119,7 +119,7 @@ export default function AICopilot({ context, onUpdateCalculator }) {
         "fixed z-[10000] flex flex-col items-end gap-4 transition-all duration-300 bottom-28 right-4 md:bottom-8 md:right-8",
         []
     );
-    
+
     const windowClasses = useMemo(() => 
         "bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col transition-all origin-bottom-right w-[calc(100vw-2rem)] md:w-96 h-[500px] max-h-[60vh] md:max-h-[500px]",
         []
