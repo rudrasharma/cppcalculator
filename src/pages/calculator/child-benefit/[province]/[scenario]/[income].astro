@@ -1,16 +1,20 @@
 ---
 // src/pages/calculator/child-benefit/[province]/[scenario]/[income].astro
+
+// 1. IMPORTS
 import BaseLayout from '../../../../../layouts/BaseLayout.astro';
 import HouseholdBenefits from '../../../../../features/child-benefit/components/HouseholdBenefits.jsx'; 
-// NEW: Import the Breadcrumbs component
 import Breadcrumbs from '../../../../../components/shared/Breadcrumbs.astro';
 import { PROVINCES, SALARIES, FAMILY_SCENARIOS } from '../../../../../data/seo-scenarios';
 
+// 2. IMPORT THE LOGIC ENGINE (Server-Side)
+import { calculateAll } from '../../../../../features/child-benefit/utils/benefitEngine.js';
+
 export const prerender = true;
 
+// 3. GENERATE PATHS
 export async function getStaticPaths() {
   const paths = [];
-
   PROVINCES.forEach((prov) => {
     FAMILY_SCENARIOS.forEach((fam) => {
         SALARIES.forEach((salary) => {
@@ -26,31 +30,84 @@ export async function getStaticPaths() {
                     familyStatus: fam.status,
                     childCount: fam.count,
                     familyLabel: fam.label,
+                    scenarioSlug: fam.slug, // Pass slug for linking
                     salaryVal: salary 
                 },
             });
         });
     });
   });
-
   return paths;
 }
 
-const { provinceCode, provinceName, familyStatus, childCount, familyLabel, salaryVal } = Astro.props;
+const { provinceCode, provinceName, familyStatus, childCount, familyLabel, salaryVal, scenarioSlug } = Astro.props;
 
-const salaryFormatted = new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD', maximumFractionDigits: 0 }).format(salaryVal);
-const title = `CCB Calculator: ${familyLabel} in ${provinceName} (${salaryFormatted}) | 2025 Estimate | LoonieFi`;
-const description = `Calculate 2025 Canada Child Benefit (CCB) for a ${familyLabel.toLowerCase()} in ${provinceName} with a household income of ${salaryFormatted}. Includes OCB, ACFB and GST credits.`;
-const canonicalURL = new URL(`/calculator/child-benefit/${provinceCode.toLowerCase()}/${familyLabel.toLowerCase().replace(/\s+/g, '-')}/${salaryVal}`, Astro.site || Astro.url.origin);
+// 4. SERVER-SIDE CALCULATION
+// Create a "standard" family profile for this scenario to get hard numbers for Google
+const serverChildren = Array.from({ length: childCount }).map((_, i) => ({
+    id: i,
+    age: i === 0 ? 4 : (i * 3) + 2, // Distribute ages (e.g. 4, 5, 8...)
+    disability: false
+}));
 
-// NEW: Define the Breadcrumb path
+// Run the engine instantly
+const serverResults = calculateAll(
+    salaryVal, 
+    serverChildren, 
+    false, // Shared Custody default
+    provinceCode, 
+    familyStatus, 
+    false // Rural default
+);
+
+// 5. FORMATTERS & HELPERS
+const currency = new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD', maximumFractionDigits: 0 });
+const salaryFormatted = currency.format(salaryVal);
+const monthlyFormatted = currency.format(serverResults.monthly);
+const annualFormatted = currency.format(serverResults.total);
+
+// 6. DYNAMIC INSIGHT GENERATION (Unique Text)
+let insights = [];
+if (serverResults.gst > 0) insights.push(`includes the quarterly GST/HST credit`);
+if (serverResults.caip > 0) insights.push(`the Canada Carbon Rebate`);
+if (serverResults.provincial > 0) insights.push(`the ${serverResults.provName}`);
+
+const benefitListString = insights.length > 0 ? `, plus ${insights.join(' and ')}.` : `.`;
+
+// 7. SEO METADATA
+const title = `CCB Estimate: ${monthlyFormatted}/mo for ${familyLabel} in ${provinceName} | LoonieFi`;
+const description = `Based on a household income of ${salaryFormatted}, a ${familyLabel} in ${provinceName} qualifies for approximately ${annualFormatted} per year in government support. This ${benefitListString}`;
+const canonicalURL = new URL(Astro.url.pathname, Astro.site || Astro.url.origin);
+
+// Breadcrumbs
 const breadcrumbPath = [
   { label: 'Child Benefit', href: '/child-benefit-calculator' },
-  { label: provinceName, href: `/calculator/child-benefit/browse?province=${provinceCode}` }, // Links to browse page if you have one, or keep safe
-  { label: `${familyLabel} (${salaryFormatted})`, href: Astro.url.pathname } // Current Page
+  { label: provinceName, href: `/calculator/child-benefit/browse` },
+  { label: `${familyLabel} (${salaryFormatted})`, href: Astro.url.pathname }
 ];
 
-// Schema.org structured data
+// 8. LINKING STRATEGY (Previous/Next Income)
+const step = 5000;
+const prevIncome = parseInt(salaryVal) - step;
+const nextIncome = parseInt(salaryVal) + step;
+const makeUrl = (inc) => `/calculator/child-benefit/${Astro.params.province}/${scenarioSlug}/${inc}`;
+
+// 9. SCHEMAS
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": `How much CCB will I get in ${provinceName} with an income of ${salaryFormatted}?`,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": `Based on July 2025 benefit rates, a ${familyLabel.toLowerCase()} earning ${salaryFormatted} in ${provinceName} can expect approximately ${monthlyFormatted} per month in total government benefits.`
+      }
+    }
+  ]
+};
+
 const calculatorSchema = {
   "@context": "https://schema.org",
   "@type": "WebApplication",
@@ -58,39 +115,45 @@ const calculatorSchema = {
   "description": description,
   "url": canonicalURL.toString(),
   "applicationCategory": "FinanceApplication",
-  "operatingSystem": "Web",
-  "offers": {
-    "@type": "Offer",
-    "price": "0",
-    "priceCurrency": "CAD"
-  },
-  "featureList": [
-    "Canada Child Benefit (CCB)",
-    "Provincial child benefits",
-    "GST/HST credits",
-    "Carbon rebate calculations"
-  ]
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "CAD" },
 };
 ---
 
 <BaseLayout title={title} description={description}>
   <script type="application/ld+json" set:html={JSON.stringify(calculatorSchema)} />
+  <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
   
   <main>
     <section class="py-12 px-4 max-w-5xl mx-auto">
-      
-      {/* NEW: Insert Breadcrumbs at the top of the section */}
       <Breadcrumbs crumbs={breadcrumbPath} />
 
       <header class="text-center mb-10">
         <h1 class="text-3xl md:text-4xl font-black text-slate-900 mb-4">
-          {provinceName} Child Benefit Calculator
+          {provinceName} Child Benefit Estimate
         </h1>
-        <p class="text-lg text-slate-600">
-          Scenario: <strong>{familyLabel}</strong> with <strong>{salaryFormatted}</strong> Income
+        <p class="text-lg text-slate-600 max-w-2xl mx-auto">
+            Reviewing benefits for a <strong>{familyLabel}</strong> with a net income of <strong>{salaryFormatted}</strong>.
         </p>
-      </header> {/* Fixed mismatched tag here */}
+      </header>
 
+      {/* --- SERVER-SIDE RESULT PREVIEW (SEO GOLD) --- */}
+      {/* This ensures Google Bot sees the answer immediately without running JS */}
+      <div class="bg-indigo-50 border border-indigo-100 rounded-3xl p-8 mb-12 text-center relative overflow-hidden">
+         <div class="relative z-10">
+             <p class="text-xs font-black text-indigo-400 uppercase tracking-widest mb-2">Estimated Monthly Support</p>
+             <div class="text-5xl md:text-6xl font-black text-slate-900 mb-2 tracking-tighter">
+                 {monthlyFormatted}
+                 <span class="text-lg text-slate-400 font-medium">/mo</span>
+             </div>
+             <p class="text-sm text-slate-500 font-medium">
+                 ~{annualFormatted} per year (Tax-Free)
+             </p>
+         </div>
+         {/* Decorative blob */}
+         <div class="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl -mt-10"></div>
+      </div>
+
+      {/* --- INTERACTIVE CALCULATOR (Hydrates over the static content) --- */}
       <HouseholdBenefits 
         client:load 
         initialProvince={provinceCode} 
@@ -99,20 +162,49 @@ const calculatorSchema = {
         initialChildCount={childCount}
       />
 
+      {/* --- GENERATED INSIGHTS (Unique Content) --- */}
       <div class="prose prose-slate mx-auto mt-16 bg-white p-8 rounded-3xl border border-slate-100 shadow-sm">
-        <h2>How {provinceName} Benefits Work for this Family</h2>
+        <h2>Your Result Explained</h2>
         <p>
-          Based on a <strong>{familyStatus.toLowerCase()}</strong> household with <strong>{childCount} children</strong> in {provinceName}, you may be eligible for:
+          At an income of <strong>{salaryFormatted}</strong>, your family falls into the {serverResults.federal > 0 ? "eligible" : "phased-out"} range for federal benefits. 
+          {description}
         </p>
+        
+        <h3>Benefit Breakdown</h3>
         <ul>
-          <li><strong>Canada Child Benefit (CCB):</strong> The federal tax-free monthly payment.</li>
-          <li><strong>{provinceCode === 'ON' ? 'Ontario Child Benefit (OCB)' : provinceCode === 'AB' ? 'Alberta Child and Family Benefit (ACFB)' : provinceCode === 'BC' ? 'BC Family Benefit' : 'Provincial Child Benefits'}</strong>: Specific support for families living in {provinceName}.</li>
-          <li><strong>GST/HST Credit:</strong> Quarterly payments based on your ${salaryFormatted} net income.</li>
+          <li><strong>Canada Child Benefit (CCB):</strong> {currency.format(serverResults.federal)} / year</li>
+          <li><strong>{serverResults.provName}:</strong> {currency.format(serverResults.provincial)} / year</li>
+          {(serverResults.gst + serverResults.caip) > 0 && (
+              <li><strong>Tax Credits (GST + Carbon):</strong> {currency.format(serverResults.gst + serverResults.caip)} / year</li>
+          )}
         </ul>
-        <p>
-          Use the calculator above to see the exact breakdown of your monthly and annual entitlement.
-        </p>
+
+        {salaryVal > 75000 && (
+            <div class="bg-amber-50 p-4 rounded-xl border-l-4 border-amber-400 text-sm text-amber-800 not-prose my-6">
+                <strong>💡 Planning Tip:</strong> Since your income is {salaryFormatted}, you are in the "phase-out" zone. 
+                Every $100 you contribute to an RRSP could increase your tax-free benefits by reducing your net income. 
+                Use the calculator above to test a lower income!
+            </div>
+        )}
       </div>
+
+      {/* --- HORIZONTAL LINKING (Spiderweb) --- */}
+      <div class="mt-16 pt-10 border-t border-slate-200">
+          <h3 class="font-bold text-slate-900 mb-6 text-center">Compare Nearby Income Levels</h3>
+          <div class="flex flex-wrap justify-center gap-3">
+            {prevIncome >= 20000 && (
+                <a href={makeUrl(prevIncome)} class="px-5 py-3 bg-white border border-slate-200 hover:border-indigo-300 hover:text-indigo-600 rounded-xl text-sm font-bold transition-all shadow-sm">
+                    ← View {currency.format(prevIncome)}
+                </a>
+            )}
+            {nextIncome <= 250000 && (
+                <a href={makeUrl(nextIncome)} class="px-5 py-3 bg-white border border-slate-200 hover:border-indigo-300 hover:text-indigo-600 rounded-xl text-sm font-bold transition-all shadow-sm">
+                    View {currency.format(nextIncome)} →
+                </a>
+            )}
+          </div>
+      </div>
+
     </section>
   </main>
 </BaseLayout>

@@ -1,10 +1,14 @@
 ---
 // src/pages/calculator/grocery-inflation/[province]/[scenario].astro
+
 import BaseLayout from '../../../../layouts/BaseLayout.astro';
 import GroceryInflation from '../../../../features/grocery/components/GroceryInflation.jsx';
-// NEW: Import Breadcrumbs
 import Breadcrumbs from '../../../../components/shared/Breadcrumbs.astro';
 import { PROVINCES, GROCERY_SCENARIOS } from '../../../../data/seo-scenarios';
+
+// 1. IMPORT DATA & ENGINE (Server-Side)
+import { STAPLES } from '../../../../features/grocery/data/groceryData.js';
+import { calculateGroceryTotals } from '../../../../features/grocery/utils/groceryEngine.js';
 
 export const prerender = true;
 
@@ -30,18 +34,33 @@ export async function getStaticPaths() {
 
 const { provinceCode, provinceName, scenario } = Astro.props;
 
-const title = `${scenario.label} in ${provinceName} | 2025 Grocery Inflation | LoonieFi`;
-const description = `Calculate the future cost of a ${scenario.label.toLowerCase()} in ${provinceName}. ${scenario.desc} Forecast your grocery budget with provincial inflation data.`;
-const canonicalURL = new URL(`/calculator/grocery-inflation/${provinceCode.toLowerCase()}/${scenario.slug}`, Astro.site || Astro.url.origin);
+// 2. SERVER-SIDE CALCULATION
+// Resolve the cart IDs (strings) to actual Item Objects
+const cartItems = STAPLES.filter(item => scenario.cart.includes(item.id));
 
-// NEW: Define Breadcrumb Path
+// Run the engine
+const serverTotals = calculateGroceryTotals(
+    cartItems, 
+    scenario.years, 
+    provinceCode
+);
+
+// 3. FORMATTING
+const currency = new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD' });
+const currentCost = currency.format(serverTotals.current);
+const futureCost = currency.format(serverTotals.future);
+const increase = Math.round(serverTotals.increasePercent);
+
+const title = `${scenario.label} in ${provinceName}: ${futureCost} Forecast | LoonieFi`;
+const description = `In ${provinceName}, this grocery basket currently costs ${currentCost}. By ${2025 + scenario.years}, it is projected to hit ${futureCost} (+${increase}%). See the itemized breakdown.`;
+const canonicalURL = new URL(Astro.url.pathname, Astro.site || Astro.url.origin);
+
 const breadcrumbPath = [
   { label: 'Grocery Inflation', href: '/grocery-inflation-calculator' },
-  { label: provinceName, href: `/calculator/grocery-inflation/browse?province=${provinceCode}` },
+  { label: provinceName, href: `/calculator/grocery-inflation/browse` },
   { label: scenario.label, href: Astro.url.pathname }
 ];
 
-// Schema.org structured data
 const calculatorSchema = {
   "@context": "https://schema.org",
   "@type": "WebApplication",
@@ -49,18 +68,7 @@ const calculatorSchema = {
   "description": description,
   "url": canonicalURL.toString(),
   "applicationCategory": "FinanceApplication",
-  "operatingSystem": "Web",
-  "offers": {
-    "@type": "Offer",
-    "price": "0",
-    "priceCurrency": "CAD"
-  },
-  "featureList": [
-    "Grocery inflation forecasting",
-    "Provincial inflation rates",
-    "Purchasing power calculator",
-    "Multi-year projections"
-  ]
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "CAD" },
 };
 ---
 
@@ -69,8 +77,6 @@ const calculatorSchema = {
   
   <main>
     <section class="py-12 px-4 max-w-6xl mx-auto">
-      
-      {/* NEW: Breadcrumbs Component */}
       <Breadcrumbs crumbs={breadcrumbPath} />
 
       <header class="text-center mb-10">
@@ -80,24 +86,56 @@ const calculatorSchema = {
         <p class="text-lg text-slate-600 max-w-2xl mx-auto">
             {scenario.desc}
         </p>
-      </header> {/* Fixed mismatched closing tag */}
+      </header>
 
-    <GroceryInflation 
-      client:load 
-      initialProvince={provinceCode} 
-      initialYears={scenario.years}
-      initialCartIds={scenario.cart}
-    />
+      {/* --- SERVER-SIDE PREVIEW --- */}
+      <div id="static-seo-result" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
+          <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200 text-center">
+              <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Today's Price</p>
+              <p class="text-2xl font-black text-slate-700">{currentCost}</p>
+          </div>
+          <div class="bg-indigo-50 p-6 rounded-2xl border border-indigo-100 text-center relative overflow-hidden">
+              <div class="relative z-10">
+                <p class="text-xs font-bold text-indigo-400 uppercase tracking-wider">{2025 + scenario.years} Forecast</p>
+                <p class="text-4xl font-black text-indigo-900 tracking-tighter">{futureCost}</p>
+              </div>
+              <div class="absolute top-0 right-0 w-16 h-16 bg-indigo-200 rounded-full blur-2xl -mr-8 -mt-8"></div>
+          </div>
+          <div class="bg-rose-50 p-6 rounded-2xl border border-rose-100 text-center">
+              <p class="text-xs font-bold text-rose-400 uppercase tracking-wider">Inflation Hit</p>
+              <p class="text-2xl font-black text-rose-600">+{increase}%</p>
+          </div>
+      </div>
 
-    <div class="prose prose-slate mx-auto mt-16 bg-white p-8 rounded-3xl border border-slate-100 shadow-sm">
+      <GroceryInflation 
+        client:load 
+        initialProvince={provinceCode} 
+        initialYears={scenario.years}
+        initialCartIds={scenario.cart}
+      />
+
+      <div class="prose prose-slate mx-auto mt-16 bg-white p-8 rounded-3xl border border-slate-100 shadow-sm">
         <h2>About this Forecast</h2>
         <p>
-            Food inflation varies significantly by province and food category. This calculator applies <strong>{provinceName}-specific</strong> inflation factors to the items in your basket.
+            Based on {provinceName}-specific inflation factors, this basket of goods (including <strong>{cartItems.slice(0,3).map(i => i.name.split(' ')[0]).join(', ')}</strong>) is projected to increase by <strong>{increase}%</strong> over the next {scenario.years} years.
         </p>
         <p>
-            While the Bank of Canada targets 2% inflation, grocery categories like <strong>Meat</strong> and <strong>Dairy</strong> often see higher volatility due to supply chain costs and carbon pricing. This "basket approach" gives you a more realistic personal inflation rate than the generic CPI number.
+            While the Bank of Canada targets 2% inflation, specific food categories often see higher volatility due to supply chain costs and carbon pricing.
         </p>
-    </div>
+      </div>
+
+      {/* --- HORIZONTAL LINKING (Compare Provinces) --- */}
+      <div class="mt-16 border-t border-slate-200 pt-8">
+          <h3 class="text-center font-bold text-slate-900 mb-6">Compare this Basket in Other Provinces</h3>
+          <div class="flex flex-wrap justify-center gap-3">
+              {PROVINCES.filter(p => p.code !== provinceCode).slice(0, 4).map(p => (
+                  <a href={`/calculator/grocery-inflation/${p.slug}/${scenario.slug}`} class="px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-bold text-slate-600 hover:text-indigo-600 hover:border-indigo-200 transition-colors">
+                      {p.name}
+                  </a>
+              ))}
+          </div>
+      </div>
+
     </section>
   </main>
 </BaseLayout>

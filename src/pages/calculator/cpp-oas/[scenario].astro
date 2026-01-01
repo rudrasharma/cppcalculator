@@ -1,8 +1,8 @@
 ---
 // src/pages/calculator/cpp-oas/[scenario].astro
+
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import Calculator from '../../../features/retirement/components/index.jsx';
-// NEW: Import Breadcrumbs
 import Breadcrumbs from '../../../components/shared/Breadcrumbs.astro';
 import { CPP_SCENARIOS } from '../../../data/seo-scenarios';
 
@@ -17,18 +17,49 @@ export async function getStaticPaths() {
 
 const { scenario } = Astro.props;
 
-const incomeFormatted = new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD', maximumFractionDigits: 0 }).format(parseInt(scenario.income));
-const title = `${scenario.label} - CPP & OAS Calculator 2025 | LoonieFi`;
-const description = `${scenario.desc} Based on ${scenario.years} years of residence and avg annual earnings of ${incomeFormatted}. Calculate your retirement benefits with this pre-filled scenario.`;
-const canonicalURL = new URL(`/calculator/cpp-oas/${scenario.slug}`, Astro.site || Astro.url.origin);
+// --- SERVER-SIDE ESTIMATOR (Simplified for SEO) ---
+// We mimic the core logic to give Google a "Answer" without running the full React engine
+const MAX_CPP_2025 = 1364.60;
+const MAX_OAS_2025 = 727.67;
+const YMPE_2025 = 71300;
 
-// NEW: Define Breadcrumb Path
+// 1. Estimate Base CPP (Income Ratio * Max)
+const incomeVal = parseInt(scenario.income);
+const incomeRatio = Math.min(incomeVal, YMPE_2025) / YMPE_2025;
+let estCPP = MAX_CPP_2025 * incomeRatio;
+
+// 2. Apply Age Adjustment
+const monthsDiff = (scenario.age - 65) * 12;
+const adjustment = monthsDiff < 0 ? (monthsDiff * 0.006) : (monthsDiff * 0.007);
+estCPP = estCPP * (1 + adjustment);
+
+// 3. Estimate OAS (Years / 40)
+const yearsValid = Math.min(scenario.years, 40);
+let estOAS = MAX_OAS_2025 * (yearsValid / 40);
+
+// 4. Apply OAS Age Adjustment (Only positive deferral, no early penalty)
+if (monthsDiff > 0) {
+    const oasAdj = Math.min(monthsDiff, 60) * 0.006;
+    estOAS = estOAS * (1 + oasAdj);
+}
+
+const totalMonthly = estCPP + estOAS;
+// --------------------------------------------------
+
+const currency = new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD', maximumFractionDigits: 0 });
+const incomeFormatted = currency.format(incomeVal);
+const totalFormatted = currency.format(totalMonthly);
+
+const title = `${scenario.label}: ${totalFormatted}/mo Estimate | CPP & OAS Calculator`;
+const description = `Based on an income of ${incomeFormatted} and retiring at age ${scenario.age}, this scenario projects a monthly government pension of approximately ${totalFormatted}.`;
+const canonicalURL = new URL(Astro.url.pathname, Astro.site || Astro.url.origin);
+
 const breadcrumbPath = [
   { label: 'CPP & OAS', href: '/cpp-oas-calculator' },
+  { label: 'Scenarios', href: '/calculator/cpp-oas/browse' },
   { label: scenario.label, href: Astro.url.pathname }
 ];
 
-// Schema.org structured data for calculator page
 const calculatorSchema = {
   "@context": "https://schema.org",
   "@type": "WebApplication",
@@ -36,19 +67,7 @@ const calculatorSchema = {
   "description": description,
   "url": canonicalURL.toString(),
   "applicationCategory": "FinanceApplication",
-  "operatingSystem": "Web",
-  "offers": {
-    "@type": "Offer",
-    "price": "0",
-    "priceCurrency": "CAD"
-  },
-  "featureList": [
-    "CPP calculation",
-    "OAS calculation",
-    "GIS estimation",
-    "Retirement age adjustment",
-    "Enhanced CPP Tier 2"
-  ]
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "CAD" },
 };
 ---
 
@@ -57,59 +76,75 @@ const calculatorSchema = {
   
   <main>
     <section class="py-12 px-4 max-w-6xl mx-auto">
-      
-    {/* NEW: Breadcrumbs Component */}
-    <Breadcrumbs crumbs={breadcrumbPath} />
+      <Breadcrumbs crumbs={breadcrumbPath} />
 
-    <div class="text-center mb-10">
+      <header class="text-center mb-10">
         <h1 class="text-3xl md:text-4xl font-black text-slate-900 mb-4">
             {scenario.label}
         </h1>
         <p class="text-lg text-slate-600 max-w-2xl mx-auto">
             {scenario.desc}
         </p>
-    </div>
+      </header>
 
-    <Calculator 
-      client:load 
-      initialRetirementAge={scenario.age}
-      initialYearsInCanada={scenario.years}
-      initialIncome={scenario.income}
-      initialMaritalStatus={scenario.married}
-      initialSpouseIncome={scenario.spouseIncome || ''}
-      initialChildCount={scenario.childCount || 0}
-      initialDob="1960-01-01" 
-    />
-
-    <div class="prose prose-slate mx-auto mt-16 bg-white p-8 rounded-3xl border border-slate-100 shadow-sm">
-      <h2>Analysis of this Scenario</h2>
-      <p>
-        This calculation is based on a specific set of assumptions to help you estimate your future government benefits.
-      </p>
-      
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 my-8">
-          <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
-            <h3 class="text-sm font-black uppercase text-slate-400 tracking-widest mb-2 mt-0">Key Inputs</h3>
-            <ul class="text-sm space-y-2 mb-0">
-                <li><strong>Retirement Age:</strong> {scenario.age}</li>
-                <li><strong>Avg Earnings:</strong> {incomeFormatted}</li>
-                <li><strong>Years in Canada:</strong> {scenario.years}</li>
-                <li><strong>Status:</strong> {scenario.married ? 'Married/Common-Law' : 'Single'}</li>
-            </ul>
+      {/* --- SERVER-SIDE RESULT PREVIEW --- */}
+      <div id="static-seo-result" class="bg-indigo-900 text-white rounded-3xl p-8 mb-12 shadow-2xl relative overflow-hidden">
+          <div class="relative z-10 flex flex-col md:flex-row justify-between items-center gap-6">
+              <div class="text-center md:text-left">
+                  <p class="text-indigo-300 font-bold uppercase tracking-widest text-xs mb-1">Estimated Monthly Income</p>
+                  <div class="text-5xl font-black tracking-tighter">{totalFormatted}</div>
+                  <p class="text-sm text-indigo-200 mt-2 font-medium">Combined CPP & OAS (Pre-Tax)</p>
+              </div>
+              
+              <div class="flex gap-4">
+                  <div class="bg-white/10 p-4 rounded-2xl backdrop-blur-sm border border-white/10">
+                      <div class="text-xs text-indigo-300 font-bold uppercase">CPP Portion</div>
+                      <div class="text-2xl font-black">{currency.format(estCPP)}</div>
+                  </div>
+                  <div class="bg-white/10 p-4 rounded-2xl backdrop-blur-sm border border-white/10">
+                      <div class="text-xs text-indigo-300 font-bold uppercase">OAS Portion</div>
+                      <div class="text-2xl font-black">{currency.format(estOAS)}</div>
+                  </div>
+              </div>
           </div>
-
-          <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-100">
-             <h3 class="text-sm font-black uppercase text-indigo-400 tracking-widest mb-2 mt-0">Why this matters</h3>
-             <p class="text-sm text-indigo-900 mb-0">
-                {scenario.age < 65 && "You are choosing to take CPP early. This results in a permanent reduction of 0.6% for every month before age 65 (up to 36%)."}
-                {scenario.age > 65 && "You are deferring your pension. This results in a permanent increase of 0.7% for every month after age 65 (up to 42%)."}
-                {scenario.years < 40 && `You have partial OAS eligibility. You will receive ${scenario.years}/40ths of the maximum Old Age Security pension.`}
-                {scenario.income === '20000' && "With this income level, you likely qualify for the Guaranteed Income Supplement (GIS). The calculator above includes this estimation."}
-                {scenario.childCount > 0 && "The Child Rearing Dropout provision allows you to exclude low-earning years while raising young children, protecting your average."}
-             </p>
-          </div>
+          {/* Decorative Glow */}
+          <div class="absolute top-0 right-0 w-64 h-64 bg-indigo-500/30 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
       </div>
-    </div>
+
+      <Calculator 
+        client:load 
+        initialRetirementAge={scenario.age}
+        initialYearsInCanada={scenario.years}
+        initialIncome={scenario.income}
+        initialMaritalStatus={scenario.married}
+        initialSpouseIncome={scenario.spouseIncome || ''}
+        initialChildCount={scenario.childCount || 0}
+        initialDob="1965-01-01" 
+      />
+
+      {/* --- INSIGHTS --- */}
+      <div class="prose prose-slate mx-auto mt-16 bg-white p-8 rounded-3xl border border-slate-100 shadow-sm">
+        <h2>Scenario Analysis</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 my-8 not-prose">
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+              <h3 class="text-xs font-black uppercase text-slate-400 tracking-widest mb-3">Input Profile</h3>
+              <ul class="text-sm space-y-2 text-slate-700">
+                  <li class="flex justify-between"><span>Retirement Age:</span> <strong>{scenario.age}</strong></li>
+                  <li class="flex justify-between"><span>Avg Earnings:</span> <strong>{incomeFormatted}</strong></li>
+                  <li class="flex justify-between"><span>Years in Canada:</span> <strong>{scenario.years}</strong></li>
+              </ul>
+            </div>
+
+            <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-100">
+               <h3 class="text-xs font-black uppercase text-indigo-400 tracking-widest mb-3">Key Factors</h3>
+               <p class="text-sm text-indigo-900 leading-relaxed">
+                  {scenario.age < 65 && `Retiring early at ${scenario.age} reduces the CPP pension by ${(65 - scenario.age) * 7.2}% compared to age 65.`}
+                  {scenario.age > 65 && `Deferring to ${scenario.age} boosts the CPP pension by ${(scenario.age - 65) * 8.4}% and OAS by ${(scenario.age - 65) * 7.2}%.`}
+                  {scenario.years < 40 && ` With only ${scenario.years} years in Canada, this scenario qualifies for ${scenario.years}/40ths of the full OAS pension.`}
+               </p>
+            </div>
+        </div>
+      </div>
     </section>
   </main>
 </BaseLayout>
