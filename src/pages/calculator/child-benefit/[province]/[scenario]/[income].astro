@@ -2,18 +2,16 @@
 // src/pages/calculator/child-benefit/[province]/[scenario]/[income].astro
 import BaseLayout from '../../../../../layouts/BaseLayout.astro';
 import HouseholdBenefits from '../../../../../features/child-benefit/components/HouseholdBenefits.jsx'; 
+// NEW: Import the Breadcrumbs component
+import Breadcrumbs from '../../../../../components/shared/Breadcrumbs.astro';
 import { PROVINCES, SALARIES, FAMILY_SCENARIOS } from '../../../../../data/seo-scenarios';
+
 export const prerender = true;
 
 export async function getStaticPaths() {
   const paths = [];
 
-  // REMOVED: const CORE_SALARIES = ...
-  // REMOVED: const POPULAR_PROVS = ...
-
-  // Loop through ALL provinces, ALL scenarios, and ALL salaries
   PROVINCES.forEach((prov) => {
-    // Use the full SALARIES list for every province
     FAMILY_SCENARIOS.forEach((fam) => {
         SALARIES.forEach((salary) => {
             paths.push({
@@ -45,6 +43,13 @@ const title = `CCB Calculator: ${familyLabel} in ${provinceName} (${salaryFormat
 const description = `Calculate 2025 Canada Child Benefit (CCB) for a ${familyLabel.toLowerCase()} in ${provinceName} with a household income of ${salaryFormatted}. Includes OCB, ACFB and GST credits.`;
 const canonicalURL = new URL(`/calculator/child-benefit/${provinceCode.toLowerCase()}/${familyLabel.toLowerCase().replace(/\s+/g, '-')}/${salaryVal}`, Astro.site || Astro.url.origin);
 
+// NEW: Define the Breadcrumb path
+const breadcrumbPath = [
+  { label: 'Child Benefit', href: '/child-benefit-calculator' },
+  { label: provinceName, href: `/calculator/child-benefit/browse?province=${provinceCode}` }, // Links to browse page if you have one, or keep safe
+  { label: `${familyLabel} (${salaryFormatted})`, href: Astro.url.pathname } // Current Page
+];
+
 // Schema.org structured data
 const calculatorSchema = {
   "@context": "https://schema.org",
@@ -73,6 +78,10 @@ const calculatorSchema = {
   
   <main>
     <section class="py-12 px-4 max-w-5xl mx-auto">
+      
+      {/* NEW: Insert Breadcrumbs at the top of the section */}
+      <Breadcrumbs crumbs={breadcrumbPath} />
+
       <header class="text-center mb-10">
         <h1 class="text-3xl md:text-4xl font-black text-slate-900 mb-4">
           {provinceName} Child Benefit Calculator
@@ -80,30 +89,30 @@ const calculatorSchema = {
         <p class="text-lg text-slate-600">
           Scenario: <strong>{familyLabel}</strong> with <strong>{salaryFormatted}</strong> Income
         </p>
-    </div>
+      </header> {/* Fixed mismatched tag here */}
 
-    <HouseholdBenefits 
-      client:load 
-      initialProvince={provinceCode} 
-      initialIncome={salaryVal}
-      initialMaritalStatus={familyStatus}
-      initialChildCount={childCount}
-    />
+      <HouseholdBenefits 
+        client:load 
+        initialProvince={provinceCode} 
+        initialIncome={salaryVal}
+        initialMaritalStatus={familyStatus}
+        initialChildCount={childCount}
+      />
 
-    <div class="prose prose-slate mx-auto mt-16 bg-white p-8 rounded-3xl border border-slate-100 shadow-sm">
-      <h2>How {provinceName} Benefits Work for this Family</h2>
-      <p>
-        Based on a <strong>{familyStatus.toLowerCase()}</strong> household with <strong>{childCount} children</strong> in {provinceName}, you may be eligible for:
-      </p>
-      <ul>
-        <li><strong>Canada Child Benefit (CCB):</strong> The federal tax-free monthly payment.</li>
-        <li><strong>{provinceCode === 'ON' ? 'Ontario Child Benefit (OCB)' : provinceCode === 'AB' ? 'Alberta Child and Family Benefit (ACFB)' : provinceCode === 'BC' ? 'BC Family Benefit' : 'Provincial Child Benefits'}</strong>: Specific support for families living in {provinceName}.</li>
-        <li><strong>GST/HST Credit:</strong> Quarterly payments based on your ${salaryFormatted} net income.</li>
-      </ul>
-      <p>
-        Use the calculator above to see the exact breakdown of your monthly and annual entitlement.
-      </p>
-    </div>
+      <div class="prose prose-slate mx-auto mt-16 bg-white p-8 rounded-3xl border border-slate-100 shadow-sm">
+        <h2>How {provinceName} Benefits Work for this Family</h2>
+        <p>
+          Based on a <strong>{familyStatus.toLowerCase()}</strong> household with <strong>{childCount} children</strong> in {provinceName}, you may be eligible for:
+        </p>
+        <ul>
+          <li><strong>Canada Child Benefit (CCB):</strong> The federal tax-free monthly payment.</li>
+          <li><strong>{provinceCode === 'ON' ? 'Ontario Child Benefit (OCB)' : provinceCode === 'AB' ? 'Alberta Child and Family Benefit (ACFB)' : provinceCode === 'BC' ? 'BC Family Benefit' : 'Provincial Child Benefits'}</strong>: Specific support for families living in {provinceName}.</li>
+          <li><strong>GST/HST Credit:</strong> Quarterly payments based on your ${salaryFormatted} net income.</li>
+        </ul>
+        <p>
+          Use the calculator above to see the exact breakdown of your monthly and annual entitlement.
+        </p>
+      </div>
     </section>
   </main>
 </BaseLayout>

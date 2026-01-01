@@ -2,6 +2,8 @@
 // src/pages/calculator/parental-leave/[province]/[scenario]/[income].astro
 import BaseLayout from '../../../../../layouts/BaseLayout.astro';
 import ParentalLeave from '../../../../../features/parental-leave/components/ParentalLeave.jsx';
+// NEW: Import Breadcrumbs
+import Breadcrumbs from '../../../../../components/shared/Breadcrumbs.astro';
 import { PROVINCES, SALARIES, LEAVE_SCENARIOS } from '../../../../../data/seo-scenarios';
 
 export const prerender = true;
@@ -9,15 +11,7 @@ export const prerender = true;
 export async function getStaticPaths() {
   const paths = [];
   
-  // REMOVED: const CORE_SALARIES = ...
-  // REMOVED: const POPULAR_PROVS = ...
-
-  // Just generate everything for everyone. 
-  // 10 Provinces * 4 Scenarios * ~13 Salaries = ~520 pages. 
-  // Astro handles this easily.
-  
   PROVINCES.forEach((prov) => {
-    // Use the full SALARIES list for every province
     LEAVE_SCENARIOS.forEach((scene) => {
         SALARIES.forEach((salary) => {
             paths.push({
@@ -50,6 +44,13 @@ const title = `${durationText} Parental Leave Calculator ${provinceName} (${sala
 const description = `Calculate your ${scenarioLabel.toLowerCase()} benefits in ${provinceName}. See weekly EI payments for a ${salaryFormatted} income under the ${planType.toLowerCase()} plan. Estimate your maternity and parental leave benefits.`;
 const canonicalURL = new URL(`/calculator/parental-leave/${provinceCode.toLowerCase()}/${scenarioLabel.toLowerCase().replace(/\s+/g, '-')}/${salaryVal}`, Astro.site || Astro.url.origin);
 
+// NEW: Define Breadcrumb Path
+const breadcrumbPath = [
+  { label: 'Mat. Leave', href: '/parental-leave-calculator' },
+  { label: provinceName, href: `/calculator/parental-leave/browse?province=${provinceCode}` },
+  { label: `${scenarioLabel} (${salaryFormatted})`, href: Astro.url.pathname }
+];
+
 // Schema.org structured data
 const calculatorSchema = {
   "@context": "https://schema.org",
@@ -78,6 +79,10 @@ const calculatorSchema = {
   
   <main>
     <section class="py-12 px-4 max-w-5xl mx-auto">
+      
+      {/* NEW: Breadcrumbs Component */}
+      <Breadcrumbs crumbs={breadcrumbPath} />
+
       <header class="text-center mb-10">
         <h1 class="text-3xl md:text-4xl font-black text-slate-900 mb-4">
             {scenarioLabel} in <span class="text-rose-600">{provinceName}</span>
@@ -85,7 +90,7 @@ const calculatorSchema = {
         <p class="text-lg text-slate-600">
             Estimating EI benefits for an annual income of <strong>{salaryFormatted}</strong>
         </p>
-    </div>
+      </header> {/* Fixed missing closing tag */}
 
     <ParentalLeave 
       client:load 

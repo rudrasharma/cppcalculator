@@ -1,0 +1,62 @@
+---
+interface Props {
+  crumbs: {
+    label: string;
+    href: string;
+  }[];
+}
+
+const { crumbs } = Astro.props;
+
+// Generate Schema.org JSON-LD automatically
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": crumbs.map((crumb, index) => ({
+    "@type": "ListItem",
+    "position": index + 1,
+    "name": crumb.label,
+    "item": new URL(crumb.href, Astro.site || Astro.url.origin).toString()
+  }))
+};
+---
+
+<nav aria-label="Breadcrumb" class="w-full mb-8 animate-fade-in">
+  {/* SEO Schema */}
+  <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+
+  <ol class="flex flex-wrap items-center justify-center md:justify-start gap-2 text-sm text-slate-500">
+    {/* Home Icon */}
+    <li>
+      <a href="/" class="hover:text-indigo-600 transition-colors flex items-center gap-1" aria-label="Home">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+          <polyline points="9 22 9 12 15 12 15 22"></polyline>
+        </svg>
+      </a>
+    </li>
+
+    {crumbs.map((crumb, index) => {
+      const isLast = index === crumbs.length - 1;
+      
+      return (
+        <li class="flex items-center gap-2">
+          {/* Chevron */}
+          <svg class="h-4 w-4 text-slate-300 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+          
+          {isLast ? (
+            <span class="text-slate-900 font-bold truncate max-w-[150px] md:max-w-xs" aria-current="page">
+              {crumb.label}
+            </span>
+          ) : (
+            <a href={crumb.href} class="hover:text-indigo-600 transition-colors whitespace-nowrap font-medium">
+              {crumb.label}
+            </a>
+          )}
+        </li>
+      );
+    })}
+  </ol>
+</nav>

@@ -2,6 +2,8 @@
 // src/pages/calculator/cpp-oas/[scenario].astro
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import Calculator from '../../../features/retirement/components/index.jsx';
+// NEW: Import Breadcrumbs
+import Breadcrumbs from '../../../components/shared/Breadcrumbs.astro';
 import { CPP_SCENARIOS } from '../../../data/seo-scenarios';
 
 export const prerender = true;
@@ -19,6 +21,12 @@ const incomeFormatted = new Intl.NumberFormat('en-CA', { style: 'currency', curr
 const title = `${scenario.label} - CPP & OAS Calculator 2025 | LoonieFi`;
 const description = `${scenario.desc} Based on ${scenario.years} years of residence and avg annual earnings of ${incomeFormatted}. Calculate your retirement benefits with this pre-filled scenario.`;
 const canonicalURL = new URL(`/calculator/cpp-oas/${scenario.slug}`, Astro.site || Astro.url.origin);
+
+// NEW: Define Breadcrumb Path
+const breadcrumbPath = [
+  { label: 'CPP & OAS', href: '/cpp-oas-calculator' },
+  { label: scenario.label, href: Astro.url.pathname }
+];
 
 // Schema.org structured data for calculator page
 const calculatorSchema = {
@@ -49,6 +57,10 @@ const calculatorSchema = {
   
   <main>
     <section class="py-12 px-4 max-w-6xl mx-auto">
+      
+    {/* NEW: Breadcrumbs Component */}
+    <Breadcrumbs crumbs={breadcrumbPath} />
+
     <div class="text-center mb-10">
         <h1 class="text-3xl md:text-4xl font-black text-slate-900 mb-4">
             {scenario.label}

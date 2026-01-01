@@ -1,8 +1,9 @@
 ---
+// src/pages/calculator/grocery-inflation/[province]/[scenario].astro
 import BaseLayout from '../../../../layouts/BaseLayout.astro';
-
 import GroceryInflation from '../../../../features/grocery/components/GroceryInflation.jsx';
-
+// NEW: Import Breadcrumbs
+import Breadcrumbs from '../../../../components/shared/Breadcrumbs.astro';
 import { PROVINCES, GROCERY_SCENARIOS } from '../../../../data/seo-scenarios';
 
 export const prerender = true;
@@ -33,6 +34,13 @@ const title = `${scenario.label} in ${provinceName} | 2025 Grocery Inflation | L
 const description = `Calculate the future cost of a ${scenario.label.toLowerCase()} in ${provinceName}. ${scenario.desc} Forecast your grocery budget with provincial inflation data.`;
 const canonicalURL = new URL(`/calculator/grocery-inflation/${provinceCode.toLowerCase()}/${scenario.slug}`, Astro.site || Astro.url.origin);
 
+// NEW: Define Breadcrumb Path
+const breadcrumbPath = [
+  { label: 'Grocery Inflation', href: '/grocery-inflation-calculator' },
+  { label: provinceName, href: `/calculator/grocery-inflation/browse?province=${provinceCode}` },
+  { label: scenario.label, href: Astro.url.pathname }
+];
+
 // Schema.org structured data
 const calculatorSchema = {
   "@context": "https://schema.org",
@@ -61,6 +69,10 @@ const calculatorSchema = {
   
   <main>
     <section class="py-12 px-4 max-w-6xl mx-auto">
+      
+      {/* NEW: Breadcrumbs Component */}
+      <Breadcrumbs crumbs={breadcrumbPath} />
+
       <header class="text-center mb-10">
         <h1 class="text-3xl md:text-4xl font-black text-slate-900 mb-4">
             {scenario.label} in <span class="text-indigo-600">{provinceName}</span>
@@ -68,7 +80,7 @@ const calculatorSchema = {
         <p class="text-lg text-slate-600 max-w-2xl mx-auto">
             {scenario.desc}
         </p>
-    </div>
+      </header> {/* Fixed mismatched closing tag */}
 
     <GroceryInflation 
       client:load 
