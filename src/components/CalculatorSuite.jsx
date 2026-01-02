@@ -97,8 +97,8 @@ export default function CalculatorSuite() {
           <button onClick={() => changeView('landing')} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <img src="/android-chrome-192x192.png" alt="Loonie Fi" className="h-8 w-8 rounded-full shadow-sm" />
             <div className="text-lg font-bold tracking-tight">
-              {/* ACCESSIBILITY FIX: Darker Amber */}
-              <span className="text-amber-600">Loonie</span><span className="text-slate-900">Fi</span>
+              {/* FIXED: Darker Amber for Contrast */}
+              <span className="text-amber-700">Loonie</span><span className="text-slate-900">Fi</span>
             </div>
           </button>
 
@@ -127,12 +127,11 @@ export default function CalculatorSuite() {
       <nav className={`md:hidden bg-white/90 backdrop-blur-xl border-b border-slate-200 sticky top-0 z-40 px-4 flex flex-col items-center justify-center text-center transition-all ${view === 'landing' ? 'py-6' : 'py-3'}`}>
          <button onClick={() => changeView('landing')} className="flex items-center gap-1.5 mb-1">
             <img src="/android-chrome-192x192.png" alt="Loonie Fi" className="h-5 w-5 rounded-full" />
-            {/* ACCESSIBILITY FIX: Darker Amber */}
-            <span className="font-bold text-slate-900 tracking-tight text-sm">Loonie<span className="text-amber-600">Fi</span></span>
+            {/* FIXED: Darker Amber */}
+            <span className="font-bold text-slate-900 tracking-tight text-sm">Loonie<span className="text-amber-700">Fi</span></span>
          </button>
          {view !== 'landing' && (
            <div className="animate-fade-in">
-               {/* ACCESSIBILITY FIX: Darker Slate for small text */}
                <h1 className="text-[10px] font-black uppercase tracking-widest text-slate-500">{activeTabInfo?.title}</h1>
            </div>
          )}
@@ -208,7 +207,6 @@ export default function CalculatorSuite() {
                 <div className={`p-1.5 rounded-xl transition-colors ${view === tab.id ? tab.bg : 'bg-transparent'}`}>
                     <tab.icon className={`w-6 h-6 ${view === tab.id ? tab.color : 'text-slate-400'}`} />
                 </div>
-                {/* ACCESSIBILITY FIX: Darker Slate for unselected items */}
                 <span className={`text-[10px] font-bold tracking-wide ${view === tab.id ? 'text-slate-900' : 'text-slate-600'}`}>
                   {tab.label}
                 </span>
