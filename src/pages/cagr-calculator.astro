@@ -1,0 +1,57 @@
+---
+/**
+ * CAGR Calculator Page
+ * Main page for the Compound Annual Growth Rate calculator
+ */
+
+import BaseLayout from '../layouts/BaseLayout.astro';
+import CAGRCalculator from '../features/cagr/components/CAGRCalculator.jsx';
+
+const title = "CAGR Calculator | Compound Annual Growth Rate";
+const description = "Calculate the precise annual growth rate required to grow your investment from a starting value to an ending value over a specific period.";
+---
+
+<BaseLayout 
+  title={title} 
+  description={description}
+>
+  
+  {/* TITLE SECTION */}
+  <header class="max-w-6xl mx-auto px-4 pt-8 text-center md:text-left animate-fade-in">
+    <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+      <div>
+        <h1 class="text-2xl font-black text-slate-900 flex items-center gap-2 justify-center md:justify-start">
+          CAGR Calculator
+        </h1>
+        <p class="text-slate-500 text-sm font-medium">
+          Measure the consistent growth rate of your investments
+        </p>
+      </div>
+
+      {/* OPTIONAL: Trust Badge */}
+      <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 border border-slate-200">
+        <div class="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" aria-hidden="true"></div>
+        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+          Standard Financial Formula
+        </span>
+      </div>
+    </div>
+  </header>
+
+  {/* REACT COMPONENT */}
+  <main class="flex-grow flex flex-col justify-center w-full animate-fade-in">
+    <CAGRCalculator client:load isVisible={true} />
+  </main>
+
+  {/* SEO CONTENT SECTION */}
+  <section class="max-w-3xl mx-auto px-6 py-12 text-slate-600 leading-relaxed text-sm">
+    <h2 class="text-lg font-bold text-slate-900 mb-4">What is CAGR?</h2>
+    <p class="mb-4">
+      The <strong>Compound Annual Growth Rate (CAGR)</strong> is one of the most accurate ways to calculate and determine returns for anything that can rise or fall in value over time.
+    </p>
+    <p>
+      Unlike a simple average return, CAGR smoothes out the volatility of investment returns. It represents the rate at which an investment would have grown if it had grown the same rate every single year and the profits were reinvested at the end of each year.
+    </p>
+  </section>
+
+</BaseLayout>

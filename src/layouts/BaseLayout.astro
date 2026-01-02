@@ -21,6 +21,7 @@ const TABS = [
   { id: 'parental', href: '/parental-leave-calculator', label: 'Mat. Leave', color: 'text-rose-600', bg: 'bg-rose-50' },
   { id: 'ccb', href: '/child-benefit-calculator', label: 'Family Cash', color: 'text-emerald-600', bg: 'bg-emerald-50' },
   { id: 'budget', href: '/grocery-inflation-calculator', label: 'Budget Def.', color: 'text-amber-600', bg: 'bg-amber-50' },
+  { id: 'cagr', href: '/cagr-calculator', label: 'Growth Calc', color: 'text-cyan-600', bg: 'bg-cyan-50' },
 ];
 
 const schema = {
@@ -42,8 +43,8 @@ const schema = {
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    {/* FIXED: Removed user-scalable=0 to allow zooming */}
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    {/* ACCESSIBILITY FIX: Allowed zooming by removing user-scalable=0 */}
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>{title} | LoonieFi</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonicalURL} />
@@ -86,7 +87,7 @@ const schema = {
         <a href="/" class="flex items-center gap-3 hover:opacity-80 transition-opacity" aria-label="LoonieFi homepage">
           <img src="/android-chrome-192x192.png" alt="LoonieFi Logo" class="h-8 w-8 rounded-full shadow-sm" width="32" height="32" />
           <div class="text-lg font-bold tracking-tight">
-            {/* FIXED: Darker Amber for Contrast */}
+            {/* ACCESSIBILITY FIX: Darkened Amber to 700 */}
             <span class="text-amber-700">Loonie</span><span class="text-slate-900">Fi</span>
           </div>
         </a>
@@ -98,7 +99,7 @@ const schema = {
               href={tab.href}
               role="tab"
               aria-selected={currentPath === tab.href ? 'true' : 'false'}
-              class={`px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2 ${
+              class={`px-3 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 ${
                 currentPath === tab.href 
                 ? 'bg-white text-slate-900 shadow-sm ring-1 ring-black/5' 
                 : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
@@ -159,7 +160,7 @@ const schema = {
           </p>
         </div>
 
-        {/* COPYRIGHT */}
+        {/* COPYRIGHT - Increased Contrast */}
         <div class="flex flex-col gap-2 border-t border-slate-200 pt-6">
           <p class="text-xs text-slate-600">
             © {new Date().getFullYear()} LoonieFi. All rights reserved.

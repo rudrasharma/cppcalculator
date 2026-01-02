@@ -3,6 +3,8 @@ import Calculator from '../features/retirement/components';
 import HouseholdBenefits from '../features/child-benefit/components/HouseholdBenefits';
 import ParentalLeave from '../features/parental-leave/components/ParentalLeave'; 
 import GroceryInflation from '../features/grocery/components/GroceryInflation'; 
+// 1. IMPORT THE NEW CALCULATOR
+import CAGRCalculator from '../features/cagr/components/CAGRCalculator';
 import '../styles/global.css'
 
 // ICONS
@@ -10,6 +12,7 @@ const ChartIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" vie
 const BabyIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>;
 const HomeIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>;
 const ShieldIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>;
+const TrendingUpIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>;
 const ArrowRight = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>;
 
 // CONFIGURATION
@@ -54,6 +57,17 @@ const TABS = [
     bg: 'bg-amber-50',
     description: 'Protect your spending power against rising Canadian food costs.'
   },
+  // 2. ADDED THE NEW TAB CONFIGURATION
+  { 
+    id: 'cagr', 
+    label: 'Growth Calc',
+    title: 'Investment Growth (CAGR)',
+    subtitle: 'Calculate Compound Annual Growth Rate & Future Value',
+    icon: TrendingUpIcon, 
+    color: 'text-cyan-600', 
+    bg: 'bg-cyan-50',
+    description: 'Determine the annual growth rate required to grow your investment.'
+  },
 ];
 
 export default function CalculatorSuite() {
@@ -93,11 +107,11 @@ export default function CalculatorSuite() {
       
       {/* --- DESKTOP HEADER --- */}
       <nav className="hidden md:block bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <button onClick={() => changeView('landing')} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <img src="/android-chrome-192x192.png" alt="Loonie Fi" className="h-8 w-8 rounded-full shadow-sm" />
             <div className="text-lg font-bold tracking-tight">
-              {/* FIXED: Darker Amber for Contrast */}
+              {/* ACCESSIBILITY FIX: Darker Amber (700) for contrast */}
               <span className="text-amber-700">Loonie</span><span className="text-slate-900">Fi</span>
             </div>
           </button>
@@ -108,7 +122,7 @@ export default function CalculatorSuite() {
                 <button 
                   key={tab.id}
                   onClick={() => changeView(tab.id)}
-                  className={`px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2 ${
+                  className={`px-3 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 ${
                     view === tab.id 
                     ? 'bg-white text-slate-900 shadow-sm ring-1 ring-black/5' 
                     : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
@@ -127,7 +141,6 @@ export default function CalculatorSuite() {
       <nav className={`md:hidden bg-white/90 backdrop-blur-xl border-b border-slate-200 sticky top-0 z-40 px-4 flex flex-col items-center justify-center text-center transition-all ${view === 'landing' ? 'py-6' : 'py-3'}`}>
          <button onClick={() => changeView('landing')} className="flex items-center gap-1.5 mb-1">
             <img src="/android-chrome-192x192.png" alt="Loonie Fi" className="h-5 w-5 rounded-full" />
-            {/* FIXED: Darker Amber */}
             <span className="font-bold text-slate-900 tracking-tight text-sm">Loonie<span className="text-amber-700">Fi</span></span>
          </button>
          {view !== 'landing' && (
@@ -191,6 +204,10 @@ export default function CalculatorSuite() {
             <div style={{ display: view === 'budget' ? 'block' : 'none' }}>
                 <GroceryInflation isVisible={view === 'budget'} />
             </div>
+            {/* 3. ADDED CAGR CALCULATOR RENDER */}
+            <div style={{ display: view === 'cagr' ? 'block' : 'none' }}>
+                <CAGRCalculator isVisible={view === 'cagr'} />
+            </div>
           </main>
 
           {/* MOBILE BOTTOM NAV */}
@@ -207,7 +224,7 @@ export default function CalculatorSuite() {
                 <div className={`p-1.5 rounded-xl transition-colors ${view === tab.id ? tab.bg : 'bg-transparent'}`}>
                     <tab.icon className={`w-6 h-6 ${view === tab.id ? tab.color : 'text-slate-400'}`} />
                 </div>
-                <span className={`text-[10px] font-bold tracking-wide ${view === tab.id ? 'text-slate-900' : 'text-slate-600'}`}>
+                <span className={`text-[10px] font-bold tracking-wide ${view === tab.id ? 'text-slate-900' : 'text-slate-400'}`}>
                   {tab.label}
                 </span>
               </button>
