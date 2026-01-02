@@ -42,7 +42,8 @@ const schema = {
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, viewport-fit=cover" />
+    {/* ACCESSIBILITY FIX: Allowed zooming by removing user-scalable=0 */}
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>{title} | LoonieFi</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonicalURL} />
@@ -85,7 +86,8 @@ const schema = {
         <a href="/" class="flex items-center gap-3 hover:opacity-80 transition-opacity" aria-label="LoonieFi homepage">
           <img src="/android-chrome-192x192.png" alt="LoonieFi Logo" class="h-8 w-8 rounded-full shadow-sm" width="32" height="32" />
           <div class="text-lg font-bold tracking-tight">
-            <span class="text-amber-500">Loonie</span><span class="text-slate-900">Fi</span>
+            {/* ACCESSIBILITY FIX: Darkened Amber to 600 for contrast */}
+            <span class="text-amber-600">Loonie</span><span class="text-slate-900">Fi</span>
           </div>
         </a>
 
@@ -99,7 +101,7 @@ const schema = {
               class={`px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2 ${
                 currentPath === tab.href 
                 ? 'bg-white text-slate-900 shadow-sm ring-1 ring-black/5' 
-                : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
               }`}
             >
               {tab.label}
@@ -122,8 +124,8 @@ const schema = {
         <nav class="flex flex-wrap justify-center items-center gap-x-6 gap-y-2 mb-8 font-medium text-sm" aria-label="Footer navigation">
           
           {/* 1. ABOUT US LINK */}
-          <a href="/about" class="text-slate-500 hover:text-indigo-600 transition-colors">About Us</a>
-          <span class="text-slate-300 hidden sm:inline" aria-hidden="true">•</span>
+          <a href="/about" class="text-slate-600 hover:text-indigo-600 transition-colors">About Us</a>
+          <span class="text-slate-400 hidden sm:inline" aria-hidden="true">•</span>
 
           <a href="/blog" class="text-indigo-600 hover:text-indigo-800 transition-colors flex items-center gap-2 group">
             <span class="bg-indigo-100 text-indigo-700 p-1 rounded group-hover:bg-indigo-200 transition-colors" aria-hidden="true">
@@ -132,12 +134,12 @@ const schema = {
             Guides & Blog
           </a>
 
-          <span class="text-slate-300 hidden sm:inline" aria-hidden="true">•</span>
+          <span class="text-slate-400 hidden sm:inline" aria-hidden="true">•</span>
 
           {/* 2. SHARE LINK BUTTON */}
           <button 
             id="share-btn" 
-            class="text-slate-500 hover:text-indigo-600 transition-colors flex items-center gap-1"
+            class="text-slate-600 hover:text-indigo-600 transition-colors flex items-center gap-1"
             aria-label="Copy page URL to clipboard"
           >
             Share Link
@@ -145,25 +147,25 @@ const schema = {
           </button>
           <span id="share-toast" class="hidden text-xs text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full animate-fade-in" role="status" aria-live="polite">Copied!</span>
 
-          <span class="text-slate-300 hidden sm:inline" aria-hidden="true">•</span>
+          <span class="text-slate-400 hidden sm:inline" aria-hidden="true">•</span>
 
           <ContactButton client:visible />
         </nav>
 
-        {/* DISCLAIMER SECTION */}
+        {/* DISCLAIMER SECTION - Increased Contrast */}
         <div class="max-w-2xl mx-auto mb-6">
-          <p class="text-[11px] leading-relaxed text-slate-500">
+          <p class="text-[11px] leading-relaxed text-slate-600">
             <strong>Disclaimer:</strong> This tool provides estimates for informational purposes only and does not constitute financial, legal, or tax advice. While we strive for accuracy using official formulas, your actual government benefits (CPP, OAS, CCB) may vary based on official assessments. Please consult a professional financial planner or Service Canada for your specific situation.
           </p>
         </div>
 
-        {/* COPYRIGHT */}
-        <div class="flex flex-col gap-2 border-t border-slate-100 pt-6">
-          <p class="text-xs text-slate-500">
+        {/* COPYRIGHT - Increased Contrast */}
+        <div class="flex flex-col gap-2 border-t border-slate-200 pt-6">
+          <p class="text-xs text-slate-600">
             © {new Date().getFullYear()} LoonieFi. All rights reserved.
           </p>
-          <p class="text-[10px] text-slate-300 uppercase tracking-wider">
-            Made with <span class="text-rose-400" aria-label="love">♥</span> in Waterloo, ON (v1.2)
+          <p class="text-[10px] text-slate-500 uppercase tracking-wider">
+            Made with <span class="text-rose-500" aria-label="love">♥</span> in Waterloo, ON (v1.2)
           </p>
         </div>
       </div>

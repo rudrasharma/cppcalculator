@@ -89,7 +89,6 @@ export default function CalculatorSuite() {
   }, []);
 
   return (
-    // FIX 1: Removed 'min-h-screen'. Added 'flex flex-col h-full' to allow Index.astro to manage height.
     <div className="flex flex-col h-full bg-slate-50 pb-24 md:pb-0"> 
       
       {/* --- DESKTOP HEADER --- */}
@@ -98,7 +97,8 @@ export default function CalculatorSuite() {
           <button onClick={() => changeView('landing')} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <img src="/android-chrome-192x192.png" alt="Loonie Fi" className="h-8 w-8 rounded-full shadow-sm" />
             <div className="text-lg font-bold tracking-tight">
-              <span className="text-amber-500">Loonie</span><span className="text-slate-900">Fi</span>
+              {/* ACCESSIBILITY FIX: Darker Amber */}
+              <span className="text-amber-600">Loonie</span><span className="text-slate-900">Fi</span>
             </div>
           </button>
 
@@ -127,18 +127,19 @@ export default function CalculatorSuite() {
       <nav className={`md:hidden bg-white/90 backdrop-blur-xl border-b border-slate-200 sticky top-0 z-40 px-4 flex flex-col items-center justify-center text-center transition-all ${view === 'landing' ? 'py-6' : 'py-3'}`}>
          <button onClick={() => changeView('landing')} className="flex items-center gap-1.5 mb-1">
             <img src="/android-chrome-192x192.png" alt="Loonie Fi" className="h-5 w-5 rounded-full" />
-            <span className="font-bold text-slate-900 tracking-tight text-sm">Loonie<span className="text-amber-500">Fi</span></span>
+            {/* ACCESSIBILITY FIX: Darker Amber */}
+            <span className="font-bold text-slate-900 tracking-tight text-sm">Loonie<span className="text-amber-600">Fi</span></span>
          </button>
          {view !== 'landing' && (
            <div className="animate-fade-in">
-               <h1 className="text-[10px] font-black uppercase tracking-widest text-slate-400">{activeTabInfo?.title}</h1>
+               {/* ACCESSIBILITY FIX: Darker Slate for small text */}
+               <h1 className="text-[10px] font-black uppercase tracking-widest text-slate-500">{activeTabInfo?.title}</h1>
            </div>
          )}
       </nav>
 
       {/* --- LANDING VIEW --- */}
       {view === 'landing' && (
-        // FIX 2: Added flex-grow and justify-center to center landing content
         <main className="flex-grow flex flex-col justify-center max-w-6xl mx-auto px-6 py-12 md:py-20 animate-fade-in text-center">
           <div className="mb-12 md:mb-16">
             <h1 className="text-4xl md:text-6xl font-black text-slate-900 mb-6 tracking-tight leading-tight">
@@ -178,7 +179,6 @@ export default function CalculatorSuite() {
             <p className="text-slate-500 text-sm font-medium">{activeTabInfo?.subtitle}</p>
           </div>
 
-          {/* FIX 3: Added flex-grow and justify-center to center the active calculator */}
           <main className="flex-grow flex flex-col justify-center w-full animate-fade-in transition-all duration-300">
             <div style={{ display: view === 'cpp' ? 'block' : 'none' }}>
                 <Calculator isVisible={view === 'cpp'} />
@@ -208,7 +208,8 @@ export default function CalculatorSuite() {
                 <div className={`p-1.5 rounded-xl transition-colors ${view === tab.id ? tab.bg : 'bg-transparent'}`}>
                     <tab.icon className={`w-6 h-6 ${view === tab.id ? tab.color : 'text-slate-400'}`} />
                 </div>
-                <span className={`text-[10px] font-bold tracking-wide ${view === tab.id ? 'text-slate-900' : 'text-slate-400'}`}>
+                {/* ACCESSIBILITY FIX: Darker Slate for unselected items */}
+                <span className={`text-[10px] font-bold tracking-wide ${view === tab.id ? 'text-slate-900' : 'text-slate-600'}`}>
                   {tab.label}
                 </span>
               </button>

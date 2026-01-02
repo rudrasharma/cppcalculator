@@ -15,7 +15,8 @@ const canonicalURL = new URL('/404', Astro.site || Astro.url.origin);
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
+    {/* ACCESSIBILITY FIX: Allowed zooming */}
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{SITE_TITLE}</title>
     <meta name="description" content={SITE_DESCRIPTION} />
     <link rel="canonical" href={canonicalURL} />
