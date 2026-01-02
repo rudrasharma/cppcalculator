@@ -1,17 +1,7 @@
-import React from 'react';
+import React, { useId } from 'react';
 
 /**
  * RangeSlider - A styled range input component with value display
- * @param {string} label - Label text displayed above the slider
- * @param {number} value - Current slider value
- * @param {Function} onChange - Callback function when value changes
- * @param {number} min - Minimum value
- * @param {number} max - Maximum value
- * @param {number} step - Step increment
- * @param {string} subLabel - Optional sub-label text displayed below the label
- * @param {string} accentColor - Accent color class (default: 'indigo-600')
- * @param {string} className - Additional CSS classes
- * @param {Object} rest - Additional props to pass to the input element
  */
 export const RangeSlider = React.memo(({ 
     label, 
@@ -23,8 +13,12 @@ export const RangeSlider = React.memo(({
     subLabel,
     accentColor = 'indigo-600',
     className = '',
+    id,
     ...rest 
 }) => {
+    const internalId = useId();
+    const inputId = id || internalId;
+
     // Map color names to RGB values for the gradient
     const colorMap = {
         'indigo-600': 'rgb(99 102 241)',
@@ -44,12 +38,12 @@ export const RangeSlider = React.memo(({
             <div className="flex justify-between items-end">
                 <div className="space-y-1.5">
                     {label && (
-                        <label className="text-xs font-black text-slate-700 block uppercase tracking-tighter">
+                        <label htmlFor={inputId} className="text-xs font-black text-slate-700 block uppercase tracking-tighter">
                             {label}
                         </label>
                     )}
                     {subLabel && (
-                        <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                        <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
                             {subLabel}
                         </div>
                     )}
@@ -59,13 +53,14 @@ export const RangeSlider = React.memo(({
                 </span>
             </div>
             <input
+                id={inputId}
                 type="range"
                 min={min}
                 max={max}
                 step={step}
                 value={value}
                 onChange={onChange}
-                className={`w-full h-2 rounded-lg appearance-none cursor-pointer ${accentClass} hover:opacity-80 transition-all`}
+                className={`w-full h-2 rounded-lg appearance-none cursor-pointer ${accentClass} hover:opacity-80 transition-all bg-slate-200`}
                 style={{
                     background: `linear-gradient(to right, ${gradientColor} 0%, ${gradientColor} ${((value - min) / (max - min)) * 100}%, rgb(226 232 240) ${((value - min) / (max - min)) * 100}%, rgb(226 232 240) 100%)`
                 }}
@@ -76,4 +71,3 @@ export const RangeSlider = React.memo(({
 });
 
 RangeSlider.displayName = 'RangeSlider';
-
