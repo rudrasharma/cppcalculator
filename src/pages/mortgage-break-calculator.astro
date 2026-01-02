@@ -1,0 +1,69 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import MortgageBreak from '../features/mortgage/components/MortgageBreak.jsx';
+
+const title = "Mortgage Penalty Calculator 2026 (IRD vs 3 Months) | LoonieFi";
+const description = "Should you break your mortgage? Calculate the Interest Rate Differential (IRD) penalty used by Big 5 banks versus potential interest savings.";
+
+// FAQ Schema for SEO Rich Snippets
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How is a mortgage penalty calculated in Canada?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Penalties are usually the higher of two amounts: 3 months' interest or the Interest Rate Differential (IRD). Variable mortgages typically only charge 3 months' interest, while fixed mortgages carry the risk of the much higher IRD."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the Interest Rate Differential (IRD)?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The IRD is a compensation charge for the lender. It equals the difference between your current interest rate and the current market rate for the remainder of your term, multiplied by your mortgage balance."
+      }
+    }
+  ]
+};
+---
+
+<BaseLayout title={title} description={description}>
+  {/* Add FAQ Schema to Head */}
+  <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
+
+  <header class="max-w-6xl mx-auto px-4 pt-8 text-center md:text-left animate-fade-in">
+    <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+      <div>
+        <h1 class="text-2xl font-black text-slate-900 flex items-center gap-2 justify-center md:justify-start">
+          Mortgage Break & Penalty Calculator
+        </h1>
+        <p class="text-slate-500 text-sm font-medium">
+          Detect the "IRD Trap" before you call your bank
+        </p>
+      </div>
+      <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 border border-slate-200">
+        <div class="w-1.5 h-1.5 rounded-full bg-sky-500 animate-pulse" aria-hidden="true"></div>
+        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+          Updated: 2026 Rate Logic
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-grow flex flex-col justify-center w-full animate-fade-in">
+    <MortgageBreak client:only="react" isVisible={true} />
+  </main>
+  
+  <section class="max-w-3xl mx-auto px-6 py-12 text-slate-600 leading-relaxed text-sm">
+    <h2 class="text-lg font-bold text-slate-900 mb-4">The "Posted Rate" Trap</h2>
+    <p class="mb-4">
+      If you have a fixed-rate mortgage with a Big 5 Bank, your penalty is likely calculated using the <strong>Interest Rate Differential (IRD)</strong> based on the <em>Posted Rate</em> at the time you signed, not the discounted rate you actually pay.
+    </p>
+    <p>
+      This calculator estimates that hidden cost to give you a realistic "Green Light" or "Red Light" on refinancing.
+    </p>
+  </section>
+</BaseLayout>

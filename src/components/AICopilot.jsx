@@ -40,6 +40,8 @@ export default function AICopilot({ context, onUpdateCalculator, mode }) {
                 greeting = "Hi! I can help with Maternity & Parental Leave. Try 'I make $75k in Ontario' or 'Switch to Extended'.";
             } else if (activePage === 'cpp') {
                 greeting = "Hi! I can help with CPP/OAS. Try 'I am 50 years old and i want to retire at 65'.";
+            } else if (activePage === 'mortgage') { // ADD THIS
+                greeting = "Hi! I can help you decide if you should break your mortgage. Try 'I owe $450k at 5.5%'";
             }
             
             setMessages([{ role: 'assistant', content: greeting }]);

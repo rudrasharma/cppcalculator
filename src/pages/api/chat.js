@@ -141,7 +141,42 @@ export const POST = async ({ request, locals }) => {
             }
           }
         }]
-      }
+      },
+      "mortgage": {
+              system_instruction: (context) => `
+                You are LoonieFi's Mortgage Penalty Expert.
+                
+                **CRITICAL: DO NOT try to look up historical posted rates.**
+                
+                **How the Calculator Works (Explain this to the user):**
+                We do not fetch your original contract. Instead, we reverse-engineer the "IRD Trap" using a standard industry heuristic:
+                1. Banks calculate the Interest Rate Differential (IRD) using the "Posted Rate" at the time of signing, not your "Discounted Rate."
+                2. This creates a hidden gap (usually ~1.5% to 2.0%).
+                3. Our calculator simulates this by adding a "Discount Variable" to the rate gap when "Big 5 Bank" is selected.
+                
+                **YOUR GOAL:**
+                1. Explain that we use a "Phantom Discount" estimate (approx 1.5%) to simulate the higher penalty.
+                2. If the user wants to update their numbers, call 'update_mortgage_calculator'.
+              `,
+              tools: [{
+                type: "function",
+                function: {
+                  name: "update_mortgage_calculator",
+                  description: "Updates mortgage details based on user input",
+                  parameters: {
+                    type: "object",
+                    properties: {
+                      balance: { type: "number" },
+                      currentRate: { type: "number" },
+                      newRate: { type: "number" },
+                      monthsRemaining: { type: "number" },
+                      isBigBank: { type: "boolean" }
+                    },
+                    required: []
+                  }
+                }
+              }]
+            },     
     };
 
     // ==========================================

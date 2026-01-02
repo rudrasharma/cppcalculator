@@ -3,6 +3,7 @@ import Calculator from '../features/retirement/components';
 import HouseholdBenefits from '../features/child-benefit/components/HouseholdBenefits';
 import ParentalLeave from '../features/parental-leave/components/ParentalLeave'; 
 import GroceryInflation from '../features/grocery/components/GroceryInflation'; 
+import MortgageBreak from '../features/mortgage/components/MortgageBreak'; // <--- ADDED IMPORT
 import '../styles/global.css'
 
 // ICONS
@@ -11,6 +12,8 @@ const BabyIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" view
 const HomeIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>;
 const ShieldIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>;
 const ArrowRight = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>;
+// <--- ADDED KEY ICON
+const KeyIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m21 2-2 2m-7.6 7.6a6.5 6.5 0 1 1-5.3 5.3L3 21v-2h2v-2h2l2.7-2.7a.6.6 0 0 1 .7-.7Z"/></svg>;
 
 // CONFIGURATION
 const TABS = [
@@ -54,6 +57,16 @@ const TABS = [
     bg: 'bg-amber-50',
     description: 'Protect your spending power against rising Canadian food costs.'
   },
+  { 
+    id: 'mortgage', 
+    label: 'Mortgage',
+    title: 'Mortgage Break Analyzer',
+    subtitle: 'Should you break your mortgage for a lower rate?',
+    icon: KeyIcon, 
+    color: 'text-sky-600', 
+    bg: 'bg-sky-50',
+    description: 'Calculate the hidden IRD penalty trap vs. interest savings.'
+  },  
 ];
 
 export default function CalculatorSuite() {
@@ -191,6 +204,9 @@ export default function CalculatorSuite() {
             </div>
             <div style={{ display: view === 'budget' ? 'block' : 'none' }}>
                 <GroceryInflation isVisible={view === 'budget'} />
+            </div>
+            <div style={{ display: view === 'mortgage' ? 'block' : 'none' }}>
+                <MortgageBreak isVisible={view === 'mortgage'} />
             </div>
           </main>
 

@@ -2,13 +2,8 @@ import React from 'react';
 
 /**
  * NativeSelect - A styled select dropdown component
- * @param {string} label - Label text displayed above the select
- * @param {string|number} value - Current selected value
- * @param {Function} onChange - Callback function when selection changes
- * @param {Array} options - Array of option objects with {label, value}
- * @param {string} subLabel - Optional sub-label text displayed below the label
- * @param {string} className - Additional CSS classes
- * @param {Object} rest - Additional props to pass to the select element
+ * Supports flat options array OR grouped options array
+ * Grouped format: [{ label: "Group Name", options: [{ label: "Option 1", value: "1" }] }]
  */
 export const NativeSelect = React.memo(({ 
     label, 
@@ -43,15 +38,29 @@ export const NativeSelect = React.memo(({
                 }}
                 {...rest}
             >
-                {options.map((option, index) => (
-                    <option key={option.value ?? index} value={option.value}>
-                        {option.label}
-                    </option>
-                ))}
+                {options.map((option, index) => {
+                    // Check if this is a group
+                    if (option.options) {
+                        return (
+                            <optgroup key={index} label={option.label} className="font-bold text-slate-900 bg-slate-100">
+                                {option.options.map((subOption, subIndex) => (
+                                    <option key={`${index}-${subIndex}`} value={subOption.value} className="bg-white font-medium text-slate-700">
+                                        {subOption.label}
+                                    </option>
+                                ))}
+                            </optgroup>
+                        );
+                    }
+                    // Standard flat option
+                    return (
+                        <option key={option.value ?? index} value={option.value}>
+                            {option.label}
+                        </option>
+                    );
+                })}
             </select>
         </div>
     );
 });
 
 NativeSelect.displayName = 'NativeSelect';
-

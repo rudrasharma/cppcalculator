@@ -1,4 +1,4 @@
---- 
+---
 /**
  * Base Layout Component
  * Main layout wrapper for calculator pages with navigation, footer, and SEO
@@ -16,12 +16,16 @@ const { title, description } = Astro.props;
 const currentPath = Astro.url.pathname;
 const canonicalURL = new URL(Astro.url.pathname, Astro.site || Astro.url.origin);
 
+// --- UPDATE THIS SECTION ---
 const TABS = [
   { id: 'cpp', href: '/cpp-oas-calculator', label: 'CPP & OAS', color: 'text-indigo-600', bg: 'bg-indigo-50' },
   { id: 'parental', href: '/parental-leave-calculator', label: 'Mat. Leave', color: 'text-rose-600', bg: 'bg-rose-50' },
   { id: 'ccb', href: '/child-benefit-calculator', label: 'Family Cash', color: 'text-emerald-600', bg: 'bg-emerald-50' },
   { id: 'budget', href: '/grocery-inflation-calculator', label: 'Budget Def.', color: 'text-amber-600', bg: 'bg-amber-50' },
+  // ADD THIS LINE:
+  { id: 'mortgage', href: '/mortgage-break-calculator', label: 'Mortgage', color: 'text-sky-600', bg: 'bg-sky-50' },
 ];
+// ---------------------------
 
 const schema = {
   "@context": "https://schema.org",
@@ -85,7 +89,7 @@ const schema = {
         <a href="/" class="flex items-center gap-3 hover:opacity-80 transition-opacity" aria-label="LoonieFi homepage">
           <img src="/android-chrome-192x192.png" alt="LoonieFi Logo" class="h-8 w-8 rounded-full shadow-sm" width="32" height="32" />
           <div class="text-lg font-bold tracking-tight">
-            <span class="text-amber-500">Loonie</span><span class="text-slate-900">Fi</span>
+            <span className="text-amber-500">Loonie</span><span class="text-slate-900">Fi</span>
           </div>
         </a>
 
