@@ -10,6 +10,7 @@ import {
     TrashIcon,
     SparklesIcon,
     RotateCcwIcon,
+    HomeIcon,
 } from '../../../components/shared';
 import { PAYMENT_FREQUENCIES, COMPOUNDING_PERIODS } from '../utils/mortgageEngine';
 import { PROVINCES } from '../utils/lttEngine';
@@ -37,10 +38,20 @@ export const MortgageForm = ({ state, dispatch }) => {
         homePrice, downPayment, downPaymentType, annualRate, amortizationYears, 
         termYears, paymentFrequency, compounding, customPayment, startDate, 
         prepayments, lumpSums, province, isToronto, isFirstTimeBuyer, showStressTest,
+        propertyTaxes, heating, condoFees,
         calculationMode
     } = state;
 
     const isRenewal = calculationMode === 'renewal';
+    
+    // Ensure CMHC max 25 year rule is reflected in the UI dropdown if < 20% down
+    const actualDownPayment = downPaymentType === 'percent' ? homePrice * (downPayment / 100) : downPayment;
+    const downPaymentPercent = homePrice > 0 ? (actualDownPayment / homePrice) * 100 : 0;
+    const restrictAmortization = !isRenewal && downPaymentPercent < 20;
+    
+    const availableAmortizationYears = restrictAmortization 
+        ? AMORTIZATION_YEARS.filter(opt => opt.value <= 25)
+        : AMORTIZATION_YEARS;
 
     return (
         <div className="space-y-6">
@@ -100,13 +111,13 @@ export const MortgageForm = ({ state, dispatch }) => {
                                             className="sr-only peer" 
                                             checked={isFirstTimeBuyer}
                                             onChange={(e) => dispatch({ type: 'SET_IS_FIRST_TIME_BUYER', payload: e.target.checked })}
-                                    />
-                                    <div className="w-8 h-4 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-indigo-600"></div>
-                                </div>
-                                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tight group-hover:text-slate-700 transition-colors">First-Time Buyer</span>
-                            </label>
+                                        />
+                                        <div className="w-8 h-4 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-indigo-600"></div>
+                                    </div>
+                                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tight group-hover:text-slate-700 transition-colors">First-Time Buyer</span>
+                                </label>
+                            </div>
                         </div>
-                    </div>
                     )}
 
                     <MoneyInput
@@ -159,14 +170,23 @@ export const MortgageForm = ({ state, dispatch }) => {
                                             dispatch({ type: 'SET_DOWN_PAYMENT', payload: val === '' ? 0 : parseFloat(val) });
                                         }
                                     }}
-                                    className="w-full pl-8 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl font-mono text-lg font-black focus:ring-2 focus:ring-indigo-500 outline-none transition-all shadow-sm text-slate-900"
+                                    className={`w-full pl-8 pr-4 py-3 bg-slate-50 border ${restrictAmortization ? 'border-rose-200 focus:ring-rose-500' : 'border-slate-200 focus:ring-indigo-500'} rounded-2xl font-mono text-lg font-black focus:ring-2 outline-none transition-all shadow-sm text-slate-900`}
                                 />
                             </div>
-                            <p className="text-[10px] font-medium text-slate-400 text-right mt-1">
-                                {downPaymentType === 'percent' 
-                                    ? `$${(homePrice * (downPayment / 100)).toLocaleString('en-CA', { maximumFractionDigits: 0 })}`
-                                    : `${((downPayment / homePrice) * 100 || 0).toFixed(1)}%`}
-                            </p>
+                            <div className="flex justify-between items-start mt-1">
+                                {restrictAmortization ? (
+                                    <p className="text-[10px] font-bold text-rose-500 leading-tight">
+                                        *CMHC limits amortization to 25 years with less than 20% down.
+                                    </p>
+                                ) : (
+                                    <span></span>
+                                )}
+                                <p className="text-[10px] font-medium text-slate-400 text-right shrink-0 ml-4">
+                                    {downPaymentType === 'percent' 
+                                        ? `$${(homePrice * (downPayment / 100)).toLocaleString('en-CA', { maximumFractionDigits: 0 })}`
+                                        : `${((downPayment / homePrice) * 100 || 0).toFixed(1)}%`}
+                                </p>
+                            </div>
                         </div>
                     )}
 
@@ -227,7 +247,7 @@ export const MortgageForm = ({ state, dispatch }) => {
                             <NativeSelect
                                 value={amortizationYears}
                                 onChange={(e) => dispatch({ type: 'SET_AMORTIZATION', payload: parseInt(e.target.value) })}
-                                options={AMORTIZATION_YEARS}
+                                options={availableAmortizationYears}
                             />
                         </div>
 
@@ -297,6 +317,88 @@ export const MortgageForm = ({ state, dispatch }) => {
                         </div>
                     </div>
                 </div>
+            </div>
+
+            {/* Property Details Accordion */}
+            <div className="bg-slate-50/50 rounded-[2rem] border border-slate-200 overflow-hidden">
+                <Accordion 
+                    title="Property Details (PITH)"
+                    icon={HomeIcon}
+                    defaultOpen={false}
+                >
+                    <div className="p-6 pt-2 space-y-6">
+                        <div className="space-y-4">
+                            <div className="p-4 bg-white rounded-2xl border border-slate-100 shadow-sm space-y-4">
+                                <label className="text-[10px] font-black text-slate-700 block uppercase tracking-tighter">
+                                    Annual Property Taxes
+                                </label>
+                                <div className="relative">
+                                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span>
+                                    <input
+                                        type="text"
+                                        inputMode="decimal"
+                                        value={propertyTaxes || ''}
+                                        onChange={(e) => {
+                                            const val = e.target.value;
+                                            if (val === '' || /^\d*\.?\d*$/.test(val)) {
+                                                dispatch({ type: 'SET_PROPERTY_TAXES', payload: parseFloat(val) || 0 });
+                                            }
+                                        }}
+                                        className="w-full pl-8 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-mono text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none text-slate-900"
+                                        placeholder="0"
+                                    />
+                                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400 uppercase">/ Year</span>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="p-4 bg-white rounded-2xl border border-slate-100 shadow-sm space-y-4">
+                                    <label className="text-[10px] font-black text-slate-700 block uppercase tracking-tighter">
+                                        Monthly Heating
+                                    </label>
+                                    <div className="relative">
+                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span>
+                                        <input
+                                            type="text"
+                                            inputMode="decimal"
+                                            value={heating || ''}
+                                            onChange={(e) => {
+                                                const val = e.target.value;
+                                                if (val === '' || /^\d*\.?\d*$/.test(val)) {
+                                                    dispatch({ type: 'SET_HEATING', payload: parseFloat(val) || 0 });
+                                                }
+                                            }}
+                                            className="w-full pl-8 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-mono text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none text-slate-900"
+                                            placeholder="0"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="p-4 bg-white rounded-2xl border border-slate-100 shadow-sm space-y-4">
+                                    <label className="text-[10px] font-black text-slate-700 block uppercase tracking-tighter">
+                                        Monthly Condo Fees
+                                    </label>
+                                    <div className="relative">
+                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span>
+                                        <input
+                                            type="text"
+                                            inputMode="decimal"
+                                            value={condoFees || ''}
+                                            onChange={(e) => {
+                                                const val = e.target.value;
+                                                if (val === '' || /^\d*\.?\d*$/.test(val)) {
+                                                    dispatch({ type: 'SET_CONDO_FEES', payload: parseFloat(val) || 0 });
+                                                }
+                                            }}
+                                            className="w-full pl-8 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-mono text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none text-slate-900"
+                                            placeholder="0"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </Accordion>
             </div>
 
             {/* Prepayments Accordion */}

@@ -11,21 +11,57 @@ import {
     CheckCircleIcon,
     FileTextIcon,
     RotateCcwIcon,
+    HomeIcon,
 } from '../../../components/shared';
 
+// Helper for CSV export
+const exportToCSV = (schedule) => {
+    const headers = ['Year', 'Interest Paid', 'Principal Paid', 'Remaining Balance'];
+    const rows = schedule.map(row => [
+        row.year,
+        row.yearlyInterest.toFixed(2),
+        row.yearlyPrincipal.toFixed(2),
+        row.remainingBalance.toFixed(2)
+    ]);
+    
+    const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'amortization_schedule.csv');
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+};
+
 export const MortgageResults = ({ results, state }) => {
-    const { monthlyPayment, totalInterest, totalCost, yearsToPayOff, schedule, savings, cmhcPremium, principal, balanceAtEndOfTerm, ltt, stressTest, actualDownPayment } = results;
-    const { amortizationYears, paymentFrequency, termYears, showStressTest } = state;
+    const { 
+        monthlyPayment, totalInterest, totalCost, yearsToPayOff, schedule, 
+        savings, cmhcPremium, cmhcPST, principal, balanceAtEndOfTerm, ltt, 
+        stressTest, actualDownPayment, pithPayment, totalMonthlyCarryingCost 
+    } = results;
+    
+    const { amortizationYears, paymentFrequency, termYears, showStressTest, calculationMode, propertyTaxes, heating, condoFees } = state;
+
+    const isRenewal = calculationMode === 'renewal';
+    const showPITH = propertyTaxes > 0 || heating > 0 || condoFees > 0;
 
     const formattedPayment = monthlyPayment.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const formattedPITH = totalMonthlyCarryingCost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     const formattedInterest = totalInterest.toLocaleString(undefined, { maximumFractionDigits: 0 });
-    const formattedCost = totalCost.toLocaleString(undefined, { maximumFractionDigits: 0 });
     const formattedPrincipal = principal.toLocaleString(undefined, { maximumFractionDigits: 0 });
 
     const timeSavedYears = Math.floor(savings.time);
     const timeSavedMonths = Math.round((savings.time - timeSavedYears) * 12);
+    const isPrepaying = savings.time > 0.01 || savings.interest > 1;
 
-    const isRenewal = state.calculationMode === 'renewal';
+    // Closing Costs Breakdown
+    const estLegalFees = 1200;
+    const estTitleInsurance = 300;
+    const estAppraisal = 350;
+    const totalClosingCosts = actualDownPayment + ltt.totalTax + cmhcPST + estLegalFees + estTitleInsurance + estAppraisal;
 
     return (
         <div className="flex flex-col gap-8">
@@ -37,14 +73,20 @@ export const MortgageResults = ({ results, state }) => {
                 <div className="relative z-10 text-center">
                     <p className="text-slate-400 font-bold uppercase tracking-[0.2em] text-xs mb-3 flex items-center justify-center gap-2">
                         <span className="w-8 h-px bg-slate-600"></span> 
-                        Regular Payment ({paymentFrequency})
+                        {showPITH ? `True Monthly Cost (PITH)` : `Regular Payment (${paymentFrequency})`}
                         <span className="w-8 h-px bg-slate-600"></span>
                     </p>
                     
                     <div className="text-5xl md:text-6xl font-black tracking-tighter break-words text-indigo-300 drop-shadow-2xl">
                         <span className="text-3xl align-top mr-1 opacity-60">$</span>
-                        {formattedPayment}
+                        {showPITH ? formattedPITH : formattedPayment}
                     </div>
+
+                    {showPITH && (
+                        <p className="text-slate-400 text-xs font-bold mt-3">
+                            Includes <strong className="text-indigo-300">${formattedPayment}</strong> {paymentFrequency} mortgage + taxes & fees
+                        </p>
+                    )}
 
                     <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
                         <div className="bg-white/5 p-4 rounded-2xl border border-white/10 flex flex-col items-center">
@@ -90,10 +132,10 @@ export const MortgageResults = ({ results, state }) => {
                 </div>
             )}
 
-            {/* Savings & Tax Cards */}
-            <div className={`grid grid-cols-1 md:grid-cols-2 ${isRenewal ? 'lg:grid-cols-2' : 'lg:grid-cols-3'} gap-4`}>
+            {/* Savings & Closing Cost Cards */}
+            <div className={`grid grid-cols-1 md:grid-cols-2 gap-4`}>
                 {/* Interest Saved */}
-                {(savings.interest > 1 || savings.time > 0.01) && (
+                {isPrepaying ? (
                     <div className="bg-emerald-50 p-6 rounded-[2.5rem] border border-emerald-100 flex flex-col items-center text-center">
                         <div className="bg-emerald-100 p-2 rounded-xl text-emerald-600 mb-3">
                             <TrendingUpIcon size={24} />
@@ -106,37 +148,39 @@ export const MortgageResults = ({ results, state }) => {
                             {timeSavedYears === 0 && timeSavedMonths === 0 && '0 mo'} faster
                         </span>
                     </div>
-                )}
-
-                {/* Land Transfer Tax (Hidden in Renewal) */}
-                {!isRenewal && (
-                    <div className="bg-slate-50 p-6 rounded-[2.5rem] border border-slate-200 flex flex-col items-center text-center">
-                        <div className="bg-slate-100 p-2 rounded-xl text-slate-600 mb-3">
-                            <FileTextIcon size={24} />
+                ) : (
+                    <div className="bg-slate-50 p-6 rounded-[2.5rem] border border-slate-200 flex flex-col items-center text-center justify-center">
+                        <div className="bg-slate-100 p-2 rounded-xl text-slate-400 mb-3">
+                            <TrendingUpIcon size={24} />
                         </div>
-                        <span className="text-[10px] font-black text-slate-700 uppercase tracking-widest">Land Transfer Tax</span>
-                        <span className="text-2xl font-black text-slate-900 mt-1">${ltt.totalTax.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
-                        <div className="flex gap-2 mt-1">
-                            {ltt.provincialRebate > 0 && <span className="text-[9px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100 uppercase">-${ltt.provincialRebate.toLocaleString()} Rebate</span>}
-                            {ltt.municipalRebate > 0 && <span className="text-[9px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100 uppercase">-${ltt.municipalRebate.toLocaleString()} Tor Rebate</span>}
-                        </div>
+                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Prepayments</span>
+                        <span className="text-xs font-bold text-slate-400 mt-2 max-w-[200px]">Add a lump sum or monthly increase to see your savings.</span>
                     </div>
                 )}
 
-                {/* Closing Costs Estimate / Renewal Note */}
+                {/* Closing Costs Breakdown */}
                 {!isRenewal ? (
-                    <div className="bg-indigo-50 p-6 rounded-[2.5rem] border border-indigo-100 flex flex-col items-center text-center">
-                        <div className="bg-indigo-100 p-2 rounded-xl text-indigo-600 mb-3">
-                            <CalculatorIcon size={24} />
+                    <div className="bg-indigo-50 p-6 rounded-[2.5rem] border border-indigo-100 flex flex-col relative overflow-hidden group">
+                        <div className="relative z-10 flex flex-col h-full">
+                            <div className="flex items-center justify-between mb-4">
+                                <div className="flex items-center gap-2 text-indigo-700">
+                                    <CalculatorIcon size={20} />
+                                    <span className="text-[10px] font-black uppercase tracking-widest">Est. Cash to Close</span>
+                                </div>
+                                <span className="text-xl font-black text-indigo-900">${totalClosingCosts.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+                            </div>
+                            
+                            <div className="space-y-2 mt-auto text-[10px] font-bold text-indigo-900/60 font-mono">
+                                <div className="flex justify-between"><span>Down Payment</span><span>${actualDownPayment.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span></div>
+                                <div className="flex justify-between"><span>Land Transfer Tax</span><span>${ltt.totalTax.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span></div>
+                                {cmhcPST > 0 && <div className="flex justify-between text-rose-500/80"><span>CMHC PST (Upfront)</span><span>${cmhcPST.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span></div>}
+                                <div className="flex justify-between"><span>Legal & Title (Est.)</span><span>${(estLegalFees + estTitleInsurance).toLocaleString(undefined, { maximumFractionDigits: 0 })}</span></div>
+                                <div className="flex justify-between"><span>Appraisal (Est.)</span><span>${estAppraisal.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span></div>
+                            </div>
                         </div>
-                        <span className="text-[10px] font-black text-indigo-700 uppercase tracking-widest">Est. Cash to Close</span>
-                        <span className="text-2xl font-black text-indigo-900 mt-1">
-                            ${(actualDownPayment + ltt.totalTax + 2000).toLocaleString(undefined, { maximumFractionDigits: 0 })}
-                        </span>
-                        <p className="text-[9px] font-bold text-indigo-400 mt-1 uppercase leading-tight">Incl. Down Payment, LTT & $2k Legal/Fees</p>
                     </div>
                 ) : (
-                    <div className="bg-indigo-50 p-6 rounded-[2.5rem] border border-indigo-100 flex flex-col items-center text-center">
+                    <div className="bg-indigo-50 p-6 rounded-[2.5rem] border border-indigo-100 flex flex-col items-center text-center justify-center">
                         <div className="bg-indigo-100 p-2 rounded-xl text-indigo-600 mb-3">
                             <RotateCcwIcon size={24} />
                         </div>
@@ -154,7 +198,8 @@ export const MortgageResults = ({ results, state }) => {
                     <div className="flex justify-between items-center mb-6 ml-2">
                         <h3 className="text-[10px] font-black text-slate-800 uppercase tracking-widest">Balance Over Time</h3>
                         <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex gap-3">
-                            <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-indigo-500"></div> Remaining Balance</span>
+                            {isPrepaying && <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-slate-300"></div> Standard</span>}
+                            <span className="flex items-center gap-1"><div className="w-2 h-2 rounded-full bg-indigo-500"></div> {isPrepaying ? 'Accelerated' : 'Remaining Balance'}</span>
                         </div>
                     </div>
 
@@ -183,9 +228,19 @@ export const MortgageResults = ({ results, state }) => {
                                 />
                                 <RechartsTooltip 
                                     contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '12px', fontSize: '12px', fontWeight: 'bold', color: '#fff' }}
-                                    formatter={(val) => `$${val.toLocaleString(undefined, { maximumFractionDigits: 0 })}`}
+                                    formatter={(val, name) => [`$${val.toLocaleString(undefined, { maximumFractionDigits: 0 })}`, name === 'remainingBalance' ? 'Balance' : 'Standard Balance']}
                                     labelFormatter={(y) => `Year ${y}`}
                                 />
+                                {isPrepaying && (
+                                    <Area 
+                                        type="monotone" 
+                                        dataKey="baselineRemainingBalance" 
+                                        stroke="#cbd5e1" 
+                                        strokeWidth={2}
+                                        fillOpacity={0} 
+                                        strokeDasharray="5 5"
+                                    />
+                                )}
                                 <Area 
                                     type="monotone" 
                                     dataKey="remainingBalance" 
@@ -243,7 +298,13 @@ export const MortgageResults = ({ results, state }) => {
             <div className="bg-white rounded-[2.5rem] border border-slate-200 overflow-hidden shadow-sm">
                 <div className="p-6 border-b border-slate-100 flex justify-between items-center">
                     <h3 className="text-[10px] font-black text-slate-800 uppercase tracking-widest">Complete Schedule</h3>
-                    <CalculatorIcon size={20} className="text-slate-400" />
+                    <button 
+                        onClick={() => exportToCSV(schedule)}
+                        className="text-[10px] font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5"
+                    >
+                        <FileTextIcon size={12} />
+                        Export CSV
+                    </button>
                 </div>
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">

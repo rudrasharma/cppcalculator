@@ -24,6 +24,9 @@ const initialState = {
     isToronto: false,
     isFirstTimeBuyer: false,
     showStressTest: false,
+    propertyTaxes: 0,
+    heating: 0,
+    condoFees: 0,
     prepayments: {
         monthlyIncrease: 0,
     },
@@ -63,6 +66,12 @@ function mortgageReducer(state, action) {
             return { ...state, isFirstTimeBuyer: action.payload };
         case 'SET_SHOW_STRESS_TEST':
             return { ...state, showStressTest: action.payload };
+        case 'SET_PROPERTY_TAXES':
+            return { ...state, propertyTaxes: action.payload };
+        case 'SET_HEATING':
+            return { ...state, heating: action.payload };
+        case 'SET_CONDO_FEES':
+            return { ...state, condoFees: action.payload };
         case 'SET_PREPAYMENT':
             return { 
                 ...state, 
@@ -95,15 +104,13 @@ function mortgageReducer(state, action) {
 }
 
 export const useMortgageMath = (initialStateOverride = null) => {
-    // Merge any server-side overrides with the default state
     const startingState = useMemo(() => {
         if (!initialStateOverride) return initialState;
         
-        // Handle migration from old 'principal' overrrides if they exist in pSEO data
         let override = { ...initialStateOverride };
         if (override.principal && !override.homePrice) {
             override.homePrice = override.principal;
-            override.downPayment = 0; // If they passed raw principal, assume no downpayment to hit exact number
+            override.downPayment = 0;
         }
 
         return {
@@ -119,88 +126,57 @@ export const useMortgageMath = (initialStateOverride = null) => {
 
     const [state, dispatch] = useReducer(mortgageReducer, startingState);
 
-    // Sync state if the server override changes (e.g. Astro View Transitions between pages)
     useEffect(() => {
         if (initialStateOverride) {
             dispatch({ type: 'SET_STATE', payload: startingState });
         }
     }, [startingState]);
 
+    // CMHC Rule Enforcement: If down payment < 20%, max amortization is 25 years
+    useEffect(() => {
+        if (state.calculationMode !== 'renewal') {
+            const actualDownPayment = state.downPaymentType === 'percent' 
+                ? state.homePrice * (state.downPayment / 100) 
+                : state.downPayment;
+            
+            const downPaymentPercent = state.homePrice > 0 ? (actualDownPayment / state.homePrice) * 100 : 0;
+            
+            if (downPaymentPercent < 20 && state.amortizationYears > 25) {
+                dispatch({ type: 'SET_AMORTIZATION', payload: 25 });
+            }
+        }
+    }, [state.homePrice, state.downPayment, state.downPaymentType, state.amortizationYears, state.calculationMode]);
+
     useEffect(() => {
         dispatch({ type: 'SET_MOUNTED', payload: true });
         
-        // If an override was provided by the server (pSEO), don't override it with empty URL params on first mount.
-        // The subsequent useEffect will push this server state to the URL.
         if (initialStateOverride) return;
 
-        // Initial load from URL
         const params = new URLSearchParams(window.location.search);
         
-        if (params.has('m')) {
-            dispatch({ type: 'SET_CALCULATION_MODE', payload: params.get('m') });
-        }
-
-        if (params.has('hp')) {
-            const val = parseFloat(params.get('hp'));
-            if (!isNaN(val)) dispatch({ type: 'SET_HOME_PRICE', payload: val });
-        }
-        // Backwards compatibility for old URLs
+        if (params.has('m')) dispatch({ type: 'SET_CALCULATION_MODE', payload: params.get('m') });
+        if (params.has('hp')) dispatch({ type: 'SET_HOME_PRICE', payload: parseFloat(params.get('hp')) || 0 });
         else if (params.has('p')) {
-            const val = parseFloat(params.get('p'));
-            if (!isNaN(val)) {
-                dispatch({ type: 'SET_HOME_PRICE', payload: val });
-                dispatch({ type: 'SET_DOWN_PAYMENT', payload: 0 });
-            }
+            dispatch({ type: 'SET_HOME_PRICE', payload: parseFloat(params.get('p')) || 0 });
+            dispatch({ type: 'SET_DOWN_PAYMENT', payload: 0 });
         }
-
-        if (params.has('dp')) {
-            const val = parseFloat(params.get('dp'));
-            if (!isNaN(val)) dispatch({ type: 'SET_DOWN_PAYMENT', payload: val });
-        }
-        if (params.has('dpt')) {
-            dispatch({ type: 'SET_DOWN_PAYMENT_TYPE', payload: params.get('dpt') });
-        }
-        if (params.has('ty')) {
-            const val = parseInt(params.get('ty'), 10);
-            if (!isNaN(val)) dispatch({ type: 'SET_TERM_YEARS', payload: val });
-        }
-        if (params.has('r')) {
-            const val = parseFloat(params.get('r'));
-            if (!isNaN(val)) dispatch({ type: 'SET_RATE', payload: val });
-        }
-        if (params.has('a')) {
-            const val = parseInt(params.get('a'), 10);
-            if (!isNaN(val)) dispatch({ type: 'SET_AMORTIZATION', payload: val });
-        }
-        if (params.has('f')) {
-            dispatch({ type: 'SET_FREQUENCY', payload: params.get('f') });
-        }
-        if (params.has('c')) {
-            dispatch({ type: 'SET_COMPOUNDING', payload: params.get('c') });
-        }
-        if (params.has('cp')) {
-            const val = parseFloat(params.get('cp'));
-            if (!isNaN(val)) dispatch({ type: 'SET_CUSTOM_PAYMENT', payload: val });
-        }
-        if (params.has('sd')) {
-            dispatch({ type: 'SET_START_DATE', payload: params.get('sd') });
-        }
-        if (params.has('mi')) {
-            const val = parseFloat(params.get('mi'));
-            if (!isNaN(val)) dispatch({ type: 'SET_PREPAYMENT', payload: { monthlyIncrease: val } });
-        }
-        if (params.has('pv')) {
-            dispatch({ type: 'SET_PROVINCE', payload: params.get('pv') });
-        }
-        if (params.has('t')) {
-            dispatch({ type: 'SET_IS_TORONTO', payload: params.get('t') === 'true' });
-        }
-        if (params.has('ftb')) {
-            dispatch({ type: 'SET_IS_FIRST_TIME_BUYER', payload: params.get('ftb') === 'true' });
-        }
-        if (params.has('st')) {
-            dispatch({ type: 'SET_SHOW_STRESS_TEST', payload: params.get('st') === 'true' });
-        }
+        if (params.has('dp')) dispatch({ type: 'SET_DOWN_PAYMENT', payload: parseFloat(params.get('dp')) || 0 });
+        if (params.has('dpt')) dispatch({ type: 'SET_DOWN_PAYMENT_TYPE', payload: params.get('dpt') });
+        if (params.has('ty')) dispatch({ type: 'SET_TERM_YEARS', payload: parseInt(params.get('ty'), 10) || 5 });
+        if (params.has('r')) dispatch({ type: 'SET_RATE', payload: parseFloat(params.get('r')) || 5 });
+        if (params.has('a')) dispatch({ type: 'SET_AMORTIZATION', payload: parseInt(params.get('a'), 10) || 25 });
+        if (params.has('f')) dispatch({ type: 'SET_FREQUENCY', payload: params.get('f') });
+        if (params.has('c')) dispatch({ type: 'SET_COMPOUNDING', payload: params.get('c') });
+        if (params.has('cp')) dispatch({ type: 'SET_CUSTOM_PAYMENT', payload: parseFloat(params.get('cp')) || 0 });
+        if (params.has('sd')) dispatch({ type: 'SET_START_DATE', payload: params.get('sd') });
+        if (params.has('mi')) dispatch({ type: 'SET_PREPAYMENT', payload: { monthlyIncrease: parseFloat(params.get('mi')) || 0 } });
+        if (params.has('pv')) dispatch({ type: 'SET_PROVINCE', payload: params.get('pv') });
+        if (params.has('t')) dispatch({ type: 'SET_IS_TORONTO', payload: params.get('t') === 'true' });
+        if (params.has('ftb')) dispatch({ type: 'SET_IS_FIRST_TIME_BUYER', payload: params.get('ftb') === 'true' });
+        if (params.has('st')) dispatch({ type: 'SET_SHOW_STRESS_TEST', payload: params.get('st') === 'true' });
+        if (params.has('pt')) dispatch({ type: 'SET_PROPERTY_TAXES', payload: parseFloat(params.get('pt')) || 0 });
+        if (params.has('ht')) dispatch({ type: 'SET_HEATING', payload: parseFloat(params.get('ht')) || 0 });
+        if (params.has('cf')) dispatch({ type: 'SET_CONDO_FEES', payload: parseFloat(params.get('cf')) || 0 });
     }, []);
 
     useEffect(() => {
@@ -217,20 +193,20 @@ export const useMortgageMath = (initialStateOverride = null) => {
         params.set('f', state.paymentFrequency);
         params.set('c', state.compounding);
         params.set('pv', state.province);
+        
         if (state.isToronto) params.set('t', 'true'); else params.delete('t');
         if (state.isFirstTimeBuyer) params.set('ftb', 'true'); else params.delete('ftb');
         if (state.showStressTest) params.set('st', 'true'); else params.delete('st');
-
-        if (state.customPayment > 0) params.set('cp', state.customPayment);
-        else params.delete('cp');
-        if (state.startDate !== defaultStartDate) params.set('sd', state.startDate);
-        else params.delete('sd');
-        if (state.prepayments.monthlyIncrease > 0) params.set('mi', state.prepayments.monthlyIncrease);
-        else params.delete('mi');
+        if (state.customPayment > 0) params.set('cp', state.customPayment); else params.delete('cp');
+        if (state.startDate !== defaultStartDate) params.set('sd', state.startDate); else params.delete('sd');
+        if (state.prepayments.monthlyIncrease > 0) params.set('mi', state.prepayments.monthlyIncrease); else params.delete('mi');
+        if (state.propertyTaxes > 0) params.set('pt', state.propertyTaxes); else params.delete('pt');
+        if (state.heating > 0) params.set('ht', state.heating); else params.delete('ht');
+        if (state.condoFees > 0) params.set('cf', state.condoFees); else params.delete('cf');
 
         const newUrl = `${window.location.pathname}?${params.toString()}`;
         window.history.replaceState(null, '', newUrl);
-    }, [state.calculationMode, state.homePrice, state.downPayment, state.downPaymentType, state.annualRate, state.amortizationYears, state.termYears, state.paymentFrequency, state.compounding, state.customPayment, state.startDate, state.prepayments, state.province, state.isToronto, state.isFirstTimeBuyer, state.showStressTest, state.mounted]);
+    }, [state]);
 
     const results = useMemo(() => {
         const isRenewal = state.calculationMode === 'renewal';
@@ -248,6 +224,10 @@ export const useMortgageMath = (initialStateOverride = null) => {
             prepayments: state.prepayments,
             lumpSums: state.lumpSums,
             isRenewal,
+            province: state.province,
+            propertyTaxes: state.propertyTaxes,
+            heating: state.heating,
+            condoFees: state.condoFees
         });
 
         const lttResults = isRenewal ? { totalTax: 0, provincialTax: 0, municipalTax: 0, provincialRebate: 0, municipalRebate: 0 } : calculateLTT(
@@ -261,7 +241,7 @@ export const useMortgageMath = (initialStateOverride = null) => {
             ...mortgageResults,
             ltt: lttResults,
         };
-    }, [state.calculationMode, state.homePrice, state.downPayment, state.downPaymentType, state.annualRate, state.amortizationYears, state.termYears, state.paymentFrequency, state.compounding, state.customPayment, state.startDate, state.prepayments, state.lumpSums, state.province, state.isToronto, state.isFirstTimeBuyer]);
+    }, [state.calculationMode, state.homePrice, state.downPayment, state.downPaymentType, state.annualRate, state.amortizationYears, state.termYears, state.paymentFrequency, state.compounding, state.customPayment, state.startDate, state.prepayments, state.lumpSums, state.province, state.isToronto, state.isFirstTimeBuyer, state.propertyTaxes, state.heating, state.condoFees]);
 
     return { state, dispatch, results };
 };

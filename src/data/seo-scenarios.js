@@ -355,6 +355,24 @@ export const MORTGAGE_SCENARIOS = [
 
     // --- 4. SITUATIONAL / STRATEGY KEYWORDS ---
     {
+        slug: '5-year-fixed-mortgage-calculator',
+        homePrice: 500000, downPayment: 100000, rate: 4.89, amortization: 25, freq: 'monthly', termYears: 5, compounding: 'semi-annual',
+        label: "5-Year Fixed Mortgage Calculator",
+        desc: "The most popular mortgage in Canada. Calculate your payments and balance at the end of a 5-year fixed term."
+    },
+    {
+        slug: '3-year-variable-mortgage-calculator',
+        homePrice: 500000, downPayment: 100000, rate: 5.95, amortization: 25, freq: 'monthly', termYears: 3, compounding: 'monthly',
+        label: "3-Year Variable Mortgage Calculator",
+        desc: "Estimate payments for a variable rate mortgage, which legally compounds monthly instead of semi-annually."
+    },
+    {
+        slug: 'cmhc-mortgage-calculator',
+        homePrice: 400000, downPayment: 20000, rate: 4.99, amortization: 25, freq: 'monthly',
+        label: "CMHC Mortgage Calculator",
+        desc: "Calculate your exact CMHC insurance premium and mandatory provincial sales taxes for down payments under 20%."
+    },
+    {
         slug: '500k-mortgage-payment',
         homePrice: 625000, downPayment: 125000, rate: 5.0, amortization: 25, freq: 'monthly',
         label: "$500k Mortgage Calculator",

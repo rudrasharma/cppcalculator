@@ -58,7 +58,8 @@ const serverResults = calculateAmortization({
     annualRate: safeRate,
     amortizationYears: safeAmortization,
     paymentFrequency: safeFreq,
-    isRenewal: isRenewal
+    isRenewal: isRenewal,
+    province: safeProvince
 });
 
 const lttResults = isRenewal ? { totalTax: 0 } : calculateLTT(safeHomePrice, safeProvince, isToronto, isFirstTimeBuyer);
@@ -69,7 +70,10 @@ const totalInterestStr = formatter.format(serverResults.totalInterest);
 const totalCostStr = formatter.format(serverResults.totalCost);
 const homePriceStr = formatter.format(safeHomePrice);
 const lttStr = formatter.format(lttResults.totalTax);
+const cmhcPremiumStr = formatter.format(serverResults.cmhcPremium);
+const cmhcPstStr = formatter.format(serverResults.cmhcPST);
 const provinceName = PROVINCES[safeProvince];
+const hasPst = serverResults.cmhcPST > 0;
 
 const canonicalURL = new URL(`/calculator/mortgage/${Astro.params.scenario}`, Astro.site || Astro.url.origin);
 
@@ -119,6 +123,12 @@ const faqSchema = {
     }
   ]
 };
+
+// Generate related calculators dynamically
+const relatedScenarios = MORTGAGE_SCENARIOS
+    .filter(s => s.slug !== Astro.params.scenario)
+    .sort(() => 0.5 - Math.random()) // Random shuffle
+    .slice(0, 3);
 ---
 
 <BaseLayout 
@@ -171,6 +181,14 @@ const faqSchema = {
                 <p class="mb-4">
                 Based on the current inputs, if you are purchasing a <strong>{homePriceStr}</strong> home in <strong>{provinceName}{isToronto ? ' (Toronto)' : ''}</strong> with an interest rate of <strong>{safeRate}%</strong>, your estimated base payment will be <strong>{monthlyPaymentStr}</strong> ({safeFreq.replace('-', ' ')}). 
                 </p>
+                {serverResults.cmhcPremium > 0 && (
+                    <p class="mb-4 text-rose-800 bg-rose-50 p-4 rounded-xl border border-rose-100">
+                        Because your down payment is less than 20%, this calculation includes a mandatory CMHC insurance premium of <strong>{cmhcPremiumStr}</strong>, which is added to your total mortgage amount.
+                        {hasPst && ` Additionally, the province of ${provinceName} applies a provincial sales tax to this premium, resulting in an upfront cash cost of `}
+                        {hasPst && <strong>{cmhcPstStr}</strong>}
+                        {hasPst && ` that must be paid on closing.`}
+                    </p>
+                )}
                 <p class="mb-4">
                 Beyond the mortgage payment, your estimated <strong>Land Transfer Tax (LTT)</strong> for this transaction is <strong>{lttStr}</strong>. 
                 {isFirstTimeBuyer ? 'This includes first-time home buyer rebates applied at the provincial' + (isToronto ? ' and municipal' : '') + ' level.' : 'If you are a first-time home buyer, you may be eligible for significant rebates on this tax.'}
@@ -199,6 +217,19 @@ const faqSchema = {
                     <h3 class="font-bold text-slate-900 mb-2">{faq.name}</h3>
                     <p class="text-slate-600 text-sm">{faq.acceptedAnswer.text}</p>
                 </div>
+            ))}
+        </div>
+    </div>
+
+    {/* Related Calculators */}
+    <div class="mt-16 pt-8 border-t border-slate-100">
+        <h2 class="text-xl font-black text-slate-900 mb-6 tracking-tight">Explore More Mortgage Scenarios</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {relatedScenarios.map(s => (
+                <a href={`/calculator/mortgage/${s.slug}`} class="bg-slate-50 hover:bg-indigo-50 p-5 rounded-2xl border border-slate-200 transition-colors group block">
+                    <h3 class="font-bold text-slate-900 text-sm mb-1 group-hover:text-indigo-700">{s.label}</h3>
+                    <p class="text-xs text-slate-500 line-clamp-2">{s.desc}</p>
+                </a>
             ))}
         </div>
     </div>
