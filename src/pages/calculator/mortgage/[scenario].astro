@@ -2,6 +2,7 @@
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import MortgageCalculator from '../../../features/mortgage/components/MortgageCalculator.jsx';
 import { MORTGAGE_SCENARIOS } from '../../../data/seo-scenarios.js';
+import { calculateAmortization } from '../../../features/mortgage/utils/mortgageEngine.js';
 
 export const prerender = true;
 
@@ -35,6 +36,26 @@ const initialStateOverride = {
 // Remove undefined fields so we don't accidentally overwrite defaults with undefined
 Object.keys(initialStateOverride).forEach(key => initialStateOverride[key] === undefined && delete initialStateOverride[key]);
 
+// SERVER SIDE MATH FOR SEO INJECTIONS
+const safeHomePrice = principal || 500000;
+const safeRate = rate || 5.0;
+const safeAmortization = amortization || 25;
+const safeFreq = freq || 'monthly';
+
+const serverResults = calculateAmortization({
+    homePrice: safeHomePrice,
+    downPayment: 0,
+    annualRate: safeRate,
+    amortizationYears: safeAmortization,
+    paymentFrequency: safeFreq
+});
+
+const formatter = new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD', maximumFractionDigits: 0 });
+const monthlyPaymentStr = formatter.format(serverResults.monthlyPayment);
+const totalInterestStr = formatter.format(serverResults.totalInterest);
+const totalCostStr = formatter.format(serverResults.totalCost);
+const homePriceStr = formatter.format(safeHomePrice);
+
 const canonicalURL = new URL(`/calculator/mortgage/${Astro.params.scenario}`, Astro.site || Astro.url.origin);
 
 const schema = {
@@ -50,6 +71,37 @@ const schema = {
   },
   "description": desc
 };
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": `What is the payment on a ${homePriceStr} mortgage at ${safeRate}%?`,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": `Assuming a ${safeAmortization}-year amortization and no down payment, the estimated regular payment would be ${monthlyPaymentStr} per ${safeFreq.replace('-', ' ')}.`
+      }
+    },
+    {
+      "@type": "Question",
+      "name": `How much interest will I pay on a ${homePriceStr} mortgage?`,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": `Over the entire ${safeAmortization}-year life of the loan at ${safeRate}%, you would pay approximately ${totalInterestStr} in total interest. This brings the total cost of the mortgage to ${totalCostStr}.`
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How is this Canadian mortgage calculated?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "In Canada, fixed-rate mortgages are legally required to be compounded semi-annually, not monthly. This calculator uses the exact semi-annual compounding formula to ensure the payment matches what a Canadian bank would quote."
+      }
+    }
+  ]
+};
 ---
 
 <BaseLayout 
@@ -57,6 +109,7 @@ const schema = {
   description={desc}
 >
   <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+  <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
 
   <header class="max-w-6xl mx-auto px-4 pt-8 pb-4 text-center md:text-left animate-fade-in">
     <div class="flex flex-col md:flex-row justify-between items-center gap-4">
@@ -83,24 +136,30 @@ const schema = {
   </main>
 
   {/* SEO CONTENT SECTION */}
-  <section class="max-w-3xl mx-auto px-6 py-12 text-slate-600 leading-relaxed text-sm animate-fade-in">
-    <h2 class="text-lg font-bold text-slate-900 mb-4">Understanding This Calculation</h2>
-    <p class="mb-4">
-      This tool uses the exact <strong>Canadian mortgage math formula</strong> (semi-annual compounding) to generate accurate payment estimates, matching the calculations provided by major Canadian banks. While variable rates are typically compounded monthly, fixed-rate mortgages in Canada are legally required to compound semi-annually.
-    </p>
+  <section class="max-w-3xl mx-auto px-6 py-12 text-slate-600 leading-relaxed text-sm animate-fade-in space-y-8">
     
-    <h3 class="text-md font-bold text-slate-900 mt-6 mb-2">Accelerated Payments</h3>
-    <p class="mb-4">
-      Choosing "Accelerated Bi-Weekly" or "Accelerated Weekly" payments is one of the easiest ways to pay off your mortgage faster. 
-      The "Accelerated" version takes your standard monthly payment and divides it by 2 or 4, respectively. 
-      Because there are 26 bi-weekly or 52 weekly periods in a year, you effectively make one extra full monthly payment every year toward your principal.
-    </p>
+    <div>
+        <h2 class="text-xl font-black text-slate-900 mb-4 tracking-tight">Scenario Breakdown</h2>
+        <p class="mb-4">
+        Based on the current inputs, if you are purchasing a <strong>{homePriceStr}</strong> home with an interest rate of <strong>{safeRate}%</strong>, your estimated base payment will be <strong>{monthlyPaymentStr}</strong> ({safeFreq.replace('-', ' ')}). 
+        Over the course of your <strong>{safeAmortization}-year</strong> amortization, you can expect to pay a total of <strong>{totalInterestStr}</strong> in interest to the lender, bringing your true total cost of ownership to <strong>{totalCostStr}</strong>.
+        </p>
+        <p>
+        Use the prepayments tab in the calculator above to see how adding small monthly increases or annual lump-sum payments can drastically cut down this interest and shave years off your mortgage.
+        </p>
+    </div>
 
-    <h3 class="text-md font-bold text-slate-900 mt-6 mb-2">Prepayment Privileges</h3>
-    <p>
-      Most Canadian mortgage contracts include "prepayment privileges" that allow you to pay a certain percentage 
-      (often 10% to 20%) of the original principal or current balance each year without penalty. 
-      Even small monthly increases or annual lump sums can drastically reduce the total interest you pay over the life of the loan.
-    </p>
+    <div>
+        <h2 class="text-xl font-black text-slate-900 mb-4 tracking-tight">Frequently Asked Questions</h2>
+        <div class="space-y-4">
+            {faqSchema.mainEntity.map((faq) => (
+                <div class="bg-slate-50 rounded-2xl p-5 border border-slate-100">
+                    <h3 class="font-bold text-slate-900 mb-2">{faq.name}</h3>
+                    <p class="text-slate-600 text-sm">{faq.acceptedAnswer.text}</p>
+                </div>
+            ))}
+        </div>
+    </div>
+
   </section>
 </BaseLayout>
