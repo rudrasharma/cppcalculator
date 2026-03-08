@@ -384,5 +384,19 @@ export const MORTGAGE_SCENARIOS = [
         homePrice: 500000, downPayment: 100000, rate: 5.0, amortization: 30, freq: 'monthly',
         label: "30-Year Amortization Calculator",
         desc: "Compare the lower monthly payments of a 30-year mortgage against the higher total interest costs."
+    },
+    {
+        slug: 'mortgage-renewal-payment-calculator',
+        homePrice: 400000, rate: 5.5, amortization: 20, freq: 'monthly',
+        calculationMode: 'renewal',
+        label: "Mortgage Renewal Calculator",
+        desc: "Calculate your new monthly payments when renewing your mortgage at current market rates."
+    },
+    {
+        slug: 'refinance-mortgage-calculator-canada',
+        homePrice: 600000, rate: 5.25, amortization: 25, freq: 'monthly',
+        calculationMode: 'renewal',
+        label: "Refinance Calculator",
+        desc: "Estimate payments and total interest when refinancing your Canadian mortgage to access equity or lower rates."
     }
 ];

@@ -8,6 +8,8 @@ import {
     CalendarIcon,
     CalculatorIcon,
     TrashIcon,
+    SparklesIcon,
+    RotateCcwIcon,
 } from '../../../components/shared';
 import { PAYMENT_FREQUENCIES, COMPOUNDING_PERIODS } from '../utils/mortgageEngine';
 import { PROVINCES } from '../utils/lttEngine';
@@ -34,48 +36,70 @@ export const MortgageForm = ({ state, dispatch }) => {
     const { 
         homePrice, downPayment, downPaymentType, annualRate, amortizationYears, 
         termYears, paymentFrequency, compounding, customPayment, startDate, 
-        prepayments, lumpSums, province, isToronto, isFirstTimeBuyer, showStressTest 
+        prepayments, lumpSums, province, isToronto, isFirstTimeBuyer, showStressTest,
+        calculationMode
     } = state;
+
+    const isRenewal = calculationMode === 'renewal';
 
     return (
         <div className="space-y-6">
+            {/* Mode Selector */}
+            <div className="bg-white p-1.5 rounded-2xl border border-slate-200 shadow-sm flex gap-1">
+                <button
+                    onClick={() => dispatch({ type: 'SET_CALCULATION_MODE', payload: 'purchase' })}
+                    className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${calculationMode === 'purchase' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200' : 'text-slate-500 hover:bg-slate-50'}`}
+                >
+                    <SparklesIcon size={14} />
+                    New Purchase
+                </button>
+                <button
+                    onClick={() => dispatch({ type: 'SET_CALCULATION_MODE', payload: 'renewal' })}
+                    className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${calculationMode === 'renewal' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200' : 'text-slate-500 hover:bg-slate-50'}`}
+                >
+                    <RotateCcwIcon size={14} />
+                    Renewal / Refi
+                </button>
+            </div>
+
             <div className="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-xl shadow-slate-200/50 space-y-6 relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-slate-50 rounded-bl-[5rem] -mr-10 -mt-10 -z-0 pointer-events-none"></div>
 
                 <div className="relative z-10 space-y-5">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-1.5">
-                            <label className="text-xs font-black text-slate-700 block uppercase tracking-tighter">
-                                Province
-                            </label>
-                            <NativeSelect
-                                value={province}
-                                onChange={(e) => dispatch({ type: 'SET_PROVINCE', payload: e.target.value })}
-                                options={PROVINCE_OPTIONS}
-                            />
-                        </div>
-                        <div className="flex flex-col justify-end gap-2">
-                            {province === 'ON' && (
+                    {!isRenewal && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-black text-slate-700 block uppercase tracking-tighter">
+                                    Province
+                                </label>
+                                <NativeSelect
+                                    value={province}
+                                    onChange={(e) => dispatch({ type: 'SET_PROVINCE', payload: e.target.value })}
+                                    options={PROVINCE_OPTIONS}
+                                />
+                            </div>
+                            <div className="flex flex-col justify-end gap-2">
+                                {province === 'ON' && (
+                                    <label className="flex items-center gap-2 cursor-pointer group">
+                                        <div className="relative">
+                                            <input 
+                                                type="checkbox" 
+                                                className="sr-only peer" 
+                                                checked={isToronto}
+                                                onChange={(e) => dispatch({ type: 'SET_IS_TORONTO', payload: e.target.checked })}
+                                            />
+                                            <div className="w-8 h-4 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-indigo-600"></div>
+                                        </div>
+                                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tight group-hover:text-slate-700 transition-colors">Inside Toronto</span>
+                                    </label>
+                                )}
                                 <label className="flex items-center gap-2 cursor-pointer group">
                                     <div className="relative">
                                         <input 
                                             type="checkbox" 
                                             className="sr-only peer" 
-                                            checked={isToronto}
-                                            onChange={(e) => dispatch({ type: 'SET_IS_TORONTO', payload: e.target.checked })}
-                                        />
-                                        <div className="w-8 h-4 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-indigo-600"></div>
-                                    </div>
-                                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tight group-hover:text-slate-700 transition-colors">Inside Toronto</span>
-                                </label>
-                            )}
-                            <label className="flex items-center gap-2 cursor-pointer group">
-                                <div className="relative">
-                                    <input 
-                                        type="checkbox" 
-                                        className="sr-only peer" 
-                                        checked={isFirstTimeBuyer}
-                                        onChange={(e) => dispatch({ type: 'SET_IS_FIRST_TIME_BUYER', payload: e.target.checked })}
+                                            checked={isFirstTimeBuyer}
+                                            onChange={(e) => dispatch({ type: 'SET_IS_FIRST_TIME_BUYER', payload: e.target.checked })}
                                     />
                                     <div className="w-8 h-4 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-indigo-600"></div>
                                 </div>
@@ -83,65 +107,68 @@ export const MortgageForm = ({ state, dispatch }) => {
                             </label>
                         </div>
                     </div>
+                    )}
 
                     <MoneyInput
-                        label="Asking Price"
-                        subLabel="Property Purchase Price"
+                        label={isRenewal ? "Remaining Balance" : "Asking Price"}
+                        subLabel={isRenewal ? "Current Mortgage Principal" : "Property Purchase Price"}
                         value={homePrice}
                         onChange={(val) => dispatch({ type: 'SET_HOME_PRICE', payload: parseFloat(val) || 0 })}
                     />
 
-                    <div className="space-y-1.5">
-                        <div className="flex justify-between items-center mb-1">
-                            <label className="text-xs font-black text-slate-700 block uppercase tracking-tighter">Down Payment</label>
-                            <div className="flex gap-1 bg-slate-100 p-1 rounded-lg">
-                                <button
-                                    onClick={() => {
-                                        if (downPaymentType !== 'dollar') {
-                                            const newDollarAmount = homePrice * (downPayment / 100);
-                                            dispatch({ type: 'SET_DOWN_PAYMENT', payload: Math.round(newDollarAmount) });
-                                            dispatch({ type: 'SET_DOWN_PAYMENT_TYPE', payload: 'dollar' });
-                                        }
-                                    }}
-                                    className={`px-3 py-1 text-[10px] font-bold uppercase rounded-md transition-all ${downPaymentType === 'dollar' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500 hover:text-slate-700'}`}
-                                >
-                                    $ CAD
-                                </button>
-                                <button
-                                    onClick={() => {
-                                        if (downPaymentType !== 'percent') {
-                                            const newPercentAmount = (downPayment / homePrice) * 100;
-                                            dispatch({ type: 'SET_DOWN_PAYMENT', payload: parseFloat(newPercentAmount.toFixed(2)) });
-                                            dispatch({ type: 'SET_DOWN_PAYMENT_TYPE', payload: 'percent' });
-                                        }
-                                    }}
-                                    className={`px-3 py-1 text-[10px] font-bold uppercase rounded-md transition-all ${downPaymentType === 'percent' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500 hover:text-slate-700'}`}
-                                >
-                                    % Percent
-                                </button>
+                    {!isRenewal && (
+                        <div className="space-y-1.5">
+                            <div className="flex justify-between items-center mb-1">
+                                <label className="text-xs font-black text-slate-700 block uppercase tracking-tighter">Down Payment</label>
+                                <div className="flex gap-1 bg-slate-100 p-1 rounded-lg">
+                                    <button
+                                        onClick={() => {
+                                            if (downPaymentType !== 'dollar') {
+                                                const newDollarAmount = homePrice * (downPayment / 100);
+                                                dispatch({ type: 'SET_DOWN_PAYMENT', payload: Math.round(newDollarAmount) });
+                                                dispatch({ type: 'SET_DOWN_PAYMENT_TYPE', payload: 'dollar' });
+                                            }
+                                        }}
+                                        className={`px-3 py-1 text-[10px] font-bold uppercase rounded-md transition-all ${downPaymentType === 'dollar' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500 hover:text-slate-700'}`}
+                                    >
+                                        $ CAD
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            if (downPaymentType !== 'percent') {
+                                                const newPercentAmount = (downPayment / homePrice) * 100;
+                                                dispatch({ type: 'SET_DOWN_PAYMENT', payload: parseFloat(newPercentAmount.toFixed(2)) });
+                                                dispatch({ type: 'SET_DOWN_PAYMENT_TYPE', payload: 'percent' });
+                                            }
+                                        }}
+                                        className={`px-3 py-1 text-[10px] font-bold uppercase rounded-md transition-all ${downPaymentType === 'percent' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500 hover:text-slate-700'}`}
+                                    >
+                                        % Percent
+                                    </button>
+                                </div>
                             </div>
+                            <div className="relative group">
+                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold group-focus-within:text-indigo-500 transition-colors pointer-events-none" aria-hidden="true">{downPaymentType === 'dollar' ? '$' : '%'}</span>
+                                <input
+                                    type="text"
+                                    inputMode="decimal"
+                                    value={downPayment || ''}
+                                    onChange={(e) => {
+                                        const val = e.target.value;
+                                        if (val === '' || /^\d*\.?\d*$/.test(val)) {
+                                            dispatch({ type: 'SET_DOWN_PAYMENT', payload: val === '' ? 0 : parseFloat(val) });
+                                        }
+                                    }}
+                                    className="w-full pl-8 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl font-mono text-lg font-black focus:ring-2 focus:ring-indigo-500 outline-none transition-all shadow-sm text-slate-900"
+                                />
+                            </div>
+                            <p className="text-[10px] font-medium text-slate-400 text-right mt-1">
+                                {downPaymentType === 'percent' 
+                                    ? `$${(homePrice * (downPayment / 100)).toLocaleString('en-CA', { maximumFractionDigits: 0 })}`
+                                    : `${((downPayment / homePrice) * 100 || 0).toFixed(1)}%`}
+                            </p>
                         </div>
-                        <div className="relative group">
-                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold group-focus-within:text-indigo-500 transition-colors pointer-events-none" aria-hidden="true">{downPaymentType === 'dollar' ? '$' : '%'}</span>
-                            <input
-                                type="text"
-                                inputMode="decimal"
-                                value={downPayment || ''}
-                                onChange={(e) => {
-                                    const val = e.target.value;
-                                    if (val === '' || /^\d*\.?\d*$/.test(val)) {
-                                        dispatch({ type: 'SET_DOWN_PAYMENT', payload: val === '' ? 0 : parseFloat(val) });
-                                    }
-                                }}
-                                className="w-full pl-8 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl font-mono text-lg font-black focus:ring-2 focus:ring-indigo-500 outline-none transition-all shadow-sm text-slate-900"
-                            />
-                        </div>
-                        <p className="text-[10px] font-medium text-slate-400 text-right mt-1">
-                            {downPaymentType === 'percent' 
-                                ? `$${(homePrice * (downPayment / 100)).toLocaleString('en-CA', { maximumFractionDigits: 0 })}`
-                                : `${((downPayment / homePrice) * 100 || 0).toFixed(1)}%`}
-                        </p>
-                    </div>
+                    )}
 
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1.5">
@@ -195,7 +222,7 @@ export const MortgageForm = ({ state, dispatch }) => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-1.5">
                             <label className="text-xs font-black text-slate-700 block uppercase tracking-tighter">
-                                Amortization
+                                {isRenewal ? "Remaining Amort" : "Amortization"}
                             </label>
                             <NativeSelect
                                 value={amortizationYears}

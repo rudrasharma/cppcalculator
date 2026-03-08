@@ -9,6 +9,7 @@ nextYear.setFullYear(today.getFullYear() + 1);
 const defaultLumpSumDate = nextYear.toISOString().split('T')[0];
 
 const initialState = {
+    calculationMode: 'purchase', // 'purchase' or 'renewal'
     homePrice: 500000,
     downPayment: 100000,
     downPaymentType: 'dollar', // 'dollar' or 'percent'
@@ -32,6 +33,8 @@ const initialState = {
 
 function mortgageReducer(state, action) {
     switch (action.type) {
+        case 'SET_CALCULATION_MODE':
+            return { ...state, calculationMode: action.payload };
         case 'SET_HOME_PRICE':
             return { ...state, homePrice: action.payload };
         case 'SET_DOWN_PAYMENT':
@@ -133,6 +136,10 @@ export const useMortgageMath = (initialStateOverride = null) => {
         // Initial load from URL
         const params = new URLSearchParams(window.location.search);
         
+        if (params.has('m')) {
+            dispatch({ type: 'SET_CALCULATION_MODE', payload: params.get('m') });
+        }
+
         if (params.has('hp')) {
             const val = parseFloat(params.get('hp'));
             if (!isNaN(val)) dispatch({ type: 'SET_HOME_PRICE', payload: val });
@@ -200,6 +207,7 @@ export const useMortgageMath = (initialStateOverride = null) => {
         if (!state.mounted) return;
         
         const params = new URLSearchParams(window.location.search);
+        params.set('m', state.calculationMode);
         params.set('hp', state.homePrice);
         params.set('dp', state.downPayment);
         params.set('dpt', state.downPaymentType);
@@ -222,12 +230,13 @@ export const useMortgageMath = (initialStateOverride = null) => {
 
         const newUrl = `${window.location.pathname}?${params.toString()}`;
         window.history.replaceState(null, '', newUrl);
-    }, [state.homePrice, state.downPayment, state.downPaymentType, state.annualRate, state.amortizationYears, state.termYears, state.paymentFrequency, state.compounding, state.customPayment, state.startDate, state.prepayments, state.province, state.isToronto, state.isFirstTimeBuyer, state.showStressTest, state.mounted]);
+    }, [state.calculationMode, state.homePrice, state.downPayment, state.downPaymentType, state.annualRate, state.amortizationYears, state.termYears, state.paymentFrequency, state.compounding, state.customPayment, state.startDate, state.prepayments, state.province, state.isToronto, state.isFirstTimeBuyer, state.showStressTest, state.mounted]);
 
     const results = useMemo(() => {
+        const isRenewal = state.calculationMode === 'renewal';
         const mortgageResults = calculateAmortization({
             homePrice: state.homePrice,
-            downPayment: state.downPayment,
+            downPayment: isRenewal ? 0 : state.downPayment,
             downPaymentType: state.downPaymentType,
             annualRate: state.annualRate,
             amortizationYears: state.amortizationYears,
@@ -238,9 +247,10 @@ export const useMortgageMath = (initialStateOverride = null) => {
             startDate: state.startDate,
             prepayments: state.prepayments,
             lumpSums: state.lumpSums,
+            isRenewal,
         });
 
-        const lttResults = calculateLTT(
+        const lttResults = isRenewal ? { totalTax: 0, provincialTax: 0, municipalTax: 0, provincialRebate: 0, municipalRebate: 0 } : calculateLTT(
             state.homePrice,
             state.province,
             state.isToronto,
@@ -251,7 +261,7 @@ export const useMortgageMath = (initialStateOverride = null) => {
             ...mortgageResults,
             ltt: lttResults,
         };
-    }, [state.homePrice, state.downPayment, state.downPaymentType, state.annualRate, state.amortizationYears, state.termYears, state.paymentFrequency, state.compounding, state.customPayment, state.startDate, state.prepayments, state.lumpSums, state.province, state.isToronto, state.isFirstTimeBuyer]);
+    }, [state.calculationMode, state.homePrice, state.downPayment, state.downPaymentType, state.annualRate, state.amortizationYears, state.termYears, state.paymentFrequency, state.compounding, state.customPayment, state.startDate, state.prepayments, state.lumpSums, state.province, state.isToronto, state.isFirstTimeBuyer]);
 
     return { state, dispatch, results };
 };

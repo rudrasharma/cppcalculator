@@ -133,28 +133,31 @@ export const calculateAmortization = ({
     prepayments = {
         monthlyIncrease: 0,
     },
-    lumpSums = [] // Array of { amount, date }
-}) => {
+    lumpSums: [], // Array of { amount, date }
+    isRenewal = false
+    }) => {
     // 1. Calculate Down Payment & Base Mortgage
     const actualDownPayment = downPaymentType === 'percent' 
         ? homePrice * (downPayment / 100) 
         : downPayment;
-    
+
     const baseMortgageAmount = homePrice - actualDownPayment;
     const downPaymentPercent = (actualDownPayment / homePrice) * 100;
 
     // 2. Calculate CMHC Premium
     let cmhcRate = 0;
-    if (downPaymentPercent < 5) {
-        // Technically illegal in Canada, but for math sake we'll cap it at the max tier
-        cmhcRate = 0.0400; 
-    } else if (downPaymentPercent < 10) {
-        cmhcRate = 0.0400;
-    } else if (downPaymentPercent < 15) {
-        cmhcRate = 0.0310;
-    } else if (downPaymentPercent < 20) {
-        cmhcRate = 0.0280;
-    } // 20% or more = 0% CMHC
+    if (!isRenewal) {
+        if (downPaymentPercent < 5) {
+            // Technically illegal in Canada, but for math sake we'll cap it at the max tier
+            cmhcRate = 0.0400; 
+        } else if (downPaymentPercent < 10) {
+            cmhcRate = 0.0400;
+        } else if (downPaymentPercent < 15) {
+            cmhcRate = 0.0310;
+        } else if (downPaymentPercent < 20) {
+            cmhcRate = 0.0280;
+        } // 20% or more = 0% CMHC
+    }
 
     const cmhcPremium = baseMortgageAmount * cmhcRate;
     

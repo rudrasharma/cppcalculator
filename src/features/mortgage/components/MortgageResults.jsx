@@ -10,6 +10,7 @@ import {
     ArrowRightIcon,
     CheckCircleIcon,
     FileTextIcon,
+    RotateCcwIcon,
 } from '../../../components/shared';
 
 export const MortgageResults = ({ results, state }) => {
@@ -23,6 +24,8 @@ export const MortgageResults = ({ results, state }) => {
 
     const timeSavedYears = Math.floor(savings.time);
     const timeSavedMonths = Math.round((savings.time - timeSavedYears) * 12);
+
+    const isRenewal = state.calculationMode === 'renewal';
 
     return (
         <div className="flex flex-col gap-8">
@@ -88,7 +91,7 @@ export const MortgageResults = ({ results, state }) => {
             )}
 
             {/* Savings & Tax Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className={`grid grid-cols-1 md:grid-cols-2 ${isRenewal ? 'lg:grid-cols-2' : 'lg:grid-cols-3'} gap-4`}>
                 {/* Interest Saved */}
                 {(savings.interest > 1 || savings.time > 0.01) && (
                     <div className="bg-emerald-50 p-6 rounded-[2.5rem] border border-emerald-100 flex flex-col items-center text-center">
@@ -105,30 +108,43 @@ export const MortgageResults = ({ results, state }) => {
                     </div>
                 )}
 
-                {/* Land Transfer Tax */}
-                <div className="bg-slate-50 p-6 rounded-[2.5rem] border border-slate-200 flex flex-col items-center text-center">
-                    <div className="bg-slate-100 p-2 rounded-xl text-slate-600 mb-3">
-                        <FileTextIcon size={24} />
+                {/* Land Transfer Tax (Hidden in Renewal) */}
+                {!isRenewal && (
+                    <div className="bg-slate-50 p-6 rounded-[2.5rem] border border-slate-200 flex flex-col items-center text-center">
+                        <div className="bg-slate-100 p-2 rounded-xl text-slate-600 mb-3">
+                            <FileTextIcon size={24} />
+                        </div>
+                        <span className="text-[10px] font-black text-slate-700 uppercase tracking-widest">Land Transfer Tax</span>
+                        <span className="text-2xl font-black text-slate-900 mt-1">${ltt.totalTax.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+                        <div className="flex gap-2 mt-1">
+                            {ltt.provincialRebate > 0 && <span className="text-[9px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100 uppercase">-${ltt.provincialRebate.toLocaleString()} Rebate</span>}
+                            {ltt.municipalRebate > 0 && <span className="text-[9px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100 uppercase">-${ltt.municipalRebate.toLocaleString()} Tor Rebate</span>}
+                        </div>
                     </div>
-                    <span className="text-[10px] font-black text-slate-700 uppercase tracking-widest">Land Transfer Tax</span>
-                    <span className="text-2xl font-black text-slate-900 mt-1">${ltt.totalTax.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
-                    <div className="flex gap-2 mt-1">
-                        {ltt.provincialRebate > 0 && <span className="text-[9px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100 uppercase">-${ltt.provincialRebate.toLocaleString()} Rebate</span>}
-                        {ltt.municipalRebate > 0 && <span className="text-[9px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100 uppercase">-${ltt.municipalRebate.toLocaleString()} Tor Rebate</span>}
-                    </div>
-                </div>
+                )}
 
-                {/* Closing Costs Estimate */}
-                <div className="bg-indigo-50 p-6 rounded-[2.5rem] border border-indigo-100 flex flex-col items-center text-center">
-                    <div className="bg-indigo-100 p-2 rounded-xl text-indigo-600 mb-3">
-                        <CalculatorIcon size={24} />
+                {/* Closing Costs Estimate / Renewal Note */}
+                {!isRenewal ? (
+                    <div className="bg-indigo-50 p-6 rounded-[2.5rem] border border-indigo-100 flex flex-col items-center text-center">
+                        <div className="bg-indigo-100 p-2 rounded-xl text-indigo-600 mb-3">
+                            <CalculatorIcon size={24} />
+                        </div>
+                        <span className="text-[10px] font-black text-indigo-700 uppercase tracking-widest">Est. Cash to Close</span>
+                        <span className="text-2xl font-black text-indigo-900 mt-1">
+                            ${(state.downPayment + ltt.totalTax + 2000).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                        </span>
+                        <p className="text-[9px] font-bold text-indigo-400 mt-1 uppercase leading-tight">Incl. Down Payment, LTT & $2k Legal/Fees</p>
                     </div>
-                    <span className="text-[10px] font-black text-indigo-700 uppercase tracking-widest">Est. Cash to Close</span>
-                    <span className="text-2xl font-black text-indigo-900 mt-1">
-                        ${(results.baseMortgageAmount === principal - results.cmhcPremium ? results.baseMortgageAmount / (state.downPaymentType === 'percent' ? (100 - state.downPayment) / state.downPayment : (state.homePrice - results.baseMortgageAmount) / state.homePrice) : state.downPayment + ltt.totalTax + 2000).toLocaleString(undefined, { maximumFractionDigits: 0 })}
-                    </span>
-                    <p className="text-[9px] font-bold text-indigo-400 mt-1 uppercase leading-tight">Incl. Down Payment, LTT & $2k Legal/Fees</p>
-                </div>
+                ) : (
+                    <div className="bg-indigo-50 p-6 rounded-[2.5rem] border border-indigo-100 flex flex-col items-center text-center">
+                        <div className="bg-indigo-100 p-2 rounded-xl text-indigo-600 mb-3">
+                            <RotateCcwIcon size={24} />
+                        </div>
+                        <span className="text-[10px] font-black text-indigo-700 uppercase tracking-widest">Renewal Mode</span>
+                        <span className="text-sm font-black text-indigo-900 mt-1">No LTT Applied</span>
+                        <p className="text-[9px] font-bold text-indigo-400 mt-1 uppercase leading-tight">Switch to Purchase mode for closing cost estimates.</p>
+                    </div>
+                )}
             </div>
 
             {/* Charts Section */}

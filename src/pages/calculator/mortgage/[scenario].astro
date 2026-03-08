@@ -14,11 +14,14 @@ export function getStaticPaths() {
     }));
 }
 
-const { label, desc, principal, homePrice, downPayment, rate, amortization, freq, lumpSums, province, isToronto, isFirstTimeBuyer, showStressTest } = Astro.props;
+const { label, desc, principal, homePrice, downPayment, rate, amortization, freq, lumpSums, province, isToronto, isFirstTimeBuyer, showStressTest, calculationMode } = Astro.props;
+
+const isRenewal = calculationMode === 'renewal';
 
 const initialStateOverride = {
+    calculationMode: calculationMode || 'purchase',
     homePrice: homePrice || principal,
-    downPayment: downPayment || 0,
+    downPayment: isRenewal ? 0 : (downPayment || 0),
     annualRate: rate,
     amortizationYears: amortization,
     paymentFrequency: freq,
@@ -43,7 +46,7 @@ Object.keys(initialStateOverride).forEach(key => initialStateOverride[key] === u
 
 // SERVER SIDE MATH FOR SEO INJECTIONS
 const safeHomePrice = homePrice || principal || 500000;
-const safeDownPayment = downPayment || 0;
+const safeDownPayment = isRenewal ? 0 : (downPayment || 0);
 const safeRate = rate || 5.0;
 const safeAmortization = amortization || 25;
 const safeFreq = freq || 'monthly';
@@ -54,10 +57,11 @@ const serverResults = calculateAmortization({
     downPayment: safeDownPayment,
     annualRate: safeRate,
     amortizationYears: safeAmortization,
-    paymentFrequency: safeFreq
+    paymentFrequency: safeFreq,
+    isRenewal: isRenewal
 });
 
-const lttResults = calculateLTT(safeHomePrice, safeProvince, isToronto, isFirstTimeBuyer);
+const lttResults = isRenewal ? { totalTax: 0 } : calculateLTT(safeHomePrice, safeProvince, isToronto, isFirstTimeBuyer);
 
 const formatter = new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD', maximumFractionDigits: 0 });
 const monthlyPaymentStr = formatter.format(serverResults.monthlyPayment);
@@ -89,10 +93,12 @@ const faqSchema = {
   "mainEntity": [
     {
       "@type": "Question",
-      "name": `What is the payment on a ${homePriceStr} mortgage at ${safeRate}%?`,
+      "name": isRenewal ? `What will my payment be on renewal for a ${homePriceStr} balance?` : `What is the payment on a ${homePriceStr} mortgage at ${safeRate}%?`,
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": `Assuming a ${safeAmortization}-year amortization and no down payment, the estimated regular payment would be ${monthlyPaymentStr} per ${safeFreq.replace('-', ' ')}.`
+        "text": isRenewal 
+            ? `If you are renewing a ${homePriceStr} balance at ${safeRate}% with ${safeAmortization} years remaining, your estimated regular payment would be ${monthlyPaymentStr} per ${safeFreq.replace('-', ' ')}.`
+            : `Assuming a ${safeAmortization}-year amortization and no down payment, the estimated regular payment would be ${monthlyPaymentStr} per ${safeFreq.replace('-', ' ')}.`
       }
     },
     {
@@ -100,15 +106,15 @@ const faqSchema = {
       "name": `How much interest will I pay on a ${homePriceStr} mortgage?`,
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": `Over the entire ${safeAmortization}-year life of the loan at ${safeRate}%, you would pay approximately ${totalInterestStr} in total interest. This brings the total cost of the mortgage to ${totalCostStr}.`
+        "text": `Over the life of the loan at ${safeRate}%, you would pay approximately ${totalInterestStr} in total interest. This brings the total cost of the mortgage to ${totalCostStr}.`
       }
     },
     {
       "@type": "Question",
-      "name": "How is this Canadian mortgage calculated?",
+      "name": "Does land transfer tax apply to mortgage renewals?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "In Canada, fixed-rate mortgages are legally required to be compounded semi-annually, not monthly. This calculator uses the exact semi-annual compounding formula to ensure the payment matches what a Canadian bank would quote."
+        "text": "No, Land Transfer Tax (LTT) generally only applies when the title of a property changes hands (a purchase). For a standard mortgage renewal or refinance with the same owner, you do not need to pay LTT again."
       }
     }
   ]
@@ -136,7 +142,7 @@ const faqSchema = {
       <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 border border-slate-200">
         <div class="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" aria-hidden="true"></div>
         <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">
-          Canadian Compounding Rules
+          {isRenewal ? 'Mortgage Renewal Mode' : 'Canadian Compounding Rules'}
         </span>
       </div>
     </div>
@@ -151,28 +157,43 @@ const faqSchema = {
     
     <div>
         <h2 class="text-xl font-black text-slate-900 mb-4 tracking-tight">Scenario Breakdown</h2>
+        {isRenewal ? (
+            <>
+                <p class="mb-4">
+                If you are renewing or refinancing a remaining mortgage balance of <strong>{homePriceStr}</strong> at a current interest rate of <strong>{safeRate}%</strong>, your new estimated payment will be <strong>{monthlyPaymentStr}</strong> ({safeFreq.replace('-', ' ')}).
+                </p>
+                <p class="mb-4">
+                Since this is a renewal and not a new purchase, <strong>Land Transfer Tax (LTT) does not apply</strong>. Your primary costs will be the principal and interest payments, along with any potential legal or appraisal fees if you are switching lenders (typically $1,000 - $1,500).
+                </p>
+            </>
+        ) : (
+            <>
+                <p class="mb-4">
+                Based on the current inputs, if you are purchasing a <strong>{homePriceStr}</strong> home in <strong>{provinceName}{isToronto ? ' (Toronto)' : ''}</strong> with an interest rate of <strong>{safeRate}%</strong>, your estimated base payment will be <strong>{monthlyPaymentStr}</strong> ({safeFreq.replace('-', ' ')}). 
+                </p>
+                <p class="mb-4">
+                Beyond the mortgage payment, your estimated <strong>Land Transfer Tax (LTT)</strong> for this transaction is <strong>{lttStr}</strong>. 
+                {isFirstTimeBuyer ? 'This includes first-time home buyer rebates applied at the provincial' + (isToronto ? ' and municipal' : '') + ' level.' : 'If you are a first-time home buyer, you may be eligible for significant rebates on this tax.'}
+                </p>
+            </>
+        )}
         <p class="mb-4">
-        Based on the current inputs, if you are purchasing a <strong>{homePriceStr}</strong> home in <strong>{provinceName}{isToronto ? ' (Toronto)' : ''}</strong> with an interest rate of <strong>{safeRate}%</strong>, your estimated base payment will be <strong>{monthlyPaymentStr}</strong> ({safeFreq.replace('-', ' ')}). 
-        </p>
-        <p class="mb-4">
-        Beyond the mortgage payment, your estimated <strong>Land Transfer Tax (LTT)</strong> for this transaction is <strong>{lttStr}</strong>. 
-        {isFirstTimeBuyer ? 'This includes first-time home buyer rebates applied at the provincial' + (isToronto ? ' and municipal' : '') + ' level.' : 'If you are a first-time home buyer, you may be eligible for significant rebates on this tax.'}
-        </p>
-        <p class="mb-4">
-        Over the course of your <strong>{safeAmortization}-year</strong> amortization, you can expect to pay a total of <strong>{totalInterestStr}</strong> in interest to the lender, bringing your true total cost of ownership to <strong>{totalCostStr}</strong> (excluding property taxes and maintenance).
+        Over the remaining <strong>{safeAmortization} years</strong> of this mortgage, you can expect to pay a total of <strong>{totalInterestStr}</strong> in interest, assuming the rate remains constant.
         </p>
         <p>
-        Use the prepayments tab in the calculator above to see how adding small monthly increases or annual lump-sum payments can drastically cut down this interest and shave years off your mortgage.
+        Use the prepayments tab in the calculator above to see how adding small monthly increases or annual lump-sum payments can drastically cut down this interest and help you become debt-free faster.
         </p>
     </div>
 
     <div>
         <h2 class="text-xl font-black text-slate-900 mb-4 tracking-tight">Frequently Asked Questions</h2>
         <div class="space-y-4">
-            <div class="bg-slate-50 rounded-2xl p-5 border border-slate-100">
-                <h3 class="font-bold text-slate-900 mb-2">How much is the land transfer tax in {provinceName}?</h3>
-                <p class="text-slate-600 text-sm">For a {homePriceStr} home in {provinceName}, the estimated tax is {lttStr}. This varies based on whether you are a first-time buyer and if the property is located in a city with additional municipal taxes like Toronto.</p>
-            </div>
+            {!isRenewal && (
+                <div class="bg-slate-50 rounded-2xl p-5 border border-slate-100">
+                    <h3 class="font-bold text-slate-900 mb-2">How much is the land transfer tax in {provinceName}?</h3>
+                    <p class="text-slate-600 text-sm">For a {homePriceStr} home in {provinceName}, the estimated tax is {lttStr}. This varies based on whether you are a first-time buyer and if the property is located in a city with additional municipal taxes like Toronto.</p>
+                </div>
+            )}
             {faqSchema.mainEntity.map((faq) => (
                 <div class="bg-slate-50 rounded-2xl p-5 border border-slate-100">
                     <h3 class="font-bold text-slate-900 mb-2">{faq.name}</h3>
