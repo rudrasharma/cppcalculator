@@ -133,7 +133,7 @@ export const calculateAmortization = ({
     prepayments = {
         monthlyIncrease: 0,
     },
-    lumpSums: [], // Array of { amount, date }
+    lumpSums = [], // Array of { amount, date }
     isRenewal = false
     }) => {
     // 1. Calculate Down Payment & Base Mortgage
