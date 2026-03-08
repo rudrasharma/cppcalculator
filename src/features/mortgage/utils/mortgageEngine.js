@@ -258,6 +258,7 @@ export const calculateAmortization = ({
         cmhcPremium,
         principal, // Total loan size
         baseMortgageAmount,
+        actualDownPayment,
         downPaymentPercent,
         balanceAtEndOfTerm,
         stressTest: {

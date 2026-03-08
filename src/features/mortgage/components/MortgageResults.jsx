@@ -14,7 +14,7 @@ import {
 } from '../../../components/shared';
 
 export const MortgageResults = ({ results, state }) => {
-    const { monthlyPayment, totalInterest, totalCost, yearsToPayOff, schedule, savings, cmhcPremium, principal, balanceAtEndOfTerm, ltt, stressTest } = results;
+    const { monthlyPayment, totalInterest, totalCost, yearsToPayOff, schedule, savings, cmhcPremium, principal, balanceAtEndOfTerm, ltt, stressTest, actualDownPayment } = results;
     const { amortizationYears, paymentFrequency, termYears, showStressTest } = state;
 
     const formattedPayment = monthlyPayment.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -131,7 +131,7 @@ export const MortgageResults = ({ results, state }) => {
                         </div>
                         <span className="text-[10px] font-black text-indigo-700 uppercase tracking-widest">Est. Cash to Close</span>
                         <span className="text-2xl font-black text-indigo-900 mt-1">
-                            ${(state.downPayment + ltt.totalTax + 2000).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                            ${(actualDownPayment + ltt.totalTax + 2000).toLocaleString(undefined, { maximumFractionDigits: 0 })}
                         </span>
                         <p className="text-[9px] font-bold text-indigo-400 mt-1 uppercase leading-tight">Incl. Down Payment, LTT & $2k Legal/Fees</p>
                     </div>
