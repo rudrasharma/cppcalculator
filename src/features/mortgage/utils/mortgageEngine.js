@@ -120,9 +120,12 @@ const getPaymentDate = (startDateStr, paymentNumber, frequency) => {
  * Main calculation engine for mortgage amortization with prepayments.
  */
 export const calculateAmortization = ({
-    principal,
-    annualRate,
-    amortizationYears,
+    homePrice = 500000,
+    downPayment = 100000,
+    downPaymentType = 'dollar', // 'dollar' or 'percent'
+    annualRate = 5.0,
+    amortizationYears = 25,
+    termYears = 5,
     paymentFrequency = PAYMENT_FREQUENCIES.MONTHLY,
     compounding = COMPOUNDING_PERIODS.SEMI_ANNUAL,
     customPayment = 0,
@@ -132,8 +135,34 @@ export const calculateAmortization = ({
     },
     lumpSums = [] // Array of { amount, date }
 }) => {
-    const periodicRate = getPeriodicInterestRate(annualRate, paymentFrequency, compounding);
-    const standardPayment = calculatePeriodicPayment(principal, annualRate, amortizationYears, paymentFrequency, compounding);
+    // 1. Calculate Down Payment & Base Mortgage
+    const actualDownPayment = downPaymentType === 'percent' 
+        ? homePrice * (downPayment / 100) 
+        : downPayment;
+    
+    const baseMortgageAmount = homePrice - actualDownPayment;
+    const downPaymentPercent = (actualDownPayment / homePrice) * 100;
+
+    // 2. Calculate CMHC Premium
+    let cmhcRate = 0;
+    if (downPaymentPercent < 5) {
+        // Technically illegal in Canada, but for math sake we'll cap it at the max tier
+        cmhcRate = 0.0400; 
+    } else if (downPaymentPercent < 10) {
+        cmhcRate = 0.0400;
+    } else if (downPaymentPercent < 15) {
+        cmhcRate = 0.0310;
+    } else if (downPaymentPercent < 20) {
+        cmhcRate = 0.0280;
+    } // 20% or more = 0% CMHC
+
+    const cmhcPremium = baseMortgageAmount * cmhcRate;
+    
+    // Total principal includes the CMHC premium
+    const principal = baseMortgageAmount + cmhcPremium;
+
+    const periodicRate = getPeriodicInterestRate(annualRate / 100, paymentFrequency, compounding);
+    const standardPayment = calculatePeriodicPayment(principal, annualRate / 100, amortizationYears, paymentFrequency, compounding);
     const basePayment = customPayment > 0 ? customPayment : standardPayment;
     const paymentsPerYear = PAYMENTS_PER_YEAR[paymentFrequency];
     
@@ -142,6 +171,9 @@ export const calculateAmortization = ({
     let totalPrincipal = 0;
     const schedule = [];
     let paymentNumber = 0;
+    
+    const termPaymentTarget = termYears * paymentsPerYear;
+    let balanceAtEndOfTerm = 0;
 
     // Track which lump sums have been applied
     let pendingLumpSums = lumpSums.map(ls => ({ 
@@ -178,6 +210,10 @@ export const calculateAmortization = ({
         totalInterest += interestPayment;
         totalPrincipal += actualPrincipalPaid;
 
+        if (paymentNumber === termPaymentTarget) {
+            balanceAtEndOfTerm = Math.max(0, balance);
+        }
+
         // Yearly summary for the schedule table
         if (paymentNumber % paymentsPerYear === 0 || balance <= 0) {
             schedule.push({
@@ -189,8 +225,13 @@ export const calculateAmortization = ({
         }
     }
 
+    // If they pay it off before the term ends
+    if (paymentNumber < termPaymentTarget) {
+        balanceAtEndOfTerm = 0;
+    }
+
     // Calculate baseline (without prepayments) for comparison
-    const baselineResults = calculateBaseline(principal, annualRate, amortizationYears, paymentFrequency, compounding);
+    const baselineResults = calculateBaseline(principal, annualRate / 100, amortizationYears, paymentFrequency, compounding);
 
     return {
         monthlyPayment: basePayment,
@@ -199,6 +240,11 @@ export const calculateAmortization = ({
         totalCost: totalInterest + totalPrincipal,
         yearsToPayOff: paymentNumber / paymentsPerYear,
         schedule,
+        cmhcPremium,
+        principal, // Total loan size
+        baseMortgageAmount,
+        downPaymentPercent,
+        balanceAtEndOfTerm,
         savings: {
             interest: Math.max(0, baselineResults.totalInterest - totalInterest),
             time: Math.max(0, amortizationYears - (paymentNumber / paymentsPerYear)),

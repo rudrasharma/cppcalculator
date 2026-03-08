@@ -28,7 +28,7 @@ const COMPOUNDING_OPTIONS = [
 ];
 
 export const MortgageForm = ({ state, dispatch }) => {
-    const { principal, annualRate, amortizationYears, paymentFrequency, compounding, customPayment, startDate, prepayments, lumpSums } = state;
+    const { homePrice, downPayment, downPaymentType, annualRate, amortizationYears, termYears, paymentFrequency, compounding, customPayment, startDate, prepayments, lumpSums } = state;
 
     return (
         <div className="space-y-6">
@@ -37,11 +37,63 @@ export const MortgageForm = ({ state, dispatch }) => {
 
                 <div className="relative z-10 space-y-5">
                     <MoneyInput
-                        label="Mortgage Amount"
-                        subLabel="Total Loan Principal"
-                        value={principal}
-                        onChange={(val) => dispatch({ type: 'SET_PRINCIPAL', payload: parseFloat(val) || 0 })}
+                        label="Asking Price"
+                        subLabel="Property Purchase Price"
+                        value={homePrice}
+                        onChange={(val) => dispatch({ type: 'SET_HOME_PRICE', payload: parseFloat(val) || 0 })}
                     />
+
+                    <div className="space-y-1.5">
+                        <div className="flex justify-between items-center mb-1">
+                            <label className="text-xs font-black text-slate-700 block uppercase tracking-tighter">Down Payment</label>
+                            <div className="flex gap-1 bg-slate-100 p-1 rounded-lg">
+                                <button
+                                    onClick={() => {
+                                        if (downPaymentType !== 'dollar') {
+                                            const newDollarAmount = homePrice * (downPayment / 100);
+                                            dispatch({ type: 'SET_DOWN_PAYMENT', payload: Math.round(newDollarAmount) });
+                                            dispatch({ type: 'SET_DOWN_PAYMENT_TYPE', payload: 'dollar' });
+                                        }
+                                    }}
+                                    className={`px-3 py-1 text-[10px] font-bold uppercase rounded-md transition-all ${downPaymentType === 'dollar' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500 hover:text-slate-700'}`}
+                                >
+                                    $ CAD
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        if (downPaymentType !== 'percent') {
+                                            const newPercentAmount = (downPayment / homePrice) * 100;
+                                            dispatch({ type: 'SET_DOWN_PAYMENT', payload: parseFloat(newPercentAmount.toFixed(2)) });
+                                            dispatch({ type: 'SET_DOWN_PAYMENT_TYPE', payload: 'percent' });
+                                        }
+                                    }}
+                                    className={`px-3 py-1 text-[10px] font-bold uppercase rounded-md transition-all ${downPaymentType === 'percent' ? 'bg-white shadow-sm text-indigo-600' : 'text-slate-500 hover:text-slate-700'}`}
+                                >
+                                    % Percent
+                                </button>
+                            </div>
+                        </div>
+                        <div className="relative group">
+                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold group-focus-within:text-indigo-500 transition-colors pointer-events-none" aria-hidden="true">{downPaymentType === 'dollar' ? '$' : '%'}</span>
+                            <input
+                                type="text"
+                                inputMode="decimal"
+                                value={downPayment || ''}
+                                onChange={(e) => {
+                                    const val = e.target.value;
+                                    if (val === '' || /^\d*\.?\d*$/.test(val)) {
+                                        dispatch({ type: 'SET_DOWN_PAYMENT', payload: val === '' ? 0 : parseFloat(val) });
+                                    }
+                                }}
+                                className="w-full pl-8 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl font-mono text-lg font-black focus:ring-2 focus:ring-indigo-500 outline-none transition-all shadow-sm text-slate-900"
+                            />
+                        </div>
+                        <p className="text-[10px] font-medium text-slate-400 text-right mt-1">
+                            {downPaymentType === 'percent' 
+                                ? `$${(homePrice * (downPayment / 100)).toLocaleString('en-CA', { maximumFractionDigits: 0 })}`
+                                : `${((downPayment / homePrice) * 100 || 0).toFixed(1)}%`}
+                        </p>
+                    </div>
 
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1.5">
@@ -92,6 +144,27 @@ export const MortgageForm = ({ state, dispatch }) => {
 
                         <div className="space-y-1.5">
                             <label className="text-xs font-black text-slate-700 block uppercase tracking-tighter">
+                                Mortgage Term
+                            </label>
+                            <NativeSelect
+                                value={termYears}
+                                onChange={(e) => dispatch({ type: 'SET_TERM_YEARS', payload: parseInt(e.target.value) })}
+                                options={[
+                                    { label: '1 Year', value: 1 },
+                                    { label: '2 Years', value: 2 },
+                                    { label: '3 Years', value: 3 },
+                                    { label: '4 Years', value: 4 },
+                                    { label: '5 Years', value: 5 },
+                                    { label: '7 Years', value: 7 },
+                                    { label: '10 Years', value: 10 },
+                                ]}
+                            />
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-1.5">
+                            <label className="text-xs font-black text-slate-700 block uppercase tracking-tighter">
                                 Payment Frequency
                             </label>
                             <NativeSelect
@@ -100,9 +173,7 @@ export const MortgageForm = ({ state, dispatch }) => {
                                 options={FREQUENCY_OPTIONS}
                             />
                         </div>
-                    </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-1.5">
                             <label className="text-xs font-black text-slate-700 block uppercase tracking-tighter">
                                 Compounding
@@ -113,27 +184,27 @@ export const MortgageForm = ({ state, dispatch }) => {
                                 options={COMPOUNDING_OPTIONS}
                             />
                         </div>
+                    </div>
 
-                        <div className="space-y-1.5">
-                            <label className="text-xs font-black text-slate-700 block uppercase tracking-tighter">
-                                Custom Payment
-                            </label>
-                            <div className="relative group">
-                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold group-focus-within:text-indigo-500 transition-colors pointer-events-none" aria-hidden="true">$</span>
-                                <input
-                                    type="text"
-                                    inputMode="decimal"
-                                    value={customPayment || ''}
-                                    placeholder="Optional"
-                                    onChange={(e) => {
-                                        const val = e.target.value;
-                                        if (val === '' || /^\d*\.?\d*$/.test(val)) {
-                                            dispatch({ type: 'SET_CUSTOM_PAYMENT', payload: val === '' ? 0 : parseFloat(val) });
-                                        }
-                                    }}
-                                    className="w-full pl-8 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl font-mono text-sm font-black focus:ring-2 focus:ring-indigo-500 outline-none transition-all shadow-sm text-slate-900"
-                                />
-                            </div>
+                    <div className="space-y-1.5">
+                        <label className="text-xs font-black text-slate-700 block uppercase tracking-tighter">
+                            Custom Payment
+                        </label>
+                        <div className="relative group">
+                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold group-focus-within:text-indigo-500 transition-colors pointer-events-none" aria-hidden="true">$</span>
+                            <input
+                                type="text"
+                                inputMode="decimal"
+                                value={customPayment || ''}
+                                placeholder="Optional"
+                                onChange={(e) => {
+                                    const val = e.target.value;
+                                    if (val === '' || /^\d*\.?\d*$/.test(val)) {
+                                        dispatch({ type: 'SET_CUSTOM_PAYMENT', payload: val === '' ? 0 : parseFloat(val) });
+                                    }
+                                }}
+                                className="w-full pl-8 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl font-mono text-sm font-black focus:ring-2 focus:ring-indigo-500 outline-none transition-all shadow-sm text-slate-900"
+                            />
                         </div>
                     </div>
                 </div>

@@ -11,12 +11,13 @@ import {
 } from '../../../components/shared';
 
 export const MortgageResults = ({ results, state }) => {
-    const { monthlyPayment, totalInterest, totalCost, yearsToPayOff, schedule, savings } = results;
-    const { amortizationYears, paymentFrequency } = state;
+    const { monthlyPayment, totalInterest, totalCost, yearsToPayOff, schedule, savings, cmhcPremium, principal, balanceAtEndOfTerm } = results;
+    const { amortizationYears, paymentFrequency, termYears } = state;
 
     const formattedPayment = monthlyPayment.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     const formattedInterest = totalInterest.toLocaleString(undefined, { maximumFractionDigits: 0 });
     const formattedCost = totalCost.toLocaleString(undefined, { maximumFractionDigits: 0 });
+    const formattedPrincipal = principal.toLocaleString(undefined, { maximumFractionDigits: 0 });
 
     const timeSavedYears = Math.floor(savings.time);
     const timeSavedMonths = Math.round((savings.time - timeSavedYears) * 12);
@@ -40,18 +41,23 @@ export const MortgageResults = ({ results, state }) => {
                         {formattedPayment}
                     </div>
 
-                    <div className="mt-6 flex flex-wrap justify-center gap-4">
-                        <div className="bg-white/10 px-4 py-2 rounded-2xl backdrop-blur-sm border border-white/5 flex flex-col items-center">
-                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Interest</span>
-                            <span className="text-lg font-bold font-mono text-white">${formattedInterest}</span>
+                    <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div className="bg-white/5 p-4 rounded-2xl border border-white/10 flex flex-col items-center">
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">Total Loan</span>
+                            <span className="text-lg font-bold font-mono text-white mt-1">${formattedPrincipal}</span>
+                            {cmhcPremium > 0 && <span className="text-[9px] text-rose-400 mt-1 uppercase font-bold text-center border border-rose-500/20 bg-rose-500/10 px-2 py-0.5 rounded-md">Includes ${cmhcPremium.toLocaleString(undefined, { maximumFractionDigits: 0 })} CMHC</span>}
                         </div>
-                        <div className="bg-white/10 px-4 py-2 rounded-2xl backdrop-blur-sm border border-white/5 flex flex-col items-center">
-                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Total Cost</span>
-                            <span className="text-lg font-bold font-mono text-white">${formattedCost}</span>
+                        <div className="bg-white/5 p-4 rounded-2xl border border-white/10 flex flex-col items-center">
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">End of Term ({termYears}yr)</span>
+                            <span className="text-lg font-bold font-mono text-white mt-1">${balanceAtEndOfTerm.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
                         </div>
-                        <div className="bg-white/10 px-4 py-2 rounded-2xl backdrop-blur-sm border border-white/5 flex flex-col items-center">
-                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Payoff Time</span>
-                            <span className="text-lg font-bold font-mono text-white">
+                        <div className="bg-white/5 p-4 rounded-2xl border border-white/10 flex flex-col items-center justify-center">
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">Total Interest</span>
+                            <span className="text-lg font-bold font-mono text-white mt-1">${formattedInterest}</span>
+                        </div>
+                        <div className="bg-white/5 p-4 rounded-2xl border border-white/10 flex flex-col items-center justify-center">
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">Payoff Time</span>
+                            <span className="text-lg font-bold font-mono text-white mt-1">
                                 {Math.floor(yearsToPayOff)}yr {Math.round((yearsToPayOff % 1) * 12)}mo
                             </span>
                         </div>

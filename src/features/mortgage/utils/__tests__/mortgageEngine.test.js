@@ -1,15 +1,17 @@
 import { calculateAmortization, calculatePeriodicPayment, PAYMENT_FREQUENCIES, COMPOUNDING_PERIODS } from '../mortgageEngine';
 
 describe('mortgageEngine', () => {
-  const principal = 500000;
-  const annualRate = 0.05;
+  const principal = 500000; // For calculatePeriodicPayment tests
+  const homePrice = 625000;
+  const downPayment = 125000;
+  const annualRate = 5; // engine divides by 100
   const amortizationYears = 25;
 
   describe('calculatePeriodicPayment', () => {
     it('calculates correct monthly payment for Canadian fixed rate (semi-annual compounding)', () => {
       const payment = calculatePeriodicPayment(
         principal,
-        annualRate,
+        0.05, // calculatePeriodicPayment still takes raw decimal rate
         amortizationYears,
         PAYMENT_FREQUENCIES.MONTHLY,
         COMPOUNDING_PERIODS.SEMI_ANNUAL
@@ -21,14 +23,14 @@ describe('mortgageEngine', () => {
     it('calculates correct accelerated bi-weekly payment', () => {
       const monthlyPayment = calculatePeriodicPayment(
         principal,
-        annualRate,
+        0.05,
         amortizationYears,
         PAYMENT_FREQUENCIES.MONTHLY,
         COMPOUNDING_PERIODS.SEMI_ANNUAL
       );
       const acceleratedBiWeekly = calculatePeriodicPayment(
         principal,
-        annualRate,
+        0.05,
         amortizationYears,
         PAYMENT_FREQUENCIES.ACCELERATED_BI_WEEKLY,
         COMPOUNDING_PERIODS.SEMI_ANNUAL
@@ -40,7 +42,8 @@ describe('mortgageEngine', () => {
   describe('calculateAmortization', () => {
     it('calculates correct total interest without prepayments', () => {
       const result = calculateAmortization({
-        principal,
+        homePrice,
+        downPayment,
         annualRate,
         amortizationYears,
         paymentFrequency: PAYMENT_FREQUENCIES.MONTHLY,
@@ -55,7 +58,8 @@ describe('mortgageEngine', () => {
 
     it('reduces years to pay off with monthly increase', () => {
       const result = calculateAmortization({
-        principal,
+        homePrice,
+        downPayment,
         annualRate,
         amortizationYears,
         paymentFrequency: PAYMENT_FREQUENCIES.MONTHLY,
@@ -71,7 +75,8 @@ describe('mortgageEngine', () => {
 
     it('reduces years to pay off with lump sum', () => {
       const result = calculateAmortization({
-        principal,
+        homePrice,
+        downPayment,
         annualRate,
         amortizationYears,
         paymentFrequency: PAYMENT_FREQUENCIES.MONTHLY,
@@ -88,7 +93,8 @@ describe('mortgageEngine', () => {
 
     it('handles multiple lump sums correctly', () => {
       const result = calculateAmortization({
-        principal,
+        homePrice,
+        downPayment,
         annualRate,
         amortizationYears,
         paymentFrequency: PAYMENT_FREQUENCIES.MONTHLY,

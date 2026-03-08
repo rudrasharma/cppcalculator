@@ -5,6 +5,7 @@ import { MortgageResults } from './MortgageResults';
 import { CalculatorIcon, InfoIcon, RotateCcwIcon } from '../../../components/shared';
 
 export default function MortgageCalculator({ isVisible, initialStateOverride }) {
+    console.log("MortgageCalculator mounted with override:", initialStateOverride);
     const { state, dispatch, results } = useMortgageMath(initialStateOverride);
 
     if (!isVisible) return null;

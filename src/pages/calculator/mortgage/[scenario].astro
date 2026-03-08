@@ -3,6 +3,8 @@ import BaseLayout from '../../../layouts/BaseLayout.astro';
 import MortgageCalculator from '../../../features/mortgage/components/MortgageCalculator.jsx';
 import { MORTGAGE_SCENARIOS } from '../../../data/seo-scenarios.js';
 
+export const prerender = true;
+
 export function getStaticPaths() {
     return MORTGAGE_SCENARIOS.map(s => ({
         params: { scenario: s.slug },
@@ -13,7 +15,8 @@ export function getStaticPaths() {
 const { label, desc, principal, rate, amortization, freq, lumpSums } = Astro.props;
 
 const initialStateOverride = {
-    principal,
+    homePrice: principal,
+    downPayment: 0,
     annualRate: rate,
     amortizationYears: amortization,
     paymentFrequency: freq,
@@ -76,7 +79,7 @@ const schema = {
   </header>
 
   <main class="flex-grow flex flex-col justify-center w-full animate-fade-in relative z-10">
-      <MortgageCalculator client:load isVisible={true} initialStateOverride={initialStateOverride} />
+      <MortgageCalculator key={Astro.params.scenario} client:load isVisible={true} initialStateOverride={initialStateOverride} />
   </main>
 
   {/* SEO CONTENT SECTION */}

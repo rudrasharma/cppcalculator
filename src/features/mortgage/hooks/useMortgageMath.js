@@ -8,9 +8,12 @@ nextYear.setFullYear(today.getFullYear() + 1);
 const defaultLumpSumDate = nextYear.toISOString().split('T')[0];
 
 const initialState = {
-    principal: 500000,
+    homePrice: 500000,
+    downPayment: 100000,
+    downPaymentType: 'dollar', // 'dollar' or 'percent'
     annualRate: 5.0,
     amortizationYears: 25,
+    termYears: 5,
     paymentFrequency: PAYMENT_FREQUENCIES.MONTHLY,
     compounding: COMPOUNDING_PERIODS.SEMI_ANNUAL,
     customPayment: 0,
@@ -24,12 +27,18 @@ const initialState = {
 
 function mortgageReducer(state, action) {
     switch (action.type) {
-        case 'SET_PRINCIPAL':
-            return { ...state, principal: action.payload };
+        case 'SET_HOME_PRICE':
+            return { ...state, homePrice: action.payload };
+        case 'SET_DOWN_PAYMENT':
+            return { ...state, downPayment: action.payload };
+        case 'SET_DOWN_PAYMENT_TYPE':
+            return { ...state, downPaymentType: action.payload };
         case 'SET_RATE':
             return { ...state, annualRate: action.payload };
         case 'SET_AMORTIZATION':
             return { ...state, amortizationYears: action.payload };
+        case 'SET_TERM_YEARS':
+            return { ...state, termYears: action.payload };
         case 'SET_FREQUENCY':
             return { ...state, paymentFrequency: action.payload };
         case 'SET_COMPOUNDING':
@@ -60,6 +69,8 @@ function mortgageReducer(state, action) {
                     ls.id === action.payload.id ? { ...ls, [action.payload.field]: action.payload.value } : ls
                 )
             };
+        case 'SET_STATE':
+            return { ...state, ...action.payload };
         case 'SET_MOUNTED':
             return { ...state, mounted: action.payload };
         default:
@@ -71,18 +82,33 @@ export const useMortgageMath = (initialStateOverride = null) => {
     // Merge any server-side overrides with the default state
     const startingState = useMemo(() => {
         if (!initialStateOverride) return initialState;
+        
+        // Handle migration from old 'principal' overrrides if they exist in pSEO data
+        let override = { ...initialStateOverride };
+        if (override.principal && !override.homePrice) {
+            override.homePrice = override.principal;
+            override.downPayment = 0; // If they passed raw principal, assume no downpayment to hit exact number
+        }
+
         return {
             ...initialState,
-            ...initialStateOverride,
+            ...override,
             prepayments: {
                 ...initialState.prepayments,
-                ...(initialStateOverride.prepayments || {})
+                ...(override.prepayments || {})
             },
-            lumpSums: initialStateOverride.lumpSums || initialState.lumpSums
+            lumpSums: override.lumpSums || initialState.lumpSums
         };
     }, [initialStateOverride]);
 
     const [state, dispatch] = useReducer(mortgageReducer, startingState);
+
+    // Sync state if the server override changes (e.g. Astro View Transitions between pages)
+    useEffect(() => {
+        if (initialStateOverride) {
+            dispatch({ type: 'SET_STATE', payload: startingState });
+        }
+    }, [startingState]);
 
     useEffect(() => {
         dispatch({ type: 'SET_MOUNTED', payload: true });
@@ -94,9 +120,29 @@ export const useMortgageMath = (initialStateOverride = null) => {
         // Initial load from URL
         const params = new URLSearchParams(window.location.search);
         
-        if (params.has('p')) {
+        if (params.has('hp')) {
+            const val = parseFloat(params.get('hp'));
+            if (!isNaN(val)) dispatch({ type: 'SET_HOME_PRICE', payload: val });
+        }
+        // Backwards compatibility for old URLs
+        else if (params.has('p')) {
             const val = parseFloat(params.get('p'));
-            if (!isNaN(val)) dispatch({ type: 'SET_PRINCIPAL', payload: val });
+            if (!isNaN(val)) {
+                dispatch({ type: 'SET_HOME_PRICE', payload: val });
+                dispatch({ type: 'SET_DOWN_PAYMENT', payload: 0 });
+            }
+        }
+
+        if (params.has('dp')) {
+            const val = parseFloat(params.get('dp'));
+            if (!isNaN(val)) dispatch({ type: 'SET_DOWN_PAYMENT', payload: val });
+        }
+        if (params.has('dpt')) {
+            dispatch({ type: 'SET_DOWN_PAYMENT_TYPE', payload: params.get('dpt') });
+        }
+        if (params.has('ty')) {
+            const val = parseInt(params.get('ty'), 10);
+            if (!isNaN(val)) dispatch({ type: 'SET_TERM_YEARS', payload: val });
         }
         if (params.has('r')) {
             const val = parseFloat(params.get('r'));
@@ -123,16 +169,18 @@ export const useMortgageMath = (initialStateOverride = null) => {
             const val = parseFloat(params.get('mi'));
             if (!isNaN(val)) dispatch({ type: 'SET_PREPAYMENT', payload: { monthlyIncrease: val } });
         }
-        // Removed complex lump sums from URL sync to keep URLs manageable
     }, []);
 
     useEffect(() => {
         if (!state.mounted) return;
         
         const params = new URLSearchParams(window.location.search);
-        params.set('p', state.principal);
+        params.set('hp', state.homePrice);
+        params.set('dp', state.downPayment);
+        params.set('dpt', state.downPaymentType);
         params.set('r', state.annualRate);
         params.set('a', state.amortizationYears);
+        params.set('ty', state.termYears);
         params.set('f', state.paymentFrequency);
         params.set('c', state.compounding);
         if (state.customPayment > 0) params.set('cp', state.customPayment);
@@ -144,13 +192,16 @@ export const useMortgageMath = (initialStateOverride = null) => {
 
         const newUrl = `${window.location.pathname}?${params.toString()}`;
         window.history.replaceState(null, '', newUrl);
-    }, [state.principal, state.annualRate, state.amortizationYears, state.paymentFrequency, state.compounding, state.customPayment, state.startDate, state.prepayments, state.mounted]);
+    }, [state.homePrice, state.downPayment, state.downPaymentType, state.annualRate, state.amortizationYears, state.termYears, state.paymentFrequency, state.compounding, state.customPayment, state.startDate, state.prepayments, state.mounted]);
 
     const results = useMemo(() => {
         return calculateAmortization({
-            principal: state.principal,
-            annualRate: state.annualRate / 100,
+            homePrice: state.homePrice,
+            downPayment: state.downPayment,
+            downPaymentType: state.downPaymentType,
+            annualRate: state.annualRate, // Engine now divides by 100 internally
             amortizationYears: state.amortizationYears,
+            termYears: state.termYears,
             paymentFrequency: state.paymentFrequency,
             compounding: state.compounding,
             customPayment: state.customPayment,
@@ -158,7 +209,7 @@ export const useMortgageMath = (initialStateOverride = null) => {
             prepayments: state.prepayments,
             lumpSums: state.lumpSums,
         });
-    }, [state.principal, state.annualRate, state.amortizationYears, state.paymentFrequency, state.compounding, state.customPayment, state.startDate, state.prepayments, state.lumpSums]);
+    }, [state.homePrice, state.downPayment, state.downPaymentType, state.annualRate, state.amortizationYears, state.termYears, state.paymentFrequency, state.compounding, state.customPayment, state.startDate, state.prepayments, state.lumpSums]);
 
     return { state, dispatch, results };
 };
