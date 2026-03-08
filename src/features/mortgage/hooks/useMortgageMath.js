@@ -67,22 +67,62 @@ function mortgageReducer(state, action) {
     }
 }
 
-export const useMortgageMath = () => {
-    const [state, dispatch] = useReducer(mortgageReducer, initialState);
+export const useMortgageMath = (initialStateOverride = null) => {
+    // Merge any server-side overrides with the default state
+    const startingState = useMemo(() => {
+        if (!initialStateOverride) return initialState;
+        return {
+            ...initialState,
+            ...initialStateOverride,
+            prepayments: {
+                ...initialState.prepayments,
+                ...(initialStateOverride.prepayments || {})
+            },
+            lumpSums: initialStateOverride.lumpSums || initialState.lumpSums
+        };
+    }, [initialStateOverride]);
+
+    const [state, dispatch] = useReducer(mortgageReducer, startingState);
 
     useEffect(() => {
         dispatch({ type: 'SET_MOUNTED', payload: true });
         
+        // If an override was provided by the server (pSEO), don't override it with empty URL params on first mount.
+        // The subsequent useEffect will push this server state to the URL.
+        if (initialStateOverride) return;
+
         // Initial load from URL
         const params = new URLSearchParams(window.location.search);
-        if (params.get('p')) dispatch({ type: 'SET_PRINCIPAL', payload: parseFloat(params.get('p')) });
-        if (params.get('r')) dispatch({ type: 'SET_RATE', payload: parseFloat(params.get('r')) });
-        if (params.get('a')) dispatch({ type: 'SET_AMORTIZATION', payload: parseInt(params.get('a')) });
-        if (params.get('f')) dispatch({ type: 'SET_FREQUENCY', payload: params.get('f') });
-        if (params.get('c')) dispatch({ type: 'SET_COMPOUNDING', payload: params.get('c') });
-        if (params.get('cp')) dispatch({ type: 'SET_CUSTOM_PAYMENT', payload: parseFloat(params.get('cp')) });
-        if (params.get('sd')) dispatch({ type: 'SET_START_DATE', payload: params.get('sd') });
-        if (params.get('mi')) dispatch({ type: 'SET_PREPAYMENT', payload: { monthlyIncrease: parseFloat(params.get('mi')) } });
+        
+        if (params.has('p')) {
+            const val = parseFloat(params.get('p'));
+            if (!isNaN(val)) dispatch({ type: 'SET_PRINCIPAL', payload: val });
+        }
+        if (params.has('r')) {
+            const val = parseFloat(params.get('r'));
+            if (!isNaN(val)) dispatch({ type: 'SET_RATE', payload: val });
+        }
+        if (params.has('a')) {
+            const val = parseInt(params.get('a'), 10);
+            if (!isNaN(val)) dispatch({ type: 'SET_AMORTIZATION', payload: val });
+        }
+        if (params.has('f')) {
+            dispatch({ type: 'SET_FREQUENCY', payload: params.get('f') });
+        }
+        if (params.has('c')) {
+            dispatch({ type: 'SET_COMPOUNDING', payload: params.get('c') });
+        }
+        if (params.has('cp')) {
+            const val = parseFloat(params.get('cp'));
+            if (!isNaN(val)) dispatch({ type: 'SET_CUSTOM_PAYMENT', payload: val });
+        }
+        if (params.has('sd')) {
+            dispatch({ type: 'SET_START_DATE', payload: params.get('sd') });
+        }
+        if (params.has('mi')) {
+            const val = parseFloat(params.get('mi'));
+            if (!isNaN(val)) dispatch({ type: 'SET_PREPAYMENT', payload: { monthlyIncrease: val } });
+        }
         // Removed complex lump sums from URL sync to keep URLs manageable
     }, []);
 

@@ -1,0 +1,103 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import MortgageCalculator from '../../../features/mortgage/components/MortgageCalculator.jsx';
+import { MORTGAGE_SCENARIOS } from '../../../data/seo-scenarios.js';
+
+export function getStaticPaths() {
+    return MORTGAGE_SCENARIOS.map(s => ({
+        params: { scenario: s.slug },
+        props: { ...s }
+    }));
+}
+
+const { label, desc, principal, rate, amortization, freq, lumpSums } = Astro.props;
+
+const initialStateOverride = {
+    principal,
+    annualRate: rate,
+    amortizationYears: amortization,
+    paymentFrequency: freq,
+    lumpSums: lumpSums ? lumpSums.map((ls, i) => ({
+        id: Date.now() + i,
+        amount: ls.amount,
+        // Calculate date based on offsetYears if provided, otherwise default next year
+        date: (() => {
+            const d = new Date();
+            d.setFullYear(d.getFullYear() + (ls.offsetYears || 1));
+            return d.toISOString().split('T')[0];
+        })()
+    })) : undefined
+};
+
+// Remove undefined fields so we don't accidentally overwrite defaults with undefined
+Object.keys(initialStateOverride).forEach(key => initialStateOverride[key] === undefined && delete initialStateOverride[key]);
+
+const canonicalURL = new URL(`/calculator/mortgage/${Astro.params.scenario}`, Astro.site || Astro.url.origin);
+
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": `${label} - LoonieFi`,
+  "applicationCategory": "FinanceApplication",
+  "operatingSystem": "Web",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "CAD"
+  },
+  "description": desc
+};
+---
+
+<BaseLayout 
+  title={`${label} - Free Canadian Calculator`} 
+  description={desc}
+>
+  <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+
+  <header class="max-w-6xl mx-auto px-4 pt-8 pb-4 text-center md:text-left animate-fade-in">
+    <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+      <div>
+        <h1 class="text-2xl font-black text-slate-900 flex items-center gap-2 justify-center md:justify-start">
+          {label}
+        </h1>
+        <p class="text-slate-500 text-sm font-medium">
+          {desc}
+        </p>
+      </div>
+
+      <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 border border-slate-200">
+        <div class="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" aria-hidden="true"></div>
+        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+          Canadian Compounding Rules
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-grow flex flex-col justify-center w-full animate-fade-in relative z-10">
+      <MortgageCalculator client:load isVisible={true} initialStateOverride={initialStateOverride} />
+  </main>
+
+  {/* SEO CONTENT SECTION */}
+  <section class="max-w-3xl mx-auto px-6 py-12 text-slate-600 leading-relaxed text-sm animate-fade-in">
+    <h2 class="text-lg font-bold text-slate-900 mb-4">Understanding This Calculation</h2>
+    <p class="mb-4">
+      This tool uses the exact <strong>Canadian mortgage math formula</strong> (semi-annual compounding) to generate accurate payment estimates, matching the calculations provided by major Canadian banks. While variable rates are typically compounded monthly, fixed-rate mortgages in Canada are legally required to compound semi-annually.
+    </p>
+    
+    <h3 class="text-md font-bold text-slate-900 mt-6 mb-2">Accelerated Payments</h3>
+    <p class="mb-4">
+      Choosing "Accelerated Bi-Weekly" or "Accelerated Weekly" payments is one of the easiest ways to pay off your mortgage faster. 
+      The "Accelerated" version takes your standard monthly payment and divides it by 2 or 4, respectively. 
+      Because there are 26 bi-weekly or 52 weekly periods in a year, you effectively make one extra full monthly payment every year toward your principal.
+    </p>
+
+    <h3 class="text-md font-bold text-slate-900 mt-6 mb-2">Prepayment Privileges</h3>
+    <p>
+      Most Canadian mortgage contracts include "prepayment privileges" that allow you to pay a certain percentage 
+      (often 10% to 20%) of the original principal or current balance each year without penalty. 
+      Even small monthly increases or annual lump sums can drastically reduce the total interest you pay over the life of the loan.
+    </p>
+  </section>
+</BaseLayout>

@@ -4,8 +4,8 @@ import { MortgageForm } from './MortgageForm';
 import { MortgageResults } from './MortgageResults';
 import { CalculatorIcon, InfoIcon, RotateCcwIcon } from '../../../components/shared';
 
-export default function MortgageCalculator({ isVisible }) {
-    const { state, dispatch, results } = useMortgageMath();
+export default function MortgageCalculator({ isVisible, initialStateOverride }) {
+    const { state, dispatch, results } = useMortgageMath(initialStateOverride);
 
     if (!isVisible) return null;
 
