@@ -217,37 +217,37 @@ export const MORTGAGE_SCENARIOS = [
     // --- 1. MAJOR BANKS (The "Big Six") ---
     {
         slug: 'rbc-mortgage-calculator',
-        principal: 500000, rate: 5.25, amortization: 25, freq: 'monthly',
+        homePrice: 500000, downPayment: 100000, rate: 5.25, amortization: 25, freq: 'monthly',
         label: "RBC Mortgage Calculator Comparison",
         desc: "Calculate your Royal Bank of Canada (RBC) mortgage payments using standard semi-annual compounding."
     },
     {
         slug: 'td-mortgage-calculator',
-        principal: 500000, rate: 5.25, amortization: 25, freq: 'monthly',
+        homePrice: 500000, downPayment: 100000, rate: 5.25, amortization: 25, freq: 'monthly',
         label: "TD Mortgage Calculator Comparison",
         desc: "Estimate your TD Canada Trust mortgage payments and see how prepayments can reduce your interest."
     },
     {
         slug: 'scotiabank-mortgage-calculator',
-        principal: 500000, rate: 5.25, amortization: 25, freq: 'monthly',
+        homePrice: 500000, downPayment: 100000, rate: 5.25, amortization: 25, freq: 'monthly',
         label: "Scotiabank Mortgage Calculator",
         desc: "See your Scotiabank mortgage schedule and compare accelerated bi-weekly payment options."
     },
     {
         slug: 'bmo-mortgage-calculator',
-        principal: 500000, rate: 5.25, amortization: 25, freq: 'monthly',
+        homePrice: 500000, downPayment: 100000, rate: 5.25, amortization: 25, freq: 'monthly',
         label: "BMO Mortgage Calculator",
         desc: "Calculate your Bank of Montreal (BMO) mortgage payments and total interest cost over time."
     },
     {
         slug: 'cibc-mortgage-calculator',
-        principal: 500000, rate: 5.25, amortization: 25, freq: 'monthly',
+        homePrice: 500000, downPayment: 100000, rate: 5.25, amortization: 25, freq: 'monthly',
         label: "CIBC Mortgage Calculator",
         desc: "Estimate your CIBC home loan payments with precise Canadian compounding rules."
     },
     {
         slug: 'national-bank-mortgage-calculator',
-        principal: 500000, rate: 5.25, amortization: 25, freq: 'monthly',
+        homePrice: 500000, downPayment: 100000, rate: 5.25, amortization: 25, freq: 'monthly',
         label: "National Bank Mortgage Calculator",
         desc: "Calculate National Bank of Canada (NBC) mortgage payments, including lump sum prepayment options."
     },
@@ -255,82 +255,120 @@ export const MORTGAGE_SCENARIOS = [
     // --- 2. REGIONAL & DIGITAL BANKS / LENDERS ---
     {
         slug: 'tangerine-mortgage-calculator',
-        principal: 500000, rate: 4.99, amortization: 25, freq: 'monthly',
+        homePrice: 500000, downPayment: 100000, rate: 4.99, amortization: 25, freq: 'monthly',
         label: "Tangerine Mortgage Calculator",
         desc: "Calculate Tangerine mortgage payments and track their generous 25% annual lump-sum prepayment privileges."
     },
     {
         slug: 'simplii-mortgage-calculator',
-        principal: 500000, rate: 4.99, amortization: 25, freq: 'monthly',
+        homePrice: 500000, downPayment: 100000, rate: 4.99, amortization: 25, freq: 'monthly',
         label: "Simplii Financial Mortgage Calculator",
         desc: "Estimate Simplii Financial mortgage payments and see how increasing regular payments affects your amortization."
     },
     {
         slug: 'eq-bank-mortgage-calculator',
-        principal: 500000, rate: 4.99, amortization: 25, freq: 'monthly',
+        homePrice: 500000, downPayment: 100000, rate: 4.99, amortization: 25, freq: 'monthly',
         label: "EQ Bank Mortgage Calculator",
         desc: "Calculate EQ Bank mortgage payments and total interest costs."
     },
     {
         slug: 'desjardins-mortgage-calculator',
-        principal: 500000, rate: 5.25, amortization: 25, freq: 'monthly',
+        homePrice: 500000, downPayment: 100000, rate: 5.25, amortization: 25, freq: 'monthly',
         label: "Desjardins Mortgage Calculator",
         desc: "Calculate your Desjardins mortgage payments with accurate semi-annual compounding."
     },
     {
         slug: 'laurentian-bank-mortgage-calculator',
-        principal: 500000, rate: 5.25, amortization: 25, freq: 'monthly',
+        homePrice: 500000, downPayment: 100000, rate: 5.25, amortization: 25, freq: 'monthly',
         label: "Laurentian Bank Mortgage Calculator",
         desc: "Estimate Laurentian Bank mortgage payments and accelerated payoff schedules."
     },
     {
         slug: 'atb-financial-mortgage-calculator',
-        principal: 500000, rate: 5.25, amortization: 25, freq: 'monthly',
+        homePrice: 500000, downPayment: 100000, rate: 5.25, amortization: 25, freq: 'monthly',
         label: "ATB Financial Mortgage Calculator",
         desc: "Calculate ATB Financial mortgage payments tailored for Alberta homebuyers."
     },
     {
         slug: 'first-national-mortgage-calculator',
-        principal: 500000, rate: 5.25, amortization: 25, freq: 'monthly',
+        homePrice: 500000, downPayment: 100000, rate: 5.25, amortization: 25, freq: 'monthly',
         label: "First National Mortgage Calculator",
         desc: "Calculate payments for First National Financial LP, Canada's largest non-bank mortgage lender."
     },
     {
         slug: 'mcap-mortgage-calculator',
-        principal: 500000, rate: 5.25, amortization: 25, freq: 'monthly',
+        homePrice: 500000, downPayment: 100000, rate: 5.25, amortization: 25, freq: 'monthly',
         label: "MCAP Mortgage Calculator",
         desc: "Estimate your MCAP mortgage payments and view your complete amortization schedule."
     },
     
-    // --- 3. SITUATIONAL / STRATEGY KEYWORDS ---
+    // --- 3. PROVINCES & MAJOR CITIES ---
+    {
+        slug: 'toronto-mortgage-calculator',
+        homePrice: 1100000, downPayment: 220000, rate: 5.0, amortization: 30, freq: 'monthly',
+        label: "Toronto Mortgage Calculator",
+        desc: "Estimate monthly payments for Toronto real estate, where home prices average over $1.1 million."
+    },
+    {
+        slug: 'vancouver-mortgage-calculator',
+        homePrice: 1200000, downPayment: 240000, rate: 5.0, amortization: 30, freq: 'monthly',
+        label: "Vancouver Mortgage Calculator",
+        desc: "Calculate Vancouver mortgage payments to help plan for one of Canada's most expensive housing markets."
+    },
+    {
+        slug: 'calgary-mortgage-calculator',
+        homePrice: 550000, downPayment: 27500, rate: 5.0, amortization: 25, freq: 'monthly',
+        label: "Calgary Mortgage Calculator",
+        desc: "Estimate your Calgary mortgage payments, including CMHC insurance fees for smaller down payments."
+    },
+    {
+        slug: 'alberta-mortgage-calculator',
+        homePrice: 450000, downPayment: 22500, rate: 5.0, amortization: 25, freq: 'monthly',
+        label: "Alberta Mortgage Calculator",
+        desc: "Calculate mortgage payments across Alberta, accounting for local real estate prices and CMHC rules."
+    },
+    {
+        slug: 'ontario-mortgage-calculator',
+        homePrice: 850000, downPayment: 170000, rate: 5.0, amortization: 25, freq: 'monthly',
+        label: "Ontario Mortgage Calculator",
+        desc: "Estimate your Ontario mortgage payments and total interest over the life of your loan."
+    },
+    {
+        slug: 'bc-mortgage-calculator',
+        homePrice: 950000, downPayment: 190000, rate: 5.0, amortization: 25, freq: 'monthly',
+        label: "BC Mortgage Calculator",
+        desc: "Calculate British Columbia mortgage payments to understand affordability in the local market."
+    },
+
+    // --- 4. SITUATIONAL / STRATEGY KEYWORDS ---
     {
         slug: '500k-mortgage-payment',
-        principal: 500000, rate: 5.0, amortization: 25, freq: 'monthly',
+        homePrice: 625000, downPayment: 125000, rate: 5.0, amortization: 25, freq: 'monthly',
         label: "$500k Mortgage Calculator",
         desc: "See the monthly payment and total interest cost for a standard half-million dollar Canadian mortgage."
     },
     {
         slug: '1-million-dollar-mortgage',
-        principal: 1000000, rate: 5.0, amortization: 30, freq: 'monthly',
+        homePrice: 1250000, downPayment: 250000, rate: 5.0, amortization: 30, freq: 'monthly',
         label: "$1 Million Mortgage Calculator",
         desc: "Estimate payments for a $1M home loan, common in high-cost cities like Toronto and Vancouver."
     },
     {
         slug: 'accelerated-bi-weekly-mortgage-calculator',
-        principal: 500000, rate: 5.0, amortization: 25, freq: 'accelerated-bi-weekly',
+        homePrice: 500000, downPayment: 100000, rate: 5.0, amortization: 25, freq: 'accelerated-bi-weekly',
         label: "Accelerated Bi-Weekly Calculator",
         desc: "See exactly how much time and interest you save by making 26 accelerated bi-weekly payments per year."
     },
     {
         slug: 'mortgage-payoff-calculator-with-lump-sums',
-        principal: 500000, rate: 5.0, amortization: 25, freq: 'monthly',
+        homePrice: 500000, downPayment: 100000, rate: 5.0, amortization: 25, freq: 'monthly',
         lumpSums: [{ amount: 20000, offsetYears: 1 }],
         label: "Mortgage Payoff with Prepayments",
         desc: "Calculate how a large lump-sum payment (like an inheritance or bonus) reduces your total mortgage term."
     },
     {
         slug: '30-year-amortization-calculator',
-        principal: 500000, rate: 5.0, amortization: 30, freq: 'monthly',
+        homePrice: 500000, downPayment: 100000, rate: 5.0, amortization: 30, freq: 'monthly',
         label: "30-Year Amortization Calculator",
         desc: "Compare the lower monthly payments of a 30-year mortgage against the higher total interest costs."
     }
