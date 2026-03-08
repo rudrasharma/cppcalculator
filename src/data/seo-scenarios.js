@@ -306,38 +306,51 @@ export const MORTGAGE_SCENARIOS = [
     {
         slug: 'toronto-mortgage-calculator',
         homePrice: 1100000, downPayment: 220000, rate: 5.0, amortization: 30, freq: 'monthly',
+        province: 'ON', isToronto: true,
         label: "Toronto Mortgage Calculator",
-        desc: "Estimate monthly payments for Toronto real estate, where home prices average over $1.1 million."
+        desc: "Estimate monthly payments for Toronto real estate, including both Ontario and Toronto Land Transfer Taxes."
     },
     {
         slug: 'vancouver-mortgage-calculator',
         homePrice: 1200000, downPayment: 240000, rate: 5.0, amortization: 30, freq: 'monthly',
+        province: 'BC',
         label: "Vancouver Mortgage Calculator",
-        desc: "Calculate Vancouver mortgage payments to help plan for one of Canada's most expensive housing markets."
+        desc: "Calculate Vancouver mortgage payments and BC Land Transfer Tax for one of Canada's most expensive markets."
     },
     {
         slug: 'calgary-mortgage-calculator',
         homePrice: 550000, downPayment: 27500, rate: 5.0, amortization: 25, freq: 'monthly',
+        province: 'AB',
         label: "Calgary Mortgage Calculator",
-        desc: "Estimate your Calgary mortgage payments, including CMHC insurance fees for smaller down payments."
+        desc: "Estimate Calgary mortgage payments with Alberta's low closing fees and CMHC insurance for 5% down."
     },
     {
         slug: 'alberta-mortgage-calculator',
         homePrice: 450000, downPayment: 22500, rate: 5.0, amortization: 25, freq: 'monthly',
+        province: 'AB',
         label: "Alberta Mortgage Calculator",
-        desc: "Calculate mortgage payments across Alberta, accounting for local real estate prices and CMHC rules."
+        desc: "Calculate mortgage payments across Alberta, accounting for local registration fees and CMHC rules."
     },
     {
         slug: 'ontario-mortgage-calculator',
         homePrice: 850000, downPayment: 170000, rate: 5.0, amortization: 25, freq: 'monthly',
+        province: 'ON',
         label: "Ontario Mortgage Calculator",
-        desc: "Estimate your Ontario mortgage payments and total interest over the life of your loan."
+        desc: "Estimate Ontario mortgage payments and Land Transfer Tax over the life of your loan."
     },
     {
         slug: 'bc-mortgage-calculator',
         homePrice: 950000, downPayment: 190000, rate: 5.0, amortization: 25, freq: 'monthly',
+        province: 'BC',
         label: "BC Mortgage Calculator",
-        desc: "Calculate British Columbia mortgage payments to understand affordability in the local market."
+        desc: "Calculate British Columbia mortgage payments and LTT to understand total cost of ownership."
+    },
+    {
+        slug: 'montreal-mortgage-calculator',
+        homePrice: 600000, downPayment: 120000, rate: 5.0, amortization: 25, freq: 'monthly',
+        province: 'QC',
+        label: "Montreal Mortgage Calculator",
+        desc: "Estimate Montreal mortgage payments and Quebec 'Welcome Tax' (taxe de bienvenue)."
     },
 
     // --- 4. SITUATIONAL / STRATEGY KEYWORDS ---

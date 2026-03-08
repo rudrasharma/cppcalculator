@@ -1,5 +1,6 @@
 import { useReducer, useEffect, useMemo } from 'react';
 import { calculateAmortization, PAYMENT_FREQUENCIES, COMPOUNDING_PERIODS } from '../utils/mortgageEngine';
+import { calculateLTT } from '../utils/lttEngine';
 
 const today = new Date();
 const defaultStartDate = today.toISOString().split('T')[0];
@@ -18,6 +19,10 @@ const initialState = {
     compounding: COMPOUNDING_PERIODS.SEMI_ANNUAL,
     customPayment: 0,
     startDate: defaultStartDate,
+    province: 'ON',
+    isToronto: false,
+    isFirstTimeBuyer: false,
+    showStressTest: false,
     prepayments: {
         monthlyIncrease: 0,
     },
@@ -47,6 +52,14 @@ function mortgageReducer(state, action) {
             return { ...state, customPayment: action.payload };
         case 'SET_START_DATE':
             return { ...state, startDate: action.payload };
+        case 'SET_PROVINCE':
+            return { ...state, province: action.payload, isToronto: action.payload === 'ON' ? state.isToronto : false };
+        case 'SET_IS_TORONTO':
+            return { ...state, isToronto: action.payload };
+        case 'SET_IS_FIRST_TIME_BUYER':
+            return { ...state, isFirstTimeBuyer: action.payload };
+        case 'SET_SHOW_STRESS_TEST':
+            return { ...state, showStressTest: action.payload };
         case 'SET_PREPAYMENT':
             return { 
                 ...state, 
@@ -169,6 +182,18 @@ export const useMortgageMath = (initialStateOverride = null) => {
             const val = parseFloat(params.get('mi'));
             if (!isNaN(val)) dispatch({ type: 'SET_PREPAYMENT', payload: { monthlyIncrease: val } });
         }
+        if (params.has('pv')) {
+            dispatch({ type: 'SET_PROVINCE', payload: params.get('pv') });
+        }
+        if (params.has('t')) {
+            dispatch({ type: 'SET_IS_TORONTO', payload: params.get('t') === 'true' });
+        }
+        if (params.has('ftb')) {
+            dispatch({ type: 'SET_IS_FIRST_TIME_BUYER', payload: params.get('ftb') === 'true' });
+        }
+        if (params.has('st')) {
+            dispatch({ type: 'SET_SHOW_STRESS_TEST', payload: params.get('st') === 'true' });
+        }
     }, []);
 
     useEffect(() => {
@@ -183,6 +208,11 @@ export const useMortgageMath = (initialStateOverride = null) => {
         params.set('ty', state.termYears);
         params.set('f', state.paymentFrequency);
         params.set('c', state.compounding);
+        params.set('pv', state.province);
+        if (state.isToronto) params.set('t', 'true'); else params.delete('t');
+        if (state.isFirstTimeBuyer) params.set('ftb', 'true'); else params.delete('ftb');
+        if (state.showStressTest) params.set('st', 'true'); else params.delete('st');
+
         if (state.customPayment > 0) params.set('cp', state.customPayment);
         else params.delete('cp');
         if (state.startDate !== defaultStartDate) params.set('sd', state.startDate);
@@ -192,14 +222,14 @@ export const useMortgageMath = (initialStateOverride = null) => {
 
         const newUrl = `${window.location.pathname}?${params.toString()}`;
         window.history.replaceState(null, '', newUrl);
-    }, [state.homePrice, state.downPayment, state.downPaymentType, state.annualRate, state.amortizationYears, state.termYears, state.paymentFrequency, state.compounding, state.customPayment, state.startDate, state.prepayments, state.mounted]);
+    }, [state.homePrice, state.downPayment, state.downPaymentType, state.annualRate, state.amortizationYears, state.termYears, state.paymentFrequency, state.compounding, state.customPayment, state.startDate, state.prepayments, state.province, state.isToronto, state.isFirstTimeBuyer, state.showStressTest, state.mounted]);
 
     const results = useMemo(() => {
-        return calculateAmortization({
+        const mortgageResults = calculateAmortization({
             homePrice: state.homePrice,
             downPayment: state.downPayment,
             downPaymentType: state.downPaymentType,
-            annualRate: state.annualRate, // Engine now divides by 100 internally
+            annualRate: state.annualRate,
             amortizationYears: state.amortizationYears,
             termYears: state.termYears,
             paymentFrequency: state.paymentFrequency,
@@ -209,7 +239,19 @@ export const useMortgageMath = (initialStateOverride = null) => {
             prepayments: state.prepayments,
             lumpSums: state.lumpSums,
         });
-    }, [state.homePrice, state.downPayment, state.downPaymentType, state.annualRate, state.amortizationYears, state.termYears, state.paymentFrequency, state.compounding, state.customPayment, state.startDate, state.prepayments, state.lumpSums]);
+
+        const lttResults = calculateLTT(
+            state.homePrice,
+            state.province,
+            state.isToronto,
+            state.isFirstTimeBuyer
+        );
+
+        return {
+            ...mortgageResults,
+            ltt: lttResults,
+        };
+    }, [state.homePrice, state.downPayment, state.downPaymentType, state.annualRate, state.amortizationYears, state.termYears, state.paymentFrequency, state.compounding, state.customPayment, state.startDate, state.prepayments, state.lumpSums, state.province, state.isToronto, state.isFirstTimeBuyer]);
 
     return { state, dispatch, results };
 };

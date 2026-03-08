@@ -169,6 +169,8 @@ export const calculateAmortization = ({
     let balance = principal;
     let totalInterest = 0;
     let totalPrincipal = 0;
+    let yearlyInterestAccumulator = 0;
+    let yearlyPrincipalAccumulator = 0;
     const schedule = [];
     let paymentNumber = 0;
     
@@ -209,6 +211,8 @@ export const calculateAmortization = ({
         balance -= actualPrincipalPaid;
         totalInterest += interestPayment;
         totalPrincipal += actualPrincipalPaid;
+        yearlyInterestAccumulator += interestPayment;
+        yearlyPrincipalAccumulator += actualPrincipalPaid;
 
         if (paymentNumber === termPaymentTarget) {
             balanceAtEndOfTerm = Math.max(0, balance);
@@ -221,7 +225,11 @@ export const calculateAmortization = ({
                 remainingBalance: Math.max(0, balance),
                 totalInterest: totalInterest,
                 totalPrincipal: totalPrincipal,
+                yearlyInterest: yearlyInterestAccumulator,
+                yearlyPrincipal: yearlyPrincipalAccumulator,
             });
+            yearlyInterestAccumulator = 0;
+            yearlyPrincipalAccumulator = 0;
         }
     }
 
@@ -232,6 +240,10 @@ export const calculateAmortization = ({
 
     // Calculate baseline (without prepayments) for comparison
     const baselineResults = calculateBaseline(principal, annualRate / 100, amortizationYears, paymentFrequency, compounding);
+
+    // Stress Test / Qualifying Rate (Higher of 5.25% or contract rate + 2%)
+    const stressTestRate = Math.max(5.25, annualRate + 2);
+    const stressTestPayment = calculatePeriodicPayment(principal, stressTestRate / 100, amortizationYears, paymentFrequency, compounding);
 
     return {
         monthlyPayment: basePayment,
@@ -245,6 +257,11 @@ export const calculateAmortization = ({
         baseMortgageAmount,
         downPaymentPercent,
         balanceAtEndOfTerm,
+        stressTest: {
+            rate: stressTestRate,
+            payment: stressTestPayment,
+            difference: stressTestPayment - basePayment
+        },
         savings: {
             interest: Math.max(0, baselineResults.totalInterest - totalInterest),
             time: Math.max(0, amortizationYears - (paymentNumber / paymentsPerYear)),

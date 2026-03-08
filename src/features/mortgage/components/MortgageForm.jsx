@@ -10,8 +10,11 @@ import {
     TrashIcon,
 } from '../../../components/shared';
 import { PAYMENT_FREQUENCIES, COMPOUNDING_PERIODS } from '../utils/mortgageEngine';
+import { PROVINCES } from '../utils/lttEngine';
 
 const AMORTIZATION_YEARS = [5, 10, 15, 20, 25, 30].map(y => ({ label: `${y} Years`, value: y }));
+
+const PROVINCE_OPTIONS = Object.entries(PROVINCES).map(([code, name]) => ({ label: name, value: code }));
 
 const FREQUENCY_OPTIONS = [
     { label: 'Monthly', value: PAYMENT_FREQUENCIES.MONTHLY },
@@ -28,7 +31,11 @@ const COMPOUNDING_OPTIONS = [
 ];
 
 export const MortgageForm = ({ state, dispatch }) => {
-    const { homePrice, downPayment, downPaymentType, annualRate, amortizationYears, termYears, paymentFrequency, compounding, customPayment, startDate, prepayments, lumpSums } = state;
+    const { 
+        homePrice, downPayment, downPaymentType, annualRate, amortizationYears, 
+        termYears, paymentFrequency, compounding, customPayment, startDate, 
+        prepayments, lumpSums, province, isToronto, isFirstTimeBuyer, showStressTest 
+    } = state;
 
     return (
         <div className="space-y-6">
@@ -36,6 +43,47 @@ export const MortgageForm = ({ state, dispatch }) => {
                 <div className="absolute top-0 right-0 w-32 h-32 bg-slate-50 rounded-bl-[5rem] -mr-10 -mt-10 -z-0 pointer-events-none"></div>
 
                 <div className="relative z-10 space-y-5">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-1.5">
+                            <label className="text-xs font-black text-slate-700 block uppercase tracking-tighter">
+                                Province
+                            </label>
+                            <NativeSelect
+                                value={province}
+                                onChange={(e) => dispatch({ type: 'SET_PROVINCE', payload: e.target.value })}
+                                options={PROVINCE_OPTIONS}
+                            />
+                        </div>
+                        <div className="flex flex-col justify-end gap-2">
+                            {province === 'ON' && (
+                                <label className="flex items-center gap-2 cursor-pointer group">
+                                    <div className="relative">
+                                        <input 
+                                            type="checkbox" 
+                                            className="sr-only peer" 
+                                            checked={isToronto}
+                                            onChange={(e) => dispatch({ type: 'SET_IS_TORONTO', payload: e.target.checked })}
+                                        />
+                                        <div className="w-8 h-4 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-indigo-600"></div>
+                                    </div>
+                                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tight group-hover:text-slate-700 transition-colors">Inside Toronto</span>
+                                </label>
+                            )}
+                            <label className="flex items-center gap-2 cursor-pointer group">
+                                <div className="relative">
+                                    <input 
+                                        type="checkbox" 
+                                        className="sr-only peer" 
+                                        checked={isFirstTimeBuyer}
+                                        onChange={(e) => dispatch({ type: 'SET_IS_FIRST_TIME_BUYER', payload: e.target.checked })}
+                                    />
+                                    <div className="w-8 h-4 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-indigo-600"></div>
+                                </div>
+                                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tight group-hover:text-slate-700 transition-colors">First-Time Buyer</span>
+                            </label>
+                        </div>
+                    </div>
+
                     <MoneyInput
                         label="Asking Price"
                         subLabel="Property Purchase Price"
@@ -109,9 +157,23 @@ export const MortgageForm = ({ state, dispatch }) => {
                         </div>
 
                         <div className="space-y-1.5">
-                            <label className="text-xs font-black text-slate-700 block uppercase tracking-tighter">
-                                Interest Rate
-                            </label>
+                            <div className="flex justify-between items-center">
+                                <label className="text-xs font-black text-slate-700 block uppercase tracking-tighter">
+                                    Interest Rate
+                                </label>
+                                <label className="flex items-center gap-1.5 cursor-pointer group">
+                                    <div className="relative">
+                                        <input 
+                                            type="checkbox" 
+                                            className="sr-only peer" 
+                                            checked={showStressTest}
+                                            onChange={(e) => dispatch({ type: 'SET_SHOW_STRESS_TEST', payload: e.target.checked })}
+                                        />
+                                        <div className="w-6 h-3 bg-slate-200 rounded-full peer peer-checked:after:translate-x-[12px] after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-2 after:w-2 after:transition-all peer-checked:bg-rose-500"></div>
+                                    </div>
+                                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tight group-hover:text-slate-600 transition-colors">Stress Test</span>
+                                </label>
+                            </div>
                             <div className="relative group">
                                 <input
                                     type="text"
