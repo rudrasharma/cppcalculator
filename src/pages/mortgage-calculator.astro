@@ -59,11 +59,41 @@ const description = "Calculate your Canadian mortgage payments with semi-annual 
     </p>
 
     <h3 class="text-md font-bold text-slate-900 mt-6 mb-2">Prepayment Privileges</h3>
-    <p>
+    <p class="mb-8">
       Most Canadian mortgage contracts include "prepayment privileges" that allow you to pay a certain percentage 
       (often 15% or 20%) of the original principal or current balance each year without penalty. 
       Even small monthly increases or annual lump sums can drastically reduce the total interest you pay over the life of the loan.
     </p>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-12">
+      <div class="bg-indigo-50 p-6 rounded-2xl border border-indigo-100">
+        <h3 class="font-black text-indigo-900 uppercase tracking-tighter text-sm mb-2">Mortgage Resources</h3>
+        <ul class="space-y-3">
+          <li>
+            <a href="/blog/mortgage-prepayment-guide" class="text-indigo-600 hover:text-indigo-800 font-bold text-sm flex items-center gap-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
+              How to Shave 5+ Years Off Your Mortgage
+            </a>
+          </li>
+          <li>
+            <a href="/blog/understanding-mortgage-carrying-costs" class="text-indigo-600 hover:text-indigo-800 font-bold text-sm flex items-center gap-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
+              Understanding PITH & Carrying Costs
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200 flex flex-col justify-between">
+        <div>
+          <h3 class="font-black text-slate-900 uppercase tracking-tighter text-sm mb-2">Regional Scenarios</h3>
+          <p class="text-xs text-slate-500 mb-4 font-medium">Browse localized mortgage calculations for Toronto, Vancouver, Calgary, and more.</p>
+        </div>
+        <a href="/calculator/mortgage/browse" class="inline-flex items-center justify-center px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-black text-slate-700 hover:bg-slate-100 transition-colors uppercase tracking-widest">
+          Browse All Scenarios
+        </a>
+      </div>
+    </div>
   </section>
 
 </BaseLayout>
