@@ -3,14 +3,15 @@ import Calculator from '../features/retirement/components';
 import HouseholdBenefits from '../features/child-benefit/components/HouseholdBenefits';
 import ParentalLeave from '../features/parental-leave/components/ParentalLeave'; 
 import GroceryInflation from '../features/grocery/components/GroceryInflation'; 
-// 1. IMPORT THE NEW CALCULATOR
 import CAGRCalculator from '../features/cagr/components/CAGRCalculator';
+import MortgageCalculator from '../features/mortgage/components/MortgageCalculator';
 import '../styles/global.css'
 
 // ICONS
 const ChartIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="12" y1="20" x2="12" y2="10"></line><line x1="18" y1="20" x2="18" y2="4"></line><line x1="6" y1="20" x2="6" y2="16"></line></svg>;
 const BabyIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>;
 const HomeIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>;
+const UsersIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>;
 const ShieldIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>;
 const TrendingUpIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>;
 const ArrowRight = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>;
@@ -28,6 +29,16 @@ const TABS = [
     description: 'Calculate your future monthly income from government pensions.'
   },
   { 
+    id: 'mortgage', 
+    label: 'Mortgage',
+    title: 'Mortgage Paydown',
+    subtitle: 'Canadian semi-annual compounding & prepayments',
+    icon: HomeIcon, 
+    color: 'text-blue-600', 
+    bg: 'bg-blue-50',
+    description: 'See how extra payments can save you thousands in interest.'
+  },
+  { 
     id: 'parental', 
     label: 'Mat. Leave',
     title: 'Maternity & Parental Leave',
@@ -42,7 +53,7 @@ const TABS = [
     label: 'Family Cash',
     title: 'Household Benefits Estimator',
     subtitle: 'CCB, Trillium, Carbon Rebate & GST Credits',
-    icon: HomeIcon, 
+    icon: UsersIcon, 
     color: 'text-emerald-600', 
     bg: 'bg-emerald-50',
     description: 'Maximize your Child Benefits and quarterly tax rebates.'
@@ -57,7 +68,6 @@ const TABS = [
     bg: 'bg-amber-50',
     description: 'Protect your spending power against rising Canadian food costs.'
   },
-  // 2. ADDED THE NEW TAB CONFIGURATION
   { 
     id: 'cagr', 
     label: 'Growth Calc',
@@ -117,12 +127,12 @@ export default function CalculatorSuite() {
           </button>
 
           {view !== 'landing' && (
-            <div className="flex gap-1 bg-slate-100/50 p-1 rounded-xl border border-slate-200/50 animate-fade-in">
+            <div className="flex gap-1 bg-slate-100/50 p-1 rounded-xl border border-slate-200/50 animate-fade-in overflow-x-auto no-scrollbar max-w-[70%]">
               {TABS.map((tab) => (
                 <button 
                   key={tab.id}
                   onClick={() => changeView(tab.id)}
-                  className={`px-3 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 ${
+                  className={`px-3 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 whitespace-nowrap ${
                     view === tab.id 
                     ? 'bg-white text-slate-900 shadow-sm ring-1 ring-black/5' 
                     : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
@@ -162,7 +172,7 @@ export default function CalculatorSuite() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {TABS.map((tool) => (
               <button 
                 key={tool.id}
@@ -204,14 +214,16 @@ export default function CalculatorSuite() {
             <div style={{ display: view === 'budget' ? 'block' : 'none' }}>
                 <GroceryInflation isVisible={view === 'budget'} />
             </div>
-            {/* 3. ADDED CAGR CALCULATOR RENDER */}
             <div style={{ display: view === 'cagr' ? 'block' : 'none' }}>
                 <CAGRCalculator isVisible={view === 'cagr'} />
+            </div>
+            <div style={{ display: view === 'mortgage' ? 'block' : 'none' }}>
+                <MortgageCalculator isVisible={view === 'mortgage'} />
             </div>
           </main>
 
           {/* MOBILE BOTTOM NAV */}
-          <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 pb-safe z-[10000] flex justify-around items-center h-16 px-2 shadow-[0_-5px_20px_-5px_rgba(0,0,0,0.05)] animate-slide-up">
+          <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 pb-safe z-[10000] flex justify-around items-center h-16 px-2 shadow-[0_-5px_20px_-5px_rgba(0,0,0,0.05)] animate-slide-up overflow-x-auto no-scrollbar">
             {TABS.map((tab) => (
               <button
                 key={tab.id}
@@ -219,7 +231,7 @@ export default function CalculatorSuite() {
                     changeView(tab.id);
                     window.scrollTo({ top: 0, behavior: 'smooth' }); 
                 }}
-                className="flex-1 flex flex-col items-center justify-center h-full gap-1 active:scale-95 transition-transform"
+                className="flex-1 min-w-[64px] flex flex-col items-center justify-center h-full gap-1 active:scale-95 transition-transform"
               >
                 <div className={`p-1.5 rounded-xl transition-colors ${view === tab.id ? tab.bg : 'bg-transparent'}`}>
                     <tab.icon className={`w-6 h-6 ${view === tab.id ? tab.color : 'text-slate-400'}`} />
