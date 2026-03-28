@@ -7,8 +7,14 @@ describe('Smith Manoeuvre Engine', () => {
         mortgageRate: 0.05,
         helocRate: 0.06,
         marginalTaxRate: 0.40,
-        expectedReturn: 0.07,
-        amortizationYears: 25
+        capitalGainsRate: 0.05,
+        dividendYield: 0.02,
+        dividendTaxRate: 0.15,
+        reinvestDividends: true,
+        amortizationYears: 25,
+        initialHelocLumpSum: 0,
+        readvanceTolerance: 1.0,
+        reinvestTaxRefund: true
     };
 
     test('standardMortgageBalance reaches exactly 0 at the end of amortization', () => {
@@ -19,59 +25,71 @@ describe('Smith Manoeuvre Engine', () => {
         expect(lastMonth.standardMortgageBalance).toBeCloseTo(0, 2);
     });
 
-    test('smithHelocBalance does not exceed the original mortgageBalance', () => {
+    test('smithHelocBalance grows higher than mortgageBalance due to interest capitalization', () => {
         const results = calculateSmithManoeuvre(defaultInputs);
+        const lastMonth = results[results.length - 1];
         
-        results.forEach(monthData => {
-            // In a standard re-advance, HELOC balance grows as principal is paid.
-            // It should never exceed the total principal paid, which caps at the starting mortgage balance.
-            expect(monthData.smithHelocBalance).toBeLessThanOrEqual(defaultInputs.mortgageBalance + 0.01);
+        // With interest capitalization, the HELOC debt will eventually exceed the original mortgage principal
+        expect(lastMonth.smithHelocBalance).toBeGreaterThan(defaultInputs.mortgageBalance);
+    });
+
+    test('readvanceTolerance of 0.5 borrows exactly half the principal when interest is ignored', () => {
+        const results = calculateSmithManoeuvre({
+            ...defaultInputs,
+            helocRate: 0, // Set to 0 to ignore capitalization for this test
+            readvanceTolerance: 0.5
         });
 
         const lastMonth = results[results.length - 1];
-        expect(lastMonth.smithHelocBalance).toBeCloseTo(defaultInputs.mortgageBalance, 2);
+        // Without interest, HELOC should be exactly half of total principal paid
+        expect(lastMonth.smithHelocBalance).toBeCloseTo(defaultInputs.mortgageBalance * 0.5, 2);
     });
 
-    test('taxRefundAccumulated correctly applies marginal tax rate to annual HELOC interest', () => {
-        const results = calculateSmithManoeuvre(defaultInputs);
-        
-        // Let's check year 2 (months 13-24)
-        // HELOC interest is paid monthly on the current balance.
-        // The engine resets yearlyHelocInterestPaid every 12 months.
-        
-        const year1End = results[11]; // Month 12
-        const year2End = results[23]; // Month 24
-        
-        // Manual verification logic for year 1
-        let manualInterestYear1 = 0;
-        const monthlyHelocRate = defaultInputs.helocRate / 12;
-        
-        // Calculate interest paid manually for months 1-12
-        // Month 1: balance is 0 initially, grows by principal of month 1.
-        // Interest is calculated on balance BEFORE this month's growth or engine uses current?
-        // Looking at engine: const helocInterest = currentHelocBalance * monthlyHelocRate; 
-        // Then currentHelocBalance += principalComponent;
-        // So interest is on the PREVIOUS month's ending balance.
-        
-        let currentBal = 0;
-        for (let i = 0; i < 12; i++) {
-            manualInterestYear1 += currentBal * monthlyHelocRate;
-            // The engine adds principal AFTER interest calculation in the loop
-            // Month 1 principal is in results[0].smithHelocBalance (which is previousBal + principal)
-            const principalPaidThisMonth = i === 0 ? results[i].smithHelocBalance : results[i].smithHelocBalance - results[i-1].smithHelocBalance;
-            currentBal += principalPaidThisMonth;
-        }
+    test('marginalTaxRate affects the final smithNetWorth (Feedback Loop Check)', () => {
+        const lowTaxResults = calculateSmithManoeuvre({ ...defaultInputs, marginalTaxRate: 0.20 });
+        const highTaxResults = calculateSmithManoeuvre({ ...defaultInputs, marginalTaxRate: 0.50 });
 
-        const expectedRefund = manualInterestYear1 * defaultInputs.marginalTaxRate;
-        expect(year1End.taxRefundAccumulated).toBeCloseTo(expectedRefund, 2);
+        const lowTaxNetWorth = lowTaxResults[lowTaxResults.length - 1].smithNetWorth;
+        const highTaxNetWorth = highTaxResults[highTaxResults.length - 1].smithNetWorth;
+
+        // Higher tax rate = higher refund = higher net worth (due to reinvestment)
+        expect(highTaxNetWorth).toBeGreaterThan(lowTaxNetWorth);
     });
 
-    test('smithNetWorth shows the expected advantage over standardNetWorth over time', () => {
-        const results = calculateSmithManoeuvre(defaultInputs);
-        const lastMonth = results[results.length - 1];
+    test('reinvestTaxRefund parameter correctly affects the investment balance', () => {
+        const withReinvest = calculateSmithManoeuvre({ ...defaultInputs, reinvestTaxRefund: true });
+        const withoutReinvest = calculateSmithManoeuvre({ ...defaultInputs, reinvestTaxRefund: false });
+
+        const withReinvestBal = withReinvest[withReinvest.length - 1].smithInvestmentBalance;
+        const withoutReinvestBal = withoutReinvest[withoutReinvest.length - 1].smithInvestmentBalance;
+
+        expect(withReinvestBal).toBeGreaterThan(withoutReinvestBal);
+    });
+
+    test('reinvestDividends parameter affects cumulativePocketedCash and investmentBalance', () => {
+        const withReinvest = calculateSmithManoeuvre({ ...defaultInputs, reinvestDividends: true });
+        const withoutReinvest = calculateSmithManoeuvre({ ...defaultInputs, reinvestDividends: false });
+
+        const lastWith = withReinvest[withReinvest.length - 1];
+        const lastWithout = withoutReinvest[withoutReinvest.length - 1];
+
+        // When reinvesting, investment balance should be higher
+        expect(lastWith.smithInvestmentBalance).toBeGreaterThan(lastWithout.smithInvestmentBalance);
         
-        // Given expectedReturn (7%) > helocRate (6%) and tax deductibility,
-        // Smith Net Worth should be higher than standard net worth.
-        expect(lastMonth.smithNetWorth).toBeGreaterThan(lastMonth.standardNetWorth);
+        // When NOT reinvesting, pocketed cash should be accumulated
+        expect(lastWithout.cumulativePocketedCash).toBeGreaterThan(0);
+        expect(lastWith.cumulativePocketedCash).toBe(0);
+    });
+
+    test('initialHelocLumpSum correctly initializes balances', () => {
+        const val = 50000;
+        const results = calculateSmithManoeuvre({
+            ...defaultInputs,
+            initialHelocLumpSum: val
+        });
+
+        // First month should have at least the initial lump sum + some principal re-advance
+        expect(results[0].smithHelocBalance).toBeGreaterThan(val);
+        expect(results[0].smithInvestmentBalance).toBeGreaterThan(val);
     });
 });

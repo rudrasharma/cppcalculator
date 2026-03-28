@@ -1,0 +1,43 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SmithCalculator from '../features/smith-manoeuvre/components/SmithCalculator.jsx';
+
+const title = "Canadian Smith Manoeuvre Calculator | Tax-Deductible Mortgage Tool";
+const description = "Calculate how the Smith Manoeuvre can make your Canadian mortgage tax-deductible. Forecast net worth growth by re-advancing principal into deductible investment debt.";
+---
+
+<BaseLayout title={title} description={description}>
+  <main class="py-12 bg-slate-50 min-h-screen">
+    <div class="max-w-6xl mx-auto px-4 mb-10 text-center md:text-left">
+        <h1 class="text-4xl font-black text-slate-900 mb-4 tracking-tight">Smith Manoeuvre Estimator</h1>
+        <p class="text-lg text-slate-600 max-w-3xl">
+            Convert your non-deductible mortgage interest into a tax-deductible investment loan. 
+            Accelerate your wealth building using the standard Canadian re-advanceable mortgage strategy.
+        </p>
+    </div>
+
+    <SmithCalculator client:load />
+
+    <section class="max-w-4xl mx-auto px-6 py-16 text-slate-700 leading-relaxed">
+        <h2 class="text-2xl font-black text-slate-900 mb-6">How the Smith Manoeuvre Works</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+            <div class="space-y-4">
+                <h3 class="font-bold text-indigo-600 uppercase text-xs tracking-widest">Step 1: Re-advancing</h3>
+                <p>As you make your regular mortgage payment, the principal portion is "re-advanced" into a Home Equity Line of Credit (HELOC).</p>
+            </div>
+            <div class="space-y-4">
+                <h3 class="font-bold text-indigo-600 uppercase text-xs tracking-widest">Step 2: Investing</h3>
+                <p>The money from the HELOC is invested in income-producing assets (like stocks or ETFs), making the interest on that loan tax-deductible.</p>
+            </div>
+            <div class="space-y-4">
+                <h3 class="font-bold text-indigo-600 uppercase text-xs tracking-widest">Step 3: Tax Refunds</h3>
+                <p>The tax deductions generate annual refunds, which you can use to pay down your mortgage even faster, accelerating the cycle.</p>
+            </div>
+            <div class="space-y-4">
+                <h3 class="font-bold text-indigo-600 uppercase text-xs tracking-widest">Step 4: Debt Conversion</h3>
+                <p>Eventually, your entire non-deductible mortgage is converted into a fully deductible investment loan, improving your net worth.</p>
+            </div>
+        </div>
+    </section>
+  </main>
+</BaseLayout>
