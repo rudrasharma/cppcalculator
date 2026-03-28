@@ -20,6 +20,7 @@
  * @param {number} inputs.initialHelocLumpSum - Initial investment from HELOC (default 0)
  * @param {number} inputs.readvanceTolerance - % of principal re-advanced (0.0 to 1.0, default 1.0)
  * @param {boolean} inputs.reinvestTaxRefund - Whether to reinvest annual tax refunds (default true)
+ * @param {boolean} inputs.capitalizeInterest - Whether to borrow from HELOC to pay HELOC interest (default true)
  */
 export const calculateSmithManoeuvre = ({
     homeValue,
@@ -34,7 +35,8 @@ export const calculateSmithManoeuvre = ({
     amortizationYears = 25,
     initialHelocLumpSum = 0,
     readvanceTolerance = 1.0,
-    reinvestTaxRefund = true
+    reinvestTaxRefund = true,
+    capitalizeInterest = true
 }) => {
     const totalMonths = amortizationYears * 12;
     const data = [];
@@ -59,6 +61,8 @@ export const calculateSmithManoeuvre = ({
     let lastYearlyRefund = 0;
     let cumulativePocketedCash = 0;
     let yearlyNetDividends = 0;
+    let cumulativeOutOfPocketInterest = 0;
+    let yearlyOutOfPocketInterest = 0;
 
     for (let month = 1; month <= totalMonths; month++) {
         let currentMonthTaxRefund = 0;
@@ -70,7 +74,14 @@ export const calculateSmithManoeuvre = ({
 
         // 2. Smith Step: Interest Capitalization
         const monthlyHelocInterest = currentHelocBalance * monthlyHelocRate;
-        currentHelocBalance += monthlyHelocInterest;
+        
+        if (capitalizeInterest) {
+            currentHelocBalance += monthlyHelocInterest;
+        } else {
+            cumulativeOutOfPocketInterest += monthlyHelocInterest;
+            yearlyOutOfPocketInterest += monthlyHelocInterest;
+        }
+        
         yearlyHelocInterestPaid += monthlyHelocInterest;
 
         // 3. Investment Growth: Capital Gains
@@ -103,8 +114,9 @@ export const calculateSmithManoeuvre = ({
         }
 
         // 7. Net Worth Calculations
+        // Note: smithNetWorth is penalized by cumulativeOutOfPocketInterest if capitalization is OFF
         const standardNetWorth = homeValue - currentMortgageBalance;
-        const smithNetWorth = homeValue - currentMortgageBalance - currentHelocBalance + currentInvestmentBalance + cumulativePocketedCash;
+        const smithNetWorth = homeValue - currentMortgageBalance - currentHelocBalance + currentInvestmentBalance + cumulativePocketedCash - cumulativeOutOfPocketInterest;
 
         data.push({
             month,
@@ -116,12 +128,15 @@ export const calculateSmithManoeuvre = ({
             annualTaxRefund: currentMonthTaxRefund,
             yearlyNetDividends,
             cumulativePocketedCash,
+            yearlyOutOfPocketInterest,
+            cumulativeOutOfPocketInterest,
             standardNetWorth,
             smithNetWorth
         });
 
         if (month % 12 === 0) {
             yearlyNetDividends = 0; // Reset for next year
+            yearlyOutOfPocketInterest = 0;
         }
     }
 
