@@ -1,4 +1,4 @@
-import { EI_2025 } from '../../child-benefit/utils/constants.js';
+import { EI_DATA } from '../../child-benefit/utils/constants.js';
 
 /**
  * Calculate parental leave benefits and totals
@@ -38,19 +38,19 @@ export const calculateParentalLeave = ({
         totalValue: 0
     };
 
-    const insurableCap = isQuebec ? EI_2025.QC_MAX_INSURABLE : EI_2025.MAX_INSURABLE;
+    const insurableCap = isQuebec ? EI_DATA.QC_MAX_INSURABLE : EI_DATA.MAX_INSURABLE;
     const p1Insurable = Math.min(salary, insurableCap);
     const p2Insurable = Math.min(partnerSalary, insurableCap);
     const isExtended = planType === 'EXTENDED';
 
     if (!isQuebec) {
         // Maternity
-        data.maternityWeekly = Math.min(EI_2025.MAX_WEEKLY_STD, (p1Insurable * EI_2025.STD_RATE) / 52);
+        data.maternityWeekly = Math.min(EI_DATA.MAX_WEEKLY_STD, (p1Insurable * EI_DATA.STD_RATE) / 52);
         data.maternityTotal = data.maternityWeekly * data.maternityWeeks;
 
         // Parental
-        const pRate = isExtended ? EI_2025.EXT_RATE : EI_2025.STD_RATE;
-        const pMax = isExtended ? EI_2025.MAX_WEEKLY_EXT : EI_2025.MAX_WEEKLY_STD;
+        const pRate = isExtended ? EI_DATA.EXT_RATE : EI_DATA.STD_RATE;
+        const pMax = isExtended ? EI_DATA.MAX_WEEKLY_EXT : EI_DATA.MAX_WEEKLY_STD;
 
         data.p1Weekly = Math.min(pMax, (p1Insurable * pRate) / 52);
         data.p1Total = data.p1Weekly * data.p1Weeks;
@@ -78,7 +78,7 @@ export const calculateParentalLeave = ({
  * @returns {number} - Max insurable earnings
  */
 export const getCurrentMaxInsurable = (province) => {
-    return province === 'QC' ? EI_2025.QC_MAX_INSURABLE : EI_2025.MAX_INSURABLE;
+    return province === 'QC' ? EI_DATA.QC_MAX_INSURABLE : EI_DATA.MAX_INSURABLE;
 };
 
 /**

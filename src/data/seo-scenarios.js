@@ -1,3 +1,5 @@
+import { CURRENT_APP_YEAR, RETIREMENT_2026 } from '../config/constants.js';
+
 export const PROVINCES = [
   { code: 'ON', name: 'Ontario', slug: 'ontario' },
   { code: 'BC', name: 'British Columbia', slug: 'bc' },
@@ -70,12 +72,11 @@ export const CPP_SCENARIOS = [
 
     // --- 2. INCOME TIERS (Search intent: "How much will I get?") ---
     { 
-        slug: 'maximum-cpp-amount-2025', 
-        age: 65, income: '73200', years: 40, married: false, // 2025 YMPE
+        slug: `maximum-cpp-amount-${CURRENT_APP_YEAR}`, 
+        age: 65, income: RETIREMENT_2026.YMPE.toString(), years: 40, married: false, // YMPE
         label: "Maximum CPP Contributor",
         desc: "Estimate for high-income earners who consistently hit the Yearly Maximum Pensionable Earnings."
-    },
-    { 
+    },    { 
         slug: 'average-canadian-salary', 
         age: 65, income: '55000', years: 40, married: false,
         label: "Average Canadian Income ($55k)",

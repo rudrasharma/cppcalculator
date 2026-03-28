@@ -7,11 +7,12 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Calculator from '../features/retirement/components/index.jsx';
 import { CPP_SCENARIOS } from '../data/seo-scenarios';
+import { CURRENT_APP_YEAR } from '../config/constants.js';
 
 interface Props {}
 
-const title = "CPP, OAS & GIS Pension Calculator [2026] | LoonieFi";
-const description = "Estimate your combined monthly CPP, OAS, and GIS retirement payments. Free Canadian pension calculator adjusted for 2026 maximums and income clawbacks.";
+const title = `CPP, OAS & GIS Pension Calculator [${CURRENT_APP_YEAR}] | LoonieFi`;
+const description = `Estimate your combined monthly CPP, OAS, and GIS retirement payments. Free Canadian pension calculator adjusted for ${CURRENT_APP_YEAR} maximums and income clawbacks.`;
 const canonicalURL = new URL('/cpp-oas-calculator', Astro.site || Astro.url.origin);
 ---
 
@@ -20,7 +21,7 @@ const canonicalURL = new URL('/cpp-oas-calculator', Astro.site || Astro.url.orig
     <section class="py-12 px-4 max-w-5xl mx-auto">
       <header class="text-center mb-10">
         <h1 class="text-4xl md:text-5xl font-black text-slate-900 mb-4 tracking-tighter">
-          CPP & OAS Estimator
+          CPP & OAS Estimator [{CURRENT_APP_YEAR}]
         </h1>
         <p class="text-lg text-slate-600 max-w-2xl mx-auto">
           Accurate estimates for your government pension benefits, including the new enhanced CPP and GIS top-ups.

@@ -6,11 +6,12 @@
 
 import BaseLayout from '../layouts/BaseLayout.astro';
 import HouseholdBenefits from '../features/child-benefit/components/HouseholdBenefits.jsx';
+import { CURRENT_APP_YEAR } from '../config/constants.js';
 
 interface Props {}
 
-const title = "Canada Child Benefit (CCB) Calculator [2026] | LoonieFi";
-const description = "Estimate your exact 2026 Canada Child Benefit payments instantly. Free, fast calculator for Canadian parents to check monthly CCB based on family net income.";
+const title = `Canada Child Benefit (CCB) Calculator [${CURRENT_APP_YEAR}] | LoonieFi`;
+const description = `Estimate your exact ${CURRENT_APP_YEAR} Canada Child Benefit payments instantly. Free, fast calculator for Canadian parents to check monthly CCB based on family net income.`;
 ---
 
 <BaseLayout 
@@ -23,7 +24,7 @@ const description = "Estimate your exact 2026 Canada Child Benefit payments inst
     <div class="flex flex-col md:flex-row justify-between items-center gap-4">
       <div>
         <h1 class="text-2xl font-black text-slate-900 flex items-center gap-2 justify-center md:justify-start">
-          Household Benefits Estimator
+          Household Benefits Estimator [{CURRENT_APP_YEAR}]
         </h1>
         <p class="text-slate-500 text-sm font-medium">
           CCB, Trillium, Carbon Rebate & GST Credits
@@ -34,7 +35,7 @@ const description = "Estimate your exact 2026 Canada Child Benefit payments inst
       <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 border border-slate-200">
         <div class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" aria-hidden="true"></div>
         <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">
-          Data: CRA Indexed Rates (July 2025)
+          Data: CRA Indexed Rates (July {CURRENT_APP_YEAR})
         </span>
       </div>
     </div>
@@ -67,10 +68,10 @@ const description = "Estimate your exact 2026 Canada Child Benefit payments inst
   <section class="max-w-3xl mx-auto px-6 py-12 text-slate-600 leading-relaxed text-sm">
     <h2 class="text-lg font-bold text-slate-900 mb-4">When do CCB payments change?</h2>
     <p class="mb-4">
-      The Canada Child Benefit (CCB) is recalculated every July based on your "Adjusted Family Net Income" (AFNI) from the previous year's tax return. For example, payments starting in <strong>July 2025</strong> are based on your <strong>2024 Tax Return</strong>.
+      The Canada Child Benefit (CCB) is recalculated every July based on your "Adjusted Family Net Income" (AFNI) from the previous year's tax return. For example, payments starting in <strong>July {CURRENT_APP_YEAR}</strong> are based on your <strong>{parseInt(CURRENT_APP_YEAR) - 1} Tax Return</strong>.
     </p>
     <p>
-      This calculator uses the latest indexation rates (announced late 2024) to forecast exactly how much your family will receive in the upcoming benefit year.
+      This calculator uses the latest indexation rates (announced late {parseInt(CURRENT_APP_YEAR) - 1}) to forecast exactly how much your family will receive in the upcoming benefit year.
     </p>
   </section>
 

@@ -6,21 +6,24 @@
  */
 
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { CURRENT_APP_YEAR, RETIREMENT_2026, CCB_2026 } from '../config/constants.js';
 
 interface Props {}
+
+const currency = new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD', maximumFractionDigits: 0 });
 
 const DATA_SOURCES = [
   {
     title: "Canada Pension Plan (CPP)",
-    text: "Calculations utilize the 2025 YMPE ($71,300) and YAMPE ($81,100) ceilings defined by the CRA. Enhancement phases 1 and 2 are modeled based on the official C-26 legislation."
+    text: `Calculations utilize the ${CURRENT_APP_YEAR} YMPE (${currency.format(RETIREMENT_2026.YMPE)}) and YAMPE (${currency.format(RETIREMENT_2026.YAMPE)}) ceilings defined by the CRA. Enhancement phases 1 and 2 are modeled based on the official C-26 legislation.`
   },
   {
     title: "Child Benefits (CCB)",
-    text: "Base Benefit and Phase-out thresholds are indexed to the July 2025 rates (4.7% adjustment factor estimate). Provincial benefits include OCB (Ontario), ACFB (Alberta), and Family Benefit (BC)."
+    text: `Base Benefit and Phase-out thresholds are indexed to the July ${CURRENT_APP_YEAR} rates (2.5% indexation estimate). Provincial benefits include OCB (Ontario), ACFB (Alberta), and Family Benefit (BC).`
   },
   {
     title: "Inflation & Cost of Living",
-    text: "Food inflation data is sourced from the 'Canada's Food Price Report 2025' (Dalhousie University/University of Guelph), adjusted for provincial CPI variations."
+    text: `Food inflation data is sourced from the 'Canada's Food Price Report ${CURRENT_APP_YEAR}' (Dalhousie University/University of Guelph), adjusted for provincial CPI variations.`
   }
 ];
 ---

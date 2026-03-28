@@ -6,6 +6,7 @@ import BaseLayout from '../../../../../layouts/BaseLayout.astro';
 import ParentalLeave from '../../../../../features/parental-leave/components/ParentalLeave.jsx';
 import Breadcrumbs from '../../../../../components/shared/Breadcrumbs.astro';
 import { PROVINCES, SALARIES, LEAVE_SCENARIOS } from '../../../../../data/seo-scenarios';
+import { CURRENT_APP_YEAR } from '../../../../../config/constants.js';
 
 // 2. IMPORT ENGINE (Server-Side)
 import { calculateParentalLeave } from '../../../../../features/parental-leave/utils/parentalLeaveEngine.js';
@@ -102,7 +103,7 @@ const faqSchema = {
       "name": `How much is EI maternity pay for a ${salaryFormatted} salary in ${provinceName}?`,
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": `Based on 2025 rates, a parent in ${provinceName} earning ${salaryFormatted} would receive approximately ${weeklyPay} per week on the ${planType.toLowerCase()} plan.`
+        "text": `Based on ${CURRENT_APP_YEAR} rates, a parent in ${provinceName} earning ${salaryFormatted} would receive approximately ${weeklyPay} per week on the ${planType.toLowerCase()} plan.`
       }
     }
   ]
@@ -129,10 +130,10 @@ const calculatorSchema = {
 
       <header class="text-center mb-10">
         <h1 class="text-3xl md:text-4xl font-black text-slate-900 mb-4">
-            {scenarioLabel} in <span class="text-rose-600">{provinceName}</span>
+            {scenarioLabel} in <span class="text-rose-600">{provinceName}</span> [{CURRENT_APP_YEAR}]
         </h1>
         <p class="text-lg text-slate-600 max-w-2xl mx-auto">
-            Estimating 2025 EI benefits for an income of <strong>{salaryFormatted}</strong>.
+            Estimating ${CURRENT_APP_YEAR} EI benefits for an income of <strong>{salaryFormatted}</strong>.
         </p>
       </header>
 

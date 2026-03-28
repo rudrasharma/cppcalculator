@@ -5,6 +5,7 @@ import BaseLayout from '../../../layouts/BaseLayout.astro';
 import Calculator from '../../../features/retirement/components/index.jsx';
 import Breadcrumbs from '../../../components/shared/Breadcrumbs.astro';
 import { CPP_SCENARIOS } from '../../../data/seo-scenarios';
+import { CURRENT_APP_YEAR, RETIREMENT_2026 } from '../../../config/constants.js';
 
 export const prerender = true;
 
@@ -19,14 +20,12 @@ const { scenario } = Astro.props;
 
 // --- SERVER-SIDE ESTIMATOR (Simplified for SEO) ---
 // We mimic the core logic to give Google a "Answer" without running the full React engine
-const MAX_CPP_2025 = 1364.60;
-const MAX_OAS_2025 = 727.67;
-const YMPE_2025 = 71300;
+const { MAX_BASE_CPP, MAX_OAS, YMPE } = RETIREMENT_2026;
 
 // 1. Estimate Base CPP (Income Ratio * Max)
 const incomeVal = parseInt(scenario.income);
-const incomeRatio = Math.min(incomeVal, YMPE_2025) / YMPE_2025;
-let estCPP = MAX_CPP_2025 * incomeRatio;
+const incomeRatio = Math.min(incomeVal, YMPE) / YMPE;
+let estCPP = MAX_BASE_CPP * incomeRatio;
 
 // 2. Apply Age Adjustment
 const monthsDiff = (scenario.age - 65) * 12;
@@ -35,7 +34,7 @@ estCPP = estCPP * (1 + adjustment);
 
 // 3. Estimate OAS (Years / 40)
 const yearsValid = Math.min(scenario.years, 40);
-let estOAS = MAX_OAS_2025 * (yearsValid / 40);
+let estOAS = MAX_OAS * (yearsValid / 40);
 
 // 4. Apply OAS Age Adjustment (Only positive deferral, no early penalty)
 if (monthsDiff > 0) {
@@ -80,7 +79,7 @@ const calculatorSchema = {
 
       <header class="text-center mb-10">
         <h1 class="text-3xl md:text-4xl font-black text-slate-900 mb-4">
-            {scenario.label}
+            {scenario.label} [{CURRENT_APP_YEAR}]
         </h1>
         <p class="text-lg text-slate-600 max-w-2xl mx-auto">
             {scenario.desc}

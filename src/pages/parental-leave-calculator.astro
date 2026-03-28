@@ -6,11 +6,12 @@
 
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ParentalLeave from '../features/parental-leave/components/ParentalLeave.jsx';
+import { CURRENT_APP_YEAR } from '../config/constants.js';
 
 interface Props {}
 
-const title = "Maternity & Parental Leave EI Calculator [2026] Canada";
-const description = "Planning for a baby? Calculate your exact Canadian EI maternity and parental leave pay. Compare weekly payments for standard vs. extended leave instantly.";
+const title = `Maternity & Parental Leave EI Calculator [${CURRENT_APP_YEAR}] Canada`;
+const description = `Planning for a baby? Calculate your exact Canadian EI maternity and parental leave pay. Compare weekly payments for standard vs. extended leave instantly.`;
 ---
 
 <BaseLayout 
@@ -23,7 +24,7 @@ const description = "Planning for a baby? Calculate your exact Canadian EI mater
     <div class="flex flex-col md:flex-row justify-between items-center gap-4">
       <div>
         <h1 class="text-2xl font-black text-slate-900 flex items-center gap-2 justify-center md:justify-start">
-          Maternity & Parental Leave Estimator
+          Maternity & Parental Leave Estimator [{CURRENT_APP_YEAR}]
         </h1>
         <p class="text-slate-500 text-sm font-medium">
           Plan your EI payments and family budget
@@ -34,7 +35,7 @@ const description = "Planning for a baby? Calculate your exact Canadian EI mater
       <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 border border-slate-200">
         <div class="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" aria-hidden="true"></div>
         <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">
-          Data: Service Canada EI Rates (2025)
+          Data: Service Canada EI Rates ({CURRENT_APP_YEAR})
         </span>
       </div>
     </div>

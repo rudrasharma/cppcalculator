@@ -1,16 +1,18 @@
+import { CCB_2026, EI_2026 } from '../../../config/constants.js';
+
 /**
  * Benefit calculation constants
  * Separated for better maintainability
  */
 
 // ==========================================
-//              CCB PARAMETERS (2025/2026)
+//              CCB PARAMETERS
 // ==========================================
 export const CCB_PARAMS = {
-    MAX_UNDER_6: 7997,
-    MAX_6_TO_17: 6748,
-    THRESHOLD_1: 37487,
-    THRESHOLD_2: 81222,
+    MAX_UNDER_6: CCB_2026.MAX_UNDER_6,
+    MAX_6_TO_17: CCB_2026.MAX_6_TO_17,
+    THRESHOLD_1: CCB_2026.THRESHOLD_1,
+    THRESHOLD_2: CCB_2026.THRESHOLD_2,
     PHASE_OUT: {
         1: { t1: 0.07, t2: 0.032 },
         2: { t1: 0.135, t2: 0.057 },
@@ -71,17 +73,17 @@ export const PROV_PARAMS = {
 };
 
 // ==========================================
-//              EI/PARENTAL LEAVE (2025)
+//              EI/PARENTAL LEAVE (DATA)
 // ==========================================
-export const EI_2025 = {
-    MAX_INSURABLE: 66600,
-    QC_MAX_INSURABLE: 98000,
-    STD_RATE: 0.55,
-    EXT_RATE: 0.33,
-    MAX_WEEKLY_STD: 705,
-    MAX_WEEKLY_EXT: 423,
-    STD_INDIVIDUAL_MAX: 35,
-    STD_COMBINED_MAX: 40,
-    EXT_INDIVIDUAL_MAX: 61,
-    EXT_COMBINED_MAX: 69,
+export const EI_DATA = {
+    MAX_INSURABLE: EI_2026.MAX_INSURABLE,
+    QC_MAX_INSURABLE: EI_2026.QC_MAX_INSURABLE,
+    STD_RATE: EI_2026.STD_RATE,
+    EXT_RATE: EI_2026.EXT_RATE,
+    MAX_WEEKLY_STD: EI_2026.MAX_WEEKLY_STD,
+    MAX_WEEKLY_EXT: EI_2026.MAX_WEEKLY_EXT,
+    STD_INDIVIDUAL_MAX: EI_2026.STD_INDIVIDUAL_MAX,
+    STD_COMBINED_MAX: EI_2026.STD_COMBINED_MAX,
+    EXT_INDIVIDUAL_MAX: EI_2026.EXT_INDIVIDUAL_MAX,
+    EXT_COMBINED_MAX: EI_2026.EXT_COMBINED_MAX,
 };

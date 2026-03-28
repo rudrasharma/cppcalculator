@@ -1,14 +1,15 @@
 // src/utils/constants.js
+import { RETIREMENT_2026 } from '../config/constants.js';
 
 export const CURRENT_YEAR = new Date().getFullYear();
 
 // ==========================================
-//           2025 MAXIMUMS & LIMITS
+//           CURRENT MAXIMUMS & LIMITS
 // ==========================================
-// Source: CRA / Service Canada 2025 Announcements
-export const MAX_BASE_CPP_2025 = 1364.60;
-export const MAX_OAS_2025 = 727.67; 
-export const OAS_CLAWBACK_THRESHOLD_2025 = 93454;
+// Source: Configured in src/config/constants.js
+export const MAX_BASE_CPP_2025 = RETIREMENT_2026.MAX_BASE_CPP;
+export const MAX_OAS_2025 = RETIREMENT_2026.MAX_OAS; 
+export const OAS_CLAWBACK_THRESHOLD_2025 = RETIREMENT_2026.OAS_CLAWBACK_THRESHOLD;
 
 // ==========================================
 //               YMPE HISTORY

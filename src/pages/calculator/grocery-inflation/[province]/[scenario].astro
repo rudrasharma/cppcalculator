@@ -5,6 +5,7 @@ import BaseLayout from '../../../../layouts/BaseLayout.astro';
 import GroceryInflation from '../../../../features/grocery/components/GroceryInflation.jsx';
 import Breadcrumbs from '../../../../components/shared/Breadcrumbs.astro';
 import { PROVINCES, GROCERY_SCENARIOS } from '../../../../data/seo-scenarios';
+import { CURRENT_APP_YEAR } from '../../../../config/constants.js';
 
 // 1. IMPORT DATA & ENGINE (Server-Side)
 import { STAPLES } from '../../../../features/grocery/data/groceryData.js';
@@ -51,8 +52,8 @@ const currentCost = currency.format(serverTotals.current);
 const futureCost = currency.format(serverTotals.future);
 const increase = Math.round(serverTotals.increasePercent);
 
-const title = `${scenario.label} in ${provinceName}: ${futureCost} Forecast | LoonieFi`;
-const description = `In ${provinceName}, this grocery basket currently costs ${currentCost}. By ${2025 + scenario.years}, it is projected to hit ${futureCost} (+${increase}%). See the itemized breakdown.`;
+const title = `${scenario.label} in ${provinceName} [${CURRENT_APP_YEAR}]: ${futureCost} Forecast | LoonieFi`;
+const description = `In ${provinceName}, this grocery basket currently costs ${currentCost}. By ${parseInt(CURRENT_APP_YEAR) + scenario.years} Forecast, it is projected to hit ${futureCost} (+${increase}%). See the itemized breakdown.`;
 const canonicalURL = new URL(Astro.url.pathname, Astro.site || Astro.url.origin);
 
 const breadcrumbPath = [
@@ -81,7 +82,7 @@ const calculatorSchema = {
 
       <header class="text-center mb-10">
         <h1 class="text-3xl md:text-4xl font-black text-slate-900 mb-4">
-            {scenario.label} in <span class="text-indigo-600">{provinceName}</span>
+            {scenario.label} in <span class="text-indigo-600">{provinceName}</span> [{CURRENT_APP_YEAR}]
         </h1>
         <p class="text-lg text-slate-600 max-w-2xl mx-auto">
             {scenario.desc}
@@ -96,7 +97,7 @@ const calculatorSchema = {
           </div>
           <div class="bg-indigo-50 p-6 rounded-2xl border border-indigo-100 text-center relative overflow-hidden">
               <div class="relative z-10">
-                <p class="text-xs font-bold text-indigo-400 uppercase tracking-wider">{2025 + scenario.years} Forecast</p>
+                <p class="text-xs font-bold text-indigo-400 uppercase tracking-wider">{parseInt(CURRENT_APP_YEAR) + scenario.years} Forecast</p>
                 <p class="text-4xl font-black text-indigo-900 tracking-tighter">{futureCost}</p>
               </div>
               <div class="absolute top-0 right-0 w-16 h-16 bg-indigo-200 rounded-full blur-2xl -mr-8 -mt-8"></div>
