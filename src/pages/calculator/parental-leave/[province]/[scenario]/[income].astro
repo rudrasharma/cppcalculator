@@ -95,6 +95,21 @@ const nextIncome = parseInt(salaryVal) + step;
 const makeUrl = (inc) => `/calculator/parental-leave/${Astro.params.province}/${scenarioSlug}/${inc}`;
 
 // 9. SCHEMA
+const softwareSchema = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": title,
+  "description": description,
+  "url": canonicalURL.toString(),
+  "applicationCategory": "FinanceApplication",
+  "operatingSystem": "All",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "CAD"
+  }
+};
+
 const faqSchema = {
   "@context": "https://schema.org",
   "@type": "FAQPage",
@@ -106,23 +121,21 @@ const faqSchema = {
         "@type": "Answer",
         "text": `Based on ${CURRENT_APP_YEAR} rates, a parent in ${provinceName} earning ${salaryFormatted} would receive approximately ${weeklyPay} per week on the ${planType.toLowerCase()} plan.`
       }
+    },
+    {
+      "@type": "Question",
+      "name": `What is the maximum weekly EI benefit for ${CURRENT_APP_YEAR}?`,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": `For ${CURRENT_APP_YEAR}, the maximum weekly EI benefit is $${TAX_YEAR_CONFIG.EI.MAX_WEEKLY_BENEFIT} for standard leave and $${TAX_YEAR_CONFIG.EI.MAX_WEEKLY_EXT} for extended leave.`
+      }
     }
   ]
-};
-
-const calculatorSchema = {
-  "@context": "https://schema.org",
-  "@type": "WebApplication",
-  "name": title,
-  "description": description,
-  "url": canonicalURL.toString(),
-  "applicationCategory": "FinanceApplication",
-  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "CAD" },
 };
 ---
 
 <BaseLayout title={title} description={description}>
-  <script type="application/ld+json" set:html={JSON.stringify(calculatorSchema)} />
+  <script type="application/ld+json" set:html={JSON.stringify(softwareSchema)} />
   <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
   
   <main>

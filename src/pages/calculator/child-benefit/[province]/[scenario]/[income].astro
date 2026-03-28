@@ -95,6 +95,21 @@ const nextIncome = parseInt(salaryVal) + step;
 const makeUrl = (inc) => `/calculator/child-benefit/${Astro.params.province}/${scenarioSlug}/${inc}`;
 
 // 9. SCHEMAS
+const softwareSchema = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": title,
+  "description": description,
+  "url": canonicalURL.toString(),
+  "applicationCategory": "FinanceApplication",
+  "operatingSystem": "All",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "CAD"
+  }
+};
+
 const faqSchema = {
   "@context": "https://schema.org",
   "@type": "FAQPage",
@@ -106,23 +121,21 @@ const faqSchema = {
         "@type": "Answer",
         "text": `Based on July ${CURRENT_APP_YEAR} benefit rates, a ${familyLabel.toLowerCase()} earning ${salaryFormatted} in ${provinceName} can expect approximately ${monthlyFormatted} per month in total government benefits.`
       }
+    },
+    {
+      "@type": "Question",
+      "name": `Is the Canada Child Benefit taxable?`,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No, the Canada Child Benefit (CCB) is a tax-free monthly payment made to eligible families to help with the cost of raising children under 18 years of age."
+      }
     }
   ]
-};
-
-const calculatorSchema = {
-  "@context": "https://schema.org",
-  "@type": "WebApplication",
-  "name": title,
-  "description": description,
-  "url": canonicalURL.toString(),
-  "applicationCategory": "FinanceApplication",
-  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "CAD" },
 };
 ---
 
 <BaseLayout title={title} description={description}>
-  <script type="application/ld+json" set:html={JSON.stringify(calculatorSchema)} />
+  <script type="application/ld+json" set:html={JSON.stringify(softwareSchema)} />
   <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
   
   <main>
