@@ -6,7 +6,8 @@
  */
 
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { CURRENT_APP_YEAR, RETIREMENT_2026, CCB_2026 } from '../config/constants.js';
+import { TAX_YEAR_CONFIG } from '../config/taxYears.js';
+const { CURRENT_APP_YEAR, CPP, CCB } = TAX_YEAR_CONFIG;
 
 interface Props {}
 
@@ -15,7 +16,7 @@ const currency = new Intl.NumberFormat('en-CA', { style: 'currency', currency: '
 const DATA_SOURCES = [
   {
     title: "Canada Pension Plan (CPP)",
-    text: `Calculations utilize the ${CURRENT_APP_YEAR} YMPE (${currency.format(RETIREMENT_2026.YMPE)}) and YAMPE (${currency.format(RETIREMENT_2026.YAMPE)}) ceilings defined by the CRA. Enhancement phases 1 and 2 are modeled based on the official C-26 legislation.`
+    text: `Calculations utilize the ${CURRENT_APP_YEAR} YMPE (${currency.format(CPP.YMPE)}) and YAMPE (${currency.format(CPP.YAMPE)}) ceilings defined by the CRA. Enhancement phases 1 and 2 are modeled based on the official C-26 legislation.`
   },
   {
     title: "Child Benefits (CCB)",

@@ -1,4 +1,5 @@
-import { CURRENT_APP_YEAR, RETIREMENT_2026 } from '../config/constants.js';
+import { TAX_YEAR_CONFIG } from '../config/taxYears.js';
+const { CURRENT_APP_YEAR, CPP } = TAX_YEAR_CONFIG;
 
 export const PROVINCES = [
   { code: 'ON', name: 'Ontario', slug: 'ontario' },
@@ -73,7 +74,7 @@ export const CPP_SCENARIOS = [
     // --- 2. INCOME TIERS (Search intent: "How much will I get?") ---
     { 
         slug: `maximum-cpp-amount-${CURRENT_APP_YEAR}`, 
-        age: 65, income: RETIREMENT_2026.YMPE.toString(), years: 40, married: false, // YMPE
+        age: 65, income: CPP.YMPE.toString(), years: 40, married: false, // YMPE
         label: "Maximum CPP Contributor",
         desc: "Estimate for high-income earners who consistently hit the Yearly Maximum Pensionable Earnings."
     },    { 

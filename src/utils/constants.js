@@ -1,15 +1,16 @@
 // src/utils/constants.js
-import { RETIREMENT_2026 } from '../config/constants.js';
+import { TAX_YEAR_CONFIG } from '../config/taxYears.js';
+const { CPP, OAS } = TAX_YEAR_CONFIG;
 
 export const CURRENT_YEAR = new Date().getFullYear();
 
 // ==========================================
 //           CURRENT MAXIMUMS & LIMITS
 // ==========================================
-// Source: Configured in src/config/constants.js
-export const MAX_BASE_CPP_2025 = RETIREMENT_2026.MAX_BASE_CPP;
-export const MAX_OAS_2025 = RETIREMENT_2026.MAX_OAS; 
-export const OAS_CLAWBACK_THRESHOLD_2025 = RETIREMENT_2026.OAS_CLAWBACK_THRESHOLD;
+// Source: Configured in src/config/taxYears.js
+export const MAX_BASE_CPP_2025 = CPP.MAX_MONTHLY_BENEFIT;
+export const MAX_OAS_2025 = OAS.MAX_MONTHLY; 
+export const OAS_CLAWBACK_THRESHOLD_2025 = OAS.CLAWBACK_THRESHOLD;
 
 // ==========================================
 //               YMPE HISTORY
@@ -17,11 +18,11 @@ export const OAS_CLAWBACK_THRESHOLD_2025 = RETIREMENT_2026.OAS_CLAWBACK_THRESHOL
 // Year's Maximum Pensionable Earnings
 export const YMPE_DATA = {
     // --- Future Projections (Estimated at ~2.5% growth) ---
-    2030: 80600, 
-    2029: 78700, 
-    2028: 76800, 
-    2027: 74900, 
-    2026: 73100,
+    2030: 82500, 
+    2029: 80500, 
+    2028: 78500, 
+    2027: 76500, 
+    2026: CPP.YMPE,
     
     // --- Confirmed Historical Data ---
     2025: 71300,
@@ -87,28 +88,28 @@ export const YMPE_DATA = {
 };
 
 // ==========================================
-//           GIS PARAMETERS (2025)
+//           GIS PARAMETERS (2026)
 // ==========================================
-// Based on Jan-Mar 2025 Benefit Amounts
+// Based on 2026 Estimates
 export const GIS_PARAMS = {
     SINGLE: { 
-        max: 1086.88, 
-        limit: 22056, 
+        max: OAS.GIS_SINGLE_MAX, 
+        limit: 22600, 
         rate: 0.50 
     },
     MARRIED_SPOUSE_OAS: { 
-        max: 665.41, 
-        limit: 29136, 
+        max: OAS.GIS_COUPLE_MAX, 
+        limit: 29800, 
         rate: 0.25 
     },
     MARRIED_SPOUSE_NO_OAS: { 
-        max: 1086.88, 
-        limit: 52848, 
+        max: OAS.GIS_SINGLE_MAX, 
+        limit: 54100, 
         rate: 0.25 
     },
     MARRIED_SPOUSE_ALLOWANCE: { 
-        max: 665.41, 
-        limit: 40800, 
+        max: OAS.GIS_COUPLE_MAX, 
+        limit: 41800, 
         rate: 0.25 
     }
 };
@@ -128,11 +129,10 @@ export const getYMPE = (year) => {
     // 2. Future Projection (> 2030)
     // Assumes 2.5% annual growth for conservative estimation
     if (year > 2030) {
-        return Math.round(80600 * Math.pow(1.025, year - 2030));
+        return Math.round(82500 * Math.pow(1.025, year - 2030));
     }
 
     // 3. Pre-1966 Logic
-    // CPP didn't exist, but for math safety we return the baseline
     if (year < 1966) {
         return 5000; 
     }
@@ -151,8 +151,11 @@ export const getYAMPE = (year) => {
     // 2024 was the transition year (~107% of YMPE)
     if (year === 2024) return 73200;
 
-    // 2025+ is fully phased in (~114% of YMPE)
+    // 2025 is fully phased in (~114% of YMPE)
     if (year === 2025) return 81200;
+
+    // 2026+ uses Config
+    if (year === 2026) return CPP.YAMPE;
 
     // Future calculation: Fixed at ~1.14x the YMPE
     const ympe = getYMPE(year);

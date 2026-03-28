@@ -5,7 +5,8 @@ import BaseLayout from '../../../layouts/BaseLayout.astro';
 import Calculator from '../../../features/retirement/components/index.jsx';
 import Breadcrumbs from '../../../components/shared/Breadcrumbs.astro';
 import { CPP_SCENARIOS } from '../../../data/seo-scenarios';
-import { CURRENT_APP_YEAR, RETIREMENT_2026 } from '../../../config/constants.js';
+import { TAX_YEAR_CONFIG } from '../../../config/taxYears.js';
+const { CURRENT_APP_YEAR, CPP, OAS } = TAX_YEAR_CONFIG;
 
 export const prerender = true;
 
@@ -20,7 +21,9 @@ const { scenario } = Astro.props;
 
 // --- SERVER-SIDE ESTIMATOR (Simplified for SEO) ---
 // We mimic the core logic to give Google a "Answer" without running the full React engine
-const { MAX_BASE_CPP, MAX_OAS, YMPE } = RETIREMENT_2026;
+const MAX_BASE_CPP = CPP.MAX_MONTHLY_BENEFIT;
+const MAX_OAS = OAS.MAX_MONTHLY;
+const YMPE = CPP.YMPE;
 
 // 1. Estimate Base CPP (Income Ratio * Max)
 const incomeVal = parseInt(scenario.income);

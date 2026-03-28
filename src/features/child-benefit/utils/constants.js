@@ -1,4 +1,5 @@
-import { CCB_2026, EI_2026 } from '../../../config/constants.js';
+import { TAX_YEAR_CONFIG } from '../../../config/taxYears.js';
+const { CCB, EI } = TAX_YEAR_CONFIG;
 
 /**
  * Benefit calculation constants
@@ -9,10 +10,10 @@ import { CCB_2026, EI_2026 } from '../../../config/constants.js';
 //              CCB PARAMETERS
 // ==========================================
 export const CCB_PARAMS = {
-    MAX_UNDER_6: CCB_2026.MAX_UNDER_6,
-    MAX_6_TO_17: CCB_2026.MAX_6_TO_17,
-    THRESHOLD_1: CCB_2026.THRESHOLD_1,
-    THRESHOLD_2: CCB_2026.THRESHOLD_2,
+    MAX_UNDER_6: CCB.MAX_UNDER_6,
+    MAX_6_TO_17: CCB.MAX_6_TO_17,
+    THRESHOLD_1: CCB.THRESHOLD_1,
+    THRESHOLD_2: CCB.THRESHOLD_2,
     PHASE_OUT: {
         1: { t1: 0.07, t2: 0.032 },
         2: { t1: 0.135, t2: 0.057 },
@@ -76,14 +77,14 @@ export const PROV_PARAMS = {
 //              EI/PARENTAL LEAVE (DATA)
 // ==========================================
 export const EI_DATA = {
-    MAX_INSURABLE: EI_2026.MAX_INSURABLE,
-    QC_MAX_INSURABLE: EI_2026.QC_MAX_INSURABLE,
-    STD_RATE: EI_2026.STD_RATE,
-    EXT_RATE: EI_2026.EXT_RATE,
-    MAX_WEEKLY_STD: EI_2026.MAX_WEEKLY_STD,
-    MAX_WEEKLY_EXT: EI_2026.MAX_WEEKLY_EXT,
-    STD_INDIVIDUAL_MAX: EI_2026.STD_INDIVIDUAL_MAX,
-    STD_COMBINED_MAX: EI_2026.STD_COMBINED_MAX,
-    EXT_INDIVIDUAL_MAX: EI_2026.EXT_INDIVIDUAL_MAX,
-    EXT_COMBINED_MAX: EI_2026.EXT_COMBINED_MAX,
+    MAX_INSURABLE: EI.MIE,
+    QC_MAX_INSURABLE: EI.QC_MIE,
+    STD_RATE: EI.STD_RATE,
+    EXT_RATE: EI.EXT_RATE,
+    MAX_WEEKLY_STD: EI.MAX_WEEKLY_BENEFIT,
+    MAX_WEEKLY_EXT: EI.MAX_WEEKLY_EXT,
+    STD_INDIVIDUAL_MAX: 35,
+    STD_COMBINED_MAX: 40,
+    EXT_INDIVIDUAL_MAX: 61,
+    EXT_COMBINED_MAX: 69,
 };

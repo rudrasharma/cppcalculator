@@ -7,11 +7,13 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import GroceryInflation from '../features/grocery/components/GroceryInflation.jsx';
 import { GROCERY_SCENARIOS } from '../data/seo-scenarios';
+import { TAX_YEAR_CONFIG } from '../config/taxYears.js';
+const { CURRENT_APP_YEAR } = TAX_YEAR_CONFIG;
 
 interface Props {}
 
-const title = "Grocery Inflation Calculator & Forecast 2025";
-const description = "Audit your grocery bill and see how 4.7% food inflation impacts your family budget over the next 5 years.";
+const title = `Grocery Inflation Calculator & Forecast [${CURRENT_APP_YEAR}]`;
+const description = `Audit your grocery bill and see how 5.2% food inflation impacts your family budget over the next 5 years.`;
 ---
 
 <BaseLayout title={title} description={description}>
@@ -21,7 +23,7 @@ const description = "Audit your grocery bill and see how 4.7% food inflation imp
     <div class="flex flex-col md:flex-row justify-between items-center gap-4">
       <div>
         <h1 class="text-2xl font-black text-slate-900 flex items-center gap-2 justify-center md:justify-start">
-          Budget Defense & Purchasing Power
+          Budget Defense & Purchasing Power [{CURRENT_APP_YEAR}]
         </h1>
         <p class="text-slate-500 text-sm font-medium">
           Forecast grocery inflation and shrinking money value
@@ -32,7 +34,7 @@ const description = "Audit your grocery bill and see how 4.7% food inflation imp
       <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 border border-slate-200">
         <div class="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" aria-hidden="true"></div>
         <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">
-          Data: Canada Food Price Report 2025
+          Data: Canada Food Price Report {CURRENT_APP_YEAR}
         </span>
       </div>
     </div>

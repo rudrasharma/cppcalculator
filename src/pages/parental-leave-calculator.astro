@@ -6,7 +6,8 @@
 
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ParentalLeave from '../features/parental-leave/components/ParentalLeave.jsx';
-import { CURRENT_APP_YEAR } from '../config/constants.js';
+import { TAX_YEAR_CONFIG } from '../config/taxYears.js';
+const { CURRENT_APP_YEAR } = TAX_YEAR_CONFIG;
 
 interface Props {}
 
