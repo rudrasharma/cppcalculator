@@ -35,6 +35,25 @@ global.ResizeObserver = class ResizeObserver {
   unobserve() {}
 };
 
+// Mock window.scrollTo
+window.scrollTo = jest.fn();
+
+// Mock Recharts
+jest.mock('recharts', () => ({
+  ResponsiveContainer: ({ children }) => <div style={{ width: 800, height: 400 }}>{children}</div>,
+  AreaChart: ({ children }) => <svg>{children}</svg>,
+  Area: () => <rect />,
+  XAxis: () => <g />,
+  YAxis: () => <g />,
+  CartesianGrid: () => <g />,
+  Tooltip: () => <div />,
+  Legend: () => <div />,
+  ReferenceLine: () => <g />,
+  LineChart: ({ children }) => <svg>{children}</svg>,
+  Line: () => <path />,
+  Label: () => <text />,
+}));
+
 // Suppress console errors in tests (optional - uncomment if needed)
 // global.console = {
 //   ...console,
