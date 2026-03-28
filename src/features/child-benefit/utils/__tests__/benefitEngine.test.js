@@ -1,4 +1,5 @@
-import { calculateAll, CCB_PARAMS, GST_PARAMS } from '../benefitEngine';
+import { calculateAll } from '../benefitEngine';
+import { CCB_PARAMS, GST_PARAMS } from '../constants';
 
 describe('benefitEngine', () => {
   describe('calculateAll', () => {
