@@ -7,18 +7,59 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import HouseholdBenefits from '../features/child-benefit/components/HouseholdBenefits.jsx';
 import { TAX_YEAR_CONFIG } from '../config/taxYears.js';
-const { CURRENT_APP_YEAR } = TAX_YEAR_CONFIG;
+const { CURRENT_APP_YEAR, CCB } = TAX_YEAR_CONFIG;
 
 interface Props {}
 
 const title = `Canada Child Benefit (CCB) Calculator [${CURRENT_APP_YEAR}] | LoonieFi`;
 const description = `Estimate your exact ${CURRENT_APP_YEAR} Canada Child Benefit payments instantly. Free, fast calculator for Canadian parents to check monthly CCB based on family net income.`;
+const canonicalURL = new URL('/child-benefit-calculator', Astro.site || Astro.url.origin);
+
+const softwareSchema = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": title,
+  "description": description,
+  "url": canonicalURL.toString(),
+  "applicationCategory": "FinanceApplication",
+  "operatingSystem": "All",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "CAD"
+  }
+};
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": `What is the maximum CCB amount for ${CURRENT_APP_YEAR}?`,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": `For the ${CURRENT_APP_YEAR} benefit year, the maximum Canada Child Benefit is $${CCB.MAX_UNDER_6.toLocaleString()} per year ($${(CCB.MAX_UNDER_6 / 12).toFixed(2)}/mo) for each child under 6, and $${CCB.MAX_6_TO_17.toLocaleString()} per year ($${(CCB.MAX_6_TO_17 / 12).toFixed(2)}/mo) for each child aged 6 to 17.`
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the CCB income threshold for 2026?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": `The first income threshold for CCB phase-out in 2026 is $${CCB.THRESHOLD_1.toLocaleString()}. Families with an Adjusted Family Net Income (AFNI) below this amount receive the maximum benefit.`
+      }
+    }
+  ]
+};
 ---
 
 <BaseLayout 
   title={title} 
   description={description}
 >
+  <script type="application/ld+json" set:html={JSON.stringify(softwareSchema)} />
+  <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
   
   {/* TITLE SECTION with Trust Badge */}
   <header class="max-w-6xl mx-auto px-4 pt-8 text-center md:text-left animate-fade-in">

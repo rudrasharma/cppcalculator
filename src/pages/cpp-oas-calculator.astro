@@ -8,16 +8,57 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Calculator from '../features/retirement/components/index.jsx';
 import { CPP_SCENARIOS } from '../data/seo-scenarios';
 import { TAX_YEAR_CONFIG } from '../config/taxYears.js';
-const { CURRENT_APP_YEAR } = TAX_YEAR_CONFIG;
+const { CURRENT_APP_YEAR, CPP, OAS } = TAX_YEAR_CONFIG;
 
 interface Props {}
 
 const title = `CPP, OAS & GIS Pension Calculator [${CURRENT_APP_YEAR}] | LoonieFi`;
 const description = `Estimate your combined monthly CPP, OAS, and GIS retirement payments. Free Canadian pension calculator adjusted for ${CURRENT_APP_YEAR} maximums and income clawbacks.`;
 const canonicalURL = new URL('/cpp-oas-calculator', Astro.site || Astro.url.origin);
+
+const softwareSchema = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": title,
+  "description": description,
+  "url": canonicalURL.toString(),
+  "applicationCategory": "FinanceApplication",
+  "operatingSystem": "All",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "CAD"
+  }
+};
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": `What is the maximum CPP benefit for ${CURRENT_APP_YEAR}?`,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": `For ${CURRENT_APP_YEAR}, the maximum monthly CPP benefit at age 65 is approximately $${CPP.MAX_MONTHLY_BENEFIT.toLocaleString()}. This depends on your contributions throughout your working life and the Year's Maximum Pensionable Earnings (YMPE).`
+      }
+    },
+    {
+      "@type": "Question",
+      "name": `What is the OAS clawback threshold for ${CURRENT_APP_YEAR}?`,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": `The OAS recovery tax (clawback) threshold for ${CURRENT_APP_YEAR} is $${OAS.CLAWBACK_THRESHOLD.toLocaleString()}. If your individual net world income exceeds this amount, your OAS pension will be reduced by 15% of the excess.`
+      }
+    }
+  ]
+};
 ---
 
 <BaseLayout title={title} description={description}>
+  <script type="application/ld+json" set:html={JSON.stringify(softwareSchema)} />
+  <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
+  
   <main>
     <section class="py-12 px-4 max-w-5xl mx-auto">
       <header class="text-center mb-10">

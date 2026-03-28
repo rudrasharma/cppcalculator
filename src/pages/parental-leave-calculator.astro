@@ -7,18 +7,59 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ParentalLeave from '../features/parental-leave/components/ParentalLeave.jsx';
 import { TAX_YEAR_CONFIG } from '../config/taxYears.js';
-const { CURRENT_APP_YEAR } = TAX_YEAR_CONFIG;
+const { CURRENT_APP_YEAR, EI } = TAX_YEAR_CONFIG;
 
 interface Props {}
 
 const title = `Maternity & Parental Leave EI Calculator [${CURRENT_APP_YEAR}] Canada`;
 const description = `Planning for a baby? Calculate your exact Canadian EI maternity and parental leave pay. Compare weekly payments for standard vs. extended leave instantly.`;
+const canonicalURL = new URL('/parental-leave-calculator', Astro.site || Astro.url.origin);
+
+const softwareSchema = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": title,
+  "description": description,
+  "url": canonicalURL.toString(),
+  "applicationCategory": "FinanceApplication",
+  "operatingSystem": "All",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "CAD"
+  }
+};
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": `What is the maximum weekly EI benefit for ${CURRENT_APP_YEAR}?`,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": `For ${CURRENT_APP_YEAR}, the maximum weekly EI benefit for maternity and standard parental leave is $${EI.MAX_WEEKLY_BENEFIT} per week. For extended parental leave, the maximum is $${EI.MAX_WEEKLY_EXT} per week.`
+      }
+    },
+    {
+      "@type": "Question",
+      "name": `What is the maximum insurable earnings for ${CURRENT_APP_YEAR}?`,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": `The maximum insurable earnings (MIE) for ${CURRENT_APP_YEAR} is $${EI.MIE.toLocaleString()}. This is the income level at which you contribute the maximum amount to EI and also the cap used to calculate your weekly benefits.`
+      }
+    }
+  ]
+};
 ---
 
 <BaseLayout 
   title={title} 
   description={description}
 >
+  <script type="application/ld+json" set:html={JSON.stringify(softwareSchema)} />
+  <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
   
   {/* TITLE SECTION */}
   <header class="max-w-6xl mx-auto px-4 pt-8 text-center md:text-left animate-fade-in">

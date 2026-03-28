@@ -64,17 +64,46 @@ const breadcrumbPath = [
 
 const calculatorSchema = {
   "@context": "https://schema.org",
-  "@type": "WebApplication",
+  "@type": "SoftwareApplication",
   "name": title,
   "description": description,
   "url": canonicalURL.toString(),
   "applicationCategory": "FinanceApplication",
-  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "CAD" },
+  "operatingSystem": "All",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "CAD"
+  }
+};
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": `How much CPP will I get if I retire at ${scenario.age}?`,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": `Based on an average income of ${incomeFormatted}, your estimated monthly CPP benefit at age ${scenario.age} is approximately ${currency.format(estCPP)}.`
+      }
+    },
+    {
+      "@type": "Question",
+      "name": `What is the maximum CPP benefit for ${CURRENT_APP_YEAR}?`,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": `For ${CURRENT_APP_YEAR}, the maximum monthly CPP benefit at age 65 is $${CPP.MAX_MONTHLY_BENEFIT.toLocaleString()}.`
+      }
+    }
+  ]
 };
 ---
 
 <BaseLayout title={title} description={description}>
   <script type="application/ld+json" set:html={JSON.stringify(calculatorSchema)} />
+  <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
   
   <main>
     <section class="py-12 px-4 max-w-6xl mx-auto">
