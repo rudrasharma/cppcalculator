@@ -6,6 +6,7 @@
 
 import '../styles/global.css';
 import ContactButton from '../components/shared/ui/ContactButton.jsx';
+import { PostHogProviderWrapper } from '../components/PostHogProviderWrapper.jsx';
 
 interface Props {
   title: string;
@@ -81,7 +82,7 @@ const schema = {
   </head>
 
   <body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col antialiased selection:bg-indigo-100 selection:text-indigo-900">
-    
+    <PostHogProviderWrapper client:load>
     {/* --- SHARED HEADER --- */}
     <nav class="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50" role="navigation" aria-label="Main navigation">
       <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
@@ -172,6 +173,7 @@ const schema = {
         </div>
       </div>
     </footer>
+    </PostHogProviderWrapper>
 
     {/* SCRIPT FOR SHARE BUTTON */}
     <script is:inline>

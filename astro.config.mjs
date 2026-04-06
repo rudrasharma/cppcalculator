@@ -26,4 +26,16 @@ export default defineConfig({
 
   output: 'server',
   adapter: cloudflare(),
+  
+  vite: {
+    server: {
+      proxy: {
+        '/ingest': {
+          target: 'https://us.i.posthog.com',
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/ingest/, ''),
+        },
+      },
+    },
+  },
 });

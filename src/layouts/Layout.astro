@@ -6,6 +6,8 @@
  * @property {string} [canonical] - Canonical URL for the page
  */
 
+import { PostHogProviderWrapper } from '../components/PostHogProviderWrapper.jsx';
+
 interface Props {
   title?: string;
   description?: string;
@@ -46,9 +48,11 @@ const canonicalURL = canonical || new URL(Astro.url.pathname, Astro.site || Astr
     {description && <meta name="twitter:description" content={description} />}
   </head>
   <body>
-    <main>
-      <slot />
-    </main>
+    <PostHogProviderWrapper client:load>
+      <main>
+        <slot />
+      </main>
+    </PostHogProviderWrapper>
   </body>
 </html>
 
