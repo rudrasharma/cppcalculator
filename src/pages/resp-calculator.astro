@@ -1,0 +1,11 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import RESPCalculator from '../features/resp/components/RESPCalculator';
+
+const title = "RESP Calculator: Maximize Your Education Savings | LoonieFi";
+const description = "Calculate your projected Registered Education Savings Plan (RESP) balance. Plan for CESG grants, CLB eligibility, and provincial incentives in Canada.";
+---
+
+<BaseLayout title={title} description={description}>
+    <RESPCalculator client:load />
+</BaseLayout>

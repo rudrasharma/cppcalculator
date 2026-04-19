@@ -263,3 +263,58 @@ export const FilterIcon = React.memo((props) => (
 ));
 FilterIcon.displayName = 'FilterIcon';
 
+export const GraduationCapIcon = React.memo((props) => (
+    <IconBase {...props}>
+        <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+        <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+    </IconBase>
+));
+GraduationCapIcon.displayName = 'GraduationCapIcon';
+
+export const PiggyBankIcon = React.memo((props) => (
+    <IconBase {...props}>
+        <path d="M19 5c-1.5 0-2.8 1.4-3 2-3.5-1.5-11-.3-11 5 0 1.8 0 3 2 4.5V20h4v-2h3v2h4v-4c2-1.5 2-2.7 2-4.5 0-3.4-2.2-4-4-4z"/>
+        <path d="M7 11h.01"/>
+        <path d="M11 7.5a4.01 4.01 0 0 0-4 4"/>
+    </IconBase>
+));
+PiggyBankIcon.displayName = 'PiggyBankIcon';
+
+export const GiftIcon = React.memo((props) => (
+    <IconBase {...props}>
+        <polyline points="20 12 20 22 4 22 4 12"/>
+        <rect width="20" height="5" x="2" y="7"/>
+        <line x1="12" x2="12" y1="22" y2="7"/>
+        <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/>
+        <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/>
+    </IconBase>
+));
+GiftIcon.displayName = 'GiftIcon';
+
+export const BarChart3Icon = React.memo((props) => (
+    <IconBase {...props}>
+        <path d="M3 3v18h18"/>
+        <path d="M18 17V9"/>
+        <path d="M13 17V5"/>
+        <path d="M8 17v-3"/>
+    </IconBase>
+));
+BarChart3Icon.displayName = 'BarChart3Icon';
+
+export const PlusIcon = React.memo((props) => (
+    <IconBase {...props}>
+        <line x1="12" y1="5" x2="12" y2="19"/>
+        <line x1="5" y1="12" x2="19" y2="12"/>
+    </IconBase>
+));
+PlusIcon.displayName = 'PlusIcon';
+
+export const AlertCircleIcon = React.memo((props) => (
+    <IconBase {...props}>
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" x2="12" y1="8" y2="12"/>
+        <line x1="12" x2="12.01" y1="16" y2="16"/>
+    </IconBase>
+));
+AlertCircleIcon.displayName = 'AlertCircleIcon';
+
