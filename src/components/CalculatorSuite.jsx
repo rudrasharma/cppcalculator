@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Calculator from '../features/retirement/components';
 import HouseholdBenefits from '../features/child-benefit/components/HouseholdBenefits';
 import ParentalLeave from '../features/parental-leave/components/ParentalLeave'; 
-import GroceryInflation from '../features/grocery/components/GroceryInflation'; 
+import RESPCalculator from '../features/resp/components/RESPCalculator';
 import CAGRCalculator from '../features/cagr/components/CAGRCalculator';
 import MortgageCalculator from '../features/mortgage/components/MortgageCalculator';
 import '../styles/global.css'
@@ -12,7 +12,7 @@ const ChartIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" vie
 const BabyIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>;
 const HomeIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>;
 const UsersIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>;
-const ShieldIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>;
+const GraduationCapIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>;
 const TrendingUpIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>;
 const ArrowRight = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>;
 
@@ -27,6 +27,16 @@ const TABS = [
     color: 'text-indigo-600', 
     bg: 'bg-indigo-50',
     description: 'Calculate your future monthly income from government pensions.'
+  },
+  { 
+    id: 'resp', 
+    label: 'RESP',
+    title: 'Education Savings (RESP)',
+    subtitle: 'Maximize grants for your children\'s future',
+    icon: GraduationCapIcon, 
+    color: 'text-emerald-600', 
+    bg: 'bg-emerald-50',
+    description: 'Maximize government grants and project your child’s future education fund.'
   },
   { 
     id: 'mortgage', 
@@ -57,16 +67,6 @@ const TABS = [
     color: 'text-emerald-600', 
     bg: 'bg-emerald-50',
     description: 'Maximize your Child Benefits and quarterly tax rebates.'
-  },
-  { 
-    id: 'budget', 
-    label: 'Budget Def.',
-    title: 'Budget Defense & Purchasing Power',
-    subtitle: 'Forecast grocery inflation and shrinking money value',
-    icon: ShieldIcon, 
-    color: 'text-amber-600', 
-    bg: 'bg-amber-50',
-    description: 'Protect your spending power against rising Canadian food costs.'
   },
   { 
     id: 'cagr', 
@@ -198,7 +198,7 @@ export default function CalculatorSuite() {
         <>
           <div className="hidden md:block max-w-5xl mx-auto px-8 pt-8 pb-2 animate-fade-in text-center md:text-left">
             <h1 className="text-2xl font-black text-slate-900">{activeTabInfo?.title}</h1>
-            <p className="text-slate-500 text-sm font-medium">{activeTabInfo?.subtitle}</p>
+            <h2 className="text-slate-500 text-sm font-medium">{activeTabInfo?.subtitle}</h2>
           </div>
 
           <main className="flex-grow flex flex-col justify-center w-full animate-fade-in transition-all duration-300">
@@ -211,8 +211,8 @@ export default function CalculatorSuite() {
             <div style={{ display: view === 'parental' ? 'block' : 'none' }}>
                 <ParentalLeave isVisible={view === 'parental'} />
             </div>
-            <div style={{ display: view === 'budget' ? 'block' : 'none' }}>
-                <GroceryInflation isVisible={view === 'budget'} />
+            <div style={{ display: view === 'resp' ? 'block' : 'none' }}>
+                <RESPCalculator isVisible={view === 'resp'} />
             </div>
             <div style={{ display: view === 'cagr' ? 'block' : 'none' }}>
                 <CAGRCalculator isVisible={view === 'cagr'} />
