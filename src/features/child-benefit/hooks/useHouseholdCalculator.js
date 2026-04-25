@@ -65,6 +65,8 @@ function householdCalculatorReducer(state, action) {
             return { ...state, mounted: action.payload };
         case 'SET_IS_VISIBLE':
             return { ...state, isVisible: action.payload };
+        case 'SET_STATE':
+            return { ...state, ...action.payload };
         default:
             throw new Error(`Unhandled action type: ${action.type}`);
     }
@@ -72,6 +74,33 @@ function householdCalculatorReducer(state, action) {
 
 export const useHouseholdCalculator = () => {
     const [state, dispatch] = useReducer(householdCalculatorReducer, initialState);
+
+    // Persistence Layer
+    useEffect(() => {
+        try {
+            const saved = window.localStorage.getItem('looniefi_benefit_state');
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                delete parsed.mounted;
+                delete parsed.activeTab;
+                dispatch({ type: 'SET_STATE', payload: parsed });
+            }
+        } catch (e) {
+            console.warn('Failed to load benefit state', e);
+        }
+    }, []);
+
+    useEffect(() => {
+        if (!state.mounted) return;
+        try {
+            const stateToSave = { ...state };
+            delete stateToSave.mounted;
+            delete stateToSave.activeTab;
+            window.localStorage.setItem('looniefi_benefit_state', JSON.stringify(stateToSave));
+        } catch (e) {
+            console.warn('Failed to save benefit state', e);
+        }
+    }, [state, state.mounted]);
 
     const { province, maritalStatus, grossAfni, sharedCustody, isRural, children, mounted } = state;
 

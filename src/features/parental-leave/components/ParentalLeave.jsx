@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import AICopilot from '../../../components/AICopilot';
 import { useUrlTab } from '../../../hooks/useUrlTab';
+import { useLocalStorage } from '../../../hooks/useLocalStorage';
 import { 
     calculateParentalLeave,
     getCurrentMaxInsurable,
@@ -30,45 +31,44 @@ export default function ParentalLeave({
     };
 
     // --- LAZY STATE INITIALIZATION ---
-    const [province, setProvince] = useState(() => getParam('prov') || initialProvince);
-    
-    const [salary, setSalary] = useState(() => {
+    const [province, setProvince] = useLocalStorage('looniefi_parental_prov', getParam('prov') || initialProvince);
+
+    const [salary, setSalary] = useLocalStorage('looniefi_parental_sal', (() => {
         const val = getParam('sal');
         return val ? parseInt(val, 36) : initialSalary;
-    });
+    })());
 
-    const [partnerSalary, setPartnerSalary] = useState(() => {
+    const [partnerSalary, setPartnerSalary] = useLocalStorage('looniefi_parental_psal', (() => {
         const val = getParam('psal');
         return val ? parseInt(val, 36) : 60000;
-    });
+    })());
 
-    const [hasPartner, setHasPartner] = useState(() => {
+    const [hasPartner, setHasPartner] = useLocalStorage('looniefi_parental_part', (() => {
         const val = getParam('part');
         return val ? val === '1' : initialPartner;
-    });
+    })());
 
-    const [planType, setPlanType] = useState(() => {
+    const [planType, setPlanType] = useLocalStorage('looniefi_parental_plan', (() => {
         const val = getParam('plan');
-        if (val) return val === 'ext' ? 'EXTENDED' : 'STANDARD';
-        return initialPlan;
-    });
+        return val ? val : initialPlan;
+    })());
 
-    const [p1Maternity, setP1Maternity] = useState(() => {
+    const [p1Maternity, setP1Maternity] = useLocalStorage('looniefi_parental_p1mat', (() => {
         const val = getParam('mat');
         return val ? val === '1' : true;
-    });
+    })());
 
-    const [p1Weeks, setP1Weeks] = useState(() => {
+    const [p1Weeks, setP1Weeks] = useLocalStorage('looniefi_parental_p1w', (() => {
         const val = getParam('p1w');
         if (val) return parseInt(val);
         return initialPlan === 'EXTENDED' ? 50 : 30;
-    });
+    })());
 
-    const [p2Weeks, setP2Weeks] = useState(() => {
+    const [p2Weeks, setP2Weeks] = useLocalStorage('looniefi_parental_p2w', (() => {
         const val = getParam('p2w');
         if (val) return parseInt(val);
         return 5;
-    });
+    })());
 
     const [activeTab, setActiveTab] = useUrlTab('input', 'step');
     const [copySuccess, setCopySuccess] = useState(false);

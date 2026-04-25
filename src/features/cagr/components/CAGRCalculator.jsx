@@ -20,6 +20,7 @@ import {
     TrendingDownIcon,
     NativeSelect 
 } from '../../../components/shared';
+import { useLocalStorage } from '../../../hooks/useLocalStorage';
 
 const MODES = {
     RATE: { 
@@ -60,22 +61,22 @@ const FREQUENCIES = [
 ];
 
 export default function CAGRCalculator({ isVisible }) {
-    const [mode, setMode] = useState('FUTURE'); 
+    const [mode, setMode] = useLocalStorage('looniefi_cagr_mode', 'FUTURE'); 
     
     // Core State
-    const [startValue, setStartValue] = useState(10000);
-    const [endValue, setEndValue] = useState(100000);
-    const [years, setYears] = useState(10);
-    const [rate, setRate] = useState(7.0);
+    const [startValue, setStartValue] = useLocalStorage('looniefi_cagr_start', 10000);
+    const [endValue, setEndValue] = useLocalStorage('looniefi_cagr_end', 100000);
+    const [years, setYears] = useLocalStorage('looniefi_cagr_years', 10);
+    const [rate, setRate] = useLocalStorage('looniefi_cagr_rate', 7.0);
     
     // Contribution State
-    const [hasContribution, setHasContribution] = useState(false);
-    const [contribution, setContribution] = useState(500);
-    const [frequency, setFrequency] = useState('Monthly');
+    const [hasContribution, setHasContribution] = useLocalStorage('looniefi_cagr_has_contrib', false);
+    const [contribution, setContribution] = useLocalStorage('looniefi_cagr_contrib', 500);
+    const [frequency, setFrequency] = useLocalStorage('looniefi_cagr_freq', 'Monthly');
     
     // Inflation State
-    const [useInflation, setUseInflation] = useState(false);
-    const [inflationRate, setInflationRate] = useState(2.5);
+    const [useInflation, setUseInflation] = useLocalStorage('looniefi_cagr_use_inf', false);
+    const [inflationRate, setInflationRate] = useLocalStorage('looniefi_cagr_inf_rate', 2.5);
 
     // Calculate Primary Result
     const result = useMemo(() => {

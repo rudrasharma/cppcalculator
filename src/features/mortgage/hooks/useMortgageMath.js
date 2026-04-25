@@ -126,6 +126,33 @@ export const useMortgageMath = (initialStateOverride = null) => {
 
     const [state, dispatch] = useReducer(mortgageReducer, startingState);
 
+    // Persistence Layer
+    useEffect(() => {
+        if (initialStateOverride) return;
+        try {
+            const saved = window.localStorage.getItem('looniefi_mortgage_state');
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                // Don't restore 'mounted' or overrides
+                delete parsed.mounted;
+                dispatch({ type: 'SET_STATE', payload: parsed });
+            }
+        } catch (e) {
+            console.warn('Failed to load mortgage state', e);
+        }
+    }, []);
+
+    useEffect(() => {
+        if (!state.mounted || initialStateOverride) return;
+        try {
+            const stateToSave = { ...state };
+            delete stateToSave.mounted;
+            window.localStorage.setItem('looniefi_mortgage_state', JSON.stringify(stateToSave));
+        } catch (e) {
+            console.warn('Failed to save mortgage state', e);
+        }
+    }, [state, state.mounted]);
+
     useEffect(() => {
         if (initialStateOverride) {
             dispatch({ type: 'SET_STATE', payload: startingState });

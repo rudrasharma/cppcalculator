@@ -4,30 +4,31 @@ import {
 } from 'recharts';
 import { calculateSmithManoeuvre } from '../utils/smithEngine';
 import { MoneyInput } from '../../../components/shared/MoneyInput';
+import { useLocalStorage } from '../../../hooks/useLocalStorage';
 
 export default function SmithCalculator() {
     // UI State
     const [showAdvanced, setShowAdvanced] = useState(false);
 
     // Initial State
-    const [homeValue, setHomeValue] = useState(750000);
-    const [mortgageBalance, setMortgageBalance] = useState(500000);
-    const [mortgageRate, setMortgageRate] = useState(0.045);
-    const [helocRate, setHelocRate] = useState(0.065);
-    const [marginalTaxRate, setMarginalTaxRate] = useState(0.43);
+    const [homeValue, setHomeValue] = useLocalStorage('looniefi_smith_home_val', 750000);
+    const [mortgageBalance, setMortgageBalance] = useLocalStorage('looniefi_smith_mort_bal', 500000);
+    const [mortgageRate, setMortgageRate] = useLocalStorage('looniefi_smith_mort_rate', 0.045);
+    const [helocRate, setHelocRate] = useLocalStorage('looniefi_smith_heloc_rate', 0.065);
+    const [marginalTaxRate, setMarginalTaxRate] = useLocalStorage('looniefi_smith_tax_rate', 0.43);
     
     // New Return States
-    const [capitalGainsRate, setCapitalGainsRate] = useState(0.05);
-    const [dividendYield, setDividendYield] = useState(0.02);
-    const [dividendTaxRate, setDividendTaxRate] = useState(0.15);
-    const [reinvestDividends, setReinvestDividends] = useState(true);
+    const [capitalGainsRate, setCapitalGainsRate] = useLocalStorage('looniefi_smith_cap_gains', 0.05);
+    const [dividendYield, setDividendYield] = useLocalStorage('looniefi_smith_div_yield', 0.02);
+    const [dividendTaxRate, setDividendTaxRate] = useLocalStorage('looniefi_smith_div_tax', 0.15);
+    const [reinvestDividends, setReinvestDividends] = useLocalStorage('looniefi_smith_reinvest_div', true);
     
     // Previous Inputs
-    const [amortizationYears, setAmortizationYears] = useState(25);
-    const [initialLumpSum, setInitialLumpSum] = useState(0);
-    const [readvanceTolerance, setReadvanceTolerance] = useState(1.0);
-    const [reinvestTaxRefund, setReinvestTaxRefund] = useState(true);
-    const [capitalizeInterest, setCapitalizeInterest] = useState(true);
+    const [amortizationYears, setAmortizationYears] = useLocalStorage('looniefi_smith_amort', 25);
+    const [initialLumpSum, setInitialLumpSum] = useLocalStorage('looniefi_smith_lump_sum', 0);
+    const [readvanceTolerance, setReadvanceTolerance] = useLocalStorage('looniefi_smith_tolerance', 1.0);
+    const [reinvestTaxRefund, setReinvestTaxRefund] = useLocalStorage('looniefi_smith_reinvest_tax', true);
+    const [capitalizeInterest, setCapitalizeInterest] = useLocalStorage('looniefi_smith_capitalize', true);
 
     const currency = new Intl.NumberFormat('en-CA', { 
         style: 'currency', 

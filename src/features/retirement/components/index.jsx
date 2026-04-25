@@ -7,6 +7,7 @@ import { loadStateFromUrl, syncStateToUrl } from '../utils/urlSync';
 import { AboutModal, ImportModal } from './Modals';
 import InputTab from './InputTab';
 import ResultsTab from './ResultsTab';
+import { useLocalStorage } from '../../../hooks/useLocalStorage';
 
 export default function Calculator({ 
     isVisible = true,
@@ -31,19 +32,19 @@ export default function Calculator({
         return [];
     });
 
-    const [dob, setDob] = useState(initialDob);
-    const [retirementAge, setRetirementAge] = useState(initialRetirementAge);
-    const [yearsInCanada, setYearsInCanada] = useState(initialYearsInCanada);
-    const [earnings, setEarnings] = useState({});
+    const [dob, setDob] = useLocalStorage('looniefi_retirement_dob', initialDob);
+    const [retirementAge, setRetirementAge] = useLocalStorage('looniefi_retirement_age', initialRetirementAge);
+    const [yearsInCanada, setYearsInCanada] = useLocalStorage('looniefi_retirement_years', initialYearsInCanada);
+    const [earnings, setEarnings] = useLocalStorage('looniefi_retirement_earnings', {});
     const [activeTab, setActiveTab] = useUrlTab('input', 'step');
     const [mounted, setMounted] = useState(false); 
     
     // --- INPUT STATE ---
-    const [avgSalaryInput, setAvgSalaryInput] = useState(initialIncome ? initialIncome.toString() : '');
-    const [otherIncome, setOtherIncome] = useState(''); 
-    const [livedInCanadaAllLife, setLivedInCanadaAllLife] = useState(initialYearsInCanada >= 40); 
-    const [isMarried, setIsMarried] = useState(initialMaritalStatus);
-    const [showChildren, setShowChildren] = useState(initialChildCount > 0);
+    const [avgSalaryInput, setAvgSalaryInput] = useLocalStorage('looniefi_retirement_avg_salary', initialIncome ? initialIncome.toString() : '');
+    const [otherIncome, setOtherIncome] = useLocalStorage('looniefi_retirement_other_income', ''); 
+    const [livedInCanadaAllLife, setLivedInCanadaAllLife] = useLocalStorage('looniefi_retirement_lived_canada', initialYearsInCanada >= 40); 
+    const [isMarried, setIsMarried] = useLocalStorage('looniefi_retirement_married', initialMaritalStatus);
+    const [showChildren, setShowChildren] = useLocalStorage('looniefi_retirement_show_kids', initialChildCount > 0);
     const [showGrid, setShowGrid] = useState(false);
     const [showNet, setShowNet] = useState(false);
     const TAX_RATE = 0.15; 
