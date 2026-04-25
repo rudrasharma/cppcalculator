@@ -1,7 +1,6 @@
-import { useMemo, useEffect, useState } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { calculateFamilyRESP } from '../utils/respEngine';
 import { usePostHog } from '@posthog/react';
-import { useLocalStorage } from '../../../hooks/useLocalStorage';
 
 const DEFAULT_STATE = {
     beneficiaries: [
@@ -18,7 +17,7 @@ const DEFAULT_STATE = {
 };
 
 export function useRESPMath(initialStateOverride) {
-    const [state, setState] = useLocalStorage('looniefi_resp_state', { ...DEFAULT_STATE, ...initialStateOverride });
+    const [state, setState] = useState({ ...DEFAULT_STATE, ...initialStateOverride });
     const [mounted, setMounted] = useState(false);
     const posthog = usePostHog();
 
