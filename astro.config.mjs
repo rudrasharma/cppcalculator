@@ -26,6 +26,21 @@ export default defineConfig({
 
   output: 'server',
   adapter: cloudflare(),
+
+  redirects: {
+    '/grocery-inflation-calculator': {
+      status: 301,
+      destination: '/'
+    },
+    '/calculator/grocery-inflation/[...slug]': {
+      status: 301,
+      destination: '/'
+    },
+    '/blog/grocery-inflation': {
+      status: 301,
+      destination: '/'
+    }
+  },
   
   vite: {
     server: {
