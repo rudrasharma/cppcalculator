@@ -1,19 +1,18 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 /**
  * useLocalStorage Hook
  * 
  * A hydration-safe hook that persists state to window.localStorage.
  * Follows the same API signature as React's useState.
+ * 
+ * @param {string} key - The unique storage key
+ * @param {any} initialValue - The fallback value if no storage exists
  */
 export function useLocalStorage(key, initialValue) {
-    // 1. Initialize state with initialValue for SSR/Hydration match
-    const [state, setState] = useState(() => {
-        return typeof initialValue === 'function' ? initialValue() : initialValue;
-    });
-    
-    // Track if we've initialized from localStorage to avoid overwriting on mount
-    const hasInitialized = useRef(false);
+    // 1. Initialize state with initialValue
+    // This ensures Server-Side Rendering matches the first Client-Side render
+    const [state, setState] = useState(initialValue);
 
     // 2. Load from localStorage once on mount
     useEffect(() => {
@@ -23,30 +22,25 @@ export function useLocalStorage(key, initialValue) {
                 setState(JSON.parse(item));
             }
         } catch (error) {
-            console.warn(`useLocalStorage: Error reading key "${key}":`, error);
-        } finally {
-            hasInitialized.current = true;
+            console.warn(`Error reading localStorage key "${key}":`, error);
         }
     }, [key]);
 
-    // 3. Stable setter function
+    // 3. Persist to localStorage whenever state changes
     const setValue = useCallback((value) => {
-        setState((prev) => {
-            // Resolve functional updates correctly using the latest previous state
-            const nextValue = value instanceof Function ? value(prev) : value;
+        try {
+            // Support both direct values and functional updates
+            const valueToStore = value instanceof Function ? value(state) : value;
             
-            // Persist to localStorage immediately
-            try {
-                if (typeof window !== 'undefined') {
-                    window.localStorage.setItem(key, JSON.stringify(nextValue));
-                }
-            } catch (error) {
-                console.warn(`useLocalStorage: Error setting key "${key}":`, error);
+            setState(valueToStore);
+            
+            if (typeof window !== 'undefined') {
+                window.localStorage.setItem(key, JSON.stringify(valueToStore));
             }
-            
-            return nextValue;
-        });
-    }, [key]);
+        } catch (error) {
+            console.warn(`Error setting localStorage key "${key}":`, error);
+        }
+    }, [key, state]);
 
     return [state, setValue];
 }
