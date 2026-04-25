@@ -49,9 +49,9 @@ export default function Calculator({
     const [showNet, setShowNet] = useState(false);
     const TAX_RATE = 0.15; 
 
-    const [spouseDob, setSpouseDob] = useState('1985-01-01');
-    const [spouseIncome, setSpouseIncome] = useState(initialSpouseIncome ? initialSpouseIncome.toString() : '');
-    const [forceAllowance, setForceAllowance] = useState(false);
+    const [spouseDob, setSpouseDob] = useLocalStorage('looniefi_retirement_spouse_dob', '1985-01-01');
+    const [spouseIncome, setSpouseIncome] = useLocalStorage('looniefi_retirement_spouse_income', initialSpouseIncome ? initialSpouseIncome.toString() : '');
+    const [forceAllowance, setForceAllowance] = useLocalStorage('looniefi_retirement_force_allowance', false);
 
     // --- UI STATE ---
     const [showAbout, setShowAbout] = useState(false);
