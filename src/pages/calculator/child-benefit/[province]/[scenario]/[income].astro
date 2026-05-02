@@ -88,10 +88,10 @@ const breadcrumbPath = [
   { label: `${familyLabel} (${salaryFormatted})`, href: Astro.url.pathname }
 ];
 
-// 8. LINKING STRATEGY (Previous/Next Income)
-const step = 5000;
-const prevIncome = parseInt(salaryVal) - step;
-const nextIncome = parseInt(salaryVal) + step;
+// 8. LINKING STRATEGY (Previous/Next Income from SALARIES array)
+const currentIndex = SALARIES.indexOf(parseInt(salaryVal));
+const prevIncome = currentIndex > 0 ? SALARIES[currentIndex - 1] : null;
+const nextIncome = currentIndex < SALARIES.length - 1 ? SALARIES[currentIndex + 1] : null;
 const makeUrl = (inc) => `/calculator/child-benefit/${Astro.params.province}/${scenarioSlug}/${inc}`;
 
 // 9. SCHEMAS
@@ -207,12 +207,12 @@ const faqSchema = {
       <div class="mt-16 pt-10 border-t border-slate-200">
           <h3 class="font-bold text-slate-900 mb-6 text-center">Compare Nearby Income Levels</h3>
           <div class="flex flex-wrap justify-center gap-3">
-            {prevIncome >= 20000 && (
+            {prevIncome && (
                 <a href={makeUrl(prevIncome)} class="px-5 py-3 bg-white border border-slate-200 hover:border-indigo-300 hover:text-indigo-600 rounded-xl text-sm font-bold transition-all shadow-sm">
                     ← View {currency.format(prevIncome)}
                 </a>
             )}
-            {nextIncome <= 250000 && (
+            {nextIncome && (
                 <a href={makeUrl(nextIncome)} class="px-5 py-3 bg-white border border-slate-200 hover:border-indigo-300 hover:text-indigo-600 rounded-xl text-sm font-bold transition-all shadow-sm">
                     View {currency.format(nextIncome)} →
                 </a>

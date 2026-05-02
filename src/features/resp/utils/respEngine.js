@@ -37,15 +37,24 @@ export const calculateFamilyRESP = ({
     const annualTotalContributionBase = totalContributionAmount * frequencyMultiplier;
 
     // Track per-child lifetime stats
-    const childStats = beneficiaries.map(b => ({
-        id: b.id,
-        currentAge: Number(b.age),
-        totalCESG: 0,
-        totalCLB: 0,
-        totalProvincial: 0,
-        totalContributions: 0, // This projection only
-        catchUpRoom: Math.max(0, Number(b.age) * 2500) // Simple catch-up estimate
-    }));
+    // We estimate historical contributions if not provided to avoid over-calculating grants/limits
+    const estimatedTotalPrincipal = currentBalance * 0.8; // Assume 80% of current balance is principal/grants
+    const perChildPrincipalEstimate = estimatedTotalPrincipal / beneficiaries.length;
+
+    const childStats = beneficiaries.map(b => {
+        const pastContrib = Number(b.pastContributions || perChildPrincipalEstimate * 0.8);
+        const pastGrants = Number(perChildPrincipalEstimate * 0.2); // Rough grant estimate
+        
+        return {
+            id: b.id,
+            currentAge: Number(b.age),
+            totalCESG: Math.min(7200, pastGrants), 
+            totalCLB: 0,
+            totalProvincial: 0,
+            totalContributions: pastContrib, 
+            catchUpRoom: Math.max(0, (Number(b.age) * 2500) - pastContrib)
+        };
+    });
 
     let totalProjectedInterest = 0;
     let totalProjectedContributions = 0;
@@ -70,10 +79,8 @@ export const calculateFamilyRESP = ({
                 let childYearContrib = splitContribution;
                 
                 // Per-child HARD LIMIT 1: $50,000 lifetime
-                // Note: We don't have exact historical per-child contribs here, 
-                // but we cap the projection room.
                 const remainingRoom = 50000 - child.totalContributions;
-                childYearContrib = Math.min(childYearContrib, remainingRoom);
+                childYearContrib = Math.max(0, Math.min(childYearContrib, remainingRoom));
                 
                 child.totalContributions += childYearContrib;
                 yearTotalContributions += childYearContrib;
@@ -85,7 +92,7 @@ export const calculateFamilyRESP = ({
 
                 let childCESG = childYearContrib * 0.20;
                 const remainingCESG = 7200 - child.totalCESG;
-                childCESG = Math.min(childCESG, maxGrant, remainingCESG);
+                childCESG = Math.max(0, Math.min(childCESG, maxGrant, remainingCESG));
                 
                 child.totalCESG += childCESG;
                 yearTotalGrants += childCESG;
@@ -93,6 +100,9 @@ export const calculateFamilyRESP = ({
                 // Update catch-up room
                 if (childCESG > 500) {
                     child.catchUpRoom = Math.max(0, child.catchUpRoom - (childCESG - 500) / 0.20);
+                } else if (childYearContrib < 2500) {
+                    // If they contributed less than max, they gain future catch-up room
+                    child.catchUpRoom += (2500 - childYearContrib);
                 }
 
                 // 3. Provincial Grants
@@ -100,20 +110,19 @@ export const calculateFamilyRESP = ({
                 const childAgeAtYear = child.currentAge + year;
 
                 if (province === 'British Columbia') {
-                    // BCTESG: $1,200 at age 6, or immediately if starting at 7-8
                     if (childAgeAtYear === 6 || (year === 0 && (childAgeAtYear === 7 || childAgeAtYear === 8))) {
                         childProvincial = 1200;
                     }
                 } else if (province === 'Quebec') {
                     let qesiMatch = childYearContrib * 0.10;
-                    childProvincial = Math.min(qesiMatch, 250, 3600 - child.totalProvincial);
+                    childProvincial = Math.max(0, Math.min(qesiMatch, 250, 3600 - child.totalProvincial));
                 }
                 child.totalProvincial += childProvincial;
                 yearTotalGrants += childProvincial;
             });
         }
 
-        // 4. Federal CLB (requires no contribution)
+        // 4. Federal CLB
         if (clbEligible) {
             eligibleForCLB.forEach(child => {
                 const childAgeAtYear = child.currentAge + year;
@@ -131,12 +140,24 @@ export const calculateFamilyRESP = ({
             });
         }
 
-        // 5. Compounding
-        const interestRate = annualReturn / 100;
-        // Apply interest to start balance + mid-year contributions/grants
-        const yearInterest = (yearStartBalance + (yearTotalContributions + yearTotalGrants) / 2) * interestRate;
-        
-        balance = yearStartBalance + yearTotalContributions + yearTotalGrants + yearInterest;
+        // 5. Compounding (Accurate monthly compounding model)
+        const annualRate = annualReturn / 100;
+        let yearInterest = 0;
+
+        if (annualRate > 0) {
+            const monthlyRate = annualRate / 12;
+            const fvLump = yearStartBalance * Math.pow(1 + monthlyRate, 12);
+            
+            // Ordinary annuity formula for monthly contributions during the year
+            const pmtMonthly = (yearTotalContributions + yearTotalGrants) / 12;
+            const fvPmt = pmtMonthly * (Math.pow(1 + monthlyRate, 12) - 1) / monthlyRate;
+            
+            const totalEndBalance = fvLump + fvPmt;
+            yearInterest = totalEndBalance - (yearStartBalance + yearTotalContributions + yearTotalGrants);
+            balance = totalEndBalance;
+        } else {
+            balance = yearStartBalance + yearTotalContributions + yearTotalGrants;
+        }
         
         totalProjectedInterest += yearInterest;
         totalProjectedContributions += yearTotalContributions;
