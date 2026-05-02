@@ -32,6 +32,7 @@ export default {
     '/node_modules/',
     '/dist/',
     '/.astro/',
+    '/tests/',
     '/__tests__/testUtils', // Exclude test utilities file
   ],
   
