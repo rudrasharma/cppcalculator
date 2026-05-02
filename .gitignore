@@ -30,3 +30,8 @@ coverage/
 
 # Jest
 .jest-cache/
+
+# Playwright artifacts
+playwright-report/
+test-results/
+
