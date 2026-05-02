@@ -17,7 +17,7 @@ test.describe('Calculator Smoke Tests', () => {
       // Check for a common element or the title
       await expect(page).toHaveTitle(/LoonieFi/);
       // Verify main content area exists
-      const main = page.locator('main');
+      const main = page.locator('main').first();
       await expect(main).toBeVisible();
     });
   }
@@ -26,8 +26,9 @@ test.describe('Calculator Smoke Tests', () => {
 test.describe('pSEO Route Integrity', () => {
     test('should load dynamic child benefit scenario', async ({ page }) => {
         await page.goto('/calculator/child-benefit/ontario/married-2-children/60000');
-        await expect(page.getByText('Ontario')).toBeVisible();
-        await expect(page.getByText('$60,000')).toBeVisible();
+        // Use a more specific locator to avoid strict mode violations
+        await expect(page.getByRole('heading', { name: /Ontario/i })).toBeVisible();
+        await expect(page.getByText('$60,000')).first().toBeVisible();
         // Check for "spiderweb" links we fixed earlier
         const nearbyLinks = page.locator('a:has-text("View")');
         await expect(nearbyLinks.first()).toBeVisible();

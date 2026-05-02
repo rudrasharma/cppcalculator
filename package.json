@@ -16,7 +16,7 @@
   },
   "lint-staged": {
     "*.{js,jsx}": [
-      "jest --findRelatedTests --bail"
+      "jest --findRelatedTests --bail --passWithNoTests"
     ]
   },
   "dependencies": {
