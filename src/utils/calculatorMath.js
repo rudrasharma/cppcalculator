@@ -55,7 +55,7 @@ export const calculateEI = (salary, planType = 'STANDARD', province = 'ON') => {
     const insurableEarnings = Math.min(salary, insurableCap);
     
     const rate = planType === 'EXTENDED' ? eiConfig.EXT_RATE : eiConfig.STD_RATE;
-    const maxWeekly = planType === 'EXTENDED' ? eiConfig.MAX_WEEKLY_EXT : eiConfig.MAX_WEEKLY_BENEFIT;
+    const maxWeekly = planType === 'EXTENDED' ? eiConfig.MAX_WEEKLY_BEN_EXT : eiConfig.MAX_WEEKLY_BEN_STD;
     
     let weeklyBenefit = (insurableEarnings * rate) / 52;
     weeklyBenefit = Math.min(weeklyBenefit, maxWeekly);

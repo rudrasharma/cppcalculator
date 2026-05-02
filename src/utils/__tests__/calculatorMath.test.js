@@ -59,7 +59,7 @@ describe('Calculator Math Utilities (2026 Config)', () => {
             // Math: (50000 * 0.55) / 52 = 528.85 -> 529
             const expected = Math.round((50000 * TAX_YEAR_CONFIG.EI.STD_RATE) / 52);
             expect(results.weekly).toBe(expected);
-            expect(results.weekly).toBeLessThan(TAX_YEAR_CONFIG.EI.MAX_WEEKLY_BENEFIT);
+            expect(results.weekly).toBeLessThan(TAX_YEAR_CONFIG.EI.MAX_WEEKLY_BEN_STD);
         });
 
         test('User hitting or exceeding MIE ($68,900)', () => {
@@ -67,7 +67,7 @@ describe('Calculator Math Utilities (2026 Config)', () => {
             const results = calculateEI(salary, 'STANDARD', 'ON');
             
             // Should cap exactly at $729 (from TAX_YEAR_CONFIG)
-            expect(results.weekly).toBe(TAX_YEAR_CONFIG.EI.MAX_WEEKLY_BENEFIT);
+            expect(results.weekly).toBe(TAX_YEAR_CONFIG.EI.MAX_WEEKLY_BEN_STD);
             expect(results.insurableEarnings).toBe(TAX_YEAR_CONFIG.EI.MIE);
         });
 
@@ -76,7 +76,7 @@ describe('Calculator Math Utilities (2026 Config)', () => {
             const results = calculateEI(salary, 'EXTENDED', 'ON');
             
             // Cap should be $437
-            expect(results.weekly).toBe(TAX_YEAR_CONFIG.EI.MAX_WEEKLY_EXT);
+            expect(results.weekly).toBe(TAX_YEAR_CONFIG.EI.MAX_WEEKLY_BEN_EXT);
         });
     });
 
