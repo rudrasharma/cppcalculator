@@ -28,7 +28,7 @@ test.describe('pSEO Route Integrity', () => {
         await page.goto('/calculator/child-benefit/ontario/married-2-children/60000');
         // Use a more specific locator to avoid strict mode violations
         await expect(page.getByRole('heading', { name: /Ontario/i })).toBeVisible();
-        await expect(page.getByText('$60,000')).first().toBeVisible();
+        await expect(page.getByText('$60,000').first()).toBeVisible();
         // Check for "spiderweb" links we fixed earlier
         const nearbyLinks = page.locator('a:has-text("View")');
         await expect(nearbyLinks.first()).toBeVisible();

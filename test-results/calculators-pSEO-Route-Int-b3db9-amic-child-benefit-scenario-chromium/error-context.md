@@ -12,21 +12,7 @@
 # Error details
 
 ```
-Error: expect(locator).toBeVisible() failed
-
-Locator: getByText('Ontario')
-Expected: visible
-Error: strict mode violation: getByText('Ontario') resolved to 5 elements:
-    1) <a href="/calculator/child-benefit/browse" class="hover:text-indigo-600 transition-colors whitespace-nowrap font-medium"> Ontario </a> aka getByRole('link', { name: 'Ontario' })
-    2) <h1 class="text-3xl md:text-4xl font-black text-slate-900 mb-4"> Ontario Child Benefit Estimator [2026]↵</h1> aka getByRole('heading', { name: 'Ontario Child Benefit' })
-    3) <option selected value="ON">Ontario (ON)</option> aka getByLabel('Province')
-    4) <p>…</p> aka getByText('At an income of $60,000, your')
-    5) <strong>Ontario Child & Trillium:</strong> aka getByText('Ontario Child & Trillium:')
-
-Call log:
-  - Expect "toBeVisible" with timeout 5000ms
-  - waiting for getByText('Ontario')
-
+Error: expect: Property 'first' not found.
 ```
 
 # Page snapshot
@@ -276,7 +262,7 @@ Call log:
   17 |       // Check for a common element or the title
   18 |       await expect(page).toHaveTitle(/LoonieFi/);
   19 |       // Verify main content area exists
-  20 |       const main = page.locator('main');
+  20 |       const main = page.locator('main').first();
   21 |       await expect(main).toBeVisible();
   22 |     });
   23 |   }
@@ -285,13 +271,14 @@ Call log:
   26 | test.describe('pSEO Route Integrity', () => {
   27 |     test('should load dynamic child benefit scenario', async ({ page }) => {
   28 |         await page.goto('/calculator/child-benefit/ontario/married-2-children/60000');
-> 29 |         await expect(page.getByText('Ontario')).toBeVisible();
-     |                                                 ^ Error: expect(locator).toBeVisible() failed
-  30 |         await expect(page.getByText('$60,000')).toBeVisible();
-  31 |         // Check for "spiderweb" links we fixed earlier
-  32 |         const nearbyLinks = page.locator('a:has-text("View")');
-  33 |         await expect(nearbyLinks.first()).toBeVisible();
-  34 |     });
-  35 | });
-  36 | 
+  29 |         // Use a more specific locator to avoid strict mode violations
+  30 |         await expect(page.getByRole('heading', { name: /Ontario/i })).toBeVisible();
+> 31 |         await expect(page.getByText('$60,000')).first().toBeVisible();
+     |                                                ^ Error: expect: Property 'first' not found.
+  32 |         // Check for "spiderweb" links we fixed earlier
+  33 |         const nearbyLinks = page.locator('a:has-text("View")');
+  34 |         await expect(nearbyLinks.first()).toBeVisible();
+  35 |     });
+  36 | });
+  37 | 
 ```
