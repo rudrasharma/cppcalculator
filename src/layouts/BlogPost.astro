@@ -25,6 +25,7 @@ const TOOL_MAPPING: Record<string, { url: string; label: string }> = {
   'parental': { url: '/parental-leave-calculator', label: 'Calculate Your Leave' },
   'cpp': { url: '/cpp-oas-calculator', label: 'Estimate Your Pension' },
   'ccb': { url: '/child-benefit-calculator', label: 'Calculate Child Benefits' },
+  'tax': { url: '/income-tax-calculator', label: 'Calculate Your Take-Home' },
 };
 
 const targetTool = TOOL_MAPPING[frontmatter.category || ''] || { url: '/', label: 'Start a Calculation' };

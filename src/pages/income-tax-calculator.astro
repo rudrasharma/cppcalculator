@@ -1,0 +1,78 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import TaxCalculator from '../features/tax/components/TaxCalculator.jsx';
+import Breadcrumbs from '../components/shared/Breadcrumbs.astro';
+
+const title = "2026 Canadian Income Tax & Take-Home Pay Calculator | LoonieFi";
+const description = "Calculate your 2026 Canadian federal and provincial income tax, CPP, and EI deductions. See your monthly and bi-weekly take-home pay with our privacy-first tool.";
+const canonicalURL = new URL('/income-tax-calculator', Astro.site || Astro.url.origin);
+
+const breadcrumbPath = [
+  { label: 'Income Tax', href: Astro.url.pathname }
+];
+
+const softwareSchema = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "LoonieFi Income Tax Calculator",
+  "operatingSystem": "Web",
+  "applicationCategory": "FinanceApplication",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "CAD"
+  },
+  "description": description
+};
+---
+
+<BaseLayout title={title} description={description}>
+    <script type="application/ld+json" set:html={JSON.stringify(softwareSchema)} />
+
+    <main class="max-w-6xl mx-auto px-6 py-12 md:py-20 animate-fade-in w-full">
+        
+        <Breadcrumbs crumbs={breadcrumbPath} />
+
+        <header class="mb-12 text-center md:text-left">
+            <h1 class="text-4xl md:text-6xl font-black text-slate-900 mb-6 tracking-tight">
+                Income Tax <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-amber-500 italic">& Take-Home</span>
+            </h1>
+            <p class="text-lg text-slate-600 max-w-2xl font-medium">
+                Estimate your 2026 net pay after federal and provincial taxes, CPP enhancement, and EI premiums. 
+                Everything is calculated locally in your browser.
+            </p>
+        </header>
+
+        <TaxCalculator client:load />
+
+        {/* SEO Content Section */}
+        <section class="mt-24 grid grid-cols-1 md:grid-cols-2 gap-12 border-t border-slate-100 pt-16">
+            <article class="prose prose-slate prose-sm max-w-none">
+                <h2 class="text-xl font-black text-slate-900 uppercase tracking-tight">How 2026 Taxes Work</h2>
+                <p>
+                    Canada uses a progressive tax system where your income is divided into brackets, each taxed at a higher rate. 
+                    For 2026, federal tax brackets have been indexed by 2.0% to account for inflation.
+                </p>
+                <h3 class="text-lg font-bold">What are Payroll Deductions?</h3>
+                <p>
+                    Beyond income tax, most employees must contribute to the **Canada Pension Plan (CPP)** and **Employment Insurance (EI)**. 
+                    In 2026, the CPP second enhancement (CPP2) applies to earnings between $74,600 and $85,000, ensuring a more robust pension for future retirees.
+                </p>
+            </article>
+
+            <article class="bg-slate-50 p-8 rounded-[2rem] border border-slate-100">
+                <h2 class="text-xl font-black text-slate-900 mb-4 tracking-tight">The "RRSP Strategy"</h2>
+                <p class="text-slate-600 text-sm leading-relaxed mb-6">
+                    Contributing to a Registered Retirement Savings Plan (RRSP) directly reduces your taxable income. 
+                    If you earn $100,000 and contribute $10,000 to an RRSP, you are only taxed as if you earned $90,000. 
+                    This can often result in a significant tax refund at your marginal tax rate.
+                </p>
+                <div class="flex items-center gap-2 text-indigo-600 font-bold text-xs uppercase tracking-widest">
+                    <span class="w-2 h-2 rounded-full bg-indigo-600 animate-pulse"></span>
+                    Tip: Use the slider to see your tax savings
+                </div>
+            </article>
+        </section>
+
+    </main>
+</BaseLayout>

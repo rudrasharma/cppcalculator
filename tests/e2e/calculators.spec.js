@@ -8,6 +8,7 @@ const calculators = [
   { name: 'RESP', path: '/resp-calculator' },
   { name: 'CAGR', path: '/cagr-calculator' },
   { name: 'Smith Manoeuvre', path: '/smith-manoeuvre' },
+  { name: 'Income Tax', path: '/income-tax-calculator' },
 ];
 
 test.describe('Calculator Smoke Tests', () => {

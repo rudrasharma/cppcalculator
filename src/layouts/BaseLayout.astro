@@ -18,6 +18,7 @@ const currentPath = Astro.url.pathname;
 const canonicalURL = new URL(Astro.url.pathname, Astro.site || Astro.url.origin);
 
 const TABS = [
+  { id: 'tax', href: '/income-tax-calculator', label: 'Income Tax', color: 'text-emerald-600', bg: 'bg-emerald-50' },
   { id: 'cpp', href: '/cpp-oas-calculator', label: 'CPP & OAS', color: 'text-indigo-600', bg: 'bg-indigo-50' },
   { id: 'resp', href: '/resp-calculator', label: 'RESP', color: 'text-emerald-600', bg: 'bg-emerald-50' },
   { id: 'mortgage', href: '/mortgage-calculator', label: 'Mortgage', color: 'text-blue-600', bg: 'bg-blue-50' },
