@@ -36,6 +36,16 @@ export default function AICopilot({ context, onUpdateCalculator, mode }) {
                 greeting = "Hi! I can help with Maternity & Parental Leave. Try 'I make $75k in Ontario' or 'Switch to Extended'.";
             } else if (activePage === 'cpp') {
                 greeting = "Hi! I can help with CPP/OAS. Try 'I am 50 years old and i want to retire at 65'.";
+            } else if (activePage === 'tax') {
+                greeting = "Hi! I can help with your 2026 Income Tax. Try 'I make $80k in Alberta' or 'What is my average tax rate?'.";
+            } else if (activePage === 'mortgage') {
+                greeting = "Hi! I can help with your mortgage. Try 'I'm buying a $600k house with 10% down' or 'How much interest can I save?'.";
+            } else if (activePage === 'resp') {
+                greeting = "Hi! I can help with RESP planning. Try 'I have two kids, ages 2 and 5' or 'How much grant will I get?'.";
+            } else if (activePage === 'cagr') {
+                greeting = "Hi! I can help with growth projections. Try 'What return do I need to turn $10k into $50k in 10 years?'.";
+            } else if (activePage === 'smith') {
+                greeting = "Hi! I can help with the Smith Manoeuvre. Try 'I have a $400k mortgage at 4%' or 'Explain the tax benefit'.";
             }
             
             setMessages([{ role: 'assistant', content: greeting }]);
@@ -104,7 +114,12 @@ export default function AICopilot({ context, onUpdateCalculator, mode }) {
             if ([
                 'update_parental_calculator', 
                 'update_household_calculator',
-                'update_retirement_calculator' 
+                'update_retirement_calculator',
+                'update_tax_calculator',
+                'update_mortgage_calculator',
+                'update_resp_calculator',
+                'update_cagr_calculator',
+                'update_smith_calculator'
             ].includes(toolCall.function.name)) {
                 toolWasExecuted = handleToolExecution(toolCall.function.name, toolCall.function.arguments);
             }

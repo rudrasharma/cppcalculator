@@ -4,6 +4,7 @@ import {
 } from 'recharts';
 import { calculateSmithManoeuvre } from '../utils/smithEngine';
 import { MoneyInput } from '../../../components/shared/MoneyInput';
+import AICopilot from '../../../components/AICopilot';
 
 export default function SmithCalculator() {
     // UI State
@@ -79,6 +80,15 @@ export default function SmithCalculator() {
         return results.filter(r => r.month % 12 === 0 || r.month === results.length);
     }, [results]);
 
+    const handleAIUpdate = (args) => {
+        if (args.homeValue !== undefined) setHomeValue(args.homeValue);
+        if (args.mortgageBalance !== undefined) setMortgageBalance(args.mortgageBalance);
+        if (args.mortgageRate !== undefined) setMortgageRate(args.mortgageRate);
+        if (args.helocRate !== undefined) setHelocRate(args.helocRate);
+        if (args.marginalTaxRate !== undefined) setMarginalTaxRate(args.marginalTaxRate);
+        if (args.amortizationYears !== undefined) setAmortizationYears(args.amortizationYears);
+    };
+
     const handleExportCSV = () => {
         const headers = "Year,Mortgage Balance,HELOC Balance,Investment Portfolio,Out-of-Pocket Interest,Net Annual Dividends,Pocketed Cash,Standard Net Worth,Smith Net Worth,Net Benefit";
         const rows = annualData.map(row => {
@@ -111,6 +121,11 @@ export default function SmithCalculator() {
 
     return (
         <div className="max-w-6xl mx-auto p-4 md:p-8 space-y-8 animate-fade-in">
+            <AICopilot 
+                mode="smith"
+                context={{ homeValue, mortgageBalance, mortgageRate, helocRate, marginalTaxRate, amortizationYears }}
+                onUpdateCalculator={handleAIUpdate}
+            />
             {/* Task 1: Intro Primer */}
             <div className="space-y-4 text-center md:text-left">
                 <h1 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight">Smith Manoeuvre Optimizer</h1>

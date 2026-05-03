@@ -141,6 +141,156 @@ export const POST = async ({ request, locals }) => {
             }
           }
         }]
+      },
+
+      // --- INCOME TAX CALCULATOR ---
+      "tax": {
+        system_instruction: (context) => `
+          You are LoonieFi's expert on Canadian Income Tax for 2026.
+          
+          GOALS:
+          1. **Update Form**: If the user provides income/province/rrsp, call 'update_tax_calculator'.
+          2. **Answer Questions**: Explain average vs marginal rates, RRSP benefits, etc.
+        `,
+        tools: [{
+          type: "function",
+          function: {
+            name: "update_tax_calculator",
+            description: "Updates income tax settings",
+            parameters: {
+              type: "object",
+              properties: {
+                grossIncome: { type: "number" },
+                province: { type: "string", enum: ["ON", "BC", "AB", "QC", "NS", "NB", "MB", "SK", "PE", "NL"] },
+                rrspContribution: { type: "number" },
+                employerMatchPercent: { type: "number" }
+              },
+              required: []
+            }
+          }
+        }]
+      },
+
+      // --- MORTGAGE CALCULATOR ---
+      "mortgage": {
+        system_instruction: (context) => `
+          You are LoonieFi's expert on Canadian Mortgages.
+          
+          GOALS:
+          1. **Update Form**: If the user provides home price/down payment/rate, call 'update_mortgage_calculator'.
+          2. **Answer Questions**: Explain amortization, prepayments, CMHC insurance.
+        `,
+        tools: [{
+          type: "function",
+          function: {
+            name: "update_mortgage_calculator",
+            description: "Updates mortgage settings",
+            parameters: {
+              type: "object",
+              properties: {
+                homePrice: { type: "number" },
+                downPayment: { type: "number" },
+                annualRate: { type: "number" },
+                amortizationYears: { type: "number" },
+                province: { type: "string", enum: ["ON", "BC", "AB", "QC", "NS", "NB", "MB", "SK", "PE", "NL"] }
+              },
+              required: []
+            }
+          }
+        }]
+      },
+
+      // --- RESP CALCULATOR ---
+      "resp": {
+        system_instruction: (context) => `
+          You are LoonieFi's expert on RESPs (Registered Education Savings Plans).
+          
+          GOALS:
+          1. **Update Form**: If the user describes their kids or contributions, call 'update_resp_calculator'.
+          2. **Answer Questions**: Explain CESG grants, CLB, and contribution limits.
+        `,
+        tools: [{
+          type: "function",
+          function: {
+            name: "update_resp_calculator",
+            description: "Updates RESP settings",
+            parameters: {
+              type: "object",
+              properties: {
+                contributionAmount: { type: "number" },
+                currentBalance: { type: "number" },
+                annualReturn: { type: "number" },
+                beneficiaries: {
+                    type: "array",
+                    items: {
+                        type: "object",
+                        properties: { age: { type: "number" }, name: { type: "string" } },
+                        required: ["age"]
+                    }
+                }
+              },
+              required: []
+            }
+          }
+        }]
+      },
+
+      // --- CAGR CALCULATOR ---
+      "cagr": {
+        system_instruction: (context) => `
+          You are LoonieFi's Investment Growth Expert.
+          
+          GOALS:
+          1. **Update Form**: If the user provides investment details, call 'update_cagr_calculator'.
+          2. **Answer Questions**: Explain compound interest and inflation.
+        `,
+        tools: [{
+          type: "function",
+          function: {
+            name: "update_cagr_calculator",
+            description: "Updates CAGR settings",
+            parameters: {
+              type: "object",
+              properties: {
+                startValue: { type: "number" },
+                endValue: { type: "number" },
+                years: { type: "number" },
+                rate: { type: "number" },
+                contribution: { type: "number" },
+                hasContribution: { type: "boolean" }
+              },
+              required: []
+            }
+          }
+        }]
+      },
+
+      // --- SMITH MANOEUVRE ---
+      "smith": {
+        system_instruction: (context) => `
+          You are LoonieFi's expert on the Smith Manoeuvre.
+          
+          GOALS:
+          1. **Update Form**: If the user provides mortgage/home details, call 'update_smith_calculator'.
+          2. **Answer Questions**: Explain tax-deductible interest and the debt conversion process.
+        `,
+        tools: [{
+          type: "function",
+          function: {
+            name: "update_smith_calculator",
+            description: "Updates Smith Manoeuvre settings",
+            parameters: {
+              type: "object",
+              properties: {
+                homeValue: { type: "number" },
+                mortgageBalance: { type: "number" },
+                mortgageRate: { type: "number" },
+                marginalTaxRate: { type: "number" }
+              },
+              required: []
+            }
+          }
+        }]
       }
     };
 

@@ -91,6 +91,10 @@ export function useRESPMath(initialStateOverride) {
         setState(prev => ({ ...prev, [field]: value }));
     };
 
+    const updateFields = (fields) => {
+        setState(prev => ({ ...prev, ...fields }));
+    };
+
     const addBeneficiary = () => {
         if (state.beneficiaries.length >= 4) return;
         setState(prev => ({
@@ -120,6 +124,7 @@ export function useRESPMath(initialStateOverride) {
     return {
         state,
         updateField,
+        updateFields,
         addBeneficiary,
         removeBeneficiary,
         updateBeneficiary,

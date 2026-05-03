@@ -20,6 +20,7 @@ import {
     TrendingDownIcon,
     NativeSelect 
 } from '../../../components/shared';
+import AICopilot from '../../../components/AICopilot';
 
 const MODES = {
     RATE: { 
@@ -146,10 +147,25 @@ export default function CAGRCalculator({ isVisible }) {
 
     if (!isVisible) return null;
 
+    const handleAIUpdate = (args) => {
+        if (args.startValue !== undefined) setStartValue(args.startValue);
+        if (args.endValue !== undefined) setEndValue(args.endValue);
+        if (args.years !== undefined) setYears(args.years);
+        if (args.rate !== undefined) setRate(args.rate);
+        if (args.contribution !== undefined) setContribution(args.contribution);
+        if (args.hasContribution !== undefined) setHasContribution(args.hasContribution);
+        if (args.mode !== undefined) setMode(args.mode);
+    };
+
     const activeConfig = MODES[mode];
 
     return (
         <div className="max-w-6xl mx-auto px-4 py-8 animate-fade-in">
+            <AICopilot 
+                mode="cagr"
+                context={{ mode, startValue, endValue, years, rate, hasContribution, contribution, frequency }}
+                onUpdateCalculator={handleAIUpdate}
+            />
             
             {/* 1. MODE SELECTOR */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-10">

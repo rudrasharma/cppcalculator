@@ -3,11 +3,13 @@ import { useRESPMath } from '../hooks/useRESPMath';
 import { RESPForm } from './RESPForm';
 import { RESPResults } from './RESPResults';
 import { GraduationCapIcon, InfoIcon, RotateCcwIcon } from '../../../components/shared';
+import AICopilot from '../../../components/AICopilot';
 
 export default function RESPCalculator({ initialStateOverride }) {
     const { 
         state, 
         updateField, 
+        updateFields,
         addBeneficiary, 
         removeBeneficiary, 
         updateBeneficiary, 
@@ -20,6 +22,11 @@ export default function RESPCalculator({ initialStateOverride }) {
 
     return (
         <div className="max-w-6xl mx-auto px-4 py-8 pb-32 md:pb-8 animate-fade-in relative">
+            <AICopilot 
+                mode="resp"
+                context={state}
+                onUpdateCalculator={updateFields}
+            />
             {/* Header */}
             <div className="flex flex-col md:flex-row justify-between items-center mb-10 gap-6">
                 <div className="flex items-center gap-4">

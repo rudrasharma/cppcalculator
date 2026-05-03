@@ -3,6 +3,7 @@ import { useMortgageMath } from '../hooks/useMortgageMath';
 import { MortgageForm } from './MortgageForm';
 import { MortgageResults } from './MortgageResults';
 import { CalculatorIcon, InfoIcon, RotateCcwIcon } from '../../../components/shared';
+import AICopilot from '../../../components/AICopilot';
 
 export default function MortgageCalculator({ isVisible, initialStateOverride }) {
     const { state, dispatch, results } = useMortgageMath(initialStateOverride);
@@ -13,8 +14,17 @@ export default function MortgageCalculator({ isVisible, initialStateOverride }) 
         window.location.search = '';
     };
 
+    const handleAIUpdate = (args) => {
+        dispatch({ type: 'SET_STATE', payload: args });
+    };
+
     return (
         <div className="max-w-6xl mx-auto px-4 py-8 pb-32 md:pb-8 animate-fade-in relative">
+            <AICopilot 
+                mode="mortgage"
+                context={state}
+                onUpdateCalculator={handleAIUpdate}
+            />
             {/* Header / Mode Selector equivalent */}
             <div className="flex flex-col md:flex-row justify-between items-center mb-10 gap-6">
                 <div className="flex items-center gap-4">
