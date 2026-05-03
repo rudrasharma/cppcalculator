@@ -15,11 +15,11 @@ const PERIODS = [
     { value: 'biWeekly', label: 'Bi-Weekly' }
 ];
 
-const TaxCalculator = () => {
-    const [grossIncome, setGrossIncome] = useState(75000);
+const TaxCalculator = ({ initialIncome = 75000, initialProvince = 'ON' }) => {
+    const [grossIncome, setGrossIncome] = useState(initialIncome);
     const [rrspContribution, setRrspContribution] = useState(0);
     const [employerMatchPercent, setEmployerMatchPercent] = useState(0);
-    const [province, setProvince] = useState('ON');
+    const [province, setProvince] = useState(initialProvince);
     const [period, setPeriod] = useState('monthly');
 
     // RRSP Max is roughly 18% of previous year's income, but for this simple calculator 

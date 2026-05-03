@@ -1,0 +1,150 @@
+---
+// src/pages/calculator/income-tax/[province]/[income].astro
+
+import BaseLayout from '../../../../layouts/BaseLayout.astro';
+import TaxCalculator from '../../../../features/tax/components/TaxCalculator.jsx';
+import Breadcrumbs from '../../../../components/shared/Breadcrumbs.astro';
+import { PROVINCES, SALARIES } from '../../../../data/seo-scenarios';
+import { TAX_YEAR_CONFIG } from '../../../../config/taxYears.js';
+import { calculateTakeHome } from '../../../../features/tax/utils/taxEngine.js';
+
+export const prerender = true;
+
+// 1. GENERATE PATHS
+export async function getStaticPaths() {
+  const paths = [];
+  PROVINCES.forEach((prov) => {
+    SALARIES.forEach((salary) => {
+        paths.push({
+            params: { 
+                province: prov.slug, 
+                income: salary.toString() 
+            },
+            props: { 
+                provinceCode: prov.code, 
+                provinceName: prov.name, 
+                salaryVal: salary 
+            },
+        });
+    });
+  });
+  return paths;
+}
+
+const { provinceCode, provinceName, salaryVal } = Astro.props;
+
+// 2. SERVER-SIDE CALCULATION
+const serverResults = calculateTakeHome(salaryVal, 0, provinceCode, 0);
+
+// 3. FORMATTERS
+const currency = new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD', maximumFractionDigits: 0 });
+const salaryFormatted = currency.format(salaryVal);
+const monthlyNet = currency.format(serverResults.monthly.net);
+const annualNet = currency.format(serverResults.annual.net);
+
+// 4. SEO METADATA
+const title = `Take-Home Pay on ${salaryFormatted} in ${provinceName} [2026] | LoonieFi`;
+const description = `With a gross annual income of ${salaryFormatted} in ${provinceName}, your estimated take-home pay is ${annualNet} per year, or approximately ${monthlyNet} per month after taxes and deductions.`;
+const canonicalURL = new URL(Astro.url.pathname, Astro.site || Astro.url.origin);
+
+// Breadcrumbs
+const breadcrumbPath = [
+  { label: 'Income Tax', href: '/income-tax-calculator' },
+  { label: provinceName, href: `/calculator/income-tax/browse` },
+  { label: `${salaryFormatted} Income`, href: Astro.url.pathname }
+];
+
+// 5. LINKING STRATEGY
+const currentIndex = SALARIES.indexOf(parseInt(salaryVal));
+const prevIncome = currentIndex > 0 ? SALARIES[currentIndex - 1] : null;
+const nextIncome = currentIndex < SALARIES.length - 1 ? SALARIES[currentIndex + 1] : null;
+const makeUrl = (inc) => `/calculator/income-tax/${Astro.params.province}/${inc}`;
+
+// 6. SCHEMAS
+const softwareSchema = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": title,
+  "description": description,
+  "url": canonicalURL.toString(),
+  "applicationCategory": "FinanceApplication",
+  "operatingSystem": "All",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "CAD"
+  }
+};
+---
+
+<BaseLayout title={title} description={description}>
+  <script type="application/ld+json" set:html={JSON.stringify(softwareSchema)} />
+  
+  <main class="animate-fade-in">
+    <section class="py-12 px-6 max-w-6xl mx-auto">
+      <Breadcrumbs crumbs={breadcrumbPath} />
+
+      <header class="mb-12">
+        <h1 class="text-3xl md:text-5xl font-black text-slate-900 mb-6 tracking-tight">
+          Take-Home Pay on <span class="text-indigo-600">{salaryFormatted}</span> in {provinceName}
+        </h1>
+        <p class="text-lg text-slate-600 max-w-2xl font-medium">
+            Based on 2026 tax brackets, here is your estimated net income after Federal tax, {provinceName} provincial tax, CPP enhancement, and EI premiums.
+        </p>
+      </header>
+
+      {/* --- SERVER-SIDE RESULT PREVIEW --- */}
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+          <div class="bg-indigo-600 rounded-[2.5rem] p-8 text-white shadow-xl shadow-indigo-200">
+              <p class="text-xs font-black uppercase tracking-widest opacity-70 mb-2">Monthly Take-Home</p>
+              <div class="text-4xl font-black">{monthlyNet}</div>
+              <p class="text-[10px] mt-4 font-bold opacity-60 uppercase">After all deductions</p>
+          </div>
+          <div class="bg-white border border-slate-200 rounded-[2.5rem] p-8 shadow-sm">
+              <p class="text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Total Annual Net</p>
+              <div class="text-4xl font-black text-slate-900">{annualNet}</div>
+          </div>
+          <div class="bg-emerald-50 border border-emerald-100 rounded-[2.5rem] p-8 shadow-sm">
+              <p class="text-xs font-black text-emerald-600 uppercase tracking-widest mb-2">Estimated Total Tax</p>
+              <div class="text-4xl font-black text-slate-900">{currency.format(serverResults.annual.totalTax)}</div>
+              <p class="text-[10px] mt-4 text-emerald-700 font-bold uppercase italic">Avg. Rate: {((serverResults.annual.totalTax / salaryVal) * 100).toFixed(1)}%</p>
+          </div>
+      </div>
+
+      {/* --- HYDRATED CALCULATOR --- */}
+      <TaxCalculator client:load initialIncome={salaryVal} initialProvince={provinceCode} />
+
+      {/* --- SEO CONTENT & COMPARISON --- */}
+      <div class="mt-20 pt-16 border-t border-slate-100">
+          <div class="max-w-3xl">
+              <h2 class="text-2xl font-black text-slate-900 mb-6 tracking-tight">Understanding your {salaryFormatted} salary in {provinceName}</h2>
+              <p class="text-slate-600 leading-relaxed mb-6">
+                  In {provinceName}, an income of {salaryFormatted} is subject to a combined marginal tax rate. 
+                  Because Canada uses a progressive tax system, your first {currency.format(TAX_YEAR_CONFIG.FEDERAL_TAX.BRACKETS[0].threshold)} is taxed at the lowest rate, with higher portions of your income taxed at increasing percentages.
+              </p>
+              <p class="text-slate-600 leading-relaxed">
+                  Your take-home pay of {annualNet} includes mandatory contributions to the <strong>Canada Pension Plan (CPP)</strong> and <strong>Employment Insurance (EI)</strong>. 
+                  For 2026, these are calculated on your gross income up to the annual maximum pensionable earnings ceiling.
+              </p>
+          </div>
+
+          {/* INTERNAL LINKING (Spiderweb) */}
+          <div class="mt-16 bg-slate-50 rounded-[2.5rem] p-10 border border-slate-100">
+              <h3 class="text-sm font-black text-slate-400 uppercase tracking-widest mb-8 text-center">Compare Nearby Salaries</h3>
+              <div class="flex flex-wrap justify-center gap-4">
+                  {prevIncome && (
+                      <a href={makeUrl(prevIncome)} class="px-6 py-4 bg-white border border-slate-200 hover:border-indigo-300 hover:text-indigo-600 rounded-2xl text-sm font-black transition-all shadow-sm transform hover:-translate-y-1">
+                          ← View {currency.format(prevIncome)}
+                      </a>
+                  )}
+                  {nextIncome && (
+                      <a href={makeUrl(nextIncome)} class="px-6 py-4 bg-white border border-slate-200 hover:border-indigo-300 hover:text-indigo-600 rounded-2xl text-sm font-black transition-all shadow-sm transform hover:-translate-y-1">
+                          View {currency.format(nextIncome)} →
+                      </a>
+                  )}
+              </div>
+          </div>
+      </div>
+    </section>
+  </main>
+</BaseLayout>

@@ -1,0 +1,57 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { PROVINCES, SALARIES } from '../../../data/seo-scenarios';
+
+export const prerender = true;
+
+const title = "Browse 2026 Take-Home Pay & Tax Scenarios by Province | LoonieFi";
+const description = "Compare net income and tax deductions across all Canadian provinces. Find specific take-home pay estimates for various salary levels from $30k to $150k.";
+const canonicalURL = new URL('/calculator/income-tax/browse', Astro.site || Astro.url.origin);
+
+// Representative salaries to show in the browse grid
+const sampleSalaries = [40000, 60000, 80000, 100000, 120000, 150000];
+const formatter = new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD', maximumFractionDigits: 0 });
+---
+
+<BaseLayout title={title} description={description}>
+  <main class="bg-slate-50 min-h-screen">
+    <section class="max-w-6xl mx-auto px-6 py-16 md:py-24">
+      <header class="mb-16 text-center">
+        <h1 class="text-4xl md:text-6xl font-black text-slate-900 mb-6 tracking-tight">
+          Browse <span class="text-indigo-600">Tax Scenarios</span>
+        </h1>
+        <p class="text-lg text-slate-600 max-w-2xl mx-auto font-medium">
+          Select a province to see how take-home pay, CPP, and EI deductions vary across different income levels in Canada.
+        </p>
+      </header>
+    
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {PROVINCES.map((prov) => (
+          <article class="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm hover:shadow-xl hover:border-indigo-200 transition-all group">
+            <h2 class="text-2xl font-black text-slate-900 mb-6 flex items-center justify-between">
+              {prov.name}
+              <span class="text-xs bg-slate-100 text-slate-400 py-1 px-3 rounded-full font-bold uppercase tracking-widest group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors">{prov.code}</span>
+            </h2>
+            
+            <div class="grid grid-cols-2 gap-2">
+              {sampleSalaries.map((salary) => (
+                <a 
+                  href={`/calculator/income-tax/${prov.slug}/${salary}`} 
+                  class="text-xs bg-slate-50 hover:bg-indigo-600 text-slate-600 hover:text-white px-3 py-3 rounded-xl border border-slate-100 font-black text-center transition-all transform hover:-translate-y-1"
+                >
+                  {formatter.format(salary)}
+                </a>
+              ))}
+            </div>
+            
+            <div class="mt-8 pt-6 border-t border-slate-50">
+                <a href={`/income-tax-calculator`} class="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-600 hover:text-indigo-800 transition-colors">
+                    Custom Estimate →
+                </a>
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+  </main>
+</BaseLayout>

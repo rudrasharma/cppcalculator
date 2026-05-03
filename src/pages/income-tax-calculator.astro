@@ -34,13 +34,20 @@ const softwareSchema = {
         <Breadcrumbs crumbs={breadcrumbPath} />
 
         <header class="mb-12 text-center md:text-left">
-            <h1 class="text-4xl md:text-6xl font-black text-slate-900 mb-6 tracking-tight">
-                Income Tax <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-amber-500 italic">& Take-Home</span>
-            </h1>
-            <p class="text-lg text-slate-600 max-w-2xl font-medium">
-                Estimate your 2026 net pay after federal and provincial taxes, CPP enhancement, and EI premiums. 
-                Everything is calculated locally in your browser.
-            </p>
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-6">
+                <div>
+                    <h1 class="text-4xl md:text-6xl font-black text-slate-900 mb-4 tracking-tight">
+                        Income Tax <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-amber-500 italic">& Take-Home</span>
+                    </h1>
+                    <p class="text-lg text-slate-600 max-w-2xl font-medium">
+                        Estimate your 2026 net pay after federal and provincial taxes, CPP enhancement, and EI premiums. 
+                    </p>
+                </div>
+                <a href="/calculator/income-tax/browse" class="inline-flex items-center gap-2 px-6 py-3 bg-white border border-slate-200 rounded-2xl text-xs font-black uppercase tracking-widest text-slate-600 hover:text-indigo-600 hover:border-indigo-200 transition-all shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                    Browse by Province
+                </a>
+            </div>
         </header>
 
         <TaxCalculator client:load />
