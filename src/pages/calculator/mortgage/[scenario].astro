@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import MortgageCalculator from '../../../features/mortgage/components/MortgageCalculator.jsx';
+import Breadcrumbs from '../../../components/shared/Breadcrumbs.astro';
 import { MORTGAGE_SCENARIOS } from '../../../data/seo-scenarios.js';
 import { calculateAmortization } from '../../../features/mortgage/utils/mortgageEngine.js';
 import { calculateLTT, PROVINCES } from '../../../features/mortgage/utils/lttEngine.js';
@@ -75,7 +76,13 @@ const cmhcPstStr = formatter.format(serverResults.cmhcPST);
 const provinceName = PROVINCES[safeProvince];
 const hasPst = serverResults.cmhcPST > 0;
 
-const canonicalURL = new URL(`/calculator/mortgage/${Astro.params.scenario}`, Astro.site || Astro.url.origin);
+const canonicalURL = new URL(Astro.url.pathname, Astro.site || Astro.url.origin);
+
+const breadcrumbPath = [
+  { label: 'Mortgage', href: '/mortgage-calculator' },
+  { label: 'Scenarios', href: '/calculator/mortgage/browse' },
+  { label: label, href: Astro.url.pathname }
+];
 
 const schema = {
   "@context": "https://schema.org",
@@ -138,101 +145,105 @@ const relatedScenarios = MORTGAGE_SCENARIOS
   <script type="application/ld+json" set:html={JSON.stringify(schema)} />
   <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
 
-  <header class="max-w-6xl mx-auto px-4 pt-8 pb-4 text-center md:text-left animate-fade-in">
-    <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+  <main class="py-12 px-6 max-w-6xl mx-auto flex flex-col min-h-screen">
+    <Breadcrumbs crumbs={breadcrumbPath} />
+
+    <header class="pt-8 pb-4 text-center md:text-left animate-fade-in">
+      <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+        <div>
+          <h1 class="text-2xl font-black text-slate-900 flex items-center gap-2 justify-center md:justify-start">
+            {label}
+          </h1>
+          <p class="text-slate-500 text-sm font-medium">
+            {desc}
+          </p>
+        </div>
+
+        <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 border border-slate-200">
+          <div class="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" aria-hidden="true"></div>
+          <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+            {isRenewal ? 'Mortgage Renewal Mode' : 'Canadian Compounding Rules'}
+          </span>
+        </div>
+      </div>
+    </header>
+
+    <div class="flex-grow flex flex-col justify-center w-full animate-fade-in relative z-10 py-8">
+        <MortgageCalculator key={Astro.params.scenario} client:load isVisible={true} initialStateOverride={initialStateOverride} />
+    </div>
+
+    {/* SEO CONTENT SECTION */}
+    <section class="max-w-3xl mx-auto px-6 py-12 text-slate-600 leading-relaxed text-sm animate-fade-in space-y-8 w-full">
+      
       <div>
-        <h1 class="text-2xl font-black text-slate-900 flex items-center gap-2 justify-center md:justify-start">
-          {label}
-        </h1>
-        <p class="text-slate-500 text-sm font-medium">
-          {desc}
-        </p>
+          <h2 class="text-xl font-black text-slate-900 mb-4 tracking-tight">Scenario Breakdown</h2>
+          {isRenewal ? (
+              <>
+                  <p class="mb-4">
+                  If you are renewing or refinancing a remaining mortgage balance of <strong>{homePriceStr}</strong> at a current interest rate of <strong>{safeRate}%</strong>, your new estimated payment will be <strong>{monthlyPaymentStr}</strong> ({safeFreq.replace('-', ' ')}).
+                  </p>
+                  <p class="mb-4">
+                  Since this is a renewal and not a new purchase, <strong>Land Transfer Tax (LTT) does not apply</strong>. Your primary costs will be the principal and interest payments, along with any potential legal or appraisal fees if you are switching lenders (typically $1,000 - $1,500).
+                  </p>
+              </>
+          ) : (
+              <>
+                  <p class="mb-4">
+                  Based on the current inputs, if you are purchasing a <strong>{homePriceStr}</strong> home in <strong>{provinceName}{isToronto ? ' (Toronto)' : ''}</strong> with an interest rate of <strong>{safeRate}%</strong>, your estimated base payment will be <strong>{monthlyPaymentStr}</strong> ({safeFreq.replace('-', ' ')}). 
+                  </p>
+                  {serverResults.cmhcPremium > 0 && (
+                      <p class="mb-4 text-rose-800 bg-rose-50 p-4 rounded-xl border border-rose-100">
+                          Because your down payment is less than 20%, this calculation includes a mandatory CMHC insurance premium of <strong>{cmhcPremiumStr}</strong>, which is added to your total mortgage amount.
+                          {hasPst && ` Additionally, the province of ${provinceName} applies a provincial sales tax to this premium, resulting in an upfront cash cost of `}
+                          {hasPst && <strong>{cmhcPstStr}</strong>}
+                          {hasPst && ` that must be paid on closing.`}
+                      </p>
+                  )}
+                  <p class="mb-4">
+                  Beyond the mortgage payment, your estimated <strong>Land Transfer Tax (LTT)</strong> for this transaction is <strong>{lttStr}</strong>. 
+                  {isFirstTimeBuyer ? 'This includes first-time home buyer rebates applied at the provincial' + (isToronto ? ' and municipal' : '') + ' level.' : 'If you are a first-time home buyer, you may be eligible for significant rebates on this tax.'}
+                  </p>
+              </>
+          )}
+          <p class="mb-4">
+          Over the remaining <strong>{safeAmortization} years</strong> of this mortgage, you can expect to pay a total of <strong>{totalInterestStr}</strong> in interest, assuming the rate remains constant.
+          </p>
+          <p>
+          Use the prepayments tab in the calculator above to see how adding small monthly increases or annual lump-sum payments can drastically cut down this interest and help you become debt-free faster.
+          </p>
       </div>
 
-      <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 border border-slate-200">
-        <div class="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" aria-hidden="true"></div>
-        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">
-          {isRenewal ? 'Mortgage Renewal Mode' : 'Canadian Compounding Rules'}
-        </span>
+      <div>
+          <h2 class="text-xl font-black text-slate-900 mb-4 tracking-tight">Frequently Asked Questions</h2>
+          <div class="space-y-4">
+              {!isRenewal && (
+                  <div class="bg-slate-50 rounded-2xl p-5 border border-slate-100">
+                      <h3 class="font-bold text-slate-900 mb-2">How much is the land transfer tax in {provinceName}?</h3>
+                      <p class="text-slate-600 text-sm">For a {homePriceStr} home in {provinceName}, the estimated tax is {lttStr}. This varies based on whether you are a first-time buyer and if the property is located in a city with additional municipal taxes like Toronto.</p>
+                  </div>
+              )}
+              {faqSchema.mainEntity.map((faq) => (
+                  <div class="bg-slate-50 rounded-2xl p-5 border border-slate-100">
+                      <h3 class="font-bold text-slate-900 mb-2">{faq.name}</h3>
+                      <p class="text-slate-600 text-sm">{faq.acceptedAnswer.text}</p>
+                  </div>
+              ))}
+          </div>
       </div>
-    </div>
-  </header>
 
-  <main class="flex-grow flex flex-col justify-center w-full animate-fade-in relative z-10">
-      <MortgageCalculator key={Astro.params.scenario} client:load isVisible={true} initialStateOverride={initialStateOverride} />
+      {/* Related Calculators */}
+      <div class="mt-16 pt-8 border-t border-slate-100">
+          <h2 class="text-xl font-black text-slate-900 mb-6 tracking-tight">Explore More Mortgage Scenarios</h2>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {relatedScenarios.map(s => (
+                  <a href={`/calculator/mortgage/${s.slug}`} class="bg-slate-50 hover:bg-indigo-50 p-5 rounded-2xl border border-slate-200 transition-colors group block">
+                      <h3 class="font-bold text-slate-900 text-sm mb-1 group-hover:text-indigo-700">{s.label}</h3>
+                      <p class="text-xs text-slate-500 line-clamp-2">{s.desc}</p>
+                  </a>
+              ))}
+          </div>
+      </div>
+
+    </section>
   </main>
-
-  {/* SEO CONTENT SECTION */}
-  <section class="max-w-3xl mx-auto px-6 py-12 text-slate-600 leading-relaxed text-sm animate-fade-in space-y-8">
-    
-    <div>
-        <h2 class="text-xl font-black text-slate-900 mb-4 tracking-tight">Scenario Breakdown</h2>
-        {isRenewal ? (
-            <>
-                <p class="mb-4">
-                If you are renewing or refinancing a remaining mortgage balance of <strong>{homePriceStr}</strong> at a current interest rate of <strong>{safeRate}%</strong>, your new estimated payment will be <strong>{monthlyPaymentStr}</strong> ({safeFreq.replace('-', ' ')}).
-                </p>
-                <p class="mb-4">
-                Since this is a renewal and not a new purchase, <strong>Land Transfer Tax (LTT) does not apply</strong>. Your primary costs will be the principal and interest payments, along with any potential legal or appraisal fees if you are switching lenders (typically $1,000 - $1,500).
-                </p>
-            </>
-        ) : (
-            <>
-                <p class="mb-4">
-                Based on the current inputs, if you are purchasing a <strong>{homePriceStr}</strong> home in <strong>{provinceName}{isToronto ? ' (Toronto)' : ''}</strong> with an interest rate of <strong>{safeRate}%</strong>, your estimated base payment will be <strong>{monthlyPaymentStr}</strong> ({safeFreq.replace('-', ' ')}). 
-                </p>
-                {serverResults.cmhcPremium > 0 && (
-                    <p class="mb-4 text-rose-800 bg-rose-50 p-4 rounded-xl border border-rose-100">
-                        Because your down payment is less than 20%, this calculation includes a mandatory CMHC insurance premium of <strong>{cmhcPremiumStr}</strong>, which is added to your total mortgage amount.
-                        {hasPst && ` Additionally, the province of ${provinceName} applies a provincial sales tax to this premium, resulting in an upfront cash cost of `}
-                        {hasPst && <strong>{cmhcPstStr}</strong>}
-                        {hasPst && ` that must be paid on closing.`}
-                    </p>
-                )}
-                <p class="mb-4">
-                Beyond the mortgage payment, your estimated <strong>Land Transfer Tax (LTT)</strong> for this transaction is <strong>{lttStr}</strong>. 
-                {isFirstTimeBuyer ? 'This includes first-time home buyer rebates applied at the provincial' + (isToronto ? ' and municipal' : '') + ' level.' : 'If you are a first-time home buyer, you may be eligible for significant rebates on this tax.'}
-                </p>
-            </>
-        )}
-        <p class="mb-4">
-        Over the remaining <strong>{safeAmortization} years</strong> of this mortgage, you can expect to pay a total of <strong>{totalInterestStr}</strong> in interest, assuming the rate remains constant.
-        </p>
-        <p>
-        Use the prepayments tab in the calculator above to see how adding small monthly increases or annual lump-sum payments can drastically cut down this interest and help you become debt-free faster.
-        </p>
-    </div>
-
-    <div>
-        <h2 class="text-xl font-black text-slate-900 mb-4 tracking-tight">Frequently Asked Questions</h2>
-        <div class="space-y-4">
-            {!isRenewal && (
-                <div class="bg-slate-50 rounded-2xl p-5 border border-slate-100">
-                    <h3 class="font-bold text-slate-900 mb-2">How much is the land transfer tax in {provinceName}?</h3>
-                    <p class="text-slate-600 text-sm">For a {homePriceStr} home in {provinceName}, the estimated tax is {lttStr}. This varies based on whether you are a first-time buyer and if the property is located in a city with additional municipal taxes like Toronto.</p>
-                </div>
-            )}
-            {faqSchema.mainEntity.map((faq) => (
-                <div class="bg-slate-50 rounded-2xl p-5 border border-slate-100">
-                    <h3 class="font-bold text-slate-900 mb-2">{faq.name}</h3>
-                    <p class="text-slate-600 text-sm">{faq.acceptedAnswer.text}</p>
-                </div>
-            ))}
-        </div>
-    </div>
-
-    {/* Related Calculators */}
-    <div class="mt-16 pt-8 border-t border-slate-100">
-        <h2 class="text-xl font-black text-slate-900 mb-6 tracking-tight">Explore More Mortgage Scenarios</h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {relatedScenarios.map(s => (
-                <a href={`/calculator/mortgage/${s.slug}`} class="bg-slate-50 hover:bg-indigo-50 p-5 rounded-2xl border border-slate-200 transition-colors group block">
-                    <h3 class="font-bold text-slate-900 text-sm mb-1 group-hover:text-indigo-700">{s.label}</h3>
-                    <p class="text-xs text-slate-500 line-clamp-2">{s.desc}</p>
-                </a>
-            ))}
-        </div>
-    </div>
-
-  </section>
 </BaseLayout>
