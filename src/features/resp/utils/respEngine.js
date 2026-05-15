@@ -42,8 +42,8 @@ export const calculateFamilyRESP = ({
     const perChildPrincipalEstimate = estimatedTotalPrincipal / beneficiaries.length;
 
     const childStats = beneficiaries.map(b => {
-        const pastContrib = Number(b.pastContributions || perChildPrincipalEstimate * 0.8);
-        const pastGrants = Number(perChildPrincipalEstimate * 0.2); // Rough grant estimate
+        const pastContrib = b.pastContributions !== undefined ? Number(b.pastContributions) : Number(perChildPrincipalEstimate * 0.7);
+        const pastGrants = b.pastGrants !== undefined ? Number(b.pastGrants) : Number(perChildPrincipalEstimate * 0.2); 
         
         return {
             id: b.id,
@@ -52,7 +52,7 @@ export const calculateFamilyRESP = ({
             totalCLB: 0,
             totalProvincial: 0,
             totalContributions: pastContrib, 
-            catchUpRoom: Math.max(0, (Number(b.age) * 2500) - pastContrib)
+            catchUpRoom: Math.max(0, ((Number(b.age) + 1) * 2500) - pastContrib)
         };
     });
 

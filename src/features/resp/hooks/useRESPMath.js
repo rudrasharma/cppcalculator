@@ -69,6 +69,11 @@ export function useRESPMath(initialStateOverride) {
             currentBalance: Number(state.currentBalance),
             annualReturn: Number(state.annualReturn),
             totalContributionAmount: Number(state.contributionAmount),
+            beneficiaries: state.beneficiaries.map(b => ({
+                ...b,
+                pastContributions: b.pastContributions !== undefined ? Number(b.pastContributions) : undefined,
+                pastGrants: b.pastGrants !== undefined ? Number(b.pastGrants) : undefined,
+            }))
         });
     }, [state]);
 

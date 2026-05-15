@@ -62,6 +62,51 @@ export const RESPForm = ({
                                     onChange={(e) => updateBeneficiary(child.id, 'age', parseInt(e.target.value))}
                                 />
                             </label>
+
+                            <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-100 mt-4">
+                                <div className="space-y-1.5">
+                                    <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest block min-h-[20px] flex items-end">
+                                        Past Contributions
+                                    </label>
+                                    <div className="relative group">
+                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-[11px] group-focus-within:text-indigo-500 transition-colors pointer-events-none">$</span>
+                                        <input 
+                                            type="text"
+                                            inputMode="decimal"
+                                            value={child.pastContributions !== undefined ? child.pastContributions : ''}
+                                            onChange={(e) => {
+                                                const val = e.target.value;
+                                                if (val === '' || /^\d*\.?\d*$/.test(val)) {
+                                                    updateBeneficiary(child.id, 'pastContributions', val === '' ? undefined : val);
+                                                }
+                                            }}
+                                            placeholder="0"
+                                            className="w-full pl-7 pr-3 py-2.5 bg-white border border-slate-200 rounded-xl font-mono text-sm font-black focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-slate-900 shadow-sm"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest block min-h-[20px] flex items-end">
+                                        Grants Received
+                                    </label>
+                                    <div className="relative group">
+                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-[11px] group-focus-within:text-indigo-500 transition-colors pointer-events-none">$</span>
+                                        <input 
+                                            type="text"
+                                            inputMode="decimal"
+                                            value={child.pastGrants !== undefined ? child.pastGrants : ''}
+                                            onChange={(e) => {
+                                                const val = e.target.value;
+                                                if (val === '' || /^\d*\.?\d*$/.test(val)) {
+                                                    updateBeneficiary(child.id, 'pastGrants', val === '' ? undefined : val);
+                                                }
+                                            }}
+                                            placeholder="0"
+                                            className="w-full pl-7 pr-3 py-2.5 bg-white border border-slate-200 rounded-xl font-mono text-sm font-black focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-slate-900 shadow-sm"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     ))}
                 </div>

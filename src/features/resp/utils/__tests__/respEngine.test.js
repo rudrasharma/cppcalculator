@@ -127,4 +127,20 @@ describe('respEngine', () => {
     // Should only have 1 year of projection (17 -> 18)
     expect(result.yearlyBreakdown.length).toBe(1);
   });
+
+  it('allows full contributions when explicit pastContributions: 0 is provided even with high balance', () => {
+    const highBalanceParams = {
+        ...baseParams,
+        currentBalance: 77000,
+        beneficiaries: [{ id: 1, age: 7, pastContributions: 0, pastGrants: 0 }],
+        totalContributionAmount: 2500,
+        contributionFrequency: 'Yearly'
+    };
+
+    const result = calculateFamilyRESP(highBalanceParams);
+    const firstYear = result.yearlyBreakdown[0];
+
+    expect(firstYear.contributions).toBe(2500);
+    expect(firstYear.grants).toBe(500);
+  });
 });
