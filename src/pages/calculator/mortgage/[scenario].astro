@@ -63,6 +63,28 @@ const serverResults = calculateAmortization({
     province: safeProvince
 });
 
+// Calculate savings for a standard $200/mo increase
+const paymentsPerYear = {
+    'monthly': 12,
+    'semi-monthly': 24,
+    'bi-weekly': 26,
+    'accelerated-bi-weekly': 26,
+    'weekly': 52,
+    'accelerated-weekly': 52
+}[safeFreq] || 12;
+
+const extraPerPeriod = 200 / (paymentsPerYear / 12);
+const savingsResults = calculateAmortization({
+    homePrice: safeHomePrice,
+    downPayment: safeDownPayment,
+    annualRate: safeRate,
+    amortizationYears: safeAmortization,
+    paymentFrequency: safeFreq,
+    isRenewal: isRenewal,
+    province: safeProvince,
+    prepayments: { monthlyIncrease: extraPerPeriod }
+});
+
 const lttResults = isRenewal ? { totalTax: 0 } : calculateLTT(safeHomePrice, safeProvince, isToronto, isFirstTimeBuyer);
 
 const formatter = new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD', maximumFractionDigits: 0 });
@@ -75,6 +97,9 @@ const cmhcPremiumStr = formatter.format(serverResults.cmhcPremium);
 const cmhcPstStr = formatter.format(serverResults.cmhcPST);
 const provinceName = PROVINCES[safeProvince];
 const hasPst = serverResults.cmhcPST > 0;
+
+const interestSaved = formatter.format(savingsResults.savings.interest);
+const yearsSaved = savingsResults.savings.time.toFixed(1);
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site || Astro.url.origin);
 
@@ -140,7 +165,7 @@ const relatedScenarios = MORTGAGE_SCENARIOS
 
 <BaseLayout 
   title={`${label} - Free Canadian Calculator`} 
-  description={desc}
+  description={`${desc} Your estimated monthly payment is ${monthlyPaymentStr}.`}
 >
   <script type="application/ld+json" set:html={JSON.stringify(schema)} />
   <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
@@ -167,6 +192,37 @@ const relatedScenarios = MORTGAGE_SCENARIOS
         </div>
       </div>
     </header>
+
+    {/* --- SMART INSIGHTS BOX (Phase 1 Refinement) --- */}
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+        <div class="bg-indigo-900 rounded-[2.5rem] p-8 text-white relative overflow-hidden group">
+            <div class="relative z-10">
+                <h3 class="text-xs font-black uppercase tracking-widest text-indigo-400 mb-4">Interest Savings Insight</h3>
+                <p class="text-lg font-medium leading-relaxed mb-4">
+                    Adding just <span class="text-white font-black">$200 / month</span> to your payments could save you <span class="text-indigo-400 font-black">{interestSaved}</span> in total interest.
+                </p>
+                <div class="flex items-center gap-2 text-[10px] font-black uppercase tracking-tighter text-indigo-300/60">
+                    <span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
+                    Calculated over {safeAmortization} years
+                </div>
+            </div>
+            <div class="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-3xl -mr-10 -mt-10 transition-transform group-hover:scale-150"></div>
+        </div>
+
+        <div class="bg-white border-2 border-indigo-100 rounded-[2.5rem] p-8 relative overflow-hidden group">
+            <div class="relative z-10">
+                <h3 class="text-xs font-black uppercase tracking-widest text-indigo-600 mb-4">Time Savings</h3>
+                <p class="text-lg font-medium text-slate-700 leading-relaxed mb-4">
+                    That same $200 increase would help you become debt-free <span class="text-indigo-600 font-black">{yearsSaved} years</span> earlier than planned.
+                </p>
+                <div class="flex items-center gap-2 text-[10px] font-black uppercase tracking-tighter text-slate-400">
+                    <span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
+                    Acceleration Strategy
+                </div>
+            </div>
+            <div class="absolute bottom-0 right-0 w-32 h-32 bg-indigo-500/5 rounded-full blur-3xl -mr-10 -mb-10 transition-transform group-hover:scale-150"></div>
+        </div>
+    </div>
 
     <div class="flex-grow flex flex-col justify-center w-full animate-fade-in relative z-10 py-8">
         <MortgageCalculator key={Astro.params.scenario} client:load isVisible={true} initialStateOverride={initialStateOverride} />
