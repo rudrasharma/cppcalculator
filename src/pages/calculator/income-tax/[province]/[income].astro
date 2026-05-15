@@ -36,15 +36,26 @@ const { provinceCode, provinceName, salaryVal } = Astro.props;
 // 2. SERVER-SIDE CALCULATION
 const serverResults = calculateTakeHome(salaryVal, 0, provinceCode, 0);
 
+// 2a. MARGINAL RATE CALCULATION (Estimate)
+const incomeStep = 100;
+const resultsHigher = calculateTakeHome(salaryVal + incomeStep, 0, provinceCode, 0);
+const marginalRate = (resultsHigher.annual.totalTax - serverResults.annual.totalTax) / incomeStep;
+
+// 2b. RRSP SAVINGS (Estimate for a $5k contribution)
+const rrspAmount = 5000;
+const resultsWithRRSP = calculateTakeHome(salaryVal, rrspAmount, provinceCode, 0);
+const rrspSavings = serverResults.annual.totalTax - resultsWithRRSP.annual.totalTax;
+
 // 3. FORMATTERS
 const currency = new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD', maximumFractionDigits: 0 });
+const percentFormatter = new Intl.NumberFormat('en-CA', { style: 'percent', minimumFractionDigits: 1 });
 const salaryFormatted = currency.format(salaryVal);
 const monthlyNet = currency.format(serverResults.monthly.net);
 const annualNet = currency.format(serverResults.annual.net);
 
 // 4. SEO METADATA
 const title = `Take-Home Pay on ${salaryFormatted} in ${provinceName} [2026] | LoonieFi`;
-const description = `With a gross annual income of ${salaryFormatted} in ${provinceName}, your estimated take-home pay is ${annualNet} per year, or approximately ${monthlyNet} per month after taxes and deductions.`;
+const description = `With a gross annual income of ${salaryFormatted} in ${provinceName}, your estimated take-home pay is ${annualNet} per year. Your marginal tax rate is ${percentFormatter.format(marginalRate)}.`;
 const canonicalURL = new URL(Astro.url.pathname, Astro.site || Astro.url.origin);
 
 // Breadcrumbs
@@ -108,6 +119,37 @@ const softwareSchema = {
               <p class="text-xs font-black text-emerald-600 uppercase tracking-widest mb-2">Estimated Total Tax</p>
               <div class="text-4xl font-black text-slate-900">{currency.format(serverResults.annual.totalTax)}</div>
               <p class="text-[10px] mt-4 text-emerald-700 font-bold uppercase italic">Avg. Rate: {((serverResults.annual.totalTax / salaryVal) * 100).toFixed(1)}%</p>
+          </div>
+      </div>
+
+      {/* --- SMART INSIGHTS BOX (Phase 1 Refinement) --- */}
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+          <div class="bg-slate-900 rounded-[2.5rem] p-8 text-white relative overflow-hidden group">
+              <div class="relative z-10">
+                  <h3 class="text-xs font-black uppercase tracking-widest text-indigo-400 mb-4">Marginal Tax Insight</h3>
+                  <p class="text-lg font-medium leading-relaxed mb-4">
+                      At this income level, your next dollar earned will be taxed at <span class="text-white font-black">{percentFormatter.format(marginalRate)}</span>. 
+                  </p>
+                  <div class="flex items-center gap-2 text-[10px] font-black uppercase tracking-tighter text-slate-400">
+                      <span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
+                      Combined Federal & {provinceName} Rates
+                  </div>
+              </div>
+              <div class="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-3xl -mr-10 -mt-10 transition-transform group-hover:scale-150"></div>
+          </div>
+
+          <div class="bg-white border-2 border-emerald-500/20 rounded-[2.5rem] p-8 relative overflow-hidden group">
+              <div class="relative z-10">
+                  <h3 class="text-xs font-black uppercase tracking-widest text-emerald-600 mb-4">The RRSP Strategy</h3>
+                  <p class="text-lg font-medium text-slate-700 leading-relaxed mb-4">
+                      A <span class="font-black text-slate-900">{currency.format(rrspAmount)}</span> RRSP contribution would reduce your 2026 tax bill by approximately <span class="text-emerald-600 font-black">{currency.format(rrspSavings)}</span>.
+                  </p>
+                  <div class="flex items-center gap-2 text-[10px] font-black uppercase tracking-tighter text-slate-400">
+                      <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                      Effective {percentFormatter.format(rrspSavings / rrspAmount)} Tax Savings
+                  </div>
+              </div>
+              <div class="absolute bottom-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full blur-3xl -mr-10 -mb-10 transition-transform group-hover:scale-150"></div>
           </div>
       </div>
 
