@@ -1,85 +1,8 @@
 ---
-/**
- * @typedef {Object} Tool
- * @property {string} href - URL path
- * @property {string} label - Display label
- * @property {string} color - Text color class
- * @property {string} bg - Background color class
- * @property {string} iconSvg - SVG path string
- * @property {string} description - Tool description
- */
-
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { ALL_TOOLS, TOOL_CATEGORIES } from '../config/navigation';
 
 interface Props {}
-
-const TOOLS = [
-  { 
-    href: '/income-tax-calculator', 
-    label: 'Income Tax', 
-    color: 'text-emerald-600', 
-    bg: 'bg-emerald-50',
-    iconSvg: `<path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`,
-    description: 'Calculate your take-home pay and 2026 tax brackets.'
-  },
-  { 
-    href: '/cpp-oas-calculator', 
-    label: 'CPP & OAS', 
-    color: 'text-indigo-600', 
-    bg: 'bg-indigo-50',
-    iconSvg: `<path d="M12 20v-10m6 10v-16m-12 16v-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`,
-    description: 'Calculate your future monthly income from government pensions.'
-  },
-  { 
-    href: '/resp-calculator', 
-    label: 'Education (RESP)', 
-    color: 'text-emerald-600', 
-    bg: 'bg-emerald-50',
-    iconSvg: `<path d="M22 10v6M2 10l10-5 10 5-10 5z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path d="M6 12v5c3 3 9 3 12 0v-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>`,
-    description: 'Maximize government grants and project your child’s future education fund.'
-  },
-  { 
-    href: '/parental-leave-calculator', 
-    label: 'Mat. Leave', 
-    color: 'text-rose-600', 
-    bg: 'bg-rose-50',
-    iconSvg: `<circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/><path d="M8 14s1.5 2 4 2 4-2 4-2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/><line x1="9" y1="9" x2="9.01" y2="9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="15" y1="9" x2="15.01" y2="9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>`,
-    description: 'Estimate your EI weekly payments and total leave duration.'
-  },
-  { 
-    href: '/child-benefit-calculator', 
-    label: 'Family Cash', 
-    color: 'text-emerald-600', 
-    bg: 'bg-emerald-50',
-    iconSvg: `<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/><polyline points="9 22 9 12 15 12 15 22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>`,
-    description: 'Maximize your Child Benefits and quarterly tax rebates.'
-  },
-  { 
-    href: '/smith-manoeuvre', 
-    label: 'Smith Manoeuvre', 
-    color: 'text-violet-600', 
-    bg: 'bg-violet-50',
-    iconSvg: `<path d="M22 12h-4l-3 9L9 3l-3 9H2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>`,
-    description: 'Make your mortgage tax-deductible and accelerate long-term wealth.'
-  },
-  { 
-    href: '/mortgage-calculator', 
-    label: 'Mortgage', 
-    color: 'text-blue-600', 
-    bg: 'bg-blue-50',
-    iconSvg: `<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/><polyline points="9 22 9 12 15 12 15 22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>`,
-    description: 'See how Canadian compounding and prepayments save you thousands.'
-  },
-  { 
-    href: '/cagr-calculator', 
-    label: 'CAGR Calc', 
-    color: 'text-cyan-600', 
-    bg: 'bg-cyan-50',
-    // You can use a simple SVG path here
-    iconSvg: `<path d="M2 20h20M4 16l6-6 4 4 6-8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`,
-    description: 'Determine the precise annual growth rate required to grow your investment from A to B.'
-  },  
-];
 
 const title = "Canadian Financial & Family Calculators | LoonieFi";
 const description = "Free, privacy-first calculators for CPP, Child Benefits, Parental Leave, and Inflation. Calculate your Canadian government benefits and plan your finances.";
@@ -105,7 +28,7 @@ const softwareSchema = {
     "price": "0",
     "priceCurrency": "CAD"
   },
-  "featureList": TOOLS.map(tool => tool.description)
+  "featureList": ALL_TOOLS.map(tool => tool.description)
 };
 ---
 
@@ -127,31 +50,41 @@ const softwareSchema = {
 
     {/* TOOLS GRID */}
     <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-20" aria-label="Available calculators">
-      {TOOLS.map((tool) => (
-        <article>
-          <a 
-            href={tool.href} 
-            class="group relative flex flex-col items-start p-8 bg-white border border-slate-200 rounded-[2.5rem] transition-all duration-300 hover:border-transparent hover:shadow-[0_20px_50px_rgba(0,0,0,0.08)] hover:-translate-y-2 text-left"
-            aria-label={`${tool.label} calculator: ${tool.description}`}
-          >
-            {/* ICON BOX */}
-            <div class={`p-4 rounded-2xl mb-6 transition-transform group-hover:scale-110 group-hover:rotate-3 ${tool.bg} ${tool.color}`} aria-hidden="true">
-              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" set:html={tool.iconSvg} aria-hidden="true" />
-            </div>
+      {ALL_TOOLS.map((tool) => {
+        const category = TOOL_CATEGORIES.find(c => c.id === tool.categoryId);
+        return (
+          <article>
+            <a 
+              href={tool.href} 
+              class="group relative flex flex-col items-start p-8 bg-white border border-slate-200 rounded-[2.5rem] transition-all duration-300 hover:border-transparent hover:shadow-[0_20px_50px_rgba(0,0,0,0.08)] hover:-translate-y-2 text-left h-full"
+              aria-label={`${tool.label} calculator: ${tool.description}`}
+            >
+              {/* ICON BOX */}
+              <div class={`p-4 rounded-2xl mb-6 transition-transform group-hover:scale-110 group-hover:rotate-3 ${category?.bg} ${category?.color}`} aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  {tool.icon === 'ChartIcon' && <><line x1="12" y1="20" x2="12" y2="10"></line><line x1="18" y1="20" x2="18" y2="4"></line><line x1="6" y1="20" x2="6" y2="16"></line></>}
+                  {tool.icon === 'BabyIcon' && <><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></>}
+                  {tool.icon === 'HomeIcon' && <><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></>}
+                  {tool.icon === 'UsersIcon' && <><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></>}
+                  {tool.icon === 'GraduationCapIcon' && <><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></>}
+                  {tool.icon === 'TrendingUpIcon' && <><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></>}
+                </svg>
+              </div>
 
-            <h2 class="text-xl font-black text-slate-900 mb-2">{tool.label}</h2>
-            <p class="text-slate-500 mb-8 text-sm leading-relaxed font-medium">{tool.description}</p>
-            
-            <div class="mt-auto flex items-center font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
-              Start Calculating 
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" aria-hidden="true">
-                <line x1="5" y1="12" x2="19" y2="12"></line>
-                <polyline points="12 5 19 12 12 19"></polyline>
-              </svg>
-            </div>
-          </a>
-        </article>
-      ))}
+              <h2 class="text-xl font-black text-slate-900 mb-2">{tool.label}</h2>
+              <p class="text-slate-500 mb-8 text-sm leading-relaxed font-medium">{tool.description}</p>
+              
+              <div class="mt-auto flex items-center font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
+                Start Calculating 
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" aria-hidden="true">
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                  <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
+              </div>
+            </a>
+          </article>
+        );
+      })}
     </section>
 
     {/* SOCIAL LINKS */}

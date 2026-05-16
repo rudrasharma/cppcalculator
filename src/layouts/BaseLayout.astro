@@ -7,6 +7,10 @@
 import '../styles/global.css';
 import ContactButton from '../components/shared/ui/ContactButton.jsx';
 import { PostHogProviderWrapper } from '../components/PostHogProviderWrapper.jsx';
+import { ALL_TOOLS } from '../config/navigation';
+import { DesktopToolSwitcher } from '../components/shared/ui/DesktopToolSwitcher';
+import { ToolDrawer } from '../components/shared/ui/ToolDrawer';
+import HeaderActions from '../components/shared/ui/HeaderActions.jsx';
 
 interface Props {
   title: string;
@@ -14,18 +18,10 @@ interface Props {
 }
 
 const { title, description } = Astro.props;
-const currentPath = Astro.url.pathname;
+const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
 const canonicalURL = new URL(Astro.url.pathname, Astro.site || Astro.url.origin);
 
-const TABS = [
-  { id: 'tax', href: '/income-tax-calculator', label: 'Income Tax', color: 'text-emerald-600', bg: 'bg-emerald-50' },
-  { id: 'cpp', href: '/cpp-oas-calculator', label: 'CPP & OAS', color: 'text-indigo-600', bg: 'bg-indigo-50' },
-  { id: 'resp', href: '/resp-calculator', label: 'RESP', color: 'text-emerald-600', bg: 'bg-emerald-50' },
-  { id: 'mortgage', href: '/mortgage-calculator', label: 'Mortgage', color: 'text-blue-600', bg: 'bg-blue-50' },
-  { id: 'smith', href: '/smith-manoeuvre', label: 'Smith Calc', color: 'text-violet-600', bg: 'bg-violet-50' },
-  { id: 'parental', href: '/parental-leave-calculator', label: 'Mat. Leave', color: 'text-rose-600', bg: 'bg-rose-50' },
-  { id: 'ccb', href: '/child-benefit-calculator', label: 'Family Cash', color: 'text-emerald-600', bg: 'bg-emerald-50' },
-];
+const activeTool = ALL_TOOLS.find(t => t.href.replace(/\/$/, '') === currentPath);
 
 const schema = {
   "@context": "https://schema.org",
@@ -46,29 +42,24 @@ const schema = {
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    {/* ACCESSIBILITY FIX: Allowed zooming by removing user-scalable=0 */}
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>{title} | LoonieFi</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonicalURL} />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     
-    {/* Open Graph Tags */}
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonicalURL} />
     <meta property="og:image" content="/android-chrome-192x192.png" />
     
-    {/* Twitter Card Tags */}
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
 
-    {/* Schema Markup */}
     <script type="application/ld+json" set:html={JSON.stringify(schema)} />
 
-    {/* Google Analytics 4 (GA4) */}
     <script 
       async 
       src="https://www.googletagmanager.com/gtag/js?id=G-DS4P8VC6WQ"
@@ -90,27 +81,22 @@ const schema = {
         <a href="/" class="flex items-center gap-3 hover:opacity-80 transition-opacity" aria-label="LoonieFi homepage">
           <img src="/android-chrome-192x192.png" alt="LoonieFi Logo" class="h-8 w-8 rounded-full shadow-sm" width="32" height="32" />
           <div class="text-lg font-bold tracking-tight">
-            {/* ACCESSIBILITY FIX: Darkened Amber to 700 */}
             <span class="text-amber-700">Loonie</span><span class="text-slate-900">Fi</span>
           </div>
         </a>
 
-        {/* DESKTOP TABS */}
-        <div class="hidden md:flex gap-1 bg-slate-100/50 p-1 rounded-xl border border-slate-200/50" role="tablist" aria-label="Calculator navigation">
-          {TABS.map((tab) => (
-            <a 
-              href={tab.href}
-              role="tab"
-              aria-selected={currentPath === tab.href ? 'true' : 'false'}
-              class={`px-3 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 ${
-                currentPath === tab.href 
-                ? 'bg-white text-slate-900 shadow-sm ring-1 ring-black/5' 
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
-              }`}
-            >
-              {tab.label}
-            </a>
-          ))}
+        {/* DESKTOP SWITCHER */}
+        <div class="hidden md:block">
+            <DesktopToolSwitcher 
+                client:load 
+                activeId={activeTool?.id} 
+                onSelect={(tool) => window.location.href = tool.href} 
+            />
+        </div>
+
+        {/* MOBILE ACTIONS */}
+        <div class="md:hidden">
+            <HeaderActions client:load activeId={activeTool?.id} />
         </div>
       </div>
     </nav>
@@ -124,10 +110,7 @@ const schema = {
     <footer class="bg-slate-50 border-t border-slate-200 pb-32 md:pb-20 pt-10 mt-auto">
       <div class="max-w-5xl mx-auto px-6 text-center">
         
-        {/* FOOTER LINKS */}
         <nav class="flex flex-wrap justify-center items-center gap-x-6 gap-y-2 mb-8 font-medium text-sm" aria-label="Footer navigation">
-          
-          {/* 1. ABOUT US LINK */}
           <a href="/about" class="text-slate-600 hover:text-indigo-600 transition-colors">About Us</a>
           <span class="text-slate-400 hidden sm:inline" aria-hidden="true">•</span>
 
@@ -140,7 +123,6 @@ const schema = {
 
           <span class="text-slate-400 hidden sm:inline" aria-hidden="true">•</span>
 
-          {/* 2. SHARE LINK BUTTON */}
           <button 
             id="share-btn" 
             class="text-slate-600 hover:text-indigo-600 transition-colors flex items-center gap-1"
@@ -156,14 +138,12 @@ const schema = {
           <ContactButton client:visible />
         </nav>
 
-        {/* DISCLAIMER SECTION */}
         <div class="max-w-2xl mx-auto mb-6">
           <p class="text-[11px] leading-relaxed text-slate-600">
             <strong>Disclaimer:</strong> This tool provides estimates for informational purposes only and does not constitute financial, legal, or tax advice. While we strive for accuracy using official formulas, your actual government benefits (CPP, OAS, CCB) may vary based on official assessments. Please consult a professional financial planner or Service Canada for your specific situation.
           </p>
         </div>
 
-        {/* COPYRIGHT - Increased Contrast */}
         <div class="flex flex-col gap-2 border-t border-slate-200 pt-6">
           <p class="text-xs text-slate-600">
             © {new Date().getFullYear()} LoonieFi. All rights reserved.
@@ -176,7 +156,6 @@ const schema = {
     </footer>
     </PostHogProviderWrapper>
 
-    {/* SCRIPT FOR SHARE BUTTON */}
     <script is:inline>
       const shareBtn = document.getElementById('share-btn');
       const shareToast = document.getElementById('share-toast');
@@ -185,7 +164,6 @@ const schema = {
         shareBtn.addEventListener('click', async () => {
           try {
             await navigator.clipboard.writeText(window.location.href);
-            // Show "Copied!" toast
             if (shareToast) {
               shareToast.classList.remove('hidden');
               shareToast.setAttribute('aria-live', 'polite');

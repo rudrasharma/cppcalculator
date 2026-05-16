@@ -5,93 +5,46 @@ import ParentalLeave from '../features/parental-leave/components/ParentalLeave';
 import RESPCalculator from '../features/resp/components/RESPCalculator';
 import CAGRCalculator from '../features/cagr/components/CAGRCalculator';
 import MortgageCalculator from '../features/mortgage/components/MortgageCalculator';
+import { ALL_TOOLS, TOOL_CATEGORIES } from '../config/navigation';
+import { ToolDrawer } from './shared/ui/ToolDrawer';
+import { DesktopToolSwitcher } from './shared/ui/DesktopToolSwitcher';
 import '../styles/global.css'
 
 // ICONS
+const ArrowRight = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>;
+const MenuIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>;
+
+// CONFIGURATION MAPS FOR ICONS
 const ChartIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="12" y1="20" x2="12" y2="10"></line><line x1="18" y1="20" x2="18" y2="4"></line><line x1="6" y1="20" x2="6" y2="16"></line></svg>;
 const BabyIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>;
 const HomeIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>;
 const UsersIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>;
 const GraduationCapIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>;
 const TrendingUpIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>;
-const ArrowRight = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>;
 
-// CONFIGURATION
-const TABS = [
-  { 
-    id: 'cpp', 
-    label: 'CPP & OAS',
-    title: 'Government Retirement Benefits',
-    subtitle: 'Estimates for CPP, Old Age Security (OAS), and GIS',
-    icon: ChartIcon, 
-    color: 'text-indigo-600', 
-    bg: 'bg-indigo-50',
-    description: 'Calculate your future monthly income from government pensions.'
-  },
-  { 
-    id: 'resp', 
-    label: 'RESP',
-    title: 'Education Savings (RESP)',
-    subtitle: 'Maximize grants for your children\'s future',
-    icon: GraduationCapIcon, 
-    color: 'text-emerald-600', 
-    bg: 'bg-emerald-50',
-    description: 'Maximize government grants and project your child’s future education fund.'
-  },
-  { 
-    id: 'mortgage', 
-    label: 'Mortgage',
-    title: 'Mortgage Paydown',
-    subtitle: 'Canadian semi-annual compounding & prepayments',
-    icon: HomeIcon, 
-    color: 'text-blue-600', 
-    bg: 'bg-blue-50',
-    description: 'See how extra payments can save you thousands in interest.'
-  },
-  { 
-    id: 'parental', 
-    label: 'Mat. Leave',
-    title: 'Maternity & Parental Leave',
-    subtitle: 'Plan your EI payments and family budget',
-    icon: BabyIcon, 
-    color: 'text-rose-600', 
-    bg: 'bg-rose-50',
-    description: 'Estimate your EI weekly payments and total leave duration.'
-  },
-  { 
-    id: 'ccb', 
-    label: 'Family Cash',
-    title: 'Household Benefits Estimator',
-    subtitle: 'CCB, Trillium, Carbon Rebate & GST Credits',
-    icon: UsersIcon, 
-    color: 'text-emerald-600', 
-    bg: 'bg-emerald-50',
-    description: 'Maximize your Child Benefits and quarterly tax rebates.'
-  },
-  { 
-    id: 'cagr', 
-    label: 'Growth Calc',
-    title: 'Investment Growth (CAGR)',
-    subtitle: 'Calculate Compound Annual Growth Rate & Future Value',
-    icon: TrendingUpIcon, 
-    color: 'text-cyan-600', 
-    bg: 'bg-cyan-50',
-    description: 'Determine the annual growth rate required to grow your investment.'
-  },
-];
+const ICON_MAP = {
+  ChartIcon,
+  BabyIcon,
+  HomeIcon,
+  UsersIcon,
+  GraduationCapIcon,
+  TrendingUpIcon
+};
 
 export default function CalculatorSuite() {
   const [view, setView] = useState(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
       const v = params.get('view');
-      if (v && TABS.find(t => t.id === v)) return v;
+      if (v && ALL_TOOLS.find(t => t.id === v)) return v;
       return localStorage.getItem('loonie_pref_view') || 'landing';
     }
     return 'landing';
   }); 
 
-  const activeTabInfo = useMemo(() => TABS.find(t => t.id === view), [view]);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  const activeTool = useMemo(() => ALL_TOOLS.find(t => t.id === view), [view]);
 
   useEffect(() => {
     const handlePopState = () => {
@@ -112,6 +65,16 @@ export default function CalculatorSuite() {
     window.history.pushState({}, '', url);
   }, []);
 
+  const handleToolSelect = (tool) => {
+    const suiteToolIds = ['cpp', 'ccb', 'parental', 'resp', 'cagr', 'mortgage'];
+    if (!suiteToolIds.includes(tool.id)) {
+        window.location.href = tool.href;
+    } else {
+        changeView(tool.id);
+        if (isDrawerOpen) setIsDrawerOpen(false);
+    }
+  };
+
   return (
     <div className="flex flex-col h-full bg-slate-50 pb-24 md:pb-0"> 
       
@@ -121,42 +84,34 @@ export default function CalculatorSuite() {
           <button onClick={() => changeView('landing')} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <img src="/android-chrome-192x192.png" alt="Loonie Fi" className="h-8 w-8 rounded-full shadow-sm" />
             <div className="text-lg font-bold tracking-tight">
-              {/* ACCESSIBILITY FIX: Darker Amber (700) for contrast */}
               <span className="text-amber-700">Loonie</span><span className="text-slate-900">Fi</span>
             </div>
           </button>
 
           {view !== 'landing' && (
-            <div className="flex gap-1 bg-slate-100/50 p-1 rounded-xl border border-slate-200/50 animate-fade-in overflow-x-auto no-scrollbar max-w-[70%]">
-              {TABS.map((tab) => (
-                <button 
-                  key={tab.id}
-                  onClick={() => changeView(tab.id)}
-                  className={`px-3 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 whitespace-nowrap ${
-                    view === tab.id 
-                    ? 'bg-white text-slate-900 shadow-sm ring-1 ring-black/5' 
-                    : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'
-                  }`}
-                >
-                  <tab.icon className={`w-4 h-4 ${view === tab.id ? tab.color : 'text-slate-400'}`} />
-                  {tab.label}
-                </button>
-              ))}
-            </div>
+            <DesktopToolSwitcher 
+                activeId={view} 
+                onSelect={handleToolSelect} 
+                isSuite={true}
+            />
           )}
         </div>
       </nav>
 
       {/* --- MOBILE HEADER --- */}
-      <nav className={`md:hidden bg-white/90 backdrop-blur-xl border-b border-slate-200 sticky top-0 z-40 px-4 flex flex-col items-center justify-center text-center transition-all ${view === 'landing' ? 'py-6' : 'py-3'}`}>
-         <button onClick={() => changeView('landing')} className="flex items-center gap-1.5 mb-1">
+      <nav className={`md:hidden bg-white/90 backdrop-blur-xl border-b border-slate-200 sticky top-0 z-40 px-4 flex items-center justify-between transition-all ${view === 'landing' ? 'py-6' : 'py-3'}`}>
+         <button onClick={() => changeView('landing')} className="flex items-center gap-1.5">
             <img src="/android-chrome-192x192.png" alt="Loonie Fi" className="h-5 w-5 rounded-full" />
             <span className="font-bold text-slate-900 tracking-tight text-sm">Loonie<span className="text-amber-700">Fi</span></span>
          </button>
+         
          {view !== 'landing' && (
-           <div className="animate-fade-in">
-               <h1 className="text-[10px] font-black uppercase tracking-widest text-slate-500">{activeTabInfo?.title}</h1>
-           </div>
+           <button 
+             onClick={() => setIsDrawerOpen(true)}
+             className="p-2 rounded-xl bg-slate-100 text-slate-600 active:scale-95 transition-transform"
+           >
+             <MenuIcon className="w-5 h-5" />
+           </button>
          )}
       </nav>
 
@@ -173,22 +128,26 @@ export default function CalculatorSuite() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {TABS.map((tool) => (
-              <button 
-                key={tool.id}
-                onClick={() => changeView(tool.id)}
-                className="group relative flex flex-col items-start p-8 bg-white border border-slate-200 rounded-[2.5rem] transition-all duration-300 hover:border-transparent hover:shadow-[0_20px_50px_rgba(0,0,0,0.08)] hover:-translate-y-2 text-left"
-              >
-                <div className={`p-4 rounded-2xl mb-6 transition-transform group-hover:scale-110 group-hover:rotate-3 ${tool.bg}`}>
-                  <tool.icon className={`w-8 h-8 ${tool.color}`} />
-                </div>
-                <h3 className="text-xl font-black text-slate-900 mb-2">{tool.label}</h3>
-                <p className="text-slate-500 mb-8 text-sm leading-relaxed font-medium">{tool.description}</p>
-                <div className="mt-auto flex items-center font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
-                  Start Calculating <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </div>
-              </button>
-            ))}
+            {ALL_TOOLS.map((tool) => {
+              const category = TOOL_CATEGORIES.find(c => c.id === tool.categoryId);
+              const Icon = ICON_MAP[tool.icon];
+              return (
+                <button 
+                    key={tool.id}
+                    onClick={() => handleToolSelect(tool)}
+                    className="group relative flex flex-col items-start p-8 bg-white border border-slate-200 rounded-[2.5rem] transition-all duration-300 hover:border-transparent hover:shadow-[0_20px_50px_rgba(0,0,0,0.08)] hover:-translate-y-2 text-left"
+                >
+                    <div className={`p-4 rounded-2xl mb-6 transition-transform group-hover:scale-110 group-hover:rotate-3 ${category?.bg}`}>
+                    <Icon className={`w-8 h-8 ${category?.color}`} />
+                    </div>
+                    <h3 className="text-xl font-black text-slate-900 mb-2">{tool.label}</h3>
+                    <p className="text-slate-500 mb-8 text-sm leading-relaxed font-medium">{tool.description}</p>
+                    <div className="mt-auto flex items-center font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
+                    Start Calculating <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    </div>
+                </button>
+              );
+            })}
           </div>
         </main>
       )}
@@ -197,8 +156,8 @@ export default function CalculatorSuite() {
       {view !== 'landing' && (
         <>
           <div className="hidden md:block max-w-5xl mx-auto px-8 pt-8 pb-2 animate-fade-in text-center md:text-left">
-            <h1 className="text-2xl font-black text-slate-900">{activeTabInfo?.title}</h1>
-            <h2 className="text-slate-500 text-sm font-medium">{activeTabInfo?.subtitle}</h2>
+            <h1 className="text-2xl font-black text-slate-900">{activeTool?.title}</h1>
+            <h2 className="text-slate-500 text-sm font-medium">{activeTool?.subtitle}</h2>
           </div>
 
           <main className="flex-grow flex flex-col justify-center w-full animate-fade-in transition-all duration-300">
@@ -222,28 +181,25 @@ export default function CalculatorSuite() {
             </div>
           </main>
 
-          {/* MOBILE BOTTOM NAV */}
-          <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 pb-safe z-[10000] flex justify-around items-center h-16 px-2 shadow-[0_-5px_20px_-5px_rgba(0,0,0,0.05)] animate-slide-up overflow-x-auto no-scrollbar">
-            {TABS.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => {
-                    changeView(tab.id);
-                    window.scrollTo({ top: 0, behavior: 'smooth' }); 
-                }}
-                className="flex-1 min-w-[64px] flex flex-col items-center justify-center h-full gap-1 active:scale-95 transition-transform"
-              >
-                <div className={`p-1.5 rounded-xl transition-colors ${view === tab.id ? tab.bg : 'bg-transparent'}`}>
-                    <tab.icon className={`w-6 h-6 ${view === tab.id ? tab.color : 'text-slate-400'}`} />
-                </div>
-                <span className={`text-[10px] font-bold tracking-wide ${view === tab.id ? 'text-slate-900' : 'text-slate-400'}`}>
-                  {tab.label}
-                </span>
-              </button>
-            ))}
+          {/* MOBILE TOOL DRAWER TRIGGER */}
+          <div className="md:hidden fixed bottom-6 right-6 z-40">
+            <button 
+                onClick={() => setIsDrawerOpen(true)}
+                className="bg-indigo-600 text-white p-4 rounded-full shadow-2xl active:scale-95 transition-transform"
+            >
+                <MenuIcon className="w-6 h-6" />
+            </button>
           </div>
         </>
       )}
+
+      <ToolDrawer 
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        activeId={view}
+        onSelect={handleToolSelect}
+        isSuite={true}
+      />
     </div>
   );
 }
