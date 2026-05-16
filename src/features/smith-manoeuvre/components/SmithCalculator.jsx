@@ -145,11 +145,12 @@ export default function SmithCalculator() {
                                     onClick={() => {
                                         setReadvanceTolerance(0.5);
                                         setCapitalizeInterest(false);
+                                        setInitialLumpSum(0);
                                         setReinvestTaxRefund(true);
                                         setReinvestDividends(true);
                                     }}
                                     className={`px-2 py-3 rounded-xl text-[10px] font-black uppercase tracking-tighter transition-all border ${
-                                        readvanceTolerance === 0.5 && !capitalizeInterest 
+                                        readvanceTolerance === 0.5 && !capitalizeInterest && initialLumpSum === 0
                                         ? 'bg-indigo-600 border-indigo-600 text-white shadow-md' 
                                         : 'bg-slate-50 border-slate-200 text-slate-600 hover:border-indigo-300'
                                     }`}
@@ -160,6 +161,7 @@ export default function SmithCalculator() {
                                     onClick={() => {
                                         setReadvanceTolerance(1.0);
                                         setCapitalizeInterest(true);
+                                        setInitialLumpSum(0);
                                         setReinvestTaxRefund(true);
                                         setReinvestDividends(true);
                                     }}
@@ -175,7 +177,7 @@ export default function SmithCalculator() {
                                     onClick={() => {
                                         setReadvanceTolerance(1.0);
                                         setCapitalizeInterest(true);
-                                        setInitialLumpSum(Math.floor((homeValue * 0.8) - mortgageBalance));
+                                        setInitialLumpSum(Math.max(0, Math.floor((homeValue * 0.8) - mortgageBalance)));
                                         setReinvestTaxRefund(true);
                                         setReinvestDividends(true);
                                     }}
