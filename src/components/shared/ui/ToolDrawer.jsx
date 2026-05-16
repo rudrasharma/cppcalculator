@@ -47,90 +47,81 @@ export const ToolDrawer = ({ isOpen, onClose, activeId, onSelect, isSuite = fals
     if (!isOpen && !isAnimating) return null;
 
     return (
-        <div className="fixed inset-0 z-[10001] md:hidden">
-            {/* Backdrop */}
-            <div 
-                className={`absolute inset-0 bg-slate-900/80 transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0'}`}
-                onClick={onClose}
-            />
-
-            {/* Bottom Sheet Wrapper (for transform) */}
-            <div 
-                className={`absolute bottom-0 left-0 right-0 h-[92dvh] transition-transform duration-300 ease-out bg-white rounded-t-[3rem] shadow-2xl flex flex-col overflow-hidden ${isOpen ? 'translate-y-0' : 'translate-y-full'}`}
-                onClick={(e) => e.stopPropagation()}
-            >
-                {/* 1. Static Header */}
-                <div className="shrink-0 flex flex-col items-center pt-3 pb-4 border-b border-slate-50 bg-white">
-                    <div className="w-12 h-1.5 bg-slate-200 rounded-full mb-4 active:bg-slate-300 transition-colors" onClick={onClose} />
-                    <div className="w-full px-8 flex items-center justify-between">
-                        <div>
-                            <h2 className="text-lg font-black text-slate-900 tracking-tight">Financial Tools</h2>
-                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Choose a calculator</p>
+        <div 
+            className={`fixed inset-0 z-[10001] md:hidden bg-slate-50 flex flex-col transition-all duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+        >
+            {/* 1. Full-Screen Header */}
+            <div className="shrink-0 pt-[env(safe-area-inset-top)] bg-white border-b border-slate-200">
+                <div className="h-16 px-6 flex items-center justify-between">
+                    <a href="/" className="flex items-center gap-2" onClick={onClose}>
+                        <img src="/android-chrome-192x192.png" alt="Loonie Fi" className="h-7 w-7 rounded-full shadow-sm" />
+                        <div className="text-lg font-bold tracking-tight">
+                            <span className="text-amber-700">Loonie</span><span className="text-slate-900">Fi</span>
                         </div>
-                        <button 
-                            onClick={onClose}
-                            className="w-12 h-12 flex items-center justify-center rounded-2xl bg-slate-100 text-slate-900 active:scale-90 transition-all border border-slate-200/50 shadow-sm"
-                            aria-label="Close menu"
-                        >
-                            <XIcon className="w-6 h-6" />
-                        </button>
-                    </div>
-                </div>
-
-                {/* 2. Scrollable Content Area */}
-                <div className="flex-grow overflow-y-auto overscroll-contain bg-white pb-32">
-                    <div className="p-8 space-y-12">
-                        {TOOL_CATEGORIES.map(category => {
-                            const categoryTools = ALL_TOOLS.filter(t => t.categoryId === category.id);
-                            return (
-                                <div key={category.id} className="space-y-6">
-                                    <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 px-1 flex items-center gap-3">
-                                        <span className={`w-2 h-2 rounded-full ${category.color.replace('text', 'bg')}`}></span>
-                                        {category.label}
-                                    </h3>
-                                    <div className="grid grid-cols-1 gap-3">
-                                        {categoryTools.map(tool => {
-                                            const Icon = ICON_MAP[tool.icon];
-                                            const isActive = activeId === tool.id;
-                                            return (
-                                                <a
-                                                    key={tool.id}
-                                                    href={tool.href}
-                                                    onClick={(e) => handleSelect(e, tool)}
-                                                    className={`flex items-center gap-5 p-5 rounded-[1.8rem] transition-all ${
-                                                        isActive 
-                                                        ? 'bg-indigo-600 border-indigo-600 shadow-xl shadow-indigo-100' 
-                                                        : 'bg-slate-50 border border-slate-100 active:bg-slate-100 active:scale-[0.98]'
-                                                    }`}
-                                                >
-                                                    <div className={`p-3.5 rounded-2xl ${isActive ? 'bg-white/20' : 'bg-white shadow-sm border border-slate-100'}`}>
-                                                        <Icon className={`w-6 h-6 ${isActive ? 'text-white' : category.color}`} />
-                                                    </div>
-                                                    <div className="text-left min-w-0 flex-grow">
-                                                        <p className={`text-base font-black leading-none mb-1.5 ${isActive ? 'text-white' : 'text-slate-900'}`}>
-                                                            {tool.label}
-                                                        </p>
-                                                        <p className={`text-[10px] font-bold uppercase tracking-tight truncate ${isActive ? 'text-indigo-100' : 'text-slate-400'}`}>
-                                                            {tool.subtitle}
-                                                        </p>
-                                                    </div>
-                                                </a>
-                                            );
-                                        })}
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
-                </div>
-
-                {/* 3. Fixed Footer Close */}
-                <div className="shrink-0 p-8 pt-4 pb-12 border-t border-slate-100 bg-white">
+                    </a>
                     <button 
                         onClick={onClose}
-                        className="w-full py-5 bg-slate-900 text-white rounded-[1.5rem] font-black uppercase tracking-widest text-xs active:scale-95 transition-all shadow-xl shadow-slate-200"
+                        className="w-12 h-12 flex items-center justify-center rounded-2xl bg-slate-100 text-slate-900 active:scale-90 transition-all border border-slate-200/50"
+                        aria-label="Close menu"
                     >
-                        Dismiss Menu
+                        <XIcon className="w-6 h-6" />
+                    </button>
+                </div>
+            </div>
+
+            {/* 2. Full-Screen Scrollable Content */}
+            <div className="flex-grow overflow-y-auto overscroll-contain pb-24">
+                <div className="p-6 space-y-10">
+                    {TOOL_CATEGORIES.map(category => {
+                        const categoryTools = ALL_TOOLS.filter(t => t.categoryId === category.id);
+                        return (
+                            <div key={category.id} className="space-y-4">
+                                <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 px-1 flex items-center gap-3">
+                                    <span className={`w-1.5 h-1.5 rounded-full ${category.color.replace('text', 'bg')}`}></span>
+                                    {category.label}
+                                </h3>
+                                <div className="grid grid-cols-1 gap-3">
+                                    {categoryTools.map(tool => {
+                                        const Icon = ICON_MAP[tool.icon];
+                                        const isActive = activeId === tool.id;
+                                        return (
+                                            <a
+                                                key={tool.id}
+                                                href={tool.href}
+                                                onClick={(e) => handleSelect(e, tool)}
+                                                className={`flex items-center gap-4 p-5 rounded-[1.8rem] transition-all ${
+                                                    isActive 
+                                                    ? 'bg-indigo-600 border-indigo-600 shadow-xl shadow-indigo-100' 
+                                                    : 'bg-white border border-slate-200 active:bg-slate-50 active:scale-[0.98]'
+                                                }`}
+                                            >
+                                                <div className={`p-3.5 rounded-2xl ${isActive ? 'bg-white/20' : 'bg-slate-50 border border-slate-100 shadow-sm'}`}>
+                                                    <Icon className={`w-6 h-6 ${isActive ? 'text-white' : category.color}`} />
+                                                </div>
+                                                <div className="text-left min-w-0 flex-grow">
+                                                    <p className={`text-base font-black leading-none mb-1.5 ${isActive ? 'text-white' : 'text-slate-900'}`}>
+                                                        {tool.label}
+                                                    </p>
+                                                    <p className={`text-[10px] font-bold uppercase tracking-tight truncate ${isActive ? 'text-indigo-100' : 'text-slate-400'}`}>
+                                                        {tool.subtitle}
+                                                    </p>
+                                                </div>
+                                            </a>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+
+                {/* 3. Footer Action */}
+                <div className="p-6 pt-0">
+                    <button 
+                        onClick={onClose}
+                        className="w-full py-5 bg-white border-2 border-slate-900 text-slate-900 rounded-[1.5rem] font-black uppercase tracking-widest text-xs active:scale-95 transition-all"
+                    >
+                        Return to Calculator
                     </button>
                     <div className="pb-safe" />
                 </div>
