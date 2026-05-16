@@ -21,13 +21,13 @@ export default function SmithCalculator() {
     const [capitalGainsRate, setCapitalGainsRate] = useState(0.05);
     const [dividendYield, setDividendYield] = useState(0.02);
     const [dividendTaxRate, setDividendTaxRate] = useState(0.15);
-    const [reinvestDividends, setReinvestDividends] = useState(true);
+    const [dividendAllocation, setDividendAllocation] = useState('portfolio');
     
     // Previous Inputs
     const [amortizationYears, setAmortizationYears] = useState(25);
     const [initialLumpSum, setInitialLumpSum] = useState(0);
     const [readvanceTolerance, setReadvanceTolerance] = useState(1.0);
-    const [reinvestTaxRefund, setReinvestTaxRefund] = useState(true);
+    const [taxRefundAllocation, setTaxRefundAllocation] = useState('portfolio');
     const [capitalizeInterest, setCapitalizeInterest] = useState(true);
 
     const currency = new Intl.NumberFormat('en-CA', { 
@@ -58,17 +58,17 @@ export default function SmithCalculator() {
             capitalGainsRate,
             dividendYield,
             dividendTaxRate,
-            reinvestDividends,
+            dividendAllocation,
             amortizationYears,
             initialHelocLumpSum: initialLumpSum,
             readvanceTolerance,
-            reinvestTaxRefund,
+            taxRefundAllocation,
             capitalizeInterest
         });
     }, [
         homeValue, mortgageBalance, mortgageRate, helocRate, marginalTaxRate, 
-        capitalGainsRate, dividendYield, dividendTaxRate, reinvestDividends,
-        amortizationYears, initialLumpSum, readvanceTolerance, reinvestTaxRefund,
+        capitalGainsRate, dividendYield, dividendTaxRate, dividendAllocation,
+        amortizationYears, initialLumpSum, readvanceTolerance, taxRefundAllocation,
         capitalizeInterest
     ]);
 
@@ -93,6 +93,8 @@ export default function SmithCalculator() {
         if (args.helocRate !== undefined) setHelocRate(args.helocRate);
         if (args.marginalTaxRate !== undefined) setMarginalTaxRate(args.marginalTaxRate);
         if (args.amortizationYears !== undefined) setAmortizationYears(args.amortizationYears);
+        if (args.dividendAllocation !== undefined) setDividendAllocation(args.dividendAllocation);
+        if (args.taxRefundAllocation !== undefined) setTaxRefundAllocation(args.taxRefundAllocation);
     };
 
     const handleExportCSV = () => {
@@ -152,8 +154,8 @@ export default function SmithCalculator() {
                                         setReadvanceTolerance(0.5);
                                         setCapitalizeInterest(false);
                                         setInitialLumpSum(0);
-                                        setReinvestTaxRefund(true);
-                                        setReinvestDividends(true);
+                                        setTaxRefundAllocation('portfolio');
+                                        setDividendAllocation('portfolio');
                                     }}
                                     className={`px-2 py-3 rounded-xl text-[10px] font-black uppercase tracking-tighter transition-all border ${
                                         readvanceTolerance === 0.5 && !capitalizeInterest && initialLumpSum === 0
@@ -168,8 +170,8 @@ export default function SmithCalculator() {
                                         setReadvanceTolerance(1.0);
                                         setCapitalizeInterest(true);
                                         setInitialLumpSum(0);
-                                        setReinvestTaxRefund(true);
-                                        setReinvestDividends(true);
+                                        setTaxRefundAllocation('portfolio');
+                                        setDividendAllocation('portfolio');
                                     }}
                                     className={`px-2 py-3 rounded-xl text-[10px] font-black uppercase tracking-tighter transition-all border ${
                                         readvanceTolerance === 1.0 && capitalizeInterest && initialLumpSum === 0
@@ -188,11 +190,11 @@ export default function SmithCalculator() {
                                         const maxByHelocLTV = (homeValue * 0.65);
                                         const safeLumpSum = Math.max(0, Math.floor(Math.min(maxByTotalLTV, maxByHelocLTV)));
                                         setInitialLumpSum(safeLumpSum);
-                                        setReinvestTaxRefund(true);
-                                        setReinvestDividends(true);
+                                        setTaxRefundAllocation('mortgage');
+                                        setDividendAllocation('mortgage');
                                     }}
                                     className={`px-2 py-3 rounded-xl text-[10px] font-black uppercase tracking-tighter transition-all border ${
-                                        readvanceTolerance === 1.0 && capitalizeInterest && initialLumpSum > 0
+                                        readvanceTolerance === 1.0 && capitalizeInterest && initialLumpSum > 0 && taxRefundAllocation === 'mortgage'
                                         ? 'bg-slate-900 border-slate-900 text-white shadow-md' 
                                         : 'bg-slate-50 border-slate-200 text-slate-600 hover:border-indigo-300'
                                     }`}
@@ -355,23 +357,45 @@ export default function SmithCalculator() {
                                                 <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${capitalizeInterest ? 'translate-x-6' : 'translate-x-1'}`} />
                                             </button>
                                         </div>
-                                        <div className="flex items-center justify-between">
-                                            <label className="text-xs font-black uppercase tracking-tighter text-slate-700">Reinvest Tax Refund</label>
-                                            <button 
-                                                onClick={() => setReinvestTaxRefund(!reinvestTaxRefund)}
-                                                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${reinvestTaxRefund ? 'bg-indigo-600' : 'bg-slate-200'}`}
-                                            >
-                                                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${reinvestTaxRefund ? 'translate-x-6' : 'translate-x-1'}`} />
-                                            </button>
-                                        </div>
-                                        <div className="flex items-center justify-between">
-                                            <label className="text-xs font-black uppercase tracking-tighter text-slate-700">Reinvest Dividends</label>
-                                            <button 
-                                                onClick={() => setReinvestDividends(!reinvestDividends)}
-                                                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${reinvestDividends ? 'bg-indigo-600' : 'bg-slate-200'}`}
-                                            >
-                                                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${reinvestDividends ? 'translate-x-6' : 'translate-x-1'}`} />
-                                            </button>
+
+                                        <div className="space-y-3 py-4 border-y border-slate-50">
+                                            <div className="flex flex-col gap-3">
+                                                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Tax Refund Allocation</label>
+                                                <div className="grid grid-cols-3 gap-2">
+                                                    {['portfolio', 'mortgage', 'none'].map((target) => (
+                                                        <button
+                                                            key={target}
+                                                            onClick={() => setTaxRefundAllocation(target)}
+                                                            className={`px-2 py-2 rounded-lg text-[9px] font-black uppercase border transition-all ${
+                                                                taxRefundAllocation === target 
+                                                                ? 'bg-indigo-600 border-indigo-600 text-white' 
+                                                                : 'bg-white border-slate-200 text-slate-500 hover:border-indigo-300'
+                                                            }`}
+                                                        >
+                                                            {target}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
+
+                                            <div className="flex flex-col gap-3">
+                                                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Dividend Allocation</label>
+                                                <div className="grid grid-cols-3 gap-2">
+                                                    {['portfolio', 'mortgage', 'none'].map((target) => (
+                                                        <button
+                                                            key={target}
+                                                            onClick={() => setDividendAllocation(target)}
+                                                            className={`px-2 py-2 rounded-lg text-[9px] font-black uppercase border transition-all ${
+                                                                dividendAllocation === target 
+                                                                ? 'bg-indigo-600 border-indigo-600 text-white' 
+                                                                : 'bg-white border-slate-200 text-slate-500 hover:border-indigo-300'
+                                                            }`}
+                                                        >
+                                                            {target}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

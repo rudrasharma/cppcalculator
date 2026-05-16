@@ -15,11 +15,11 @@
  * @param {number} inputs.capitalGainsRate - Annual price appreciation (e.g. 0.05)
  * @param {number} inputs.dividendYield - Annual dividend yield (e.g. 0.02)
  * @param {number} inputs.dividendTaxRate - Tax rate on dividends (e.g. 0.15)
- * @param {boolean} inputs.reinvestDividends - Whether to reinvest net dividends
+ * @param {string} inputs.dividendAllocation - 'portfolio', 'mortgage', or 'none' (default 'portfolio')
  * @param {number} inputs.amortizationYears - Total years (e.g. 25)
  * @param {number} inputs.initialHelocLumpSum - Initial investment from HELOC (default 0)
  * @param {number} inputs.readvanceTolerance - % of principal re-advanced (0.0 to 1.0, default 1.0)
- * @param {boolean} inputs.reinvestTaxRefund - Whether to reinvest annual tax refunds (default true)
+ * @param {string} inputs.taxRefundAllocation - 'portfolio', 'mortgage', or 'none' (default 'portfolio')
  * @param {boolean} inputs.capitalizeInterest - Whether to borrow from HELOC to pay HELOC interest (default true)
  */
 export const calculateSmithManoeuvre = ({
@@ -31,11 +31,11 @@ export const calculateSmithManoeuvre = ({
     capitalGainsRate = 0.05,
     dividendYield = 0.02,
     dividendTaxRate = 0.15,
-    reinvestDividends = true,
+    dividendAllocation = 'portfolio',
     amortizationYears = 25,
     initialHelocLumpSum = 0,
     readvanceTolerance = 1.0,
-    reinvestTaxRefund = true,
+    taxRefundAllocation = 'portfolio',
     capitalizeInterest = true
 }) => {
     const totalMonths = amortizationYears * 12;
@@ -66,6 +66,23 @@ export const calculateSmithManoeuvre = ({
     let currentHelocBalance = safeInitialLumpSum;
     let currentInvestmentBalance = safeInitialLumpSum;
     
+    // Month 0: Starting State
+    data.push({
+        month: 0,
+        standardMortgageBalance: mortgageBalance,
+        smithMortgageBalance: mortgageBalance,
+        smithHelocBalance: currentHelocBalance,
+        smithInvestmentBalance: currentInvestmentBalance,
+        taxRefundAccumulated: 0,
+        annualTaxRefund: 0,
+        yearlyNetDividends: 0,
+        cumulativePocketedCash: 0,
+        yearlyOutOfPocketInterest: 0,
+        cumulativeOutOfPocketInterest: 0,
+        standardNetWorth: homeValue - mortgageBalance,
+        smithNetWorth: homeValue - mortgageBalance - currentHelocBalance + currentInvestmentBalance
+    });
+
     let yearlyHelocInterestPaid = 0;
     let lastYearlyRefund = 0;
     let cumulativePocketedCash = 0;
@@ -76,9 +93,31 @@ export const calculateSmithManoeuvre = ({
     for (let month = 1; month <= totalMonths; month++) {
         let currentMonthTaxRefund = 0;
 
-        // 1. Mortgage Step
+        // 1. Mortgage Step: Base Payment
         const interestComponent = currentMortgageBalance * monthlyMortgageRate;
-        const principalComponent = Math.min(currentMortgageBalance, monthlyPayment - interestComponent);
+        let principalComponent = Math.min(currentMortgageBalance, monthlyPayment - interestComponent);
+        
+        // 1a. Dividend Accelerator: Apply net dividends to mortgage if target is 'mortgage'
+        const monthlyDividend = currentInvestmentBalance * (dividendYield / 12);
+        const netMonthlyDividend = monthlyDividend * (1 - dividendTaxRate);
+        yearlyNetDividends += netMonthlyDividend;
+
+        if (dividendAllocation === 'mortgage') {
+            const extraPayment = Math.min(currentMortgageBalance - principalComponent, netMonthlyDividend);
+            principalComponent += extraPayment;
+        }
+
+        // 1b. Tax Refund Accelerator: Apply refund to mortgage if target is 'mortgage'
+        // Refund logic happens annually (Month 12)
+        let appliedRefundToMortgage = 0;
+        if (month % 12 === 0) {
+            currentMonthTaxRefund = yearlyHelocInterestPaid * marginalTaxRate;
+            if (taxRefundAllocation === 'mortgage') {
+                appliedRefundToMortgage = Math.min(currentMortgageBalance - principalComponent, currentMonthTaxRefund);
+                principalComponent += appliedRefundToMortgage;
+            }
+        }
+
         currentMortgageBalance -= principalComponent;
 
         // 2. Smith Step: Interest Capitalization with LTV Caps
@@ -86,14 +125,12 @@ export const calculateSmithManoeuvre = ({
         const totalDebt = currentMortgageBalance + currentHelocBalance;
         
         // Can we capitalize this month's interest?
-        // Must be below 80% total LTV AND below 65% pure HELOC LTV
         const hasTotalRoom = (totalDebt + monthlyHelocInterest) <= (homeValue * MAX_TOTAL_LTV);
         const hasHelocRoom = (currentHelocBalance + monthlyHelocInterest) <= (homeValue * MAX_HELOC_LTV);
 
         if (capitalizeInterest && hasTotalRoom && hasHelocRoom) {
             currentHelocBalance += monthlyHelocInterest;
         } else {
-            // If capitalization is OFF OR we hit a cap, pay out of pocket
             cumulativeOutOfPocketInterest += monthlyHelocInterest;
             yearlyOutOfPocketInterest += monthlyHelocInterest;
         }
@@ -103,37 +140,35 @@ export const calculateSmithManoeuvre = ({
         // 3. Investment Growth: Capital Gains
         currentInvestmentBalance *= (1 + capitalGainsRate / 12);
 
-        // 4. Dividends
-        const monthlyDividend = currentInvestmentBalance * (dividendYield / 12);
-        const netMonthlyDividend = monthlyDividend * (1 - dividendTaxRate);
-        yearlyNetDividends += netMonthlyDividend;
-
-        if (reinvestDividends) {
+        // 4. Portfolio Reinvestments
+        if (dividendAllocation === 'portfolio') {
             currentInvestmentBalance += netMonthlyDividend;
-        } else {
+        } else if (dividendAllocation === 'none') {
             cumulativePocketedCash += netMonthlyDividend;
+        }
+
+        if (month % 12 === 0) {
+            if (taxRefundAllocation === 'portfolio') {
+                currentInvestmentBalance += currentMonthTaxRefund;
+            } else if (taxRefundAllocation === 'none') {
+                cumulativePocketedCash += currentMonthTaxRefund;
+            } else if (taxRefundAllocation === 'mortgage') {
+                // If we couldn't apply the whole refund to the mortgage, invest the remainder
+                const remainder = currentMonthTaxRefund - appliedRefundToMortgage;
+                currentInvestmentBalance += remainder;
+            }
+            lastYearlyRefund = currentMonthTaxRefund;
+            yearlyHelocInterestPaid = 0;
         }
 
         // 5. Smith Step: Re-advance the principal based on tolerance & Caps
         const theoreticalReadvance = principalComponent * readvanceTolerance;
-        
-        // Check room again for re-advance
         const roomTotal = (homeValue * MAX_TOTAL_LTV) - (currentMortgageBalance + currentHelocBalance);
         const roomHeloc = (homeValue * MAX_HELOC_LTV) - currentHelocBalance;
         const actualReadvance = Math.max(0, Math.min(theoreticalReadvance, roomTotal, roomHeloc));
 
         currentHelocBalance += actualReadvance;
         currentInvestmentBalance += actualReadvance;
-
-        // 6. Tax Refund logic (Annual Reinvestment)
-        if (month % 12 === 0) {
-            currentMonthTaxRefund = yearlyHelocInterestPaid * marginalTaxRate;
-            if (reinvestTaxRefund) {
-                currentInvestmentBalance += currentMonthTaxRefund;
-            }
-            lastYearlyRefund = currentMonthTaxRefund;
-            yearlyHelocInterestPaid = 0; // Reset for next year
-        }
 
         // 7. Net Worth Calculations
         // Note: smithNetWorth is penalized by cumulativeOutOfPocketInterest if capitalization is OFF

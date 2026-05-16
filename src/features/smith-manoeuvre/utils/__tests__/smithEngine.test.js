@@ -10,11 +10,11 @@ describe('Smith Manoeuvre Engine', () => {
         capitalGainsRate: 0.05,
         dividendYield: 0.02,
         dividendTaxRate: 0.15,
-        reinvestDividends: true,
+        dividendAllocation: 'portfolio',
         amortizationYears: 25,
         initialHelocLumpSum: 0,
         readvanceTolerance: 1.0,
-        reinvestTaxRefund: true
+        taxRefundAllocation: 'portfolio'
     };
 
     test('standardMortgageBalance reaches exactly 0 at the end of amortization', () => {
@@ -57,9 +57,9 @@ describe('Smith Manoeuvre Engine', () => {
         expect(highTaxNetWorth).toBeGreaterThan(lowTaxNetWorth);
     });
 
-    test('reinvestTaxRefund parameter correctly affects the investment balance', () => {
-        const withReinvest = calculateSmithManoeuvre({ ...defaultInputs, reinvestTaxRefund: true });
-        const withoutReinvest = calculateSmithManoeuvre({ ...defaultInputs, reinvestTaxRefund: false });
+    test('taxRefundAllocation parameter correctly affects the investment balance', () => {
+        const withReinvest = calculateSmithManoeuvre({ ...defaultInputs, taxRefundAllocation: 'portfolio' });
+        const withoutReinvest = calculateSmithManoeuvre({ ...defaultInputs, taxRefundAllocation: 'none' });
 
         const withReinvestBal = withReinvest[withReinvest.length - 1].smithInvestmentBalance;
         const withoutReinvestBal = withoutReinvest[withoutReinvest.length - 1].smithInvestmentBalance;
@@ -67,9 +67,9 @@ describe('Smith Manoeuvre Engine', () => {
         expect(withReinvestBal).toBeGreaterThan(withoutReinvestBal);
     });
 
-    test('reinvestDividends parameter affects cumulativePocketedCash and investmentBalance', () => {
-        const withReinvest = calculateSmithManoeuvre({ ...defaultInputs, reinvestDividends: true });
-        const withoutReinvest = calculateSmithManoeuvre({ ...defaultInputs, reinvestDividends: false });
+    test('dividendAllocation parameter affects cumulativePocketedCash and investmentBalance', () => {
+        const withReinvest = calculateSmithManoeuvre({ ...defaultInputs, dividendAllocation: 'portfolio' });
+        const withoutReinvest = calculateSmithManoeuvre({ ...defaultInputs, dividendAllocation: 'none' });
 
         const lastWith = withReinvest[withReinvest.length - 1];
         const lastWithout = withoutReinvest[withoutReinvest.length - 1];
@@ -111,5 +111,18 @@ describe('Smith Manoeuvre Engine', () => {
         // Throughout the strategy, HELOC should never exceed 650k (65% of 1M)
         const maxHeloc = Math.max(...results.map(r => r.smithHelocBalance));
         expect(maxHeloc).toBeLessThanOrEqual(650000);
+    });
+
+    test('mortgage allocation accelerator collapses mortgage faster than portfolio allocation', () => {
+        const portfolioStrategy = calculateSmithManoeuvre({ ...defaultInputs, taxRefundAllocation: 'portfolio' });
+        const acceleratorStrategy = calculateSmithManoeuvre({ ...defaultInputs, taxRefundAllocation: 'mortgage' });
+
+        // Find first month mortgage is 0 for accelerator
+        const accFinishMonth = acceleratorStrategy.findIndex(r => r.standardMortgageBalance <= 1);
+        const portFinishMonth = portfolioStrategy.findIndex(r => r.standardMortgageBalance <= 1);
+
+        // Accelerator should finish significantly earlier
+        expect(accFinishMonth).toBeLessThan(portFinishMonth);
+        expect(accFinishMonth).toBeGreaterThan(0);
     });
 });
