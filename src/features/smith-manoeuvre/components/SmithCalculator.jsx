@@ -80,6 +80,12 @@ export default function SmithCalculator() {
         return results.filter(r => r.month % 12 === 0 || r.month === results.length);
     }, [results]);
 
+    // OSFI Limit Logic for UI Feedback
+    const maxByTotalLTV = Math.max(0, (homeValue * 0.8) - mortgageBalance);
+    const maxByHelocLTV = (homeValue * 0.65);
+    const absoluteMaxLumpSum = Math.floor(Math.min(maxByTotalLTV, maxByHelocLTV));
+    const isOverLimit = initialLumpSum > absoluteMaxLumpSum;
+
     const handleAIUpdate = (args) => {
         if (args.homeValue !== undefined) setHomeValue(args.homeValue);
         if (args.mortgageBalance !== undefined) setMortgageBalance(args.mortgageBalance);
@@ -278,12 +284,30 @@ export default function SmithCalculator() {
 
                             {showAdvanced && (
                                 <div className="mt-6 space-y-6 animate-fade-in">
-                                    <MoneyInput 
-                                        label="Initial HELOC Investment" 
-                                        value={initialLumpSum} 
-                                        onChange={(val) => setInitialLumpSum(Number(val))} 
-                                        subLabel="Lump sum borrowed from HELOC at Day 1"
-                                    />
+                                    <div className="space-y-2">
+                                        <MoneyInput 
+                                            label="Initial HELOC Investment" 
+                                            value={initialLumpSum} 
+                                            onChange={(val) => setInitialLumpSum(Number(val))} 
+                                            subLabel={`Lump sum borrowed from HELOC at Day 1`}
+                                            className={isOverLimit ? 'border-amber-400' : ''}
+                                        />
+                                        <div className="flex justify-between items-center px-1">
+                                            <p className={`text-[10px] font-bold uppercase tracking-wider ${isOverLimit ? 'text-amber-600' : 'text-slate-400'}`}>
+                                                {isOverLimit ? '⚠️ Limit Exceeded' : 'Available Room'}
+                                            </p>
+                                            <p className={`text-[10px] font-black font-mono ${isOverLimit ? 'text-amber-600' : 'text-indigo-600'}`}>
+                                                {currency.format(absoluteMaxLumpSum)}
+                                            </p>
+                                        </div>
+                                        {isOverLimit && (
+                                            <div className="p-3 bg-amber-50 rounded-xl border border-amber-100 mt-2">
+                                                <p className="text-[10px] leading-relaxed text-amber-800 font-medium">
+                                                    <strong>Note:</strong> OSFI regulations cap total debt at 80% LTV and HELOCs at 65%. Your projection is being automatically capped at {currency.format(absoluteMaxLumpSum)}.
+                                                </p>
+                                            </div>
+                                        )}
+                                    </div>
 
                                     <div className="space-y-4 pt-2">
                                         <label className="block text-xs font-black uppercase tracking-tighter text-slate-700">Amortization ({amortizationYears} Years)</label>
@@ -494,23 +518,21 @@ export default function SmithCalculator() {
                                     <Legend verticalAlign="top" align="right" iconType="circle" />
                                     <Area 
                                         name="Mortgage (Non-Deductible)"
-                                        stackId="1"
                                         type="monotone" 
                                         dataKey="smithMortgageBalance" 
                                         stroke="#ef4444" 
-                                        strokeWidth={2}
-                                        fillOpacity={1} 
-                                        fill="url(#colorMortgage)" 
+                                        strokeWidth={3}
+                                        fillOpacity={0.1} 
+                                        fill="#ef4444" 
                                     />
                                     <Area 
                                         name="HELOC (Tax-Deductible)"
-                                        stackId="1"
                                         type="monotone" 
                                         dataKey="smithHelocBalance" 
                                         stroke="#10b981" 
-                                        strokeWidth={2}
-                                        fillOpacity={1} 
-                                        fill="url(#colorHeloc)" 
+                                        strokeWidth={3}
+                                        fillOpacity={0.1} 
+                                        fill="#10b981" 
                                     />
                                 </AreaChart>
                             </ResponsiveContainer>
