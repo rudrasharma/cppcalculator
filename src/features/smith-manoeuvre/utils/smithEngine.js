@@ -52,10 +52,19 @@ export const calculateSmithManoeuvre = ({
     // HELOC compounding (usually monthly)
     const monthlyHelocRate = helocRate / 12;
 
+    // OSFI Limits (Canadian Standards)
+    const MAX_TOTAL_LTV = 0.80; // Total Borrowing (Mortgage + HELOC)
+    const MAX_HELOC_LTV = 0.65; // Pure HELOC cap
+
     let currentMortgageBalance = mortgageBalance;
-    // Month 0 initialization
-    let currentHelocBalance = initialHelocLumpSum;
-    let currentInvestmentBalance = initialHelocLumpSum;
+
+    // Month 0 initialization - Subject to Caps
+    const initialTotalRoom = (homeValue * MAX_TOTAL_LTV) - currentMortgageBalance;
+    const initialHelocRoom = (homeValue * MAX_HELOC_LTV);
+    const safeInitialLumpSum = Math.max(0, Math.min(initialHelocLumpSum, initialTotalRoom, initialHelocRoom));
+
+    let currentHelocBalance = safeInitialLumpSum;
+    let currentInvestmentBalance = safeInitialLumpSum;
     
     let yearlyHelocInterestPaid = 0;
     let lastYearlyRefund = 0;
@@ -72,12 +81,19 @@ export const calculateSmithManoeuvre = ({
         const principalComponent = Math.min(currentMortgageBalance, monthlyPayment - interestComponent);
         currentMortgageBalance -= principalComponent;
 
-        // 2. Smith Step: Interest Capitalization
+        // 2. Smith Step: Interest Capitalization with LTV Caps
         const monthlyHelocInterest = currentHelocBalance * monthlyHelocRate;
+        const totalDebt = currentMortgageBalance + currentHelocBalance;
         
-        if (capitalizeInterest) {
+        // Can we capitalize this month's interest?
+        // Must be below 80% total LTV AND below 65% pure HELOC LTV
+        const hasTotalRoom = (totalDebt + monthlyHelocInterest) <= (homeValue * MAX_TOTAL_LTV);
+        const hasHelocRoom = (currentHelocBalance + monthlyHelocInterest) <= (homeValue * MAX_HELOC_LTV);
+
+        if (capitalizeInterest && hasTotalRoom && hasHelocRoom) {
             currentHelocBalance += monthlyHelocInterest;
         } else {
+            // If capitalization is OFF OR we hit a cap, pay out of pocket
             cumulativeOutOfPocketInterest += monthlyHelocInterest;
             yearlyOutOfPocketInterest += monthlyHelocInterest;
         }
@@ -98,10 +114,16 @@ export const calculateSmithManoeuvre = ({
             cumulativePocketedCash += netMonthlyDividend;
         }
 
-        // 5. Smith Step: Re-advance the principal based on tolerance
-        const readvanceAmount = principalComponent * readvanceTolerance;
-        currentHelocBalance += readvanceAmount;
-        currentInvestmentBalance += readvanceAmount;
+        // 5. Smith Step: Re-advance the principal based on tolerance & Caps
+        const theoreticalReadvance = principalComponent * readvanceTolerance;
+        
+        // Check room again for re-advance
+        const roomTotal = (homeValue * MAX_TOTAL_LTV) - (currentMortgageBalance + currentHelocBalance);
+        const roomHeloc = (homeValue * MAX_HELOC_LTV) - currentHelocBalance;
+        const actualReadvance = Math.max(0, Math.min(theoreticalReadvance, roomTotal, roomHeloc));
+
+        currentHelocBalance += actualReadvance;
+        currentInvestmentBalance += actualReadvance;
 
         // 6. Tax Refund logic (Annual Reinvestment)
         if (month % 12 === 0) {

@@ -177,7 +177,11 @@ export default function SmithCalculator() {
                                     onClick={() => {
                                         setReadvanceTolerance(1.0);
                                         setCapitalizeInterest(true);
-                                        setInitialLumpSum(Math.max(0, Math.floor((homeValue * 0.8) - mortgageBalance)));
+                                        // Max initial lump sum is limited by BOTH 80% Total LTV and 65% Pure HELOC cap
+                                        const maxByTotalLTV = (homeValue * 0.8) - mortgageBalance;
+                                        const maxByHelocLTV = (homeValue * 0.65);
+                                        const safeLumpSum = Math.max(0, Math.floor(Math.min(maxByTotalLTV, maxByHelocLTV)));
+                                        setInitialLumpSum(safeLumpSum);
                                         setReinvestTaxRefund(true);
                                         setReinvestDividends(true);
                                     }}
