@@ -148,7 +148,11 @@ export default function SmithCalculator() {
                                         setReinvestTaxRefund(true);
                                         setReinvestDividends(true);
                                     }}
-                                    className="px-2 py-3 bg-slate-50 border border-slate-200 rounded-xl text-[10px] font-black uppercase tracking-tighter text-slate-600 hover:border-indigo-300 hover:text-indigo-600 transition-all"
+                                    className={`px-2 py-3 rounded-xl text-[10px] font-black uppercase tracking-tighter transition-all border ${
+                                        readvanceTolerance === 0.5 && !capitalizeInterest 
+                                        ? 'bg-indigo-600 border-indigo-600 text-white shadow-md' 
+                                        : 'bg-slate-50 border-slate-200 text-slate-600 hover:border-indigo-300'
+                                    }`}
                                 >
                                     🛡️ Cons.
                                 </button>
@@ -159,7 +163,11 @@ export default function SmithCalculator() {
                                         setReinvestTaxRefund(true);
                                         setReinvestDividends(true);
                                     }}
-                                    className="px-2 py-3 bg-indigo-50 border border-indigo-200 rounded-xl text-[10px] font-black uppercase tracking-tighter text-indigo-600 hover:bg-indigo-600 hover:text-white transition-all"
+                                    className={`px-2 py-3 rounded-xl text-[10px] font-black uppercase tracking-tighter transition-all border ${
+                                        readvanceTolerance === 1.0 && capitalizeInterest && initialLumpSum === 0
+                                        ? 'bg-indigo-600 border-indigo-600 text-white shadow-md' 
+                                        : 'bg-slate-50 border-slate-200 text-slate-600 hover:border-indigo-300'
+                                    }`}
                                 >
                                     ⚖️ Bal.
                                 </button>
@@ -171,7 +179,11 @@ export default function SmithCalculator() {
                                         setReinvestTaxRefund(true);
                                         setReinvestDividends(true);
                                     }}
-                                    className="px-2 py-3 bg-slate-900 border border-slate-900 rounded-xl text-[10px] font-black uppercase tracking-tighter text-white hover:bg-black transition-all"
+                                    className={`px-2 py-3 rounded-xl text-[10px] font-black uppercase tracking-tighter transition-all border ${
+                                        readvanceTolerance === 1.0 && capitalizeInterest && initialLumpSum > 0
+                                        ? 'bg-slate-900 border-slate-900 text-white shadow-md' 
+                                        : 'bg-slate-50 border-slate-200 text-slate-600 hover:border-indigo-300'
+                                    }`}
                                 >
                                     🔥 Aggr.
                                 </button>
