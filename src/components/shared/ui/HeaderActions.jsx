@@ -10,10 +10,10 @@ export default function HeaderActions({ activeId }) {
         <>
             <button 
                 onClick={() => setIsDrawerOpen(true)}
-                className="p-2 rounded-xl bg-slate-100 text-slate-600 active:scale-95 transition-transform"
+                className="p-3 rounded-xl bg-slate-100 text-slate-700 active:scale-90 transition-transform shadow-sm border border-slate-200"
                 aria-label="Open tool menu"
             >
-                <MenuIcon className="w-5 h-5" />
+                <MenuIcon className="w-6 h-6" />
             </button>
 
             <ToolDrawer 

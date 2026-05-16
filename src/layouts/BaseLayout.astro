@@ -76,17 +76,17 @@ const schema = {
   <body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col antialiased selection:bg-indigo-100 selection:text-indigo-900">
     <PostHogProviderWrapper client:load>
     {/* --- SHARED HEADER --- */}
-    <nav class="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50" role="navigation" aria-label="Main navigation">
-      <div class="max-w-6xl mx-auto px-4 md:px-6 h-16 flex items-center justify-between">
-        <a href="/" class="flex items-center gap-3 hover:opacity-80 transition-opacity" aria-label="LoonieFi homepage">
+    <nav class="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-[100] pt-[env(safe-area-inset-top)]" role="navigation" aria-label="Main navigation">
+      <div class="max-w-6xl mx-auto px-4 md:px-6 h-16 flex items-center justify-between gap-4">
+        <a href="/" class="flex items-center gap-2 md:gap-3 hover:opacity-80 transition-opacity flex-shrink-0" aria-label="LoonieFi homepage">
           <img src="/android-chrome-192x192.png" alt="LoonieFi Logo" class="h-8 w-8 rounded-full shadow-sm" width="32" height="32" />
-          <div class="text-lg font-bold tracking-tight">
+          <div class="text-lg font-bold tracking-tight min-w-0">
             <span class="text-amber-700">Loonie</span><span class="text-slate-900">Fi</span>
           </div>
         </a>
 
         {/* DESKTOP SWITCHER */}
-        <div class="hidden md:block">
+        <div class="hidden md:block flex-shrink-0">
             <DesktopToolSwitcher 
                 client:load 
                 activeId={activeTool?.id} 
@@ -95,7 +95,7 @@ const schema = {
         </div>
 
         {/* MOBILE ACTIONS */}
-        <div class="md:hidden">
+        <div class="md:hidden flex-shrink-0">
             <HeaderActions client:load activeId={activeTool?.id} />
         </div>
       </div>
