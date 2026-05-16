@@ -52,17 +52,17 @@ export const ToolDrawer = ({ isOpen, onClose, activeId, onSelect, isSuite = fals
         <div className="fixed inset-0 z-[10001] md:hidden flex flex-col justify-end">
             {/* Backdrop */}
             <div 
-                className={`absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0'}`}
+                className={`absolute inset-0 bg-slate-900/60 transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0'}`}
                 onClick={onClose}
             />
 
             {/* Bottom Sheet Container */}
             <div 
-                className={`relative w-full bg-white rounded-t-[2.5rem] shadow-2xl transition-transform duration-300 ease-out flex flex-col max-h-[92%] ${isOpen ? 'translate-y-0' : 'translate-y-full'}`}
+                className={`relative w-full bg-white rounded-t-[2.5rem] shadow-2xl transition-transform duration-300 ease-out flex flex-col max-h-[92dvh] ${isOpen ? 'translate-y-0' : 'translate-y-full'}`}
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Header / Handle area */}
-                <div className="flex flex-col items-center pt-3 pb-2 border-b border-slate-50">
+                <div className="flex flex-col items-center pt-3 pb-2 border-b border-slate-50 bg-white rounded-t-[2.5rem]">
                     <div className="w-12 h-1.5 bg-slate-200 rounded-full mb-4" />
                     <div className="w-full px-6 flex items-center justify-between">
                         <h2 className="text-sm font-black uppercase tracking-widest text-slate-900">Financial Tools</h2>
@@ -76,7 +76,7 @@ export const ToolDrawer = ({ isOpen, onClose, activeId, onSelect, isSuite = fals
                 </div>
 
                 {/* Scrollable Content */}
-                <div className="overflow-y-auto flex-grow p-6 pb-24 overscroll-contain">
+                <div className="overflow-y-auto flex-grow p-6 pb-32 overscroll-contain bg-white">
                     <div className="space-y-10">
                         {TOOL_CATEGORIES.map(category => {
                             const categoryTools = ALL_TOOLS.filter(t => t.categoryId === category.id);
