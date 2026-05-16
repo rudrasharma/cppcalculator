@@ -138,7 +138,47 @@ export default function SmithCalculator() {
                 {/* Inputs Sidebar */}
                 <div className="lg:col-span-1 space-y-6">
                     <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-6">
-                        <h3 className="text-sm font-black uppercase tracking-widest text-indigo-600">The Essentials</h3>
+                        <div className="space-y-4">
+                            <h3 className="text-sm font-black uppercase tracking-widest text-indigo-600">Strategy Presets</h3>
+                            <div className="grid grid-cols-3 gap-2">
+                                <button 
+                                    onClick={() => {
+                                        setReadvanceTolerance(0.5);
+                                        setCapitalizeInterest(false);
+                                        setReinvestTaxRefund(true);
+                                        setReinvestDividends(true);
+                                    }}
+                                    className="px-2 py-3 bg-slate-50 border border-slate-200 rounded-xl text-[10px] font-black uppercase tracking-tighter text-slate-600 hover:border-indigo-300 hover:text-indigo-600 transition-all"
+                                >
+                                    🛡️ Cons.
+                                </button>
+                                <button 
+                                    onClick={() => {
+                                        setReadvanceTolerance(1.0);
+                                        setCapitalizeInterest(true);
+                                        setReinvestTaxRefund(true);
+                                        setReinvestDividends(true);
+                                    }}
+                                    className="px-2 py-3 bg-indigo-50 border border-indigo-200 rounded-xl text-[10px] font-black uppercase tracking-tighter text-indigo-600 hover:bg-indigo-600 hover:text-white transition-all"
+                                >
+                                    ⚖️ Bal.
+                                </button>
+                                <button 
+                                    onClick={() => {
+                                        setReadvanceTolerance(1.0);
+                                        setCapitalizeInterest(true);
+                                        setInitialLumpSum(Math.floor((homeValue * 0.8) - mortgageBalance));
+                                        setReinvestTaxRefund(true);
+                                        setReinvestDividends(true);
+                                    }}
+                                    className="px-2 py-3 bg-slate-900 border border-slate-900 rounded-xl text-[10px] font-black uppercase tracking-tighter text-white hover:bg-black transition-all"
+                                >
+                                    🔥 Aggr.
+                                </button>
+                            </div>
+                        </div>
+
+                        <h3 className="text-sm font-black uppercase tracking-widest text-slate-400 pt-2 border-t border-slate-50">The Essentials</h3>
                         
                         <MoneyInput 
                             label="Home Value" 
