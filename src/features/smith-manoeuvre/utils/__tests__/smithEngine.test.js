@@ -21,7 +21,8 @@ describe('Smith Manoeuvre Engine', () => {
         const results = calculateSmithManoeuvre(defaultInputs);
         const lastMonth = results[results.length - 1];
         
-        expect(results.length).toBe(300);
+        // Includes Month 0, so length is (years * 12) + 1
+        expect(results.length).toBe(301);
         expect(lastMonth.standardMortgageBalance).toBeCloseTo(0, 2);
     });
 
@@ -81,15 +82,34 @@ describe('Smith Manoeuvre Engine', () => {
         expect(lastWith.cumulativePocketedCash).toBe(0);
     });
 
-    test('initialHelocLumpSum correctly initializes balances', () => {
+    test('initialHelocLumpSum correctly initializes balances at Month 0', () => {
         const val = 50000;
         const results = calculateSmithManoeuvre({
             ...defaultInputs,
             initialHelocLumpSum: val
         });
 
-        // First month should have at least the initial lump sum + some principal re-advance
-        expect(results[0].smithHelocBalance).toBeGreaterThan(val);
-        expect(results[0].smithInvestmentBalance).toBeGreaterThan(val);
+        // Month 0 should reflect exactly the initial lump sum (within OSFI caps)
+        expect(results[0].month).toBe(0);
+        expect(results[0].smithHelocBalance).toBe(val);
+        expect(results[0].smithInvestmentBalance).toBe(val);
+        
+        // Month 1 should then show growth/re-advances
+        expect(results[1].smithHelocBalance).toBeGreaterThan(val);
+    });
+
+    test('enforces OSFI 80% LTV and 65% HELOC caps', () => {
+        const results = calculateSmithManoeuvre({
+            ...defaultInputs,
+            homeValue: 1000000,
+            mortgageBalance: 500000,
+            initialHelocLumpSum: 400000 // Total 900k (90%) -> Should cap at 80% (300k lump sum)
+        });
+
+        expect(results[0].smithHelocBalance).toBe(300000); // 500k mortgage + 300k HELOC = 800k (80%)
+        
+        // Throughout the strategy, HELOC should never exceed 650k (65% of 1M)
+        const maxHeloc = Math.max(...results.map(r => r.smithHelocBalance));
+        expect(maxHeloc).toBeLessThanOrEqual(650000);
     });
 });
