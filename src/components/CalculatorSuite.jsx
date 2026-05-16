@@ -105,14 +105,13 @@ export default function CalculatorSuite() {
             <span className="font-bold text-slate-900 tracking-tight text-sm">Loonie<span className="text-amber-700">Fi</span></span>
          </button>
          
-         {view !== 'landing' && (
-           <button 
-             onClick={() => setIsDrawerOpen(true)}
-             className="p-2 rounded-xl bg-slate-100 text-slate-600 active:scale-95 transition-transform"
-           >
-             <MenuIcon className="w-5 h-5" />
-           </button>
-         )}
+         <button 
+           onClick={() => setIsDrawerOpen(true)}
+           className="p-2 rounded-xl bg-slate-100 text-slate-600 active:scale-95 transition-transform"
+           aria-label="Open tool menu"
+         >
+           <MenuIcon className="w-5 h-5" />
+         </button>
       </nav>
 
       {/* --- LANDING VIEW --- */}
@@ -180,16 +179,6 @@ export default function CalculatorSuite() {
                 <MortgageCalculator isVisible={view === 'mortgage'} />
             </div>
           </main>
-
-          {/* MOBILE TOOL DRAWER TRIGGER */}
-          <div className="md:hidden fixed bottom-6 right-6 z-40">
-            <button 
-                onClick={() => setIsDrawerOpen(true)}
-                className="bg-indigo-600 text-white p-4 rounded-full shadow-2xl active:scale-95 transition-transform"
-            >
-                <MenuIcon className="w-6 h-6" />
-            </button>
-          </div>
         </>
       )}
 

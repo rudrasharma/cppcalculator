@@ -55,7 +55,7 @@ export const ToolDrawer = ({ isOpen, onClose, activeId, onSelect, isSuite = fals
 
             {/* Bottom Sheet */}
             <div 
-                className={`absolute bottom-0 left-0 right-0 bg-white rounded-t-[2.5rem] shadow-2xl transition-transform duration-300 ease-out p-6 max-h-[85vh] overflow-y-auto ${isOpen ? 'translate-y-0' : 'translate-y-full'}`}
+                className={`absolute bottom-0 left-0 right-0 bg-white rounded-t-[2.5rem] shadow-2xl transition-transform duration-300 ease-out p-6 pb-safe max-h-[85vh] overflow-y-auto ${isOpen ? 'translate-y-0' : 'translate-y-full'}`}
             >
                 {/* Handle */}
                 <div className="flex justify-center mb-6">
