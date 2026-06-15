@@ -1,12 +1,18 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useMortgageMath } from '../hooks/useMortgageMath';
 import { MortgageForm } from './MortgageForm';
 import { MortgageResults } from './MortgageResults';
-import { CalculatorIcon, InfoIcon, RotateCcwIcon } from '../../../components/shared';
-import AICopilot from '../../../components/AICopilot';
+import { CalculatorIcon, InfoIcon, RotateCcwIcon, AICommandBar, StrategyCard } from '../../../components/shared';
+
+const MORTGAGE_SUGGESTIONS = [
+    { label: 'Starter Home', value: 'I am buying a $500k house with 5% down in Alberta' },
+    { label: 'High Down Payment', value: 'Buying for $800k with 20% down in Ontario at 4.2% interest' },
+    { label: 'Extra Payments', value: 'I want to pay an extra $500 a month on my $400k mortgage' }
+];
 
 export default function MortgageCalculator({ isVisible, initialStateOverride }) {
     const { state, dispatch, results } = useMortgageMath(initialStateOverride);
+    const [aiInsight, setAiInsight] = useState('');
 
     if (!isVisible) return null;
 
@@ -16,17 +22,24 @@ export default function MortgageCalculator({ isVisible, initialStateOverride }) 
 
     const handleAIUpdate = (args) => {
         dispatch({ type: 'SET_STATE', payload: args });
+        if (args.strategy_insight) setAiInsight(args.strategy_insight);
     };
 
     return (
-        <div className="max-w-6xl mx-auto px-4 py-8 pb-32 md:pb-8 animate-fade-in relative">
-            <AICopilot 
-                mode="mortgage"
+        <div className="max-w-6xl mx-auto px-4 py-8 pb-32 md:pb-8 animate-fade-in relative flex flex-col min-h-0">
+            {/* AI HERO SECTION */}
+            <AICommandBar 
+                endpoint="/api/ai/mortgage"
+                suggestions={MORTGAGE_SUGGESTIONS}
+                onUpdate={handleAIUpdate}
                 context={state}
-                onUpdateCalculator={handleAIUpdate}
             />
-            {/* Header / Mode Selector equivalent */}
-            <div className="flex flex-col md:flex-row justify-between items-center mb-10 gap-6">
+
+            <StrategyCard insight={aiInsight} />
+
+            <div className="w-full">
+                {/* Header / Mode Selector equivalent */}
+                <div className="flex flex-col md:flex-row justify-between items-center mb-10 gap-6">
                 <div className="flex items-center gap-4">
                     <div className="bg-indigo-600 p-3 rounded-2xl shadow-xl shadow-indigo-200">
                         <CalculatorIcon size={32} className="text-white" />
@@ -88,6 +101,7 @@ export default function MortgageCalculator({ isVisible, initialStateOverride }) 
                         </span>
                     </div>
                 </div>
+            </div>
             </div>
         </div>
     );

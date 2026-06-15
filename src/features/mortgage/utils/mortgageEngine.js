@@ -161,6 +161,10 @@ export const calculateAmortization = ({
     const basePayment = customPayment > 0 ? customPayment : standardPayment;
     const paymentsPerYear = PAYMENTS_PER_YEAR[paymentFrequency];
 
+    // Normalize recurring prepayment increase to the payment frequency
+    // (e.g. if user adds $100 monthly increase but pays weekly, they pay ~$23 extra per week)
+    const periodicPrepaymentIncrease = (prepayments.monthlyIncrease || 0) / (paymentsPerYear / 12);
+
     // Calculate PITH (Principal, Interest, Taxes, Heating) + 50% Condo Fees (Monthly Equiv)
     const monthlyPaymentEquiv = basePayment * (paymentsPerYear / 12);
     const pithPayment = monthlyPaymentEquiv + (propertyTaxes / 12) + heating + (condoFees / 2);
@@ -190,7 +194,7 @@ export const calculateAmortization = ({
         const currentPaymentDate = getPaymentDate(startDate, paymentNumber, paymentFrequency).getTime();
         
         const interestPayment = balance * periodicRate;
-        let principalPayment = (basePayment + (prepayments.monthlyIncrease || 0)) - interestPayment;
+        let principalPayment = (basePayment + periodicPrepaymentIncrease) - interestPayment;
 
         const applicableLumpSums = pendingLumpSums.filter(ls => !ls.applied && ls.parsedDate <= currentPaymentDate);
         let lumpSumTotal = 0;

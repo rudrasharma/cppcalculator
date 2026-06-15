@@ -8,5 +8,7 @@ export { Button } from './Button';
 export { MoneyInput } from './MoneyInput';
 export { NativeSelect } from './NativeSelect';
 export { RangeSlider } from './RangeSlider';
+export { AICommandBar } from './ui/AICommandBar';
+export { StrategyCard } from './ui/StrategyCard';
 export * from './Icons';
 

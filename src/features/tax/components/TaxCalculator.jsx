@@ -1,8 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { calculateTakeHome } from '../utils/taxEngine';
-import { MoneyInput, NativeSelect, RangeSlider } from '../../../components/shared';
+import { MoneyInput, NativeSelect, RangeSlider, AICommandBar, StrategyCard } from '../../../components/shared';
 import { TAX_YEAR_CONFIG } from '../../../config/taxYears';
-import AICopilot from '../../../components/AICopilot';
 
 const PROVINCES = Object.entries(TAX_YEAR_CONFIG.PROVINCIAL_TAX).map(([code, config]) => ({
     value: code,
@@ -22,6 +21,7 @@ const TaxCalculator = ({ initialIncome = 75000, initialProvince = 'ON' }) => {
     const [employerMatchPercent, setEmployerMatchPercent] = useState(0);
     const [province, setProvince] = useState(initialProvince);
     const [period, setPeriod] = useState('monthly');
+    const [aiInsight, setAiInsight] = useState('');
 
     // RRSP Max is roughly 18% of previous year's income, but for this simple calculator 
     // we'll cap it at 30k or a percentage of gross income.
@@ -62,19 +62,23 @@ const TaxCalculator = ({ initialIncome = 75000, initialProvince = 'ON' }) => {
         if (args.province !== undefined) setProvince(args.province);
         if (args.rrspContribution !== undefined) setRrspContribution(args.rrspContribution);
         if (args.employerMatchPercent !== undefined) setEmployerMatchPercent(args.employerMatchPercent);
+        if (args.strategy_insight) setAiInsight(args.strategy_insight);
     };
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 max-w-6xl mx-auto">
-            {/* AI COPILOT */}
-            <AICopilot 
-                mode="tax"
+        <div className="max-w-6xl mx-auto px-4 py-8 flex flex-col min-h-0">
+            {/* AI HERO SECTION */}
+            <AICommandBar 
+                onUpdate={handleAIUpdate}
                 context={{ grossIncome, province, rrspContribution, employerMatchPercent }}
-                onUpdateCalculator={handleAIUpdate}
             />
 
-            {/* INPUTS */}
-            <div className="lg:col-span-5 space-y-6">
+            <StrategyCard insight={aiInsight} />
+
+            <div className="w-full">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                {/* INPUTS */}
+                <div className="lg:col-span-5 space-y-6">
                 <div className="bg-white p-6 md:p-8 rounded-[2.5rem] border border-slate-200 shadow-sm space-y-8">
                     <MoneyInput 
                         label="Gross Annual Income"
@@ -238,6 +242,8 @@ const TaxCalculator = ({ initialIncome = 75000, initialProvince = 'ON' }) => {
                         </p>
                     </div>
                 </div>
+            </div>
+            </div>
             </div>
         </div>
     );

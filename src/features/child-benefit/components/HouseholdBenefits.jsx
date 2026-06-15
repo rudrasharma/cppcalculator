@@ -2,7 +2,13 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { calculateAll } from '../utils/benefitEngine';
 import HouseholdForm from './HouseholdForm';
 import BenefitResults from './BenefitResults';
-import AICopilot from '../../../components/AICopilot';
+import { AICommandBar, StrategyCard } from '../../../components/shared';
+
+const CCB_SUGGESTIONS = [
+    { label: 'Ontario Family', value: 'We make $85k combined in Ontario with a 2 and 4 year old' },
+    { label: 'Single Parent', value: 'I am a single parent making $50k with one 3 year old child' },
+    { label: 'Add Disability', value: 'What if our 5 year old has the disability tax credit?' }
+];
 
 // ==========================================
 //              MAIN COMPONENT
@@ -22,23 +28,12 @@ export default function HouseholdBenefits({
     };
 
     // --- LAZY STATE INITIALIZATION ---
-    // 1. Province
-    const [province, setProvince] = useState(() => {
-        return getParam('p') || initialProvince;
-    });
-
-    // 2. Income
+    const [province, setProvince] = useState(() => getParam('p') || initialProvince);
     const [grossAfni, setGrossAfni] = useState(() => {
         const urlI = getParam('i');
         return urlI ? parseInt(urlI, 36) : initialIncome;
     });
-
-    // 3. Marital Status
-    const [maritalStatus, setMaritalStatus] = useState(() => {
-        return getParam('ms') || initialMaritalStatus;
-    });
-
-    // 4. Children (Complex Logic)
+    const [maritalStatus, setMaritalStatus] = useState(() => getParam('ms') || initialMaritalStatus);
     const [children, setChildren] = useState(() => {
         const urlC = getParam('c');
         if (urlC) {
@@ -58,6 +53,7 @@ export default function HouseholdBenefits({
 
     const [sharedCustody, setSharedCustody] = useState(() => getParam('sc') === '1');
     const [isRural, setIsRural] = useState(() => getParam('r') === '1');
+    const [aiInsight, setAiInsight] = useState('');
     
     const [activeTab, setActiveTab] = useState('input');
     const [copySuccess, setCopySuccess] = useState(false);
@@ -105,13 +101,13 @@ export default function HouseholdBenefits({
         setChildren(prev => prev.map(c => c.id === id ? { ...c, [field]: value } : c));
     };
 
-    // --- AI HANDLER (ADDED) ---
     const handleAIUpdate = (data) => {
         if (data.province) setProvince(data.province);
-        if (data.marital_status) setMaritalStatus(data.marital_status);
-        if (data.income !== undefined) setGrossAfni(data.income);
-        if (data.shared_custody !== undefined) setSharedCustody(data.shared_custody);
-        if (data.is_rural !== undefined) setIsRural(data.is_rural);
+        if (data.maritalStatus) setMaritalStatus(data.maritalStatus);
+        if (data.grossAfni !== undefined) setGrossAfni(data.grossAfni);
+        if (data.sharedCustody !== undefined) setSharedCustody(data.sharedCustody);
+        if (data.isRural !== undefined) setIsRural(data.isRural);
+        if (data.strategy_insight) setAiInsight(data.strategy_insight);
         
         if (data.children && Array.isArray(data.children)) {
             const newKids = data.children.map((k, i) => ({
@@ -170,9 +166,20 @@ export default function HouseholdBenefits({
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-indigo-100" style={{ paddingBottom: activeTab === 'input' ? '100px' : '40px' }}>
+        <div className="bg-slate-50 text-slate-900 font-sans selection:bg-indigo-100" style={{ paddingBottom: activeTab === 'input' ? '100px' : '40px' }}>
             
-            <main className="max-w-5xl mx-auto p-4 md:p-8 w-full mt-6">
+            <main className="max-w-5xl mx-auto p-4 md:p-8 w-full mt-6 flex flex-col min-h-0">
+                
+                {/* AI HERO SECTION */}
+                <AICommandBar 
+                    endpoint="/api/ai/ccb"
+                    suggestions={CCB_SUGGESTIONS}
+                    onUpdate={handleAIUpdate}
+                    context={{ province, maritalStatus, income: grossAfni, children, sharedCustody, isRural }}
+                />
+
+                <StrategyCard insight={aiInsight} />
+
                 <div className="bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden mb-12">
                     {/* TABS */}
                     <div className="p-2 bg-slate-50 border-b">
@@ -219,21 +226,6 @@ export default function HouseholdBenefits({
                     </div>
                 </div>
             </main>
-
-            {/* AI COPILOT (ADDED) */}
-            <AICopilot 
-                context={{ 
-                    page: 'household', 
-                    province, 
-                    maritalStatus, 
-                    income: grossAfni, 
-                    children, 
-                    sharedCustody,
-                    isRural 
-                }}
-                onUpdateCalculator={handleAIUpdate}
-            />
-
         </div>
     );
 }
