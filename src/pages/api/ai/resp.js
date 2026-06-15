@@ -18,26 +18,27 @@ export const POST = async ({ request, locals }) => {
     // 2. INITIALIZE GEMINI
     const genAI = new GoogleGenerativeAI(apiKey);
     
-    const systemInstruction = `You are LoonieFi's Child Benefit Hero, an expert on Canadian government benefits (CCB, GST, CAIP).
-      Your goal is to help users estimate their monthly and annual child benefit payments based on their household income and children's ages.
+    const systemInstruction = `You are LoonieFi's RESP Hero, an expert on Canadian Registered Education Savings Plans and government grants.
+      Your goal is to help users estimate their education savings growth based on their contributions, children's ages, and available grants (CESG, CLB, BCTESG, QESI).
       
       Current App Context: ${JSON.stringify(context || {})}
       
       When a user interacts:
-      1. If they describe a family scenario (e.g., "We make 80k and have a 2 year old"): Call 'update_ccb_calculator' with extracted values.
-      2. If they ask a general question: DO NOT call 'update_ccb_calculator'. Simply answer in the text response.
+      1. If they describe a savings scenario (e.g., "I have a 2 year old and want to save $200 a month"): Call 'update_resp_calculator' with extracted values.
+      2. If they ask a general question: DO NOT call 'update_resp_calculator'. Simply answer in the text response.
       3. ALWAYS provide a 'strategy_insight' in the tool call if calling it.
       
       FINANCIAL GUARDRAILS (STRICT):
-      - Max Children: Limit extraction to a maximum of 10 children.
-      - Child Age: CCB only applies to children under 18. If a child is 18+, do not include them in 'children' array and mention this in the insight.
-      - Marital Status: must be 'MARRIED' or 'SINGLE'.
+      - Max Beneficiaries: Limit extraction to a maximum of 4 children.
+      - Child Age: RESP contributions and grants typically apply until age 17.
+      - Contribution Limit: $50,000 lifetime per child.
+      - CESG Grant: 20% match up to $500/year (or $1,000 with catch-up room).
       - Province: use 2-letter codes (ON, BC, AB, QC, NS, NB, MB, SK, PE, NL).
       
       CRITICAL RULES:
-      - 'children' array must contain objects with 'age' (number) and 'disability' (boolean).
-      - If they mention "disability tax credit" or "disabled child", set disability to true for that child.
-      - Strategy Insight: provide a concise 1-2 sentence tip about how income affects CCB or mention provincial-specific credits.
+      - 'beneficiaries' array must contain objects with 'age' (number) and 'name' (string).
+      - If they mention "low income" or "CLB", set 'clbEligible' to true.
+      - Strategy Insight: provide a 1-2 sentence tip about the CESG grant match, the Canada Learning Bond, or provincial-specific grants like BCTESG or QESI.
       
       Be professional and accurate.`;
 
@@ -45,23 +46,24 @@ export const POST = async ({ request, locals }) => {
       {
         functionDeclarations: [
           {
-            name: "update_ccb_calculator",
-            description: "Updates the child benefit calculator with family data.",
+            name: "update_resp_calculator",
+            description: "Updates the RESP calculator with user data.",
             parameters: {
               type: "OBJECT",
               properties: {
-                grossAfni: { type: "NUMBER", description: "Annual Adjusted Family Net Income (AFNI)" },
+                currentBalance: { type: "NUMBER" },
+                annualReturn: { type: "NUMBER" },
                 province: { type: "STRING" },
-                maritalStatus: { type: "STRING", enum: ["MARRIED", "SINGLE"] },
-                sharedCustody: { type: "BOOLEAN" },
-                isRural: { type: "BOOLEAN" },
-                children: {
+                clbEligible: { type: "BOOLEAN" },
+                contributionAmount: { type: "NUMBER" },
+                contributionFrequency: { type: "STRING", enum: ["Weekly", "Monthly", "Yearly"] },
+                beneficiaries: {
                   type: "ARRAY",
                   items: {
                     type: "OBJECT",
                     properties: {
                       age: { type: "NUMBER" },
-                      disability: { type: "BOOLEAN" }
+                      name: { type: "STRING" }
                     }
                   }
                 },
@@ -103,9 +105,9 @@ export const POST = async ({ request, locals }) => {
     try {
       response = await tryRequest();
     } catch (finalErr) {
-      console.error("AI CCB Final Fallback Failure:", finalErr);
+      console.error("AI RESP Final Fallback Failure:", finalErr);
       return new Response(JSON.stringify({ 
-        text: "The Child Benefit AI is currently busy. You can manually adjust the sliders below, or try again in a moment.",
+        text: "The RESP AI is currently busy. You can manually adjust the sliders below, or try again in a moment.",
         toolData: null 
       }), { status: 200, headers: { "Content-Type": "application/json" } });
     }
@@ -125,7 +127,7 @@ export const POST = async ({ request, locals }) => {
     });
 
   } catch (error) {
-    console.error("Gemini CCB API Error:", error);
+    console.error("Gemini RESP API Error:", error);
     return new Response(JSON.stringify({ error: error.message }), { status: 500 });
   }
 };

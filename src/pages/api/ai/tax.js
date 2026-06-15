@@ -61,8 +61,8 @@ export const POST = async ({ request, locals }) => {
       },
     ];
 
-    // Fallback logic: 3.5 (Agentic) -> 1.5-8b (Fast/Lite) -> 1.5 (Stable)
-    const modelsToTry = ["gemini-3.5-flash", "gemini-1.5-flash-8b-latest", "gemini-1.5-flash-latest"];
+    // Fallback logic: 3.5 (Frontier) -> 3.1-lite (High Availability) -> 2.5 (Stable)
+    const modelsToTry = ["gemini-3.5-flash", "gemini-3.1-flash-lite", "gemini-2.5-flash"];
 
     const tryRequest = async (modelIndex = 0, retryCount = 2, delay = 2000) => {
       const modelName = modelsToTry[modelIndex];
