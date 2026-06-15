@@ -67,7 +67,7 @@ const CAGR_SUGGESTIONS = [
     { label: 'Time Horizon', value: 'How long will it take to hit $1M starting with $50k and $2000/mo at 7%?' }
 ];
 
-export default function CAGRCalculator({ isVisible }) {
+export default function CAGRCalculator({ isVisible = true }) {
     const [mode, setMode] = useState('FUTURE'); 
     
     // Core State
