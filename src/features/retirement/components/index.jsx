@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import AICopilot from '../../../components/AICopilot'; // <--- NEW IMPORT
 import { useRetirementMath } from '../hooks/useRetirementMath';
 import { useUrlTab } from '../../../hooks/useUrlTab';
 import { applyAverageSalary, calculateDisplayValues, calculateComparisonMessage } from '../utils/retirementHelpers';
@@ -7,6 +6,13 @@ import { loadStateFromUrl, syncStateToUrl } from '../utils/urlSync';
 import { AboutModal, ImportModal } from './Modals';
 import InputTab from './InputTab';
 import ResultsTab from './ResultsTab';
+import { AICommandBar, StrategyCard } from '../../../components/shared';
+
+const RETIREMENT_SUGGESTIONS = [
+    { label: 'Stop Working at 55', value: 'I turn 40 this year and make $100k. What if I stop working at age 55?' },
+    { label: 'Gap Years', value: 'I make $80k but I didn’t work at all from ages 20 to 25.' },
+    { label: 'Defer OAS/CPP', value: 'I make $75k. How much more do I get if I retire at 70 instead of 65?' }
+];
 
 export default function Calculator({ 
     isVisible = true,
@@ -46,6 +52,7 @@ export default function Calculator({
     const [showChildren, setShowChildren] = useState(initialChildCount > 0);
     const [showGrid, setShowGrid] = useState(false);
     const [showNet, setShowNet] = useState(false);
+    const [aiInsight, setAiInsight] = useState('');
     const TAX_RATE = 0.15; 
 
     const [spouseDob, setSpouseDob] = useState('1985-01-01');
@@ -188,55 +195,36 @@ export default function Calculator({
     const hasEarnings = Object.keys(earnings).length > 0;
 
     // ==========================================
-    //    AI COPILOT INTEGRATION
+    //    AI HERO INTEGRATION
     // ==========================================
     const handleAIUpdate = useCallback((updates) => {
-        console.log("AI Updates Received:", updates);
-
         if (updates.retirementAge) setRetirementAge(Number(updates.retirementAge));
         if (updates.dob) setDob(updates.dob);
         if (updates.spouseDob) setSpouseDob(updates.spouseDob);
         
-        // Boolean toggles
         if (typeof updates.isMarried !== 'undefined') setIsMarried(updates.isMarried);
-        if (typeof updates.livedInCanadaAllLife !== 'undefined') setLivedInCanadaAllLife(updates.livedInCanadaAllLife);
+        if (updates.yearsInCanada !== undefined) setYearsInCanada(Number(updates.yearsInCanada));
         
-        // Complex numeric inputs
-        if (updates.yearsInCanada) setYearsInCanada(Number(updates.yearsInCanada));
-        if (updates.avgSalaryInput) setAvgSalaryInput(String(updates.avgSalaryInput));
-        if (updates.spouseIncome) setSpouseIncome(String(updates.spouseIncome));
-        if (updates.otherIncome) setOtherIncome(String(updates.otherIncome));
-
-        // Earnings Table Merging (Handling MSCA Pastes)
-        if (updates.earnings) {
-            setEarnings(prev => ({ ...prev, ...updates.earnings }));
-            // If we have real data, we might want to clear the 'avg salary' field to avoid confusion
-            if (!updates.avgSalaryInput) setAvgSalaryInput(''); 
+        if (updates.avgSalaryInput !== undefined) {
+            setAvgSalaryInput(String(updates.avgSalaryInput));
+            // Trigger auto-fill if salary is provided
+            const newEarnings = applyAverageSalary(earnings, String(updates.avgSalaryInput), results.years, birthYear);
+            setEarnings(newEarnings);
         }
 
-        // Child logic
-        if (typeof updates.childCount === 'number') {
+        if (updates.spouseIncome !== undefined) setSpouseIncome(String(updates.spouseIncome));
+        if (updates.childCount !== undefined) {
             setShowChildren(updates.childCount > 0);
-            setChildren(prev => {
-                const currentCount = prev.length;
-                if (updates.childCount > currentCount) {
-                    const newKids = Array.from({ length: updates.childCount - currentCount }).map((_, i) => ({
-                        id: Date.now() + i,
-                        birthDate: '2015-01-01', 
-                        disability: false
-                    }));
-                    return [...prev, ...newKids];
-                } else if (updates.childCount < currentCount) {
-                    return prev.slice(0, updates.childCount);
-                }
-                return prev;
-            });
         }
-        
-        if (updates.action === 'SHOW_RESULTS') {
-            setActiveTab('results');
+
+        // Surgical Earnings Update (Merging)
+        if (updates.earningsUpdate) {
+            setEarnings(prev => ({ ...prev, ...updates.earningsUpdate }));
+            setShowGrid(true); // Open table so user sees the change
         }
-    }, []);
+
+        if (updates.strategy_insight) setAiInsight(updates.strategy_insight);
+    }, [earnings, results.years, birthYear]);
 
     const aiContext = useMemo(() => ({
         dob, retirementAge, isMarried, yearsInCanada, 
@@ -246,7 +234,7 @@ export default function Calculator({
 
     return (
         <div 
-            className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-indigo-100 selection:text-indigo-700"
+            className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-indigo-100 selection:text-indigo-700 flex flex-col min-h-0"
             style={{ paddingBottom: activeTab === 'input' ? '100px' : '60px' }}
         > 
             {showAbout && <AboutModal onClose={() => setShowAbout(false)} />}
@@ -261,11 +249,22 @@ export default function Calculator({
                 />
             )}
 
-            <main className="max-w-5xl mx-auto p-4 md:p-8 w-full">
+            <main className="max-w-5xl mx-auto p-4 md:p-8 w-full mt-6">
+                
+                {/* AI HERO SECTION */}
+                <AICommandBar 
+                    endpoint="/api/ai/retirement"
+                    suggestions={RETIREMENT_SUGGESTIONS}
+                    onUpdate={handleAIUpdate}
+                    context={aiContext}
+                />
+
+                <StrategyCard insight={aiInsight} />
+
                 <div className="bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-200 overflow-hidden mb-12">
                     <div className="p-2 bg-slate-50 border-b border-slate-200">
                         <div className="flex bg-slate-200/50 p-1 rounded-xl">
-                            <button onClick={() => setActiveTab('input')} className={`flex-1 py-2.5 text-sm font-bold text-center rounded-lg transition-all duration-200 ${activeTab === 'input' ? 'bg-white text-indigo-600 shadow-sm ring-1 ring-slate-200' : 'text-slate-500 hover:text-slate-700'}`}>1. Earnings & Inputs</button>
+                            <button onClick={() => setActiveTab('input')} className={`flex-1 py-2.5 text-sm font-bold text-center rounded-lg transition-all duration-200 ${activeTab === 'input' ? 'bg-white text-indigo-600 shadow-sm ring-1 ring-slate-200' : 'text-slate-500 hover:text-slate-700'}`}>1. Profile & History</button>
                             <button onClick={() => setActiveTab('results')} className={`flex-1 py-2.5 text-sm font-bold text-center rounded-lg transition-all duration-200 ${activeTab === 'results' ? 'bg-white text-indigo-600 shadow-sm ring-1 ring-slate-200' : 'text-slate-500 hover:text-slate-700'}`}>2. View Estimate</button>
                         </div>
                     </div>
@@ -316,16 +315,6 @@ export default function Calculator({
                 </div>
                 <div style={{ height: '140px' }}></div> 
             </main>
-
-            {/* --- AI COPILOT --- */}
-            {mounted && (
-                <AICopilot
-                    mode="cpp" 
-                    agentName="Retirement Copilot"
-                    context={aiContext}
-                    onUpdateCalculator={handleAIUpdate}
-                />
-            )}
         </div>
     );
 }
