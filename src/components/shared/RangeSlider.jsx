@@ -33,6 +33,10 @@ export const RangeSlider = React.memo(({
     const gradientColor = colorMap[accentColor] || colorMap['indigo-600'];
     const accentClass = `accent-${accentColor}`;
     
+    // Safety check: Avoid division by zero if max === min
+    const range = max - min;
+    const percentage = range > 0 ? ((value - min) / range) * 100 : 0;
+    
     return (
         <div className={`space-y-3 ${className}`}>
             <div className="flex justify-between items-end">
@@ -62,7 +66,7 @@ export const RangeSlider = React.memo(({
                 onChange={onChange}
                 className={`w-full h-2 rounded-lg appearance-none cursor-pointer ${accentClass} hover:opacity-80 transition-all bg-slate-200`}
                 style={{
-                    background: `linear-gradient(to right, ${gradientColor} 0%, ${gradientColor} ${((value - min) / (max - min)) * 100}%, rgb(226 232 240) ${((value - min) / (max - min)) * 100}%, rgb(226 232 240) 100%)`
+                    background: `linear-gradient(to right, ${gradientColor} 0%, ${gradientColor} ${percentage}%, rgb(226 232 240) ${percentage}%, rgb(226 232 240) 100%)`
                 }}
                 {...rest}
             />
