@@ -69,10 +69,11 @@ const CAGR_SUGGESTIONS = [
 ];
 
 export default function CAGRCalculator({ isVisible = true }) {
+    const { memory, updateMemory } = useFinancialMemory();
     const [mode, setMode] = useState('FUTURE'); 
     
     // Core State
-    const [startValue, setStartValue] = useState(10000);
+    const [startValue, setStartValue] = useState(() => memory.portfolioBalance || 10000);
     const [endValue, setEndValue] = useState(100000);
     const [years, setYears] = useState(10);
     const [rate, setRate] = useState(7.0);
@@ -86,6 +87,15 @@ export default function CAGRCalculator({ isVisible = true }) {
     const [useInflation, setUseInflation] = useState(false);
     const [inflationRate, setInflationRate] = useState(2.5);
     const [aiInsight, setAiInsight] = useState('');
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => { setMounted(true); }, []);
+
+    // Sync state changes back to global memory
+    useEffect(() => {
+        if (!mounted) return;
+        updateMemory({ portfolioBalance: startValue });
+    }, [startValue, mounted]);
 
     // Calculate Primary Result
     const result = useMemo(() => {
@@ -475,17 +485,6 @@ export default function CAGRCalculator({ isVisible = true }) {
                                 }} 
                                 className="text-slate-500 hover:text-indigo-600 text-[10px] font-black flex items-center gap-2 transition-all uppercase tracking-widest group bg-slate-50 px-4 py-2 rounded-xl border border-transparent hover:border-slate-200"
                             >
-                                <RotateCcwIcon size={14} className="group-hover:-rotate-180 transition-transform duration-500"/> 
-                                Reset Inputs
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-}
-   >
                                 <RotateCcwIcon size={14} className="group-hover:-rotate-180 transition-transform duration-500"/> 
                                 Reset Inputs
                             </button>

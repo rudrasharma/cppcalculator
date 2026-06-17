@@ -31,6 +31,8 @@ export const useFinancialMemory = () => {
 
     // 1. Initial Load
     useEffect(() => {
+        if (typeof window === 'undefined') return;
+        
         const stored = localStorage.getItem(MEMORY_KEY);
         if (stored) {
             try {
@@ -45,7 +47,9 @@ export const useFinancialMemory = () => {
     const updateMemory = useCallback((updates) => {
         setMemory(prev => {
             const next = { ...prev, ...updates };
-            localStorage.setItem(MEMORY_KEY, JSON.stringify(next));
+            if (typeof window !== 'undefined') {
+                localStorage.setItem(MEMORY_KEY, JSON.stringify(next));
+            }
             return next;
         });
     }, []);

@@ -1,6 +1,7 @@
 import { useReducer, useEffect, useMemo } from 'react';
 import { calculateAmortization, PAYMENT_FREQUENCIES, COMPOUNDING_PERIODS } from '../utils/mortgageEngine';
 import { calculateLTT } from '../utils/lttEngine';
+import { useFinancialMemory } from '../../../hooks/useFinancialMemory';
 
 const today = new Date();
 const defaultStartDate = today.toISOString().split('T')[0];
@@ -130,7 +131,7 @@ export const useMortgageMath = (initialStateOverride = null) => {
             },
             lumpSums: override.lumpSums || initialState.lumpSums
         };
-    }, [initialStateOverride]);
+    }, [initialStateOverride, memory]);
 
     const [state, dispatch] = useReducer(mortgageReducer, startingState);
 
@@ -142,13 +143,13 @@ export const useMortgageMath = (initialStateOverride = null) => {
             mortgageBalance: state.mortgageBalance,
             province: state.province
         });
-    }, [state.homePrice, state.mortgageBalance, state.province, state.mounted]);
+    }, [state.homePrice, state.mortgageBalance, state.province, state.mounted, updateMemory]);
 
     useEffect(() => {
         if (initialStateOverride) {
             dispatch({ type: 'SET_STATE', payload: startingState });
         }
-    }, [startingState]);
+    }, [startingState, initialStateOverride]);
 
     // CMHC Rule Enforcement: If down payment < 20%, max amortization is 25 years
     useEffect(() => {
@@ -195,7 +196,7 @@ export const useMortgageMath = (initialStateOverride = null) => {
         if (params.has('pt')) dispatch({ type: 'SET_PROPERTY_TAXES', payload: parseFloat(params.get('pt')) || 0 });
         if (params.has('ht')) dispatch({ type: 'SET_HEATING', payload: parseFloat(params.get('ht')) || 0 });
         if (params.has('cf')) dispatch({ type: 'SET_CONDO_FEES', payload: parseFloat(params.get('cf')) || 0 });
-    }, []);
+    }, [initialStateOverride]);
 
     useEffect(() => {
         if (!state.mounted) return;
