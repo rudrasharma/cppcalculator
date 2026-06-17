@@ -1,4 +1,4 @@
-import { useReducer, useEffect, useMemo } from 'react';
+import { useReducer, useEffect, useMemo, useCallback } from 'react';
 import { calculateAmortization, PAYMENT_FREQUENCIES, COMPOUNDING_PERIODS } from '../utils/mortgageEngine';
 import { calculateLTT } from '../utils/lttEngine';
 import { useFinancialMemory } from '../../../hooks/useFinancialMemory';
@@ -115,35 +115,34 @@ export const useMortgageMath = (initialStateOverride = null) => {
         const mb = base.mortgageBalance === 400000 && memory.mortgageBalance ? memory.mortgageBalance : base.mortgageBalance;
         const pv = base.province === 'ON' && memory.province ? memory.province : base.province;
 
-        let override = { ...base, homePrice: hp, mortgageBalance: mb, province: pv };
-        
-        if (override.principal && !override.homePrice) {
-            override.homePrice = override.principal;
-            override.downPayment = 0;
-        }
-
-        return {
-            ...initialState,
-            ...override,
-            prepayments: {
-                ...initialState.prepayments,
-                ...(override.prepayments || {})
-            },
-            lumpSums: override.lumpSums || initialState.lumpSums
+        return { 
+            ...base, 
+            homePrice: hp, 
+            mortgageBalance: mb, 
+            province: pv,
+            prepayments: base.prepayments || initialState.prepayments,
+            lumpSums: base.lumpSums || initialState.lumpSums
         };
     }, [initialStateOverride, memory]);
 
     const [state, dispatch] = useReducer(mortgageReducer, startingState);
 
-    // Sync state changes back to global memory
-    useEffect(() => {
-        if (!state.mounted) return;
-        updateMemory({
-            homeValue: state.homePrice,
-            mortgageBalance: state.mortgageBalance,
-            province: state.province
-        });
-    }, [state.homePrice, state.mortgageBalance, state.province, state.mounted, updateMemory]);
+    // Sync state changes back to global memory (Explicit wrapper for dispatch)
+    const dispatchWithSync = useCallback((action) => {
+        dispatch(action);
+        
+        // Broadcast relevant changes to global memory
+        if (action.type === 'SET_HOME_PRICE') updateMemory({ homeValue: action.payload });
+        if (action.type === 'SET_MORTGAGE_BALANCE') updateMemory({ mortgageBalance: action.payload });
+        if (action.type === 'SET_PROVINCE') updateMemory({ province: action.payload });
+        if (action.type === 'SET_STATE') {
+            const updates = {};
+            if (action.payload.homePrice) updates.homeValue = action.payload.homePrice;
+            if (action.payload.mortgageBalance) updates.mortgageBalance = action.payload.mortgageBalance;
+            if (action.payload.province) updates.province = action.payload.province;
+            if (Object.keys(updates).length > 0) updateMemory(updates);
+        }
+    }, [updateMemory]);
 
     useEffect(() => {
         if (initialStateOverride) {
@@ -262,5 +261,5 @@ export const useMortgageMath = (initialStateOverride = null) => {
         };
     }, [state.calculationMode, state.homePrice, state.downPayment, state.downPaymentType, state.annualRate, state.amortizationYears, state.termYears, state.paymentFrequency, state.compounding, state.customPayment, state.startDate, state.prepayments, state.lumpSums, state.province, state.isToronto, state.isFirstTimeBuyer, state.propertyTaxes, state.heating, state.condoFees]);
 
-    return { state, dispatch, results };
+    return { state, dispatch: dispatchWithSync, results };
 };

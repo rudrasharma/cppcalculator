@@ -18,9 +18,6 @@ const PARENTAL_SUGGESTIONS = [
     { label: 'Quebec QPIP', value: 'How does parental leave work in Quebec if I make $90k?' }
 ];
 
-// ==========================================
-//              MAIN COMPONENT
-// ==========================================
 export default function ParentalLeave({ 
     isVisible = true, 
     initialProvince = 'ON', 
@@ -80,16 +77,11 @@ export default function ParentalLeave({
 
     useEffect(() => { setMounted(true); }, []);
 
-    // Sync state changes back to global memory
-    useEffect(() => {
-        if (!mounted) return;
-        updateMemory({ 
-            province, 
-            grossIncome: salary, 
-            partnerIncome: partnerSalary,
-            maritalStatus: hasPartner ? 'MARRIED' : 'SINGLE'
-        });
-    }, [province, salary, partnerSalary, hasPartner, mounted]);
+    // --- EXPLICIT SETTERS ---
+    const updateProvince = (val) => { setProvince(val); updateMemory({ province: val }); };
+    const updateSalary = (val) => { setSalary(val); updateMemory({ grossIncome: val }); };
+    const updatePartnerSalary = (val) => { setPartnerSalary(val); updateMemory({ partnerIncome: val }); };
+    const updateHasPartner = (val) => { setHasPartner(val); updateMemory({ maritalStatus: val ? 'MARRIED' : 'SINGLE' }); };
 
     // Helper: Get Current Max Insurable based on province
     const currentMaxInsurable = useMemo(() => 
@@ -148,13 +140,13 @@ export default function ParentalLeave({
 
     // --- AI HANDLER ---
     const handleAIUpdate = (data) => {
-        if (data.province) setProvince(data.province);
-        if (data.salary !== undefined) setSalary(data.salary);
+        if (data.province) updateProvince(data.province);
+        if (data.salary !== undefined) updateSalary(data.salary);
         if (data.partnerSalary !== undefined) {
-            setPartnerSalary(data.partnerSalary);
-            setHasPartner(true);
+            updatePartnerSalary(data.partnerSalary);
+            updateHasPartner(true);
         }
-        if (data.hasPartner !== undefined) setHasPartner(data.hasPartner);
+        if (data.hasPartner !== undefined) updateHasPartner(data.hasPartner);
         if (data.planType) setPlanType(data.planType);
         if (data.p1Maternity !== undefined) setP1Maternity(data.p1Maternity);
         if (data.p1Weeks !== undefined) setP1Weeks(data.p1Weeks);
@@ -182,45 +174,33 @@ export default function ParentalLeave({
 
     return (
         <div className="bg-slate-50 text-slate-900 font-sans selection:bg-rose-100" style={{ paddingBottom: activeTab === 'input' ? '100px' : '40px' }}>
-            
             <main className="max-w-5xl mx-auto p-4 md:p-8 w-full mt-6 flex flex-col min-h-0">
-                
-                {/* AI HERO SECTION */}
                 <AICommandBar 
                     endpoint="/api/ai/parental-leave"
                     suggestions={PARENTAL_SUGGESTIONS}
                     onUpdate={handleAIUpdate}
                     context={{ province, salary, partnerSalary, hasPartner, planType, p1Weeks, p2Weeks, p1Maternity }}
+                    globalMemory={memory}
                 />
-
                 <StrategyCard insight={aiInsight} />
 
                 <div className="bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden mb-12">
-                    {/* TABS */}
                     <div className="p-2 bg-slate-50 border-b">
                         <div className="flex bg-slate-200/50 p-1 rounded-2xl">
                             <button onClick={() => setActiveTab('input')} className={`flex-1 py-2.5 text-sm font-bold rounded-xl transition-all ${activeTab === 'input' ? 'bg-white text-rose-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>1. Configure</button>
                             <button onClick={() => setActiveTab('results')} className={`flex-1 py-2.5 text-sm font-bold rounded-xl transition-all ${activeTab === 'results' ? 'bg-white text-rose-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>2. Your Results</button>
                         </div>
                     </div>
-
                     <div className="p-4 md:p-10">
                         {activeTab === 'input' && (
                             <ParentalLeaveForm
-                                province={province}
-                                setProvince={setProvince}
-                                salary={salary}
-                                setSalary={setSalary}
-                                partnerSalary={partnerSalary}
-                                setPartnerSalary={setPartnerSalary}
-                                hasPartner={hasPartner}
-                                setHasPartner={setHasPartner}
-                                planType={planType}
-                                setPlanType={setPlanType}
-                                p1Maternity={p1Maternity}
-                                setP1Maternity={setP1Maternity}
-                                p1Weeks={p1Weeks}
-                                p2Weeks={p2Weeks}
+                                province={province} setProvince={updateProvince}
+                                salary={salary} setSalary={updateSalary}
+                                partnerSalary={partnerSalary} setPartnerSalary={updatePartnerSalary}
+                                hasPartner={hasPartner} setHasPartner={updateHasPartner}
+                                planType={planType} setPlanType={setPlanType}
+                                p1Maternity={p1Maternity} setP1Maternity={setP1Maternity}
+                                p1Weeks={p1Weeks} p2Weeks={p2Weeks}
                                 handleWeeksChange={handleWeeksChange}
                                 currentMaxInsurable={currentMaxInsurable}
                                 individualMax={individualMax}
@@ -235,13 +215,8 @@ export default function ParentalLeave({
                                 mounted={mounted}
                             />
                         )}
-
                         {activeTab === 'results' && (
-                            <ParentalLeaveResults
-                                results={results}
-                                hasPartner={hasPartner}
-                                province={province}
-                            />
+                            <ParentalLeaveResults results={results} hasPartner={hasPartner} province={province} />
                         )}
                     </div>
                 </div>

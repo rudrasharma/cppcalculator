@@ -1,60 +1,67 @@
 import { useState, useEffect, useCallback } from 'react';
 
 const MEMORY_KEY = 'looniefi_memory_v1';
+const MEMORY_EVENT = 'financial-memory-update';
 
 const DEFAULT_MEMORY = {
-    // Core Profile
     province: null,
     maritalStatus: null,
     dob: null,
     partnerDob: null,
-
-    // Income & Employment
     grossIncome: null,
     partnerIncome: null,
     employerMatchPercent: null,
-
-    // Assets & Liabilities
     homeValue: null,
     mortgageBalance: null,
     portfolioBalance: null,
-
-    // Family
     children: []
 };
 
 /**
  * useFinancialMemory - Hook to manage global user data persistence across tools
+ * Uses a singleton-style event system to prevent infinite re-render loops
  */
 export const useFinancialMemory = () => {
     const [memory, setMemory] = useState(DEFAULT_MEMORY);
 
-    // 1. Initial Load
+    // 1. Initial Load & Listen for updates from other components
     useEffect(() => {
         if (typeof window === 'undefined') return;
         
-        const stored = localStorage.getItem(MEMORY_KEY);
-        if (stored) {
-            try {
-                setMemory(JSON.parse(stored));
-            } catch (e) {
-                console.error("Failed to parse financial memory", e);
+        const load = () => {
+            const stored = localStorage.getItem(MEMORY_KEY);
+            if (stored) {
+                try {
+                    const parsed = JSON.parse(stored);
+                    setMemory(prev => ({ ...prev, ...parsed }));
+                } catch (e) {
+                    console.error("Failed to parse financial memory", e);
+                }
             }
-        }
+        };
+
+        load();
+
+        const handleGlobalUpdate = () => load();
+        window.addEventListener(MEMORY_EVENT, handleGlobalUpdate);
+        return () => window.removeEventListener(MEMORY_EVENT, handleGlobalUpdate);
     }, []);
 
-    // 2. Persist to localStorage on change
+    // 2. Broadcast updates to all other hooks/components
     const updateMemory = useCallback((updates) => {
-        setMemory(prev => {
-            const next = { ...prev, ...updates };
-            if (typeof window !== 'undefined') {
-                localStorage.setItem(MEMORY_KEY, JSON.stringify(next));
-            }
-            return next;
-        });
+        if (typeof window === 'undefined') return;
+
+        const stored = localStorage.getItem(MEMORY_KEY);
+        const current = stored ? JSON.parse(stored) : DEFAULT_MEMORY;
+        const next = { ...current, ...updates };
+
+        localStorage.setItem(MEMORY_KEY, JSON.stringify(next));
+        setMemory(next);
+
+        // Notify other instances of this hook
+        window.dispatchEvent(new CustomEvent(MEMORY_EVENT));
     }, []);
 
-    // 3. Flatten memory for AI prompt context
     const getMemoryContext = useCallback(() => {
         const facts = [];
         if (memory.province) facts.push(`User lives in ${memory.province}.`);
