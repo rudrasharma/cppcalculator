@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
     AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer 
 } from 'recharts';
@@ -22,6 +22,7 @@ import {
     AICommandBar,
     StrategyCard
 } from '../../../components/shared';
+import { useFinancialMemory } from '../../../hooks/useFinancialMemory';
 
 const MODES = {
     RATE: { 
@@ -179,6 +180,7 @@ export default function CAGRCalculator({ isVisible = true }) {
                 suggestions={CAGR_SUGGESTIONS}
                 onUpdate={handleAIUpdate}
                 context={{ mode, startValue, endValue, years, rate, hasContribution, contribution, frequency, useInflation, inflationRate }}
+                globalMemory={memory}
             />
 
             <StrategyCard insight={aiInsight} />
@@ -473,6 +475,17 @@ export default function CAGRCalculator({ isVisible = true }) {
                                 }} 
                                 className="text-slate-500 hover:text-indigo-600 text-[10px] font-black flex items-center gap-2 transition-all uppercase tracking-widest group bg-slate-50 px-4 py-2 rounded-xl border border-transparent hover:border-slate-200"
                             >
+                                <RotateCcwIcon size={14} className="group-hover:-rotate-180 transition-transform duration-500"/> 
+                                Reset Inputs
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+   >
                                 <RotateCcwIcon size={14} className="group-hover:-rotate-180 transition-transform duration-500"/> 
                                 Reset Inputs
                             </button>

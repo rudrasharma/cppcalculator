@@ -10,6 +10,7 @@ import {
 import ParentalLeaveForm from './ParentalLeaveForm';
 import ParentalLeaveResults from './ParentalLeaveResults';
 import { AICommandBar, StrategyCard } from '../../../components/shared';
+import { useFinancialMemory } from '../../../hooks/useFinancialMemory';
 
 const PARENTAL_SUGGESTIONS = [
     { label: 'Standard Leave', value: 'I make $75k in BC and want to take 12 months off' },
@@ -27,6 +28,7 @@ export default function ParentalLeave({
     initialPartner = true,
     initialPlan = 'STANDARD' 
 }) {
+    const { memory, updateMemory } = useFinancialMemory();
     
     const getParam = (key) => {
         if (typeof window === 'undefined') return null;
@@ -35,18 +37,21 @@ export default function ParentalLeave({
     };
 
     // --- LAZY STATE INITIALIZATION ---
-    const [province, setProvince] = useState(() => getParam('prov') || initialProvince);
+    const [province, setProvince] = useState(() => getParam('prov') || memory.province || initialProvince);
     const [salary, setSalary] = useState(() => {
         const val = getParam('sal');
-        return val ? parseInt(val, 36) : initialSalary;
+        if (val) return parseInt(val, 36);
+        return memory.grossIncome || initialSalary;
     });
     const [partnerSalary, setPartnerSalary] = useState(() => {
         const val = getParam('psal');
-        return val ? parseInt(val, 36) : 60000;
+        if (val) return parseInt(val, 36);
+        return memory.partnerIncome || 60000;
     });
     const [hasPartner, setHasPartner] = useState(() => {
         const val = getParam('part');
-        return val ? val === '1' : initialPartner;
+        if (val) return val === '1';
+        return (memory.maritalStatus === 'MARRIED') || initialPartner;
     });
     const [planType, setPlanType] = useState(() => {
         const val = getParam('plan');
@@ -74,6 +79,17 @@ export default function ParentalLeave({
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => { setMounted(true); }, []);
+
+    // Sync state changes back to global memory
+    useEffect(() => {
+        if (!mounted) return;
+        updateMemory({ 
+            province, 
+            grossIncome: salary, 
+            partnerIncome: partnerSalary,
+            maritalStatus: hasPartner ? 'MARRIED' : 'SINGLE'
+        });
+    }, [province, salary, partnerSalary, hasPartner, mounted]);
 
     // Helper: Get Current Max Insurable based on province
     const currentMaxInsurable = useMemo(() => 

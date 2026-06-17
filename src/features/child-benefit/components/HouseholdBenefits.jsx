@@ -3,6 +3,7 @@ import { calculateAll } from '../utils/benefitEngine';
 import HouseholdForm from './HouseholdForm';
 import BenefitResults from './BenefitResults';
 import { AICommandBar, StrategyCard } from '../../../components/shared';
+import { useFinancialMemory } from '../../../hooks/useFinancialMemory';
 
 const CCB_SUGGESTIONS = [
     { label: 'Ontario Family', value: 'We make $85k combined in Ontario with a 2 and 4 year old' },
@@ -20,6 +21,7 @@ export default function HouseholdBenefits({
     initialMaritalStatus = 'MARRIED', 
     initialChildCount = 2 
 }) {
+    const { memory, updateMemory } = useFinancialMemory();
     
     const getParam = (key) => {
         if (typeof window === 'undefined') return null;
@@ -28,12 +30,13 @@ export default function HouseholdBenefits({
     };
 
     // --- LAZY STATE INITIALIZATION ---
-    const [province, setProvince] = useState(() => getParam('p') || initialProvince);
+    const [province, setProvince] = useState(() => getParam('p') || memory.province || initialProvince);
     const [grossAfni, setGrossAfni] = useState(() => {
         const urlI = getParam('i');
-        return urlI ? parseInt(urlI, 36) : initialIncome;
+        if (urlI) return parseInt(urlI, 36);
+        return memory.grossIncome || initialIncome;
     });
-    const [maritalStatus, setMaritalStatus] = useState(() => getParam('ms') || initialMaritalStatus);
+    const [maritalStatus, setMaritalStatus] = useState(() => getParam('ms') || memory.maritalStatus || initialMaritalStatus);
     const [children, setChildren] = useState(() => {
         const urlC = getParam('c');
         if (urlC) {
@@ -44,6 +47,11 @@ export default function HouseholdBenefits({
                 });
             } catch(e) { return [{ id: 1, age: 3, disability: false }]; }
         }
+
+        if (memory.children?.length > 0) {
+            return memory.children.map((c, i) => ({ id: Date.now() + i, age: c.age, disability: c.disability || false }));
+        }
+
         const kids = [];
         for(let i=0; i < initialChildCount; i++) {
             kids.push({ id: Date.now() + i, age: i * 2 + 1, disability: false });
@@ -60,6 +68,17 @@ export default function HouseholdBenefits({
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => { setMounted(true); }, []);
+
+    // Sync state changes back to global memory
+    useEffect(() => {
+        if (!mounted) return;
+        updateMemory({ 
+            province, 
+            maritalStatus, 
+            grossIncome: grossAfni,
+            children: children.map(c => ({ age: c.age, disability: c.disability }))
+        });
+    }, [province, maritalStatus, grossAfni, children, mounted]);
 
     const afni = Math.max(0, grossAfni || 0);
 

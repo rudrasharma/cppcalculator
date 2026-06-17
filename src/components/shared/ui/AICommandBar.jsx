@@ -5,6 +5,7 @@ export const AICommandBar = ({
     onUpdate, 
     context, 
     endpoint = '/api/ai/tax',
+    globalMemory = {}, // New prop
     suggestions = [
         { label: 'Ontario Salary', value: 'I make $75,000 in Ontario' },
         { label: 'BC with RRSP', value: 'I make $100k in BC and contribute $10k to RRSP' },
@@ -25,7 +26,11 @@ export const AICommandBar = ({
             const res = await fetch(endpoint, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: input, context })
+                body: JSON.stringify({ 
+                    message: input, 
+                    context,
+                    globalMemory // Send memory to AI
+                })
             });
             
             if (!res.ok) {

@@ -7,6 +7,7 @@ import { AboutModal, ImportModal } from './Modals';
 import InputTab from './InputTab';
 import ResultsTab from './ResultsTab';
 import { AICommandBar, StrategyCard } from '../../../components/shared';
+import { useFinancialMemory } from '../../../hooks/useFinancialMemory';
 
 const RETIREMENT_SUGGESTIONS = [
     { label: 'Stop Working at 55', value: 'I turn 40 this year and make $100k. What if I stop working at age 55?' },
@@ -24,6 +25,7 @@ export default function Calculator({
     initialChildCount = 0,
     initialDob = '1985-01-01'
 }) {
+    const { memory, updateMemory } = useFinancialMemory();
     
     // --- CORE STATE ---
     const [children, setChildren] = useState(() => {
@@ -37,18 +39,18 @@ export default function Calculator({
         return [];
     });
 
-    const [dob, setDob] = useState(initialDob);
+    const [dob, setDob] = useState(() => memory.dob || initialDob);
     const [retirementAge, setRetirementAge] = useState(initialRetirementAge);
-    const [yearsInCanada, setYearsInCanada] = useState(initialYearsInCanada);
+    const [yearsInCanada, setYearsInCanada] = useState(() => memory.yearsInCanada || initialYearsInCanada);
     const [earnings, setEarnings] = useState({});
     const [activeTab, setActiveTab] = useUrlTab('input', 'step');
     const [mounted, setMounted] = useState(false); 
     
     // --- INPUT STATE ---
-    const [avgSalaryInput, setAvgSalaryInput] = useState(initialIncome ? initialIncome.toString() : '');
+    const [avgSalaryInput, setAvgSalaryInput] = useState(() => memory.grossIncome ? memory.grossIncome.toString() : initialIncome ? initialIncome.toString() : '');
     const [otherIncome, setOtherIncome] = useState(''); 
     const [livedInCanadaAllLife, setLivedInCanadaAllLife] = useState(initialYearsInCanada >= 40); 
-    const [isMarried, setIsMarried] = useState(initialMaritalStatus);
+    const [isMarried, setIsMarried] = useState(() => (memory.maritalStatus === 'MARRIED') || initialMaritalStatus);
     const [showChildren, setShowChildren] = useState(initialChildCount > 0);
     const [showGrid, setShowGrid] = useState(false);
     const [showNet, setShowNet] = useState(false);
@@ -110,6 +112,17 @@ export default function Calculator({
 
     // --- EFFECTS ---
     useEffect(() => { setMounted(true); }, []);
+
+    // Sync state changes back to global memory
+    useEffect(() => {
+        if (!mounted) return;
+        updateMemory({ 
+            dob, 
+            yearsInCanada, 
+            grossIncome: parseFloat(avgSalaryInput) || 0,
+            maritalStatus: isMarried ? 'MARRIED' : 'SINGLE'
+        });
+    }, [dob, yearsInCanada, avgSalaryInput, isMarried, mounted]);
     
     useEffect(() => { 
         if (livedInCanadaAllLife && yearsInCanada !== 40) setYearsInCanada(40); 
@@ -257,6 +270,7 @@ export default function Calculator({
                     suggestions={RETIREMENT_SUGGESTIONS}
                     onUpdate={handleAIUpdate}
                     context={aiContext}
+                    globalMemory={memory}
                 />
 
                 <StrategyCard insight={aiInsight} />

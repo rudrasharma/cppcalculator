@@ -3,7 +3,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 export const POST = async ({ request, locals }) => {
   try {
     const body = await request.json();
-    const { message, context } = body;
+    const { message, context, globalMemory } = body;
 
     // 1. LOAD API KEY
     let apiKey = import.meta.env.GEMINI_API_KEY;
@@ -22,6 +22,7 @@ export const POST = async ({ request, locals }) => {
       Your goal is to help users estimate their education savings growth based on their contributions, children's ages, and available grants (CESG, CLB, BCTESG, QESI).
       
       Current App Context: ${JSON.stringify(context || {})}
+      Global User Profile: ${JSON.stringify(globalMemory || {})}
       
       When a user interacts:
       1. If they describe a savings scenario (e.g., "I have a 2 year old and want to save $200 a month"): Call 'update_resp_calculator' with extracted values.

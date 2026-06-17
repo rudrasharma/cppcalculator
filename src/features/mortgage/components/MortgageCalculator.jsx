@@ -12,6 +12,7 @@ const MORTGAGE_SUGGESTIONS = [
 
 export default function MortgageCalculator({ isVisible, initialStateOverride }) {
     const { state, dispatch, results } = useMortgageMath(initialStateOverride);
+    const { memory } = useFinancialMemory();
     const [aiInsight, setAiInsight] = useState('');
 
     if (!isVisible) return null;
@@ -33,6 +34,7 @@ export default function MortgageCalculator({ isVisible, initialStateOverride }) 
                 suggestions={MORTGAGE_SUGGESTIONS}
                 onUpdate={handleAIUpdate}
                 context={state}
+                globalMemory={memory}
             />
 
             <StrategyCard insight={aiInsight} />

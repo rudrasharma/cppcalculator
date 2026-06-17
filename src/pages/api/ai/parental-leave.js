@@ -3,7 +3,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 export const POST = async ({ request, locals }) => {
   try {
     const body = await request.json();
-    const { message, context } = body;
+    const { message, context, globalMemory } = body;
 
     // 1. LOAD API KEY
     let apiKey = import.meta.env.GEMINI_API_KEY;
@@ -22,6 +22,7 @@ export const POST = async ({ request, locals }) => {
       Your goal is to help users estimate their weekly payments and total benefit value for maternity and parental leave.
       
       Current App Context: ${JSON.stringify(context || {})}
+      Global User Profile: ${JSON.stringify(globalMemory || {})}
       
       When a user interacts:
       1. If they describe a leave scenario (e.g., "I make $80k and want to take 12 months off"): Call 'update_parental_leave_calculator' with extracted values.

@@ -104,10 +104,18 @@ function mortgageReducer(state, action) {
 }
 
 export const useMortgageMath = (initialStateOverride = null) => {
+    const { memory, updateMemory } = useFinancialMemory();
+
     const startingState = useMemo(() => {
-        if (!initialStateOverride) return initialState;
+        const base = initialStateOverride || initialState;
         
-        let override = { ...initialStateOverride };
+        // Hydrate from memory if not overridden by URL/Initial
+        const hp = base.homePrice === 500000 && memory.homeValue ? memory.homeValue : base.homePrice;
+        const mb = base.mortgageBalance === 400000 && memory.mortgageBalance ? memory.mortgageBalance : base.mortgageBalance;
+        const pv = base.province === 'ON' && memory.province ? memory.province : base.province;
+
+        let override = { ...base, homePrice: hp, mortgageBalance: mb, province: pv };
+        
         if (override.principal && !override.homePrice) {
             override.homePrice = override.principal;
             override.downPayment = 0;
@@ -125,6 +133,16 @@ export const useMortgageMath = (initialStateOverride = null) => {
     }, [initialStateOverride]);
 
     const [state, dispatch] = useReducer(mortgageReducer, startingState);
+
+    // Sync state changes back to global memory
+    useEffect(() => {
+        if (!state.mounted) return;
+        updateMemory({
+            homeValue: state.homePrice,
+            mortgageBalance: state.mortgageBalance,
+            province: state.province
+        });
+    }, [state.homePrice, state.mortgageBalance, state.province, state.mounted]);
 
     useEffect(() => {
         if (initialStateOverride) {

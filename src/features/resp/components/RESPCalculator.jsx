@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRESPMath } from '../hooks/useRESPMath';
 import { RESPForm } from './RESPForm';
 import { RESPResults } from './RESPResults';
 import { GraduationCapIcon, RotateCcwIcon, AICommandBar, StrategyCard } from '../../../components/shared';
+import { useFinancialMemory } from '../../../hooks/useFinancialMemory';
 
 const RESP_SUGGESTIONS = [
     { label: 'One Child', value: 'I have a newborn and want to save $200 a month for education' },
@@ -11,6 +12,8 @@ const RESP_SUGGESTIONS = [
 ];
 
 export default function RESPCalculator({ initialStateOverride }) {
+    const { memory, updateMemory } = useFinancialMemory();
+    
     const { 
         state, 
         updateField, 
@@ -22,6 +25,16 @@ export default function RESPCalculator({ initialStateOverride }) {
     } = useRESPMath(initialStateOverride);
 
     const [aiInsight, setAiInsight] = useState('');
+
+    // Sync state changes back to global memory
+    useEffect(() => {
+        if (!state.mounted) return;
+        updateMemory({
+            province: state.province,
+            portfolioBalance: state.currentBalance,
+            children: state.beneficiaries.map(b => ({ name: b.name, age: b.age }))
+        });
+    }, [state.province, state.currentBalance, state.beneficiaries, state.mounted]);
 
     const handleReset = () => {
         window.location.search = '';

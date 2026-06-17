@@ -2,7 +2,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 
 export const POST = async ({ request, locals }) => {
   try {
-    const { message, context } = await request.json();
+    const { message, context, globalMemory } = await request.json();
 
     // 1. LOAD API KEY
     let apiKey = import.meta.env.GEMINI_API_KEY;
@@ -22,6 +22,7 @@ export const POST = async ({ request, locals }) => {
       Your goal is to help users understand their 2026 income tax and take-home pay.
       
       Current App Context: ${JSON.stringify(context || {})}
+      Global User Profile: ${JSON.stringify(globalMemory || {})}
       
       When a user interacts:
       1. If they describe a scenario: Call 'update_tax_calculator' with extracted values.

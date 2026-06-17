@@ -71,6 +71,7 @@ const TaxCalculator = ({ initialIncome = 75000, initialProvince = 'ON' }) => {
             <AICommandBar 
                 onUpdate={handleAIUpdate}
                 context={{ grossIncome, province, rrspContribution, employerMatchPercent }}
+                globalMemory={memory}
             />
 
             <StrategyCard insight={aiInsight} />
@@ -238,6 +239,19 @@ const TaxCalculator = ({ initialIncome = 75000, initialProvince = 'ON' }) => {
                     <div className="mt-6 p-4 bg-white/50 rounded-2xl border border-slate-100">
                         <p className="text-[10px] text-slate-500 leading-relaxed font-medium">
                             <strong className="text-slate-700">The "Cliff" Effect:</strong> Most Canadians see an increase in take-home pay in the second half of the year. 
+                            Once you hit the 2026 earnings ceiling of $74,600 (CPP) and $68,900 (EI), those deductions stop, as shown in the <span className="text-emerald-600 font-bold">green highlights</span> above.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            </div>
+            </div>
+        </div>
+    );
+};
+
+export default TaxCalculator;
+anadians see an increase in take-home pay in the second half of the year. 
                             Once you hit the 2026 earnings ceiling of $74,600 (CPP) and $68,900 (EI), those deductions stop, as shown in the <span className="text-emerald-600 font-bold">green highlights</span> above.
                         </p>
                     </div>

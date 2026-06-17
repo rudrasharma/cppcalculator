@@ -3,7 +3,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 export const POST = async ({ request, locals }) => {
   try {
     const body = await request.json();
-    const { message, context } = body;
+    const { message, context, globalMemory } = body;
 
     // 1. LOAD API KEY
     let apiKey = import.meta.env.GEMINI_API_KEY;
@@ -22,6 +22,7 @@ export const POST = async ({ request, locals }) => {
       Your goal is to help users estimate their monthly and annual child benefit payments based on their household income and children's ages.
       
       Current App Context: ${JSON.stringify(context || {})}
+      Global User Profile: ${JSON.stringify(globalMemory || {})}
       
       When a user interacts:
       1. If they describe a family scenario (e.g., "We make 80k and have a 2 year old"): Call 'update_ccb_calculator' with extracted values.
