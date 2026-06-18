@@ -19,47 +19,47 @@ const DEFAULT_MEMORY = {
 
 /**
  * useFinancialMemory - Hook to manage global user data persistence across tools
- * Uses a singleton-style event system to prevent infinite re-render loops
  */
 export const useFinancialMemory = () => {
-    const [memory, setMemory] = useState(DEFAULT_MEMORY);
+    // Synchronous load on first render to prevent race conditions
+    const [memory, setMemory] = useState(() => {
+        if (typeof window === 'undefined') return DEFAULT_MEMORY;
+        try {
+            const stored = localStorage.getItem(MEMORY_KEY);
+            return stored ? { ...DEFAULT_MEMORY, ...JSON.parse(stored) } : DEFAULT_MEMORY;
+        } catch (e) {
+            return DEFAULT_MEMORY;
+        }
+    });
 
-    // 1. Initial Load & Listen for updates from other components
+    // Listen for updates from other components/tabs
     useEffect(() => {
         if (typeof window === 'undefined') return;
         
-        const load = () => {
+        const sync = () => {
             const stored = localStorage.getItem(MEMORY_KEY);
             if (stored) {
                 try {
-                    const parsed = JSON.parse(stored);
-                    setMemory(prev => ({ ...prev, ...parsed }));
-                } catch (e) {
-                    console.error("Failed to parse financial memory", e);
-                }
+                    setMemory(JSON.parse(stored));
+                } catch (e) {}
             }
         };
 
-        load();
-
-        const handleGlobalUpdate = () => load();
-        window.addEventListener(MEMORY_EVENT, handleGlobalUpdate);
-        return () => window.removeEventListener(MEMORY_EVENT, handleGlobalUpdate);
+        window.addEventListener(MEMORY_EVENT, sync);
+        return () => window.removeEventListener(MEMORY_EVENT, sync);
     }, []);
 
-    // 2. Broadcast updates to all other hooks/components
     const updateMemory = useCallback((updates) => {
         if (typeof window === 'undefined') return;
 
-        const stored = localStorage.getItem(MEMORY_KEY);
-        const current = stored ? JSON.parse(stored) : DEFAULT_MEMORY;
-        const next = { ...current, ...updates };
-
-        localStorage.setItem(MEMORY_KEY, JSON.stringify(next));
-        setMemory(next);
-
-        // Notify other instances of this hook
-        window.dispatchEvent(new CustomEvent(MEMORY_EVENT));
+        setMemory(prev => {
+            const next = { ...prev, ...updates };
+            localStorage.setItem(MEMORY_KEY, JSON.stringify(next));
+            
+            // Notify other instances of this hook
+            window.dispatchEvent(new CustomEvent(MEMORY_EVENT));
+            return next;
+        });
     }, []);
 
     const getMemoryContext = useCallback(() => {

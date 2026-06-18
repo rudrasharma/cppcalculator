@@ -19,26 +19,16 @@ const PERIODS = [
 const TaxCalculator = ({ initialIncome = 75000, initialProvince = 'ON' }) => {
     const { memory, updateMemory } = useFinancialMemory();
     
-    // 1. Local State (Initial hydration happens via the Hook's initial load)
-    const [grossIncome, setGrossIncome] = useState(initialIncome);
-    const [province, setProvince] = useState(initialProvince);
+    // Direct lazy initialization from memory
+    const [grossIncome, setGrossIncome] = useState(() => memory.grossIncome || initialIncome);
+    const [province, setProvince] = useState(() => memory.province || initialProvince);
     const [rrspContribution, setRrspContribution] = useState(0);
-    const [employerMatchPercent, setEmployerMatchPercent] = useState(0);
+    const [employerMatchPercent, setEmployerMatchPercent] = useState(() => memory.employerMatchPercent || 0);
+    
     const [period, setPeriod] = useState('monthly');
     const [aiInsight, setAiInsight] = useState('');
-    const [isHydrated, setIsHydrated] = useState(false);
 
-    // 2. Hydration: Only once per page load
-    useEffect(() => {
-        if (!isHydrated) {
-            if (memory.grossIncome) setGrossIncome(memory.grossIncome);
-            if (memory.province) setProvince(memory.province);
-            if (memory.employerMatchPercent) setEmployerMatchPercent(memory.employerMatchPercent);
-            setIsHydrated(true);
-        }
-    }, [memory, isHydrated]);
-
-    // 3. Explicit Setters: Update local state + global memory
+    // Explicit Setters: Update local state + global memory
     const setIncome = useCallback((val) => {
         const num = parseFloat(val) || 0;
         setGrossIncome(num);
@@ -56,7 +46,7 @@ const TaxCalculator = ({ initialIncome = 75000, initialProvince = 'ON' }) => {
         updateMemory({ employerMatchPercent: num });
     }, [updateMemory]);
 
-    // 4. Calculations
+    // RRSP Logic
     const rrspMaxTotal = useMemo(() => 
         Math.max(0, Math.min(32490, Math.floor(grossIncome * 0.18))),
         [grossIncome]
@@ -125,6 +115,7 @@ const TaxCalculator = ({ initialIncome = 75000, initialProvince = 'ON' }) => {
 
     return (
         <div className="max-w-6xl mx-auto px-4 py-8 flex flex-col min-h-0">
+            {/* AI HERO SECTION */}
             <AICommandBar 
                 onUpdate={handleAIUpdate}
                 context={{ grossIncome, province, rrspContribution, employerMatchPercent }}
