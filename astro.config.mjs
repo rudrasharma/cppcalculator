@@ -7,6 +7,7 @@ import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
   site: 'https://looniefi.ca',
+  trailingSlash: 'always',
   // Markdown configuration (no math plugins needed)
   markdown: {
     remarkPlugins: [],
