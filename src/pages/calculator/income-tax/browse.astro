@@ -36,7 +36,7 @@ const formatter = new Intl.NumberFormat('en-CA', { style: 'currency', currency: 
             <div class="grid grid-cols-2 gap-2">
               {sampleSalaries.map((salary) => (
                 <a 
-                  href={`/calculator/income-tax/${prov.slug}/${salary}`} 
+                  href={`/calculator/income-tax/${prov.slug}/${salary}/`} 
                   class="text-xs bg-slate-50 hover:bg-indigo-600 text-slate-600 hover:text-white px-3 py-3 rounded-xl border border-slate-100 font-black text-center transition-all transform hover:-translate-y-1"
                 >
                   {formatter.format(salary)}
@@ -45,7 +45,7 @@ const formatter = new Intl.NumberFormat('en-CA', { style: 'currency', currency: 
             </div>
             
             <div class="mt-8 pt-6 border-t border-slate-50">
-                <a href={`/income-tax-calculator`} class="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-600 hover:text-indigo-800 transition-colors">
+                <a href={`/income-tax-calculator/`} class="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-600 hover:text-indigo-800 transition-colors">
                     Custom Estimate →
                 </a>
             </div>

@@ -79,7 +79,7 @@ const faqSchema = {
           {CPP_SCENARIOS.slice(0, 6).map((scene) => (
             <article role="listitem">
               <a 
-                href={`/calculator/cpp-oas/${scene.slug}`}
+                href={`/calculator/cpp-oas/${scene.slug}/`}
                 class="block p-4 rounded-xl border border-slate-200 bg-white hover:border-indigo-500 hover:shadow-md transition-all group"
                 aria-label={`View ${scene.label} scenario`}
               >
@@ -105,7 +105,7 @@ const faqSchema = {
 
         <div class="text-center mt-8">
           <a 
-            href="/calculator/cpp-oas/browse" 
+            href="/calculator/cpp-oas/browse/" 
             class="inline-flex items-center gap-2 text-sm font-bold text-slate-600 hover:text-indigo-600 transition-colors"
             aria-label="Browse all CPP and OAS retirement scenarios"
           >
