@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { TOOL_CATEGORIES, ALL_TOOLS } from '../../../config/navigation';
 
 // ICONS
@@ -21,6 +22,11 @@ const ICON_MAP = {
 
 export const ToolDrawer = ({ isOpen, onClose, activeId, onSelect, isSuite = false }) => {
     const [isAnimating, setIsAnimating] = useState(false);
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     useEffect(() => {
         if (isOpen) {
@@ -45,8 +51,9 @@ export const ToolDrawer = ({ isOpen, onClose, activeId, onSelect, isSuite = fals
     };
 
     if (!isOpen && !isAnimating) return null;
+    if (!mounted) return null;
 
-    return (
+    return createPortal(
         <div 
             className={`fixed inset-0 z-[10001] md:hidden bg-slate-50 flex flex-col transition-all duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
         >
@@ -126,6 +133,7 @@ export const ToolDrawer = ({ isOpen, onClose, activeId, onSelect, isSuite = fals
                     <div className="pb-safe" />
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };

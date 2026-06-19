@@ -32,7 +32,7 @@ export const NativeSelect = React.memo(({
                 id={selectId}
                 value={value}
                 onChange={onChange}
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm text-slate-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all shadow-sm hover:border-slate-300 font-medium appearance-none cursor-pointer"
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-base md:text-sm text-slate-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all shadow-sm hover:border-slate-300 font-medium appearance-none cursor-pointer"
                 style={{
                     backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23334155' d='M6 9L1 4h10z'/%3E%3C/svg%3E")`,
                     backgroundRepeat: 'no-repeat',

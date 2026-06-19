@@ -6,6 +6,7 @@ export const AICommandBar = ({
     context, 
     endpoint = '/api/ai/tax',
     globalMemory = {}, // New prop
+    placeholder,
     suggestions = [
         { label: 'Ontario Salary', value: 'I make $75,000 in Ontario' },
         { label: 'BC with RRSP', value: 'I make $100k in BC and contribute $10k to RRSP' },
@@ -15,6 +16,37 @@ export const AICommandBar = ({
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
+
+    const getPlaceholder = () => {
+        if (placeholder) return placeholder;
+        
+        if (endpoint.includes('tax')) {
+            return "Describe your tax situation (e.g., 'I make $85k in BC and put $5k in RRSP')";
+        }
+        if (endpoint.includes('parental') || endpoint.includes('parental-leave')) {
+            return "Describe your leave scenario (e.g., 'I make $75k in Ontario and want to take 12 months')";
+        }
+        if (endpoint.includes('ccb') || endpoint.includes('household')) {
+            return "Describe your family (e.g., 'I have 3 kids in Ontario and my income is $60k')";
+        }
+        if (endpoint.includes('mortgage')) {
+            return "Describe your home purchase (e.g., 'I\'m buying a $600k house with 10% down in Alberta')";
+        }
+        if (endpoint.includes('resp')) {
+            return "Describe your children & savings (e.g., 'I have two kids, aged 2 and 5, saving $200/month')";
+        }
+        if (endpoint.includes('retirement')) {
+            return "Describe your retirement plans (e.g., 'I am 50 and want to retire at 65 in BC')";
+        }
+        if (endpoint.includes('cagr')) {
+            return "Describe your growth scenario (e.g., 'How much does $10k grow to at 8% in 15 years?')";
+        }
+        if (endpoint.includes('smith')) {
+            return "Describe your mortgage (e.g., 'I have a $400k mortgage at 4.5% interest')";
+        }
+        
+        return "Describe your scenario...";
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -79,8 +111,8 @@ export const AICommandBar = ({
                             setInput(e.target.value);
                             if (error) setError(null);
                         }}
-                        placeholder={error ? "Error: " + error : "Describe your scenario (e.g., 'I make $85k in BC and put $5k in RRSP')"}
-                        className={`flex-1 bg-transparent border-none focus:ring-0 ${error ? 'text-rose-600 placeholder:text-rose-400' : 'text-slate-900 placeholder:text-slate-400'} font-medium py-4 text-sm md:text-base`}
+                        placeholder={error ? "Error: " + error : getPlaceholder()}
+                        className={`flex-1 bg-transparent border-none focus:ring-0 ${error ? 'text-rose-600 placeholder:text-rose-400' : 'text-slate-900 placeholder:text-slate-400'} font-medium py-4 text-base`}
                         disabled={isLoading}
                     />
 

@@ -81,7 +81,7 @@ export const RESPForm = ({
                                                 }
                                             }}
                                             placeholder="0"
-                                            className="w-full pl-7 pr-3 py-2.5 bg-white border border-slate-200 rounded-xl font-mono text-sm font-black focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-slate-900 shadow-sm"
+                                            className="w-full pl-7 pr-3 py-2.5 bg-white border border-slate-200 rounded-xl font-mono text-base font-black focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-slate-900 shadow-sm"
                                         />
                                     </div>
                                 </div>
@@ -102,7 +102,7 @@ export const RESPForm = ({
                                                 }
                                             }}
                                             placeholder="0"
-                                            className="w-full pl-7 pr-3 py-2.5 bg-white border border-slate-200 rounded-xl font-mono text-sm font-black focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-slate-900 shadow-sm"
+                                            className="w-full pl-7 pr-3 py-2.5 bg-white border border-slate-200 rounded-xl font-mono text-base font-black focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-slate-900 shadow-sm"
                                         />
                                     </div>
                                 </div>

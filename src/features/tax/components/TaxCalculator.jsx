@@ -126,7 +126,7 @@ const TaxCalculator = ({ initialIncome = 75000, initialProvince = 'ON' }) => {
             <div className="w-full">
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                     <div className="lg:col-span-5 space-y-6">
-                        <div className="bg-white p-6 md:p-8 rounded-[2.5rem] border border-slate-200 shadow-sm space-y-8">
+                        <div className="bg-white p-4 sm:p-6 md:p-8 rounded-3xl md:rounded-[2.5rem] border border-slate-200 shadow-sm space-y-8">
                             <MoneyInput 
                                 label="Gross Annual Income"
                                 value={grossIncome}

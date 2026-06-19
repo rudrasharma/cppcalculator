@@ -50,7 +50,7 @@ export default function InputTab({
                     <div className="bg-slate-50/50 p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
                         <div>
                             <label className="flex items-center text-sm font-bold text-slate-700 mb-2 leading-none">Date of Birth</label>
-                            <input type="date" value={dob} onChange={(e) => setDob(e.target.value)} className="w-full p-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all shadow-sm" />
+                            <input type="date" value={dob} onChange={(e) => setDob(e.target.value)} className="w-full p-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all shadow-sm text-base" />
                         </div>
                         
                         <RangeSlider
@@ -79,7 +79,7 @@ export default function InputTab({
                             <div className="animate-fade-in space-y-5 pl-5 border-l-2 border-indigo-100 ml-2">
                                 <div>
                                     <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1.5">Spouse Birth Date</label>
-                                    <input type="date" value={spouseDob} onChange={(e) => setSpouseDob(e.target.value)} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500 transition-all" />
+                                    <input type="date" value={spouseDob} onChange={(e) => setSpouseDob(e.target.value)} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-base outline-none focus:ring-2 focus:ring-indigo-500 transition-all" />
                                 </div>
                                 <MoneyInput
                                     label="Spouse Annual Retirement Income"
@@ -104,7 +104,7 @@ export default function InputTab({
                                 {children.map((childYear, index) => (
                                     <div key={index} className="flex items-center gap-2 group/child">
                                         <span className="text-[10px] text-slate-400 font-bold uppercase w-14">Birth {index + 1}</span>
-                                        <input type="number" value={childYear} onChange={(e) => { const newC = [...children]; newC[index] = parseInt(e.target.value)||0; setChildren(newC); }} className="flex-1 p-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:border-indigo-400" placeholder="YYYY" />
+                                        <input type="number" value={childYear} onChange={(e) => { const newC = [...children]; newC[index] = parseInt(e.target.value)||0; setChildren(newC); }} className="flex-1 p-2 bg-slate-50 border border-slate-200 rounded-lg text-base outline-none focus:border-indigo-400" placeholder="YYYY" />
                                         <button onClick={() => setChildren(children.filter((_, i) => i !== index))} className="p-2 text-rose-300 hover:text-rose-600 transition-colors opacity-0 group-hover/child:opacity-100"><XIcon size={16}/></button>
                                     </div>
                                 ))}
@@ -136,7 +136,7 @@ export default function InputTab({
                         {!livedInCanadaAllLife && (
                             <div className="animate-fade-in bg-white p-4 rounded-xl border border-slate-100">
                                 <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Total Years Residing in Canada (After Age 18)</label>
-                                <input type="number" min="0" max="47" value={yearsInCanada} onChange={(e) => setYearsInCanada(parseInt(e.target.value) || 0)} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all font-mono" />
+                                <input type="number" min="0" max="47" value={yearsInCanada} onChange={(e) => setYearsInCanada(parseInt(e.target.value) || 0)} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all font-mono text-base" />
                                 <p className="text-[10px] text-slate-400 mt-2 font-medium italic">* OAS requires 40 years for full payment. 10 years minimum to qualify at age 65.</p>
                             </div>
                         )}

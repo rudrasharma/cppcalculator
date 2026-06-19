@@ -36,7 +36,7 @@ describe('Retirement Calculator UI Integration', () => {
 
         fireEvent.change(salaryInput, { target: { value: '60000' } });
         // The component might wait for button click or use effect
-        const generateButton = screen.getByText(/Generate All/i);
+        const generateButton = screen.getByText(/Fill History/i);
         fireEvent.click(generateButton);
         
         expect(useRetirementMath).toHaveBeenCalled();

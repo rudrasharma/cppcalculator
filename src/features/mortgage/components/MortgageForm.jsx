@@ -199,7 +199,7 @@ export const MortgageForm = ({ state, dispatch }) => {
                                 type="date"
                                 value={startDate}
                                 onChange={(e) => dispatch({ type: 'SET_START_DATE', payload: e.target.value })}
-                                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl font-mono text-sm font-black focus:ring-2 focus:ring-indigo-500 outline-none transition-all shadow-sm text-slate-900"
+                                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl font-mono text-base font-black focus:ring-2 focus:ring-indigo-500 outline-none transition-all shadow-sm text-slate-900"
                             />
                         </div>
 
@@ -312,7 +312,7 @@ export const MortgageForm = ({ state, dispatch }) => {
                                         dispatch({ type: 'SET_CUSTOM_PAYMENT', payload: val === '' ? 0 : parseFloat(val) });
                                     }
                                 }}
-                                className="w-full pl-8 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl font-mono text-sm font-black focus:ring-2 focus:ring-indigo-500 outline-none transition-all shadow-sm text-slate-900"
+                                className="w-full pl-8 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl font-mono text-base font-black focus:ring-2 focus:ring-indigo-500 outline-none transition-all shadow-sm text-slate-900"
                             />
                         </div>
                     </div>
@@ -344,7 +344,7 @@ export const MortgageForm = ({ state, dispatch }) => {
                                                 dispatch({ type: 'SET_PROPERTY_TAXES', payload: parseFloat(val) || 0 });
                                             }
                                         }}
-                                        className="w-full pl-8 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-mono text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none text-slate-900"
+                                        className="w-full pl-8 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-mono text-base font-bold focus:ring-2 focus:ring-indigo-500 outline-none text-slate-900"
                                         placeholder="0"
                                     />
                                     <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400 uppercase">/ Year</span>
@@ -368,7 +368,7 @@ export const MortgageForm = ({ state, dispatch }) => {
                                                     dispatch({ type: 'SET_HEATING', payload: parseFloat(val) || 0 });
                                                 }
                                             }}
-                                            className="w-full pl-8 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-mono text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none text-slate-900"
+                                            className="w-full pl-8 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-mono text-base font-bold focus:ring-2 focus:ring-indigo-500 outline-none text-slate-900"
                                             placeholder="0"
                                         />
                                     </div>
@@ -390,7 +390,7 @@ export const MortgageForm = ({ state, dispatch }) => {
                                                     dispatch({ type: 'SET_CONDO_FEES', payload: parseFloat(val) || 0 });
                                                 }
                                             }}
-                                            className="w-full pl-8 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-mono text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none text-slate-900"
+                                            className="w-full pl-8 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-mono text-base font-bold focus:ring-2 focus:ring-indigo-500 outline-none text-slate-900"
                                             placeholder="0"
                                         />
                                     </div>
@@ -426,7 +426,7 @@ export const MortgageForm = ({ state, dispatch }) => {
                                                 dispatch({ type: 'SET_PREPAYMENT', payload: { monthlyIncrease: parseFloat(val) || 0 } });
                                             }
                                         }}
-                                        className="w-full pl-8 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-mono text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none text-slate-900"
+                                        className="w-full pl-8 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-mono text-base font-bold focus:ring-2 focus:ring-indigo-500 outline-none text-slate-900"
                                         placeholder="0.00"
                                     />
                                     <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400 uppercase">Per Payment</span>
@@ -461,7 +461,7 @@ export const MortgageForm = ({ state, dispatch }) => {
                                                             const val = e.target.value;
                                                             dispatch({ type: 'UPDATE_LUMP_SUM', payload: { id: ls.id, field: 'amount', value: val === '' ? 0 : parseFloat(val) } });
                                                         }}
-                                                        className="w-full pl-6 pr-2 py-2 sm:py-1.5 bg-white border border-slate-200 rounded-lg font-mono text-xs sm:text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none text-slate-900 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none [-moz-appearance:textfield]"
+                                                        className="w-full pl-6 pr-2 py-2 sm:py-1.5 bg-white border border-slate-200 rounded-lg font-mono text-base md:text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none text-slate-900 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none [-moz-appearance:textfield]"
                                                         placeholder="Amount"
                                                     />
                                                 </div>
