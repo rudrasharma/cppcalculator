@@ -83,8 +83,8 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
 
 // Breadcrumbs
 const breadcrumbPath = [
-  { label: 'Child Benefit', href: '/child-benefit-calculator' },
-  { label: provinceName, href: `/calculator/child-benefit/browse` },
+  { label: 'Child Benefit', href: '/child-benefit-calculator/' },
+  { label: provinceName, href: `/calculator/child-benefit/browse/` },
   { label: `${familyLabel} (${salaryFormatted})`, href: Astro.url.pathname }
 ];
 
@@ -92,7 +92,7 @@ const breadcrumbPath = [
 const currentIndex = SALARIES.indexOf(parseInt(salaryVal));
 const prevIncome = currentIndex > 0 ? SALARIES[currentIndex - 1] : null;
 const nextIncome = currentIndex < SALARIES.length - 1 ? SALARIES[currentIndex + 1] : null;
-const makeUrl = (inc) => `/calculator/child-benefit/${Astro.params.province}/${scenarioSlug}/${inc}`;
+const makeUrl = (inc) => `/calculator/child-benefit/${Astro.params.province}/${scenarioSlug}/${inc}/`;
 
 // 9. SCHEMAS
 const softwareSchema = {

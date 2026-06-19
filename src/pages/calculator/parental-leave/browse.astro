@@ -26,10 +26,10 @@ const canonicalURL = new URL('/calculator/parental-leave/browse', Astro.site || 
                 <div>
                   <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-2">{scene.label}</h3>
                   <nav class="flex flex-wrap gap-2" aria-label={`${scene.label} scenarios for ${prov.name}`}>
-                    <a href={`/calculator/parental-leave/${prov.slug}/${scene.slug}/30000`} class="text-xs bg-slate-50 hover:bg-rose-50 text-slate-600 hover:text-rose-600 px-2 py-1 rounded border border-slate-100 transition-colors" aria-label={`${scene.label} with $30,000 income in ${prov.name}`}>$30k</a>
-                    <a href={`/calculator/parental-leave/${prov.slug}/${scene.slug}/60000`} class="text-xs bg-slate-50 hover:bg-rose-50 text-slate-600 hover:text-rose-600 px-2 py-1 rounded border border-slate-100 transition-colors" aria-label={`${scene.label} with $60,000 income in ${prov.name}`}>$60k</a>
-                    <a href={`/calculator/parental-leave/${prov.slug}/${scene.slug}/90000`} class="text-xs bg-slate-50 hover:bg-rose-50 text-slate-600 hover:text-rose-600 px-2 py-1 rounded border border-slate-100 transition-colors" aria-label={`${scene.label} with $90,000 income in ${prov.name}`}>$90k</a>
-                    <a href={`/calculator/parental-leave/${prov.slug}/${scene.slug}/120000`} class="text-xs bg-slate-50 hover:bg-rose-50 text-slate-600 hover:text-rose-600 px-2 py-1 rounded border border-slate-100 transition-colors" aria-label={`${scene.label} with $120,000 income in ${prov.name}`}>$120k</a>
+                    <a href={`/calculator/parental-leave/${prov.slug}/${scene.slug}/30000/`} class="text-xs bg-slate-50 hover:bg-rose-50 text-slate-600 hover:text-rose-600 px-2 py-1 rounded border border-slate-100 transition-colors" aria-label={`${scene.label} with $30,000 income in ${prov.name}`}>$30k</a>
+                    <a href={`/calculator/parental-leave/${prov.slug}/${scene.slug}/60000/`} class="text-xs bg-slate-50 hover:bg-rose-50 text-slate-600 hover:text-rose-600 px-2 py-1 rounded border border-slate-100 transition-colors" aria-label={`${scene.label} with $60,000 income in ${prov.name}`}>$60k</a>
+                    <a href={`/calculator/parental-leave/${prov.slug}/${scene.slug}/90000/`} class="text-xs bg-slate-50 hover:bg-rose-50 text-slate-600 hover:text-rose-600 px-2 py-1 rounded border border-slate-100 transition-colors" aria-label={`${scene.label} with $90,000 income in ${prov.name}`}>$90k</a>
+                    <a href={`/calculator/parental-leave/${prov.slug}/${scene.slug}/120000/`} class="text-xs bg-slate-50 hover:bg-rose-50 text-slate-600 hover:text-rose-600 px-2 py-1 rounded border border-slate-100 transition-colors" aria-label={`${scene.label} with $120,000 income in ${prov.name}`}>$120k</a>
                   </nav>
                 </div>
               ))}

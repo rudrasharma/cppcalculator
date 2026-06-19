@@ -60,8 +60,8 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site || Astro.url.origin)
 
 // Breadcrumbs
 const breadcrumbPath = [
-  { label: 'Income Tax', href: '/income-tax-calculator' },
-  { label: provinceName, href: `/calculator/income-tax/browse` },
+  { label: 'Income Tax', href: '/income-tax-calculator/' },
+  { label: provinceName, href: `/calculator/income-tax/browse/` },
   { label: `${salaryFormatted} Income`, href: Astro.url.pathname }
 ];
 
@@ -69,7 +69,7 @@ const breadcrumbPath = [
 const currentIndex = SALARIES.indexOf(parseInt(salaryVal));
 const prevIncome = currentIndex > 0 ? SALARIES[currentIndex - 1] : null;
 const nextIncome = currentIndex < SALARIES.length - 1 ? SALARIES[currentIndex + 1] : null;
-const makeUrl = (inc) => `/calculator/income-tax/${Astro.params.province}/${inc}`;
+const makeUrl = (inc) => `/calculator/income-tax/${Astro.params.province}/${inc}/`;
 
 // 6. SCHEMAS
 const softwareSchema = {

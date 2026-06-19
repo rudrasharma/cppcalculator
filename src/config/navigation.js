@@ -36,7 +36,7 @@ export const ALL_TOOLS = [
     { 
         id: 'tax',
         categoryId: 'taxes',
-        href: '/income-tax-calculator', 
+        href: '/income-tax-calculator/', 
         label: 'Income Tax', 
         shortLabel: 'Income Tax',
         title: '2026 Canadian Income Tax',
@@ -47,7 +47,7 @@ export const ALL_TOOLS = [
     { 
         id: 'parental',
         categoryId: 'family',
-        href: '/parental-leave-calculator', 
+        href: '/parental-leave-calculator/', 
         label: 'Mat. Leave', 
         shortLabel: 'Mat. Leave',
         title: 'Maternity & Parental Leave',
@@ -58,7 +58,7 @@ export const ALL_TOOLS = [
     { 
         id: 'ccb',
         categoryId: 'family',
-        href: '/child-benefit-calculator', 
+        href: '/child-benefit-calculator/', 
         label: 'Family Cash', 
         shortLabel: 'Family Cash',
         title: 'Household Benefits Estimator',
@@ -69,7 +69,7 @@ export const ALL_TOOLS = [
     { 
         id: 'resp',
         categoryId: 'family',
-        href: '/resp-calculator', 
+        href: '/resp-calculator/', 
         label: 'Education (RESP)', 
         shortLabel: 'RESP',
         title: 'Education Savings (RESP)',
@@ -80,7 +80,7 @@ export const ALL_TOOLS = [
     { 
         id: 'mortgage',
         categoryId: 'home',
-        href: '/mortgage-calculator', 
+        href: '/mortgage-calculator/', 
         label: 'Mortgage', 
         shortLabel: 'Mortgage',
         title: 'Mortgage Paydown',
@@ -91,7 +91,7 @@ export const ALL_TOOLS = [
     { 
         id: 'smith',
         categoryId: 'home',
-        href: '/smith-manoeuvre', 
+        href: '/smith-manoeuvre/', 
         label: 'Smith Manoeuvre', 
         shortLabel: 'Smith Calc',
         title: 'Smith Manoeuvre Estimator',
@@ -102,7 +102,7 @@ export const ALL_TOOLS = [
     { 
         id: 'cpp',
         categoryId: 'retirement',
-        href: '/cpp-oas-calculator', 
+        href: '/cpp-oas-calculator/', 
         label: 'CPP & OAS', 
         shortLabel: 'CPP & OAS',
         title: 'Government Retirement Benefits',
@@ -113,7 +113,7 @@ export const ALL_TOOLS = [
     { 
         id: 'cagr',
         categoryId: 'retirement',
-        href: '/cagr-calculator', 
+        href: '/cagr-calculator/', 
         label: 'Growth Calc', 
         shortLabel: 'CAGR Calc',
         title: 'Investment Growth (CAGR)',

@@ -27,7 +27,7 @@ const description = "Browse common Canadian mortgage calculations including majo
                 {MORTGAGE_SCENARIOS.map((s) => (
                     <li>
                         <a 
-                            href={`/calculator/mortgage/${s.slug}`} 
+                            href={`/calculator/mortgage/${s.slug}/`} 
                             class="flex items-start gap-3 p-3 rounded-2xl hover:bg-slate-50 transition-colors group"
                         >
                             <div class="p-2 bg-blue-50 text-blue-600 rounded-xl group-hover:bg-blue-100 transition-colors mt-0.5 shrink-0">
@@ -44,7 +44,7 @@ const description = "Browse common Canadian mortgage calculations including majo
         </div>
 
         <div class="mt-8 text-center">
-            <a href="/mortgage-calculator" class="text-xs font-bold text-indigo-600 hover:text-indigo-800 transition-colors inline-flex items-center gap-1">
+            <a href="/mortgage-calculator/" class="text-xs font-bold text-indigo-600 hover:text-indigo-800 transition-colors inline-flex items-center gap-1">
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
                 Back to Standard Calculator
             </a>
