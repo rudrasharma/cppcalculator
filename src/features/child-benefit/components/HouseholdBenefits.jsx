@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { calculateAll } from '../utils/benefitEngine';
 import HouseholdForm from './HouseholdForm';
 import BenefitResults from './BenefitResults';
-import { AICommandBar, StrategyCard } from '../../../components/shared';
+import { AICommandBar, StrategyCard, AICopilot } from '../../../components/shared';
 import { useFinancialMemory } from '../../../hooks/useFinancialMemory';
 
 const CCB_SUGGESTIONS = [
@@ -152,6 +152,7 @@ export default function HouseholdBenefits({
     return (
         <div className="bg-slate-50 text-slate-900 font-sans selection:bg-indigo-100" style={{ paddingBottom: activeTab === 'input' ? '100px' : '40px' }}>
             <main className="max-w-5xl mx-auto p-4 md:p-8 w-full mt-6 flex flex-col min-h-0">
+                {/* AI HERO SECTION (Hidden for Copilot)
                 <AICommandBar 
                     endpoint="/api/ai/ccb"
                     suggestions={CCB_SUGGESTIONS}
@@ -160,6 +161,14 @@ export default function HouseholdBenefits({
                     globalMemory={memory}
                 />
                 <StrategyCard insight={aiInsight} />
+                */}
+
+                {/* AI Copilot Persistent Sidebar/Bottom-sheet */}
+                <AICopilot 
+                    onUpdate={handleAIUpdate}
+                    context={{ calculatorId: 'ccb', province, maritalStatus, grossAfni, children, sharedCustody, isRural }}
+                    globalMemory={memory}
+                />
 
                 <div className="bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden mb-12">
                     <div className="p-2 bg-slate-50 border-b">

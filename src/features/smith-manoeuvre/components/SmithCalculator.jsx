@@ -5,7 +5,8 @@ import { SmithMetrics } from './SmithMetrics';
 import { SmithCharts } from './SmithCharts';
 import { SmithAuditTable } from './SmithAuditTable';
 import { SmithNarrative } from './SmithNarrative';
-import { ScaleIcon, RotateCcwIcon, AICommandBar, StrategyCard } from '../../../components/shared';
+import { ScaleIcon, RotateCcwIcon, AICommandBar, StrategyCard, AICopilot } from '../../../components/shared';
+import { useFinancialMemory } from '../../../hooks/useFinancialMemory';
 
 const SMITH_SUGGESTIONS = [
     { label: 'Basic Strategy', value: 'I have a $400k mortgage at 4% and a $600k home. My tax rate is 35%.' },
@@ -14,6 +15,7 @@ const SMITH_SUGGESTIONS = [
 ];
 
 export default function SmithCalculator({ isVisible = true }) {
+    const { memory, updateMemory } = useFinancialMemory();
     // 1. Initial State
     const [hVal, setHValue] = useState(600000);
     const [mBal, setMBalance] = useState(400000);
@@ -112,6 +114,7 @@ export default function SmithCalculator({ isVisible = true }) {
 
     return (
         <div className="max-w-7xl mx-auto px-4 py-8 pb-32 md:pb-8 animate-fade-in relative flex flex-col min-h-0">
+            {/* AI HERO SECTION (Hidden for Copilot)
             <AICommandBar 
                 endpoint="/api/ai/smith"
                 suggestions={SMITH_SUGGESTIONS}
@@ -119,6 +122,14 @@ export default function SmithCalculator({ isVisible = true }) {
                 context={inputsForEngine}
             />
             <StrategyCard insight={aiInsight} />
+            */}
+
+            {/* AI Copilot Persistent Sidebar/Bottom-sheet */}
+            <AICopilot 
+                onUpdate={handleAIUpdate}
+                context={{ calculatorId: 'smith', ...inputsForEngine }}
+                globalMemory={memory}
+            />
 
             <div className="w-full">
                 <div className="flex flex-col md:flex-row justify-between items-center mb-10 gap-6">

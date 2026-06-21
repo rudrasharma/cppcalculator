@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useMortgageMath } from '../hooks/useMortgageMath';
 import { MortgageForm } from './MortgageForm';
 import { MortgageResults } from './MortgageResults';
-import { CalculatorIcon, InfoIcon, RotateCcwIcon, AICommandBar, StrategyCard } from '../../../components/shared';
+import { CalculatorIcon, InfoIcon, RotateCcwIcon, AICommandBar, StrategyCard, AICopilot } from '../../../components/shared';
 import { useFinancialMemory } from '../../../hooks/useFinancialMemory';
 
 const MORTGAGE_SUGGESTIONS = [
@@ -29,7 +29,7 @@ export default function MortgageCalculator({ isVisible = true, initialStateOverr
 
     return (
         <div className="max-w-6xl mx-auto px-4 py-8 pb-32 md:pb-8 animate-fade-in relative flex flex-col min-h-0">
-            {/* AI HERO SECTION */}
+            {/* AI HERO SECTION (Hidden for Copilot)
             <AICommandBar 
                 endpoint="/api/ai/mortgage"
                 suggestions={MORTGAGE_SUGGESTIONS}
@@ -39,6 +39,14 @@ export default function MortgageCalculator({ isVisible = true, initialStateOverr
             />
 
             <StrategyCard insight={aiInsight} />
+            */}
+
+            {/* AI Copilot Persistent Sidebar/Bottom-sheet */}
+            <AICopilot 
+                onUpdate={handleAIUpdate}
+                context={{ calculatorId: 'mortgage', ...state }}
+                globalMemory={memory}
+            />
 
             <div className="w-full">
                 {/* Header / Mode Selector equivalent */}

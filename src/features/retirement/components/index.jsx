@@ -6,7 +6,7 @@ import { loadStateFromUrl, syncStateToUrl } from '../utils/urlSync';
 import { AboutModal, ImportModal } from './Modals';
 import InputTab from './InputTab';
 import ResultsTab from './ResultsTab';
-import { AICommandBar, StrategyCard } from '../../../components/shared';
+import { AICommandBar, StrategyCard, AICopilot } from '../../../components/shared';
 import { useFinancialMemory } from '../../../hooks/useFinancialMemory';
 
 const RETIREMENT_SUGGESTIONS = [
@@ -86,8 +86,17 @@ export default function Calculator({
     return (
         <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-indigo-100 flex flex-col min-h-0" style={{ paddingBottom: activeTab === 'input' ? '100px' : '60px' }}> 
             <main className="max-w-5xl mx-auto p-4 md:p-8 w-full mt-6">
+                {/* AI HERO SECTION (Hidden for Copilot)
                 <AICommandBar endpoint="/api/ai/retirement" suggestions={RETIREMENT_SUGGESTIONS} onUpdate={handleAIUpdate} context={{ dob, retirementAge, isMarried, yearsInCanada }} globalMemory={memory} />
                 <StrategyCard insight={aiInsight} />
+                */}
+
+                {/* AI Copilot Persistent Sidebar/Bottom-sheet */}
+                <AICopilot 
+                    onUpdate={handleAIUpdate}
+                    context={{ calculatorId: 'retirement', dob, retirementAge, yearsInCanada, isMarried, avgSalaryInput, spouseIncome, childCount: children.length }}
+                    globalMemory={memory}
+                />
                 <div className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden mb-12">
                     <div className="p-2 bg-slate-50 border-b border-slate-200">
                         <div className="flex bg-slate-200/50 p-1 rounded-xl">

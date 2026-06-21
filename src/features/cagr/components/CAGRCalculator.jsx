@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
 import { calculateRate, calculateFutureValue, calculatePresentValue, calculateDuration, generateGrowthSeries } from '../utils/cagrEngine';
-import { MoneyInput, TrendingUpIcon, RotateCcwIcon, InfoIcon, CalculatorIcon, ArrowRightIcon, ScaleIcon, TrendingDownIcon, NativeSelect, AICommandBar, StrategyCard } from '../../../components/shared';
+import { MoneyInput, TrendingUpIcon, RotateCcwIcon, InfoIcon, CalculatorIcon, ArrowRightIcon, ScaleIcon, TrendingDownIcon, NativeSelect, AICommandBar, StrategyCard, AICopilot } from '../../../components/shared';
 import { useFinancialMemory } from '../../../hooks/useFinancialMemory';
 
 const MODES = {
@@ -79,8 +79,17 @@ export default function CAGRCalculator({ isVisible = true }) {
 
     return (
         <div className="max-w-6xl mx-auto px-4 py-8 animate-fade-in flex flex-col min-h-0">
+            {/* AI HERO SECTION (Hidden for Copilot)
             <AICommandBar endpoint="/api/ai/cagr" suggestions={CAGR_SUGGESTIONS} onUpdate={handleAIUpdate} context={{ mode, startValue, endValue, years, rate, hasContribution, contribution, frequency, useInflation, inflationRate }} globalMemory={memory} />
             <StrategyCard insight={aiInsight} />
+            */}
+
+            {/* AI Copilot Persistent Sidebar/Bottom-sheet */}
+            <AICopilot 
+                onUpdate={handleAIUpdate}
+                context={{ calculatorId: 'cagr', mode, startValue, endValue, years, rate, hasContribution, contribution, frequency, useInflation, inflationRate }}
+                globalMemory={memory}
+            />
             <div className="w-full">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-10">
                     {Object.values(MODES).map((m) => {

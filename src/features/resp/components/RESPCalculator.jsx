@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useRESPMath } from '../hooks/useRESPMath';
 import { RESPForm } from './RESPForm';
 import { RESPResults } from './RESPResults';
-import { GraduationCapIcon, RotateCcwIcon, AICommandBar, StrategyCard } from '../../../components/shared';
+import { GraduationCapIcon, RotateCcwIcon, AICommandBar, StrategyCard, AICopilot } from '../../../components/shared';
 import { useFinancialMemory } from '../../../hooks/useFinancialMemory';
 
 const RESP_SUGGESTIONS = [
@@ -87,6 +87,7 @@ export default function RESPCalculator({ initialStateOverride }) {
 
     return (
         <div className="max-w-6xl mx-auto px-4 py-8 pb-32 md:pb-8 animate-fade-in relative flex flex-col min-h-0">
+            {/* AI HERO SECTION (Hidden for Copilot)
             <AICommandBar 
                 endpoint="/api/ai/resp"
                 suggestions={RESP_SUGGESTIONS}
@@ -95,6 +96,14 @@ export default function RESPCalculator({ initialStateOverride }) {
                 globalMemory={memory}
             />
             <StrategyCard insight={aiInsight} />
+            */}
+
+            {/* AI Copilot Persistent Sidebar/Bottom-sheet */}
+            <AICopilot 
+                onUpdate={handleAIUpdate}
+                context={{ calculatorId: 'resp', ...state }}
+                globalMemory={memory}
+            />
 
             <div className="w-full">
                 <div className="flex flex-col md:flex-row justify-between items-center mb-10 gap-6">
