@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { calculateTakeHome } from '../utils/taxEngine';
-import { MoneyInput, NativeSelect, RangeSlider, AICommandBar, StrategyCard } from '../../../components/shared';
+import { MoneyInput, NativeSelect, RangeSlider, AICommandBar, StrategyCard, AICopilot } from '../../../components/shared';
 import { TAX_YEAR_CONFIG } from '../../../config/taxYears';
 import { useFinancialMemory } from '../../../hooks/useFinancialMemory';
 
@@ -115,13 +115,21 @@ const TaxCalculator = ({ initialIncome = 75000, initialProvince = 'ON' }) => {
 
     return (
         <div className="max-w-6xl mx-auto px-4 py-8 flex flex-col min-h-0">
-            {/* AI HERO SECTION */}
+            {/* AI HERO SECTION (Hidden for Copilot Pilot)
             <AICommandBar 
                 onUpdate={handleAIUpdate}
                 context={{ grossIncome, province, rrspContribution, employerMatchPercent }}
                 globalMemory={memory}
             />
             <StrategyCard insight={aiInsight} />
+            */}
+
+            {/* AI Copilot Persistent Sidebar/Bottom-sheet */}
+            <AICopilot 
+                onUpdate={handleAIUpdate}
+                context={{ grossIncome, province, rrspContribution, employerMatchPercent }}
+                globalMemory={memory}
+            />
 
             <div className="w-full">
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
