@@ -110,5 +110,29 @@ describe('mortgageEngine', () => {
       expect(result.yearsToPayOff).toBeLessThan(25);
       expect(result.schedule.length).toBeLessThan(25);
     });
+
+    it('handles string inputs correctly without string concatenation in calculations', () => {
+      const result = calculateAmortization({
+        homePrice: "625000",
+        downPayment: "125000",
+        annualRate: "5",
+        amortizationYears: "25",
+        paymentFrequency: PAYMENT_FREQUENCIES.MONTHLY,
+        compounding: COMPOUNDING_PERIODS.SEMI_ANNUAL,
+        propertyTaxes: "2400",
+        heating: "150",
+        condoFees: "200",
+        prepayments: {
+          monthlyIncrease: "100"
+        },
+        lumpSums: [
+          { amount: "1000", date: "2026-06-01" }
+        ]
+      });
+
+      // If "5" was concatenated with 2, rate would be 52.0%
+      expect(result.stressTest.rate).toBe(7.0);
+      expect(result.totalMonthlyCarryingCost).toBeCloseTo(2908.02 * 1 + 200 + 150 + 200, 1);
+    });
   });
 });

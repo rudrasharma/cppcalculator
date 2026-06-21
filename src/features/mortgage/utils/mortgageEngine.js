@@ -124,6 +124,17 @@ export const calculateAmortization = ({
     heating = 0,       // Monthly
     condoFees = 0      // Monthly
 }) => {
+    // Ensure all numeric inputs are parsed as numbers to avoid string concatenation bugs
+    homePrice = Number(homePrice) || 0;
+    downPayment = Number(downPayment) || 0;
+    annualRate = Number(annualRate) || 0;
+    amortizationYears = Number(amortizationYears) || 0;
+    termYears = Number(termYears) || 0;
+    customPayment = Number(customPayment) || 0;
+    propertyTaxes = Number(propertyTaxes) || 0;
+    heating = Number(heating) || 0;
+    condoFees = Number(condoFees) || 0;
+
     const actualDownPayment = downPaymentType === 'percent' 
         ? homePrice * (downPayment / 100) 
         : downPayment;
@@ -163,7 +174,7 @@ export const calculateAmortization = ({
 
     // Normalize recurring prepayment increase to the payment frequency
     // (e.g. if user adds $100 monthly increase but pays weekly, they pay ~$23 extra per week)
-    const periodicPrepaymentIncrease = (prepayments.monthlyIncrease || 0) / (paymentsPerYear / 12);
+    const periodicPrepaymentIncrease = (Number(prepayments.monthlyIncrease) || 0) / (paymentsPerYear / 12);
 
     // Calculate PITH (Principal, Interest, Taxes, Heating) + 50% Condo Fees (Monthly Equiv)
     const monthlyPaymentEquiv = basePayment * (paymentsPerYear / 12);
@@ -183,6 +194,7 @@ export const calculateAmortization = ({
 
     let pendingLumpSums = lumpSums.map(ls => ({ 
         ...ls, 
+        amount: Number(ls.amount) || 0,
         applied: false, 
         parsedDate: parseSafeDate(ls.date).getTime() 
     }));
