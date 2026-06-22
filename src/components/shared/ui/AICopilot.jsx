@@ -150,9 +150,29 @@ const parseInlineFormatting = (text) => {
 
 const CHAT_STORAGE_KEY = 'loonie_copilot_messages_v1';
 
-const DEFAULT_WELCOME = {
-  role: 'assistant',
-  content: "Hi! I'm your LoonieFi Copilot. 🇨🇦\n\nI can help you model different scenarios and understand your taxes. Ask me questions like:\n- *\"I make $80,000 in Ontario\"*\n- *\"What if I contribute $6,000 to my RRSP?\"*\n- *\"Explain CPP and EI deductions\"*"
+const getWelcomeMessage = (calculatorId) => {
+  const base = "Hi! I'm your LoonieFi Copilot. 🇨🇦\n\nI can help you model different scenarios and understand your numbers. ";
+  
+  switch (calculatorId) {
+    case 'mortgage':
+      return { role: 'assistant', content: base + "Ask me questions like:\n- *\"What if I put 20% down on a $800k home?\"*\n- *\"How much interest do I save by paying an extra $500/mo?\"*\n- *\"Compare a 3-year fixed to a 5-variable rate.\"*" };
+    case 'tax':
+      return { role: 'assistant', content: base + "Ask me questions like:\n- *\"I make $80,000 in Ontario\"*\n- *\"What if I contribute $6,000 to my RRSP?\"*\n- *\"Explain CPP and EI deductions\"*" };
+    case 'ccb':
+      return { role: 'assistant', content: base + "Ask me questions like:\n- *\"I have two kids aged 4 and 8 in BC\"*\n- *\"How does my income affect the CCB?\"*\n- *\"What if my salary increases to $120,000?\"*" };
+    case 'parental':
+      return { role: 'assistant', content: base + "Ask me questions like:\n- *\"Compare standard vs extended leave\"*\n- *\"I make $90k and want to take 12 months\"*\n- *\"What is the EI maximum for this year?\"*" };
+    case 'resp':
+      return { role: 'assistant', content: base + "Ask me questions like:\n- *\"How do I max out the CESG grant?\"*\n- *\"What if I contribute $200 a month?\"*\n- *\"Explain the Canada Learning Bond\"*" };
+    case 'retirement':
+      return { role: 'assistant', content: base + "Ask me questions like:\n- *\"When should I take CPP?\"*\n- *\"How much OAS will I get at 65?\"*\n- *\"What if I delay CPP to 70?\"*" };
+    case 'smith':
+      return { role: 'assistant', content: base + "Ask me questions like:\n- *\"What is the Smith Manoeuvre?\"*\n- *\"I have a $500k mortgage and $100k in equity\"*\n- *\"How much tax refund will I get?\"*" };
+    case 'cagr':
+      return { role: 'assistant', content: base + "Ask me questions like:\n- *\"If I invest $10k at 7% for 20 years?\"*\n- *\"What is my CAGR if my portfolio went from $50k to $80k in 3 years?\"*\n- *\"Calculate Rule of 72 for 8% return\"*" };
+    default:
+      return { role: 'assistant', content: base + "Ask me questions like:\n- *\"I make $80,000 in Ontario\"*\n- *\"What if I contribute $6,000 to my RRSP?\"*\n- *\"Explain CPP and EI deductions\"*" };
+  }
 };
 
 export const AICopilot = ({ onUpdate, context, globalMemory }) => {
@@ -168,20 +188,26 @@ export const AICopilot = ({ onUpdate, context, globalMemory }) => {
   const messageEndRef = useRef(null);
   const inputRef = useRef(null);
 
+  const storageKey = context?.calculatorId 
+    ? `${CHAT_STORAGE_KEY}_${context.calculatorId}` 
+    : CHAT_STORAGE_KEY;
+
+  const defaultWelcome = getWelcomeMessage(context?.calculatorId);
+
   // Initialize from LocalStorage
   useEffect(() => {
     setMounted(true);
     try {
-      const stored = localStorage.getItem(CHAT_STORAGE_KEY);
+      const stored = localStorage.getItem(storageKey);
       if (stored) {
         setMessages(JSON.parse(stored));
       } else {
-        setMessages([DEFAULT_WELCOME]);
+        setMessages([defaultWelcome]);
       }
     } catch (e) {
-      setMessages([DEFAULT_WELCOME]);
+      setMessages([defaultWelcome]);
     }
-  }, []);
+  }, [storageKey, defaultWelcome.content]);
 
   // Sync animation and body scrolling
   useEffect(() => {
@@ -212,13 +238,13 @@ export const AICopilot = ({ onUpdate, context, globalMemory }) => {
   const saveMessages = (newMsgs) => {
     setMessages(newMsgs);
     try {
-      localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(newMsgs));
+      localStorage.setItem(storageKey, JSON.stringify(newMsgs));
     } catch (e) {}
   };
 
   const handleClearChat = () => {
     if (confirm("Reset conversation history?")) {
-      saveMessages([DEFAULT_WELCOME]);
+      saveMessages([defaultWelcome]);
     }
   };
 

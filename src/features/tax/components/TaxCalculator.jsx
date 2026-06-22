@@ -127,7 +127,7 @@ const TaxCalculator = ({ initialIncome = 75000, initialProvince = 'ON' }) => {
             {/* AI Copilot Persistent Sidebar/Bottom-sheet */}
             <AICopilot 
                 onUpdate={handleAIUpdate}
-                context={{ grossIncome, province, rrspContribution, employerMatchPercent }}
+                context={{ calculatorId: 'tax', grossIncome, province, rrspContribution, employerMatchPercent }}
                 globalMemory={memory}
             />
 
