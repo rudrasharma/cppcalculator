@@ -312,7 +312,7 @@ export const AICopilot = ({ onUpdate, context, globalMemory }) => {
       {/* Floating Action Button (FAB) */}
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 z-[9999] w-14 h-14 md:w-16 md:h-16 flex items-center justify-center bg-gradient-to-tr from-indigo-600 to-indigo-700 text-white rounded-full shadow-2xl hover:scale-105 active:scale-95 transition-all cursor-pointer border border-indigo-500/20 group"
+        className="fixed bottom-28 md:bottom-6 right-4 md:right-6 z-[10000] w-14 h-14 md:w-16 md:h-16 flex items-center justify-center bg-gradient-to-tr from-indigo-600 to-indigo-700 text-white rounded-full shadow-2xl hover:scale-105 active:scale-95 transition-all cursor-pointer border border-indigo-500/20 group"
         aria-label="Open AI Copilot"
       >
         {/* Pulsing ring indicator */}
