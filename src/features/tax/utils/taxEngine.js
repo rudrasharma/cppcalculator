@@ -115,7 +115,8 @@ export const calculateTakeHome = (grossIncome, rrspContribution, provinceCode, e
     }
 
     const totalTax = fedTax + provTax;
-    const netIncome = grossIncome - totalTax - cpp - ei;
+    const totalDeductions = totalTax + cpp + ei + rrspContribution;
+    const netIncome = grossIncome - totalDeductions;
 
     // Calculate Monthly Schedule to handle CPP/EI "cliff"
     const monthlySchedule = [];
@@ -168,7 +169,7 @@ export const calculateTakeHome = (grossIncome, rrspContribution, provinceCode, e
             provTax: monthlyProvTax,
             cpp: monthCPP,
             ei: monthEI,
-            net: monthlyGross - monthlyFedTax - monthlyProvTax - monthCPP - monthEI
+            net: monthlyGross - monthlyFedTax - monthlyProvTax - monthCPP - monthEI - (rrspContribution / 12)
         });
 
         cumulativeGross += monthlyGross;
@@ -183,6 +184,8 @@ export const calculateTakeHome = (grossIncome, rrspContribution, provinceCode, e
             cpp: cpp,
             ei: ei,
             totalTax: totalTax,
+            totalDeductions: totalDeductions,
+            rrspDeduction: rrspContribution,
             net: netIncome,
             employerMatchAmount
         },
@@ -192,6 +195,9 @@ export const calculateTakeHome = (grossIncome, rrspContribution, provinceCode, e
             provincialTax: provTax / 12,
             cpp: cpp / 12,
             ei: ei / 12,
+            totalTax: totalTax / 12,
+            totalDeductions: totalDeductions / 12,
+            rrspDeduction: rrspContribution / 12,
             net: netIncome / 12
         },
         biWeekly: {
@@ -200,6 +206,9 @@ export const calculateTakeHome = (grossIncome, rrspContribution, provinceCode, e
             provincialTax: provTax / 26,
             cpp: cpp / 26,
             ei: ei / 26,
+            totalTax: totalTax / 26,
+            totalDeductions: totalDeductions / 26,
+            rrspDeduction: rrspContribution / 26,
             net: netIncome / 26
         },
         semiMonthly: {
@@ -208,6 +217,9 @@ export const calculateTakeHome = (grossIncome, rrspContribution, provinceCode, e
             provincialTax: provTax / 24,
             cpp: cpp / 24,
             ei: ei / 24,
+            totalTax: totalTax / 24,
+            totalDeductions: totalDeductions / 24,
+            rrspDeduction: rrspContribution / 24,
             net: netIncome / 24
         },
         schedule: monthlySchedule

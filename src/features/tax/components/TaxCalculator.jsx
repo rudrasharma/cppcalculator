@@ -204,7 +204,7 @@ const TaxCalculator = ({ initialIncome = 75000, initialProvince = 'ON' }) => {
                                     <div><span className="text-slate-500 text-[10px] font-bold uppercase tracking-widest block mb-1">Federal Tax</span><span className="text-white text-lg font-black">{formatter.format(displayData?.federalTax || 0)}</span></div>
                                     <div><span className="text-slate-500 text-[10px] font-bold uppercase tracking-widest block mb-1">Provincial Tax</span><span className="text-white text-lg font-black">{formatter.format(displayData?.provincialTax || 0)}</span></div>
                                     <div><span className="text-slate-500 text-[10px] font-bold uppercase tracking-widest block mb-1">CPP/EI</span><span className="text-white text-lg font-black">{formatter.format((displayData?.cpp || 0) + (displayData?.ei || 0))}</span></div>
-                                    <div><span className="text-slate-500 text-[10px] font-bold uppercase tracking-widest block mb-1">Total Deductions</span><span className="text-rose-400 text-lg font-black">{formatter.format(displayData?.totalTax || 0)}</span></div>
+                                    <div><span className="text-slate-500 text-[10px] font-bold uppercase tracking-widest block mb-1">Total Deductions</span><span className="text-rose-400 text-lg font-black">{formatter.format(displayData?.totalDeductions || 0)}</span></div>
                                 </div>
                             </div>
                         </div>
