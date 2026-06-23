@@ -192,9 +192,9 @@ const TaxCalculator = ({ initialIncome = 75000, initialProvince = 'ON' }) => {
                                             {formatter.format(displayData?.net || 0)}
                                         </div>
                                     </div>
-                                    <div className="flex bg-white/10 p-1 rounded-2xl backdrop-blur-sm self-start">
+                                    <div className="flex bg-white/10 p-1 rounded-2xl backdrop-blur-sm self-start overflow-x-auto max-w-full scrollbar-none snap-x">
                                         {PERIODS.map(p => (
-                                            <button key={p.value} onClick={() => setPeriod(p.value)} className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${period === p.value ? 'bg-white text-slate-900 shadow-lg' : 'text-slate-300 hover:text-white'}`}>
+                                            <button key={p.value} onClick={() => setPeriod(p.value)} className={`shrink-0 snap-start px-3 sm:px-4 py-2 rounded-xl text-xs font-bold transition-all ${period === p.value ? 'bg-white text-slate-900 shadow-lg' : 'text-slate-300 hover:text-white'}`}>
                                                 {p.label}
                                             </button>
                                         ))}
