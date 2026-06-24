@@ -180,14 +180,26 @@ export default function HouseholdBenefits({
                     <div className="p-4 md:p-10">
                         {activeTab === 'input' && (
                             <HouseholdForm
-                                province={province} setProvince={updateProvince}
-                                maritalStatus={maritalStatus} setMaritalStatus={updateMarital}
-                                grossAfni={grossAfni} setGrossAfni={updateIncome}
-                                sharedCustody={sharedCustody} setSharedCustody={setSharedCustody}
-                                isRural={isRural} setIsRural={setIsRural}
-                                children={children} addChild={addChild} removeChild={removeChild} updateChild={updateChild}
-                                results={results} copyLink={copyLink} copySuccess={copySuccess}
-                                setActiveTab={setActiveTab} isVisible={isVisible} mounted={mounted}
+                                province={province}
+                                setProvince={updateProvince}
+                                maritalStatus={maritalStatus}
+                                setMaritalStatus={updateMarital}
+                                grossAfni={grossAfni}
+                                setGrossAfni={updateIncome}
+                                sharedCustody={sharedCustody}
+                                setSharedCustody={setSharedCustody}
+                                isRural={isRural}
+                                setIsRural={setIsRural}
+                                children={children}
+                                addChild={addChild}
+                                removeChild={removeChild}
+                                updateChild={updateChild}
+                                results={results}
+                                copyLink={copyLink}
+                                copySuccess={copySuccess}
+                                setActiveTab={setActiveTab}
+                                isVisible={activeTab === 'input'}
+                                mounted={mounted}
                             />
                         )}
                         {activeTab === 'results' && (

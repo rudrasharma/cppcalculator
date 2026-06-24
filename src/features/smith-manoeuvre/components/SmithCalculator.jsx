@@ -17,8 +17,8 @@ const SMITH_SUGGESTIONS = [
 export default function SmithCalculator({ isVisible = true }) {
     const { memory, updateMemory } = useFinancialMemory();
     // 1. Initial State
-    const [hVal, setHValue] = useState(600000);
-    const [mBal, setMBalance] = useState(400000);
+    const [hVal, setHValueState] = useState(() => memory.homeValue || 600000);
+    const [mBal, setMBalanceState] = useState(() => memory.mortgageBalance || 400000);
     const [mRate, setMRate] = useState(0.045);
     const [hRate, setHRate] = useState(0.055);
     const [tRate, setTRate] = useState(0.35);
@@ -35,6 +35,10 @@ export default function SmithCalculator({ isVisible = true }) {
 
     const [aiInsight, setAiInsight] = useState('');
     const [showAdvanced, setShowAdvanced] = useState(false);
+
+    // Sync wrappers
+    const setHValue = (val) => { setHValueState(val); updateMemory({ homeValue: val }); };
+    const setMBalance = (val) => { setMBalanceState(val); updateMemory({ mortgageBalance: val }); };
 
     // 2. Computed Input Object
     const inputsForEngine = useMemo(() => ({

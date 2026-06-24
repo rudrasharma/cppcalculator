@@ -11,6 +11,7 @@ import { ALL_TOOLS } from '../config/navigation';
 import { DesktopToolSwitcher } from '../components/shared/ui/DesktopToolSwitcher';
 import { ToolDrawer } from '../components/shared/ui/ToolDrawer';
 import HeaderActions from '../components/shared/ui/HeaderActions.jsx';
+import { ViewTransitions } from 'astro:transitions';
 
 interface Props {
   title: string;
@@ -47,6 +48,7 @@ const schema = {
     <meta name="description" content={description} />
     <link rel="canonical" href={canonicalURL} />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <ViewTransitions />
     
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />
