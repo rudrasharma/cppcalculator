@@ -205,9 +205,9 @@ export default function ParentalLeaveForm({
 
                                 <div className="space-y-6">
                                     {/* Parent 1 Slider */}
-                                    <div>
+                                    <div className="flex-1">
                                         <RangeSlider
-                                            label="Parent 1 (Birth)"
+                                            label="Parent 1 (Birth Parent) Leave"
                                             subLabel="Parental Weeks"
                                             value={p1Weeks}
                                             onChange={(e) => handleWeeksChange(1, e.target.value)}
