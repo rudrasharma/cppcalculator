@@ -1,0 +1,18 @@
+---
+/**
+ * Embeddable Canadian Income Tax Calculator Widget
+ * Renders without site navigation or footer.
+ */
+
+import EmbedLayout from '../../layouts/EmbedLayout.astro';
+import TaxCalculator from '../../features/tax/components/TaxCalculator.jsx';
+
+const title = "Income Tax Calculator Widget";
+const description = "Calculate your Canadian income tax instantly.";
+---
+
+<EmbedLayout title={title} description={description}>
+  <main class="w-full">
+    <TaxCalculator client:load isVisible={true} isEmbedded={true} />
+  </main>
+</EmbedLayout>

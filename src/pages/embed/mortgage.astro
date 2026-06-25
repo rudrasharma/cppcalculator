@@ -1,0 +1,22 @@
+---
+/**
+ * Embeddable Canadian Mortgage Calculator Widget
+ * Renders without site navigation or footer.
+ */
+
+import EmbedLayout from '../../layouts/EmbedLayout.astro';
+import MortgageCalculator from '../../features/mortgage/components/MortgageCalculator.jsx';
+
+// We can read Astro.url.searchParams to grab ?theme=dark etc. in the future
+// const theme = Astro.url.searchParams.get('theme') || 'light';
+
+const title = "Mortgage Calculator Widget";
+const description = "Calculate your Canadian mortgage payments instantly.";
+---
+
+<EmbedLayout title={title} description={description}>
+  {/* We add a minimal wrapper. Using no-embed class to hide any absolute placed Copilot icons if they render */}
+  <main class="w-full">
+    <MortgageCalculator client:load isVisible={true} isEmbedded={true} />
+  </main>
+</EmbedLayout>

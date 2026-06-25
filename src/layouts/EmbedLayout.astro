@@ -1,0 +1,83 @@
+--- 
+/**
+ * Embed Layout Component
+ * Minimal layout for B2B embedded widgets (iframes)
+ * Strips out navigation, footer, and constrains styles.
+ */
+
+import '../styles/global.css';
+import { PostHogProviderWrapper } from '../components/PostHogProviderWrapper.jsx';
+
+interface Props {
+  title: string;
+  description: string;
+}
+
+const { title, description } = Astro.props;
+const canonicalURL = new URL(Astro.url.pathname, Astro.site || Astro.url.origin);
+
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": title,
+  "applicationCategory": "FinanceApplication",
+  "operatingSystem": "Web",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "CAD"
+  },
+  "description": description
+};
+---
+
+<!doctype html>
+<html lang="en" class="bg-transparent">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{title} | LoonieFi Widget</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalURL} />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalURL} />
+    
+    <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+
+    {/* iframe-resizer content window script to automatically sync height with parent page */}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/iframe-resizer/4.3.9/iframeResizer.contentWindow.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    
+    <style>
+      /* Ensure body doesn't add extra scrollbars in iframe */
+      body {
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+        background-color: transparent !important;
+      }
+      /* Hide elements not meant for embedding (e.g. AI copilot floating button) */
+      .no-embed {
+        display: none !important;
+      }
+    </style>
+  </head>
+  <body class="font-sans antialiased text-slate-900 selection:bg-indigo-100 selection:text-indigo-900 bg-transparent py-4 px-2 sm:px-4 max-w-5xl mx-auto">
+    <PostHogProviderWrapper client:load>
+      <slot />
+      
+      {/* Subtle LoonieFi Watermark for B2B growth */}
+      <div class="mt-8 text-center pb-4">
+        <a href="https://looniefi.com" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-[10px] font-bold text-slate-400 hover:text-indigo-600 transition-colors uppercase tracking-widest">
+          <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+          </svg>
+          Powered by LoonieFi
+        </a>
+      </div>
+    </PostHogProviderWrapper>
+  </body>
+</html>

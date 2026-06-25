@@ -16,7 +16,7 @@ const PERIODS = [
     { value: 'biWeekly', label: 'Bi-Weekly' }
 ];
 
-const TaxCalculator = ({ initialIncome = 75000, initialProvince = 'ON' }) => {
+const TaxCalculator = ({ initialIncome = 75000, initialProvince = 'ON', isEmbedded = false }) => {
     const { memory, updateMemory } = useFinancialMemory();
     
     // Direct lazy initialization from memory
@@ -24,6 +24,13 @@ const TaxCalculator = ({ initialIncome = 75000, initialProvince = 'ON' }) => {
     const [province, setProvince] = useState(() => memory.province || initialProvince);
     const [rrspContribution, setRrspContribution] = useState(0);
     const [employerMatchPercent, setEmployerMatchPercent] = useState(() => memory.employerMatchPercent || 0);
+
+    // Sync state with memory after initial hydration or external updates
+    useEffect(() => {
+        if (memory.grossIncome !== undefined && memory.grossIncome !== null) setGrossIncome(prev => prev !== memory.grossIncome ? memory.grossIncome : prev);
+        if (memory.province !== undefined && memory.province !== null) setProvince(prev => prev !== memory.province ? memory.province : prev);
+        if (memory.employerMatchPercent !== undefined && memory.employerMatchPercent !== null) setEmployerMatchPercent(prev => prev !== memory.employerMatchPercent ? memory.employerMatchPercent : prev);
+    }, [memory]);
     
     const [period, setPeriod] = useState('monthly');
     const [aiInsight, setAiInsight] = useState('');
@@ -124,12 +131,14 @@ const TaxCalculator = ({ initialIncome = 75000, initialProvince = 'ON' }) => {
             <StrategyCard insight={aiInsight} />
             */}
 
-            {/* AI Copilot Persistent Sidebar/Bottom-sheet */}
-            <AICopilot 
-                onUpdate={handleAIUpdate}
-                context={{ calculatorId: 'tax', grossIncome, province, rrspContribution, employerMatchPercent }}
-                globalMemory={memory}
-            />
+            {/* AI Copilot Persistent Sidebar/Bottom-sheet (Hidden in embed mode) */}
+            {!isEmbedded && (
+                <AICopilot 
+                    onUpdate={handleAIUpdate}
+                    context={{ calculatorId: 'tax', grossIncome, province, rrspContribution, employerMatchPercent }}
+                    globalMemory={memory}
+                />
+            )}
 
             <div className="w-full">
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">

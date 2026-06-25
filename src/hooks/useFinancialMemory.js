@@ -21,16 +21,21 @@ const DEFAULT_MEMORY = {
  * useFinancialMemory - Hook to manage global user data persistence across tools
  */
 export const useFinancialMemory = () => {
-    // Synchronous load on first render to prevent race conditions
-    const [memory, setMemory] = useState(() => {
-        if (typeof window === 'undefined') return DEFAULT_MEMORY;
+    // Always initialize with DEFAULT_MEMORY to ensure SSR and initial client render match exactly (fixes React Hydration crashes)
+    const [memory, setMemory] = useState(DEFAULT_MEMORY);
+
+    // Load from localStorage ONLY after hydration is complete
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
         try {
             const stored = localStorage.getItem(MEMORY_KEY);
-            return stored ? { ...DEFAULT_MEMORY, ...JSON.parse(stored) } : DEFAULT_MEMORY;
+            if (stored) {
+                setMemory({ ...DEFAULT_MEMORY, ...JSON.parse(stored) });
+            }
         } catch (e) {
-            return DEFAULT_MEMORY;
+            console.error('Failed to load financial memory', e);
         }
-    });
+    }, []);
 
     // Listen for updates from other components/tabs
     useEffect(() => {

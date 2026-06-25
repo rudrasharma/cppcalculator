@@ -11,7 +11,7 @@ const MORTGAGE_SUGGESTIONS = [
     { label: 'Extra Payments', value: 'I want to pay an extra $500 a month on my $400k mortgage' }
 ];
 
-export default function MortgageCalculator({ isVisible = true, initialStateOverride }) {
+export default function MortgageCalculator({ isVisible = true, isEmbedded = false, initialStateOverride }) {
     const { state, dispatch, results } = useMortgageMath(initialStateOverride);
     const { memory } = useFinancialMemory();
     const [aiInsight, setAiInsight] = useState('');
@@ -41,12 +41,14 @@ export default function MortgageCalculator({ isVisible = true, initialStateOverr
             <StrategyCard insight={aiInsight} />
             */}
 
-            {/* AI Copilot Persistent Sidebar/Bottom-sheet */}
-            <AICopilot 
-                onUpdate={handleAIUpdate}
-                context={{ calculatorId: 'mortgage', ...state }}
-                globalMemory={memory}
-            />
+            {/* AI Copilot Persistent Sidebar/Bottom-sheet (Hidden in embed mode) */}
+            {!isEmbedded && (
+                <AICopilot 
+                    onUpdate={handleAIUpdate}
+                    context={{ calculatorId: 'mortgage', ...state }}
+                    globalMemory={memory}
+                />
+            )}
 
             <div className="w-full">
                 {/* Header / Mode Selector equivalent */}

@@ -29,6 +29,11 @@ class ResizeObserver {
 window.ResizeObserver = ResizeObserver;
 
 describe('TaxCalculator Component State', () => {
+    beforeEach(() => {
+        window.localStorage.clear();
+        // Disptach a custom event to reset memory in hooks
+        window.dispatchEvent(new CustomEvent('financial-memory-update', { detail: {} }));
+    });
     
     it('updates province state and calculations correctly', () => {
         render(<TaxCalculator initialIncome={100000} initialProvince="ON" />);

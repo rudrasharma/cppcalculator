@@ -1,0 +1,168 @@
+---
+/**
+ * Widgets Landing Page (B2B SEO Target)
+ */
+
+import BaseLayout from '../layouts/BaseLayout.astro';
+import WidgetConfigurator from '../components/widgets/WidgetConfigurator.jsx';
+import { ArrowRightIcon, SparklesIcon, FileTextIcon, TrendingUpIcon } from '../components/shared/Icons.jsx';
+
+const title = "Free Mortgage Calculator Widget & Embed Code for Websites";
+const description = "Embed a beautiful, responsive, and free Canadian mortgage calculator or income tax calculator on your website. Get the HTML embed code for WordPress, Webflow, or Squarespace.";
+---
+
+<BaseLayout 
+  title={title} 
+  description={description}
+>
+  <div class="relative overflow-hidden bg-slate-900 text-white py-20 pb-32">
+    {/* Decorative background elements */}
+    <div class="absolute inset-0 overflow-hidden pointer-events-none">
+      <div class="absolute top-0 right-0 w-[800px] h-[800px] bg-indigo-500 rounded-full blur-[120px] opacity-20 -mr-40 -mt-40"></div>
+      <div class="absolute bottom-0 left-0 w-[600px] h-[600px] bg-blue-500 rounded-full blur-[100px] opacity-10 -ml-40 -mb-40"></div>
+      
+      {/* Grid pattern */}
+      <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAwIDEwIEwgNDAgMTAgTSAxMCAwIEwgMTAgNDAiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiYSgyNTUsIDI1NSwgMjU1LCAwLjAzKSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] [mask-image:linear-gradient(to_bottom,white,transparent)]"></div>
+    </div>
+
+    <header class="relative z-10 max-w-6xl mx-auto px-4 text-center md:text-left">
+      <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 backdrop-blur-md mb-8 animate-fade-in">
+        <SparklesIcon size={16} className="text-amber-300" />
+        <span class="text-xs font-bold uppercase tracking-widest text-white/90">Free Developer Tools</span>
+      </div>
+      
+      <h1 class="text-4xl md:text-6xl font-black tracking-tighter mb-6 leading-tight animate-fade-in [animation-delay:100ms]">
+        Embed a <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-300">Beautiful Calculator</span><br/>
+        on your Website
+      </h1>
+      
+      <p class="text-lg md:text-xl text-slate-300 max-w-2xl mx-auto md:mx-0 mb-10 leading-relaxed font-medium animate-fade-in [animation-delay:200ms]">
+        Generate the financial calculator HTML embed code instantly. Perfect for real estate agents, financial advisors, and bloggers. No signup required.
+      </p>
+    </header>
+  </div>
+
+  <main class="max-w-6xl mx-auto px-4 -mt-20 relative z-20">
+    <div class="animate-fade-in [animation-delay:300ms]">
+      <WidgetConfigurator client:load />
+    </div>
+
+    {/* SEO Content Section */}
+    <section class="mt-32 mb-20 max-w-4xl mx-auto px-4 space-y-20">
+      
+      {/* 1. Benefits Section */}
+      <div class="space-y-6 animate-fade-in [animation-delay:400ms]">
+        <h2 class="text-3xl font-black text-slate-900 tracking-tight">Why Embed a Real Estate Calculator?</h2>
+        <p class="text-lg text-slate-600 leading-relaxed">
+          Adding a high-quality financial calculator to your website is one of the easiest ways to improve your SEO and lead generation. By providing an interactive tool, you increase your visitors' <strong>dwell time</strong> (how long they stay on your page), which sends a massive positive signal to Google.
+        </p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+          <div class="bg-indigo-50/50 p-6 rounded-3xl border border-indigo-100">
+            <h3 class="font-bold text-indigo-900 mb-2 flex items-center gap-2">
+              <SparklesIcon size={18} className="text-indigo-500" /> Lead Generation
+            </h3>
+            <p class="text-sm text-indigo-800/80">Clients can visualize their finances directly on your domain instead of bouncing to a competitor's site or a major bank.</p>
+          </div>
+          <div class="bg-emerald-50/50 p-6 rounded-3xl border border-emerald-100">
+            <h3 class="font-bold text-emerald-900 mb-2 flex items-center gap-2">
+              <TrendingUpIcon size={18} className="text-emerald-500" /> App-Like Experience
+            </h3>
+            <p class="text-sm text-emerald-800/80">Our widget uses premium, app-like UI that makes your brand look highly professional and technically sophisticated.</p>
+          </div>
+        </div>
+      </div>
+
+      {/* 2. How-To Guide Section */}
+      <div class="space-y-6">
+        <h2 class="text-3xl font-black text-slate-900 tracking-tight">How to Add a Mortgage Calculator to Your Website</h2>
+        <p class="text-lg text-slate-600 leading-relaxed">
+          Our calculator widget is compatible with virtually every major website builder. Because it uses a secure asynchronous iframe, it won't slow down your site or cause Core Web Vitals penalties.
+        </p>
+        
+        <div class="bg-white border border-slate-200 rounded-3xl p-8 shadow-sm space-y-8">
+          <div>
+            <h3 class="text-xl font-bold text-slate-900 mb-3">Adding to WordPress</h3>
+            <ol class="list-decimal list-inside space-y-2 text-slate-600">
+              <li>Configure your calculator using the tool above and click <strong>"Copy Embed Code"</strong>.</li>
+              <li>Open your WordPress page or post in the block editor.</li>
+              <li>Add a new <strong>"Custom HTML"</strong> block where you want the calculator to appear.</li>
+              <li>Paste the code and click Update. The calculator will automatically resize itself!</li>
+            </ol>
+          </div>
+          <hr class="border-slate-100" />
+          <div>
+            <h3 class="text-xl font-bold text-slate-900 mb-3">Adding to Squarespace or Webflow</h3>
+            <ol class="list-decimal list-inside space-y-2 text-slate-600">
+              <li>In Squarespace, add a <strong>"Code Block"</strong>. In Webflow, add an <strong>"Embed"</strong> element.</li>
+              <li>Ensure the block is not restricted by iframe security settings (this is usually default).</li>
+              <li>Paste the provided HTML code and publish your site.</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+
+      {/* 3. FAQ Section */}
+      <div class="space-y-6">
+        <h2 class="text-3xl font-black text-slate-900 tracking-tight">Frequently Asked Questions</h2>
+        <div class="space-y-4">
+          <details class="group bg-slate-50 border border-slate-200 rounded-2xl p-6 open:bg-white open:ring-2 open:ring-indigo-100 transition-all">
+            <summary class="flex justify-between items-center font-bold text-slate-900 cursor-pointer list-none">
+              Is this real estate calculator widget really free?
+              <span class="text-indigo-500 group-open:rotate-180 transition-transform">↓</span>
+            </summary>
+            <p class="mt-4 text-slate-600 leading-relaxed">Yes! We provide the Canadian mortgage calculator widget entirely for free. Unlike other providers, we don't restrict your page views, force your users to sign up, or slow down your site with heavy third-party tracking scripts.</p>
+          </details>
+
+          <details class="group bg-slate-50 border border-slate-200 rounded-2xl p-6 open:bg-white open:ring-2 open:ring-indigo-100 transition-all">
+            <summary class="flex justify-between items-center font-bold text-slate-900 cursor-pointer list-none">
+              Does the widget work on mobile phones?
+              <span class="text-indigo-500 group-open:rotate-180 transition-transform">↓</span>
+            </summary>
+            <p class="mt-4 text-slate-600 leading-relaxed">Yes, the embed code is 100% responsive. Whether your client is viewing your website on a large desktop monitor or a small iPhone, the widget will perfectly adapt to their screen size, offering a premium experience without horizontal scrolling.</p>
+          </details>
+
+          <details class="group bg-slate-50 border border-slate-200 rounded-2xl p-6 open:bg-white open:ring-2 open:ring-indigo-100 transition-all">
+            <summary class="flex justify-between items-center font-bold text-slate-900 cursor-pointer list-none">
+              Will it give my website ugly double scrollbars?
+              <span class="text-indigo-500 group-open:rotate-180 transition-transform">↓</span>
+            </summary>
+            <p class="mt-4 text-slate-600 leading-relaxed">No. Our embed code includes a lightweight, secure resize script (iframe-resizer) that dynamically adjusts the height of the widget to perfectly match its content. This ensures a seamless, native feel without nested scrolling.</p>
+          </details>
+        </div>
+      </div>
+      
+    </section>
+
+    {/* JSON-LD FAQ Schema */}
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Is this real estate calculator widget really free?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes! We provide the Canadian mortgage calculator widget entirely for free. Unlike other providers, we don't restrict your page views, force your users to sign up, or slow down your site with heavy third-party tracking scripts."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does the widget work on mobile phones?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes, the embed code is 100% responsive. Whether your client is viewing your website on a large desktop monitor or a small iPhone, the widget will perfectly adapt to their screen size."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Will it give my website ugly double scrollbars?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. Our embed code includes a lightweight, secure resize script that dynamically adjusts the height of the widget to perfectly match its content, ensuring a seamless experience."
+          }
+        }
+      ]
+    })} />
+  </main>
+</BaseLayout>

@@ -150,6 +150,15 @@ export const useMortgageMath = (initialStateOverride = null) => {
         }
     }, [startingState, initialStateOverride]);
 
+    // Sync with memory after initial hydration (since memory loads in useEffect)
+    useEffect(() => {
+        dispatch({ type: 'SET_STATE', payload: {
+            homePrice: startingState.homePrice,
+            mortgageBalance: startingState.mortgageBalance,
+            province: startingState.province
+        }});
+    }, [startingState.homePrice, startingState.mortgageBalance, startingState.province]);
+
     // CMHC Rule Enforcement: If down payment < 20%, max amortization is 25 years
     useEffect(() => {
         if (state.calculationMode !== 'renewal') {
