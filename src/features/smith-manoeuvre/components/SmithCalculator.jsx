@@ -40,6 +40,12 @@ export default function SmithCalculator({ isVisible = true }) {
     const setHValue = (val) => { setHValueState(val); updateMemory({ homeValue: val }); };
     const setMBalance = (val) => { setMBalanceState(val); updateMemory({ mortgageBalance: val }); };
 
+    // Sync state with memory after initial hydration or external updates
+    React.useEffect(() => {
+        if (memory.homeValue !== undefined && memory.homeValue !== null) setHValueState(prev => prev !== memory.homeValue ? memory.homeValue : prev);
+        if (memory.mortgageBalance !== undefined && memory.mortgageBalance !== null) setMBalanceState(prev => prev !== memory.mortgageBalance ? memory.mortgageBalance : prev);
+    }, [memory]);
+
     // 2. Computed Input Object
     const inputsForEngine = useMemo(() => ({
         homeValue: hVal,
