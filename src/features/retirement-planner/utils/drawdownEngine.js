@@ -40,18 +40,31 @@ export const calculateRetirementDrawdown = (params) => {
         province = 'ON'
     } = params;
 
-    const history = [];
-    let currentBalances = { ...initialBalances };
+    const num = (val) => parseFloat(val) || 0;
+
+    const startAgeNum = num(startAge);
+    const endAgeNum = num(endAge);
+    const targetIncomeNum = num(targetIncome);
+    const inflationNum = num(inflation);
+    const returnRateNum = num(returnRate);
     
-    let currentTarget = targetIncome;
+    const history = [];
+    let currentBalances = { 
+        tfsa: num(initialBalances?.tfsa),
+        rrsp: num(initialBalances?.rrsp),
+        nonReg: num(initialBalances?.nonReg),
+        lira: num(initialBalances?.lira),
+    };
+    
+    let currentTarget = targetIncomeNum;
     let isDepleted = false;
     let ageOfDepletion = null;
 
-    for (let age = startAge; age <= endAge; age++) {
+    for (let age = startAgeNum; age <= endAgeNum; age++) {
         // 1. Fixed Incomes
-        const pAmount = age >= pension.startAge ? pension.amount : 0;
-        const cAmount = age >= cpp.startAge ? cpp.amount : 0;
-        let oAmount = age >= oas.startAge ? oas.amount : 0;
+        const pAmount = age >= num(pension.startAge) ? num(pension.amount) : 0;
+        const cAmount = age >= num(cpp.startAge) ? num(cpp.amount) : 0;
+        let oAmount = age >= num(oas.startAge) ? num(oas.amount) : 0;
 
         let fixedTaxable = pAmount + cAmount + oAmount;
 
