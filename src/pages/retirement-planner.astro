@@ -1,0 +1,11 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { RetirementPlanner } from '../features/retirement-planner/components';
+
+const title = "Retirement Drawdown Planner | LoonieFi";
+const description = "A simplistic retirement planner for Canadians. Project how long your RRSP, TFSA, Non-Registered accounts, and pensions will last in retirement.";
+---
+
+<BaseLayout title={title} description={description}>
+    <RetirementPlanner client:load />
+</BaseLayout>
