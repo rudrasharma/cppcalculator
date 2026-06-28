@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { 
-    AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer 
+    AreaChart, Area, ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer 
 } from 'recharts';
 
 export const PlannerCharts = ({ results }) => {
@@ -57,7 +57,8 @@ export const PlannerCharts = ({ results }) => {
         withdrawNonReg: h.incomes.nonReg,
         withdrawLIRA: h.incomes.lira,
         shortfall: h.shortfall,
-        targetIncome: h.targetIncome
+        targetIncome: h.targetIncome,
+        netCash: h.netCash
     }));
 
     return (
@@ -110,20 +111,23 @@ export const PlannerCharts = ({ results }) => {
                             <Area type="monotone" dataKey="tfsa" name="TFSA" stackId="1" stroke="#10b981" fill="url(#colorTFSA)" strokeWidth={2} />
                         </AreaChart>
                     ) : (
-                        <BarChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                        <ComposedChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
                             <XAxis dataKey="age" tick={{fill: '#64748b'}} tickLine={false} axisLine={false} />
                             <YAxis tickFormatter={formatYAxis} tick={{fill: '#64748b'}} tickLine={false} axisLine={false} width={60} />
                             <RechartsTooltip content={<CustomTooltip />} />
                             <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px' }} />
                             
-                            <Bar dataKey="cpp" name="CPP" stackId="a" fill="#6366f1" />
-                            <Bar dataKey="oas" name="OAS" stackId="a" fill="#8b5cf6" />
-                            <Bar dataKey="pension" name="Pension" stackId="a" fill="#0ea5e9" />
-                            <Bar dataKey="withdrawNonReg" name="Non-Reg Withdrawal" stackId="a" fill="#f59e0b" />
-                            <Bar dataKey="withdrawRRSP" name="RRSP/LIRA Withdrawal" stackId="a" fill="#ec4899" />
-                            <Bar dataKey="withdrawTFSA" name="TFSA Withdrawal" stackId="a" fill="#10b981" />
-                        </BarChart>
+                            <Bar dataKey="cpp" name="CPP (Gross)" stackId="a" fill="#6366f1" />
+                            <Bar dataKey="oas" name="OAS (Gross)" stackId="a" fill="#8b5cf6" />
+                            <Bar dataKey="pension" name="Pension (Gross)" stackId="a" fill="#0ea5e9" />
+                            <Bar dataKey="withdrawNonReg" name="Non-Reg (Gross)" stackId="a" fill="#f59e0b" />
+                            <Bar dataKey="withdrawRRSP" name="RRSP/LIRA (Gross)" stackId="a" fill="#ec4899" />
+                            <Bar dataKey="withdrawTFSA" name="TFSA (Gross)" stackId="a" fill="#10b981" />
+
+                            <Line type="monotone" dataKey="targetIncome" name="Target Income (Net)" stroke="#0f172a" strokeWidth={2} dot={false} strokeDasharray="5 5" />
+                            <Line type="monotone" dataKey="netCash" name="Actual Income (Net)" stroke="#10b981" strokeWidth={3} dot={false} />
+                        </ComposedChart>
                     )}
                 </ResponsiveContainer>
             </div>
