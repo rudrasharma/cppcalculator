@@ -61,7 +61,7 @@ export const PlannerCharts = ({ results }) => {
     }));
 
     return (
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 md:p-6 h-full flex flex-col">
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 md:p-6 flex flex-col">
             <div className="flex justify-between items-center mb-6">
                 <h3 className="text-lg font-semibold text-slate-800">Projections</h3>
                 <div className="flex bg-slate-100 p-1 rounded-xl">
