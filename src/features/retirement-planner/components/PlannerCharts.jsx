@@ -80,7 +80,7 @@ export const PlannerCharts = ({ results }) => {
                 </div>
             </div>
 
-            <div className="flex-1 min-h-[400px]">
+            <div className="w-full h-[400px]">
                 <ResponsiveContainer width="100%" height="100%">
                     {chartMode === 'balances' ? (
                         <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
