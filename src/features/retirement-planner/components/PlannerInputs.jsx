@@ -45,6 +45,16 @@ export const PlannerInputs = ({ state, updateField }) => {
                         />
                     </div>
                     <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-1">Current Age</label>
+                        <input 
+                            type="number" 
+                            min="18" max="80" 
+                            value={state.currentAge || 40} 
+                            onChange={(e) => updateField('currentAge', parseInt(e.target.value) || 40)}
+                            className="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl focus:ring-indigo-500 focus:border-indigo-500 block p-3 transition-colors"
+                        />
+                    </div>
+                    <div>
                         <label className="block text-sm font-medium text-slate-700 mb-1">Start Retirement Age</label>
                         <input 
                             type="number" 
@@ -74,7 +84,7 @@ export const PlannerInputs = ({ state, updateField }) => {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </span>
-                    Assets at Retirement
+                    Current Assets & Contributions
                 </h3>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -107,6 +117,22 @@ export const PlannerInputs = ({ state, updateField }) => {
                             </label>
                             <MoneyInput value={state.balances.nonRegBookValue} onChange={(val) => updateField('balances', { ...state.balances, nonRegBookValue: val })} />
                         </div>
+                    </div>
+                </div>
+                
+                <h4 className="text-sm font-semibold text-slate-700 mt-6 mb-3 uppercase tracking-wider">Annual Savings (Until Retirement)</h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-1">TFSA Savings / Yr</label>
+                        <MoneyInput value={state.contributions?.tfsa || 0} onChange={(val) => updateField('contributions', { ...state.contributions, tfsa: val })} />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-1">RRSP Savings / Yr</label>
+                        <MoneyInput value={state.contributions?.rrsp || 0} onChange={(val) => updateField('contributions', { ...state.contributions, rrsp: val })} />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-1">Non-Reg Savings / Yr</label>
+                        <MoneyInput value={state.contributions?.nonReg || 0} onChange={(val) => updateField('contributions', { ...state.contributions, nonReg: val })} />
                     </div>
                 </div>
             </div>

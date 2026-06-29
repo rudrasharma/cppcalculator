@@ -10,7 +10,7 @@ export const PlannerCharts = ({ results, state }) => {
     if (!results || !results.history || results.history.length === 0) return null;
 
     const inflation = state?.inflation || 0.021;
-    const startAge = state?.startAge || results.history[0]?.age || 65;
+    const baseAge = state?.currentAge || state?.startAge || results.history[0]?.age || 40;
 
     const formatYAxis = (value) => {
         if (value >= 1000000) return `$${(value / 1000000).toFixed(1)}M`;
@@ -31,7 +31,7 @@ export const PlannerCharts = ({ results, state }) => {
                             </span>
                         </div>
                     ))}
-                    {chartMode === 'income' && payload.length > 0 && payload[0].payload && (
+                    {chartMode === 'income' && payload.length > 0 && payload[0].payload && payload[0].payload.targetIncome > 0 && (
                         <div className="mt-2 pt-2 border-t text-sm font-semibold flex justify-between">
                             <span className="text-slate-500">Shortfall</span>
                             <span className={payload[0].payload.shortfall > 10 ? 'text-rose-600' : 'text-emerald-600'}>
@@ -46,7 +46,7 @@ export const PlannerCharts = ({ results, state }) => {
     };
 
     const chartData = results.history.map(h => {
-        const yearsDiff = h.age - startAge;
+        const yearsDiff = Math.max(0, h.age - baseAge);
         const discountFactor = isReal ? Math.pow(1 + inflation, yearsDiff) : 1;
 
         return {

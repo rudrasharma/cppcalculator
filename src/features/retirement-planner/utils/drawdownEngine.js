@@ -27,12 +27,14 @@ const getOasClawback = (taxableIncome, oasAmount) => {
  */
 export const calculateRetirementDrawdown = (params) => {
     const {
+        currentAge,
         startAge,
         endAge,
         targetIncome,
         inflation,
         returnRate,
         balances: initialBalances,
+        contributions,
         pension,
         cpp,
         oas,
@@ -43,6 +45,7 @@ export const calculateRetirementDrawdown = (params) => {
     const num = (val) => parseFloat(val) || 0;
 
     const startAgeNum = num(startAge);
+    const currentAgeNum = num(currentAge) || startAgeNum;
     const endAgeNum = num(endAge);
     const targetIncomeNum = num(targetIncome);
     const inflationNum = num(inflation);
@@ -63,9 +66,45 @@ export const calculateRetirementDrawdown = (params) => {
     let isDepleted = false;
     let ageOfDepletion = null;
 
-    for (let age = startAgeNum; age <= endAgeNum; age++) {
-        const yearsDiff = age - startAgeNum;
+    for (let age = currentAgeNum; age <= endAgeNum; age++) {
+        const yearsDiff = age - currentAgeNum;
         const inflationFactor = Math.pow(1 + inflationNum, yearsDiff);
+
+        if (age < startAgeNum) {
+            // Accumulation Phase
+            const totalBalance = (currentBalances.tfsa || 0) + (currentBalances.rrsp || 0) + (currentBalances.nonReg || 0) + (currentBalances.lira || 0);
+            
+            history.push({
+                age,
+                balances: { ...currentBalances },
+                totalBalance,
+                incomes: {
+                    pension: 0,
+                    cpp: 0,
+                    oas: 0,
+                    nonReg: 0, rrsp: 0, lira: 0, tfsa: 0
+                },
+                tax: 0,
+                clawback: 0,
+                netCash: 0,
+                targetIncome: 0,
+                shortfall: 0
+            });
+            
+            // Grow balances and add contributions
+            currentTarget = currentTarget * (1 + inflationNum);
+            
+            currentBalances.tfsa = ((currentBalances.tfsa || 0) + num(contributions?.tfsa)) * (1 + returnRateNum);
+            currentBalances.rrsp = ((currentBalances.rrsp || 0) + num(contributions?.rrsp)) * (1 + returnRateNum);
+            
+            const nonRegContrib = num(contributions?.nonReg);
+            currentBalances.nonReg = ((currentBalances.nonReg || 0) + nonRegContrib) * (1 + returnRateNum);
+            currentBookValue.nonReg += nonRegContrib; // contributions directly increase book value
+            
+            currentBalances.lira = (currentBalances.lira || 0) * (1 + returnRateNum); 
+            
+            continue;
+        }
 
         // 1. Fixed Incomes (Indexed to inflation)
         // Note: For simplistic planning, we assume employer pensions are also fully indexed.

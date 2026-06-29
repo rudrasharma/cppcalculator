@@ -20,6 +20,7 @@ export default function RetirementPlanner({ isVisible = true }) {
         // Hydrate from memory where possible
         return {
             province: memory?.province || 'ON',
+            currentAge: 40,
             startAge: 65,
             endAge: 90,
             targetIncome: 60000,
@@ -31,6 +32,11 @@ export default function RetirementPlanner({ isVisible = true }) {
                 nonReg: 0,
                 nonRegBookValue: 0,
                 lira: 0
+            },
+            contributions: {
+                tfsa: 0,
+                rrsp: 0,
+                nonReg: 0
             },
             pension: { amount: 0, startAge: 65 },
             cpp: { amount: 0, startAge: 65 },
