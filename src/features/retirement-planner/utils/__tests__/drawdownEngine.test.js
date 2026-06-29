@@ -51,6 +51,7 @@ describe('Retirement Drawdown Engine', () => {
                 tfsa: 100000,
                 rrsp: 500000,
                 nonReg: 500000,
+                nonRegBookValue: 250000, // 50% capital gains to trigger tax drag
                 lira: 0
             },
             pension: { amount: 0, startAge: 65 },

@@ -29,6 +29,7 @@ export default function RetirementPlanner({ isVisible = true }) {
                 tfsa: 0,
                 rrsp: 0,
                 nonReg: 0,
+                nonRegBookValue: 0,
                 lira: 0
             },
             pension: { amount: 0, startAge: 65 },

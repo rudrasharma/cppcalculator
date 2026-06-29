@@ -87,12 +87,26 @@ export const PlannerInputs = ({ state, updateField }) => {
                         <MoneyInput value={state.balances.rrsp} onChange={(val) => updateField('balances', { ...state.balances, rrsp: val })} />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1">Non-Registered Balance</label>
-                        <MoneyInput value={state.balances.nonReg} onChange={(val) => updateField('balances', { ...state.balances, nonReg: val })} />
-                    </div>
-                    <div>
                         <label className="block text-sm font-medium text-slate-700 mb-1">LIRA Balance</label>
                         <MoneyInput value={state.balances.lira} onChange={(val) => updateField('balances', { ...state.balances, lira: val })} />
+                    </div>
+                    <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200 mt-2">
+                        <div>
+                            <label className="block text-sm font-medium text-slate-700 mb-1">Non-Registered Balance</label>
+                            <MoneyInput value={state.balances.nonReg} onChange={(val) => updateField('balances', { ...state.balances, nonReg: val })} />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-slate-700 mb-1 flex items-center justify-between">
+                                Book Value (ACB)
+                                <div className="group relative">
+                                    <InfoIcon className="w-4 h-4 text-slate-400 cursor-help" />
+                                    <div className="absolute bottom-full mb-2 right-0 w-64 p-2 bg-slate-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 shadow-xl">
+                                        Your original investment amount. Used to calculate tax-free return of capital vs taxable capital gains upon withdrawal.
+                                    </div>
+                                </div>
+                            </label>
+                            <MoneyInput value={state.balances.nonRegBookValue} onChange={(val) => updateField('balances', { ...state.balances, nonRegBookValue: val })} />
+                        </div>
                     </div>
                 </div>
             </div>

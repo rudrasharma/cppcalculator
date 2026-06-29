@@ -55,6 +55,9 @@ export const calculateRetirementDrawdown = (params) => {
         nonReg: num(initialBalances?.nonReg),
         lira: num(initialBalances?.lira),
     };
+    let currentBookValue = {
+        nonReg: num(initialBalances?.nonRegBookValue) || num(initialBalances?.nonReg)
+    };
     
     let currentTarget = targetIncomeNum;
     let isDepleted = false;
@@ -119,7 +122,19 @@ export const calculateRetirementDrawdown = (params) => {
                         if (acct === 'rrsp' || acct === 'lira') {
                             currentTaxable += pullAmount;
                         } else if (acct === 'nonReg') {
-                            currentTaxable += (pullAmount * 0.25); // 50% cap gains * 50% inclusion
+                            const prePullBalance = currentBalances.nonReg + pullAmount;
+                            
+                            if (prePullBalance > 0 && prePullBalance > currentBookValue.nonReg) {
+                                const gainProportion = (prePullBalance - currentBookValue.nonReg) / prePullBalance;
+                                const realizedGain = pullAmount * gainProportion;
+                                currentTaxable += (realizedGain * 0.5); // 50% inclusion rate
+                                
+                                const returnOfCapital = pullAmount - realizedGain;
+                                currentBookValue.nonReg = Math.max(0, currentBookValue.nonReg - returnOfCapital);
+                            } else {
+                                // If book value >= balance (loss or flat), no taxable gain, but book value reduces
+                                currentBookValue.nonReg = Math.max(0, currentBookValue.nonReg - pullAmount);
+                            }
                         }
                         
                         // Deflate taxable income to calculate taxes using today's progressive brackets
