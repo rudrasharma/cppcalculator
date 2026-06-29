@@ -151,4 +151,38 @@ describe('Retirement Drawdown Engine', () => {
         const resultNoOas = calculateRetirementDrawdown(paramsNoOas);
         expect(resultNoOas.history[0].incomes.oas).toBe(0);
     });
+
+    it('forces RRIF minimums and handles surplus cash', () => {
+        const params = {
+            startAge: 65,
+            endAge: 75,
+            targetIncome: 10000, // Very low target to force surplus
+            inflation: 0.02,
+            returnRate: 0.05,
+            balances: { tfsa: 0, rrsp: 1000000, nonReg: 0, lira: 0 },
+            pension: { amount: 0, startAge: 65 },
+            cpp: { amount: 0, startAge: 65 },
+            oas: { startAge: 65 },
+            yearsInCanada: 0,
+            drawdownOrder: ['rrsp'],
+            province: 'ON'
+        };
+
+        const result = calculateRetirementDrawdown(params);
+        
+        // At age 72, mandatory minimum for 72 is 5.40%
+        const year72 = result.history.find(h => h.age === 72);
+        expect(year72).toBeDefined();
+        
+        const priorYearBalance = result.history.find(h => h.age === 71).balances.rrsp;
+        const expectedMinimum = priorYearBalance * 0.0540;
+        
+        // The withdrawal from RRSP should be AT LEAST the expected minimum
+        expect(year72.incomes.rrsp).toBeGreaterThanOrEqual(expectedMinimum);
+        
+        // Because target is only 10,000, a massive withdrawal of ~54,000 should result in a surplus.
+        // The engine reinvests surplus into nonReg.
+        expect(year72.balances.nonReg).toBeGreaterThan(0);
+        expect(year72.shortfall).toBe(0);
+    });
 });

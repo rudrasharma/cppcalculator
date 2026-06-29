@@ -6,6 +6,20 @@ const OAS_CLAWBACK_RATE = 0.15;
 /**
  * Calculates the total tax (Federal + Provincial) for a given taxable income.
  */
+export const RRIF_MINIMUM_FACTORS = {
+    71: 0.0528, 72: 0.0540, 73: 0.0553, 74: 0.0567, 75: 0.0582,
+    76: 0.0598, 77: 0.0617, 78: 0.0636, 79: 0.0658, 80: 0.0682,
+    81: 0.0708, 82: 0.0738, 83: 0.0771, 84: 0.0808, 85: 0.0851,
+    86: 0.0899, 87: 0.0955, 88: 0.1021, 89: 0.1099, 90: 0.1192,
+    91: 0.1306, 92: 0.1449, 93: 0.1634, 94: 0.1879
+};
+
+const getRrifFactor = (age) => {
+    if (age < 72) return 0;
+    if (age >= 95) return 0.20;
+    return RRIF_MINIMUM_FACTORS[age] || 0.20;
+};
+
 const getTax = (taxableIncome, province) => {
     const fed = calculateFederalTax(taxableIncome, taxableIncome);
     const prov = calculateProvincialTax(taxableIncome, province);
@@ -127,19 +141,6 @@ export const calculateRetirementDrawdown = (params) => {
 
         let fixedTaxable = pAmount + cAmount + oAmount;
 
-        // 2. Withdraw to hit target
-        let currentCash = pAmount + cAmount + oAmount;
-        let currentTaxable = fixedTaxable;
-        
-        // Deflate to today's dollars to avoid tax bracket creep
-        const realFixedTaxable = currentTaxable / inflationFactor;
-        const realOAmount = oAmount / inflationFactor;
-
-        let tax = getTax(realFixedTaxable, province) * inflationFactor;
-        let clawback = getOasClawback(realFixedTaxable, realOAmount) * inflationFactor;
-        
-        let netCash = currentCash - tax - clawback;
-        
         let withdrawals = {
             nonReg: 0,
             rrsp: 0,
@@ -154,6 +155,35 @@ export const calculateRetirementDrawdown = (params) => {
             withdrawals[acctType] += pulled;
             return pulled;
         };
+
+        // --- RRIF/LIF Minimums ---
+        let rrifForcedTaxable = 0;
+        if (age >= 72) {
+            const rrifFactor = getRrifFactor(age);
+            
+            if ((currentBalances.rrsp || 0) > 0) {
+                const forcedRrsp = currentBalances.rrsp * rrifFactor;
+                rrifForcedTaxable += pullFromAccount('rrsp', forcedRrsp);
+            }
+            
+            if ((currentBalances.lira || 0) > 0) {
+                const forcedLira = currentBalances.lira * rrifFactor;
+                rrifForcedTaxable += pullFromAccount('lira', forcedLira);
+            }
+        }
+
+        // 2. Withdraw to hit target
+        let currentCash = pAmount + cAmount + oAmount + rrifForcedTaxable;
+        let currentTaxable = fixedTaxable + rrifForcedTaxable;
+        
+        // Deflate to today's dollars to avoid tax bracket creep
+        const realFixedTaxable = currentTaxable / inflationFactor;
+        const realOAmount = oAmount / inflationFactor;
+
+        let tax = getTax(realFixedTaxable, province) * inflationFactor;
+        let clawback = getOasClawback(realFixedTaxable, realOAmount) * inflationFactor;
+        
+        let netCash = currentCash - tax - clawback;
 
         let shortfall = currentTarget - netCash;
         let accountsExhausted = false;
@@ -209,6 +239,15 @@ export const calculateRetirementDrawdown = (params) => {
             }
 
             if (!chunkFound) accountsExhausted = true;
+        }
+
+        if (shortfall < -10) {
+            // We have a surplus from forced minimums! Reinvest into Non-Reg
+            const surplusCash = -shortfall;
+            currentBalances.nonReg = (currentBalances.nonReg || 0) + surplusCash;
+            currentBookValue.nonReg += surplusCash;
+            // Target is fully met
+            shortfall = 0;
         }
 
         if (shortfall > 100 && !isDepleted) {
