@@ -1,4 +1,4 @@
-import { calculateFederalTax, calculateProvincialTax } from '../../tax/utils/taxEngine';
+import { calculateFederalTax, calculateProvincialTax } from '../../tax/utils/taxEngine.js';
 
 const OAS_CLAWBACK_THRESHOLD = 90997; // 2024 value approx
 const OAS_CLAWBACK_RATE = 0.15;

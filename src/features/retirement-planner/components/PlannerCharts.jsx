@@ -53,9 +53,8 @@ export const PlannerCharts = ({ results }) => {
         cpp: h.incomes.cpp,
         oas: h.incomes.oas,
         withdrawTFSA: h.incomes.tfsa,
-        withdrawRRSP: h.incomes.rrsp,
+        withdrawRRSP: (h.incomes.rrsp || 0) + (h.incomes.lira || 0),
         withdrawNonReg: h.incomes.nonReg,
-        withdrawLIRA: h.incomes.lira,
         shortfall: h.shortfall,
         targetIncome: h.targetIncome,
         netCash: h.netCash
