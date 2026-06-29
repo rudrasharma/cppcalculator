@@ -177,7 +177,7 @@ export const PlannerInputs = ({ state, updateField }) => {
                                 type="number" 
                                 value={state.pension.startAge} 
                                 onChange={(e) => updateField('pension', { ...state.pension, startAge: parseInt(e.target.value) || 65 })}
-                                className="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl focus:ring-indigo-500 focus:border-indigo-500 block p-3 transition-colors"
+                                className="w-full bg-slate-50 border border-slate-200 text-slate-900 text-lg font-mono font-black rounded-2xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 block px-4 py-3 transition-colors shadow-sm"
                             />
                         </div>
                     </div>
@@ -201,7 +201,7 @@ export const PlannerInputs = ({ state, updateField }) => {
                                 type="number" min="60" max="70"
                                 value={state.cpp.startAge} 
                                 onChange={(e) => updateField('cpp', { ...state.cpp, startAge: parseInt(e.target.value) || 65 })}
-                                className="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl focus:ring-indigo-500 focus:border-indigo-500 block p-3 transition-colors"
+                                className="w-full bg-slate-50 border border-slate-200 text-slate-900 text-lg font-mono font-black rounded-2xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 block px-4 py-3 transition-colors shadow-sm"
                             />
                         </div>
                     </div>
@@ -217,7 +217,7 @@ export const PlannerInputs = ({ state, updateField }) => {
                                 type="number" min="65" max="70"
                                 value={state.oas.startAge} 
                                 onChange={(e) => updateField('oas', { ...state.oas, startAge: parseInt(e.target.value) || 65 })}
-                                className="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl focus:ring-indigo-500 focus:border-indigo-500 block p-3 transition-colors"
+                                className="w-full bg-slate-50 border border-slate-200 text-slate-900 text-lg font-mono font-black rounded-2xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 block px-4 py-3 transition-colors shadow-sm"
                             />
                         </div>
                     </div>
