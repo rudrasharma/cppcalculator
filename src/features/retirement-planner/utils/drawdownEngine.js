@@ -61,10 +61,14 @@ export const calculateRetirementDrawdown = (params) => {
     let ageOfDepletion = null;
 
     for (let age = startAgeNum; age <= endAgeNum; age++) {
-        // 1. Fixed Incomes
-        const pAmount = age >= num(pension.startAge) ? num(pension.amount) : 0;
-        const cAmount = age >= num(cpp.startAge) ? num(cpp.amount) : 0;
-        let oAmount = age >= num(oas.startAge) ? num(oas.amount) : 0;
+        const yearsDiff = age - startAgeNum;
+        const inflationFactor = Math.pow(1 + inflationNum, yearsDiff);
+
+        // 1. Fixed Incomes (Indexed to inflation)
+        // Note: For simplistic planning, we assume employer pensions are also fully indexed.
+        const pAmount = age >= num(pension.startAge) ? num(pension.amount) * inflationFactor : 0;
+        const cAmount = age >= num(cpp.startAge) ? num(cpp.amount) * inflationFactor : 0;
+        let oAmount = age >= num(oas.startAge) ? num(oas.amount) * inflationFactor : 0;
 
         let fixedTaxable = pAmount + cAmount + oAmount;
 
@@ -72,8 +76,12 @@ export const calculateRetirementDrawdown = (params) => {
         let currentCash = pAmount + cAmount + oAmount;
         let currentTaxable = fixedTaxable;
         
-        let tax = getTax(currentTaxable, province);
-        let clawback = getOasClawback(currentTaxable, oAmount);
+        // Deflate to today's dollars to avoid tax bracket creep
+        const realFixedTaxable = currentTaxable / inflationFactor;
+        const realOAmount = oAmount / inflationFactor;
+
+        let tax = getTax(realFixedTaxable, province) * inflationFactor;
+        let clawback = getOasClawback(realFixedTaxable, realOAmount) * inflationFactor;
         
         let netCash = currentCash - tax - clawback;
         
@@ -102,7 +110,7 @@ export const calculateRetirementDrawdown = (params) => {
             for (const acct of drawdownOrder) {
                 if ((currentBalances[acct] || 0) > 0) {
                     // Pull a chunk to cover the shortfall + estimated tax drag
-                    let pullAmount = Math.min(1000, currentBalances[acct], shortfall * 1.5); 
+                    let pullAmount = Math.min(1000 * inflationFactor, currentBalances[acct], shortfall * 1.5); 
                     pullAmount = pullFromAccount(acct, pullAmount);
                     
                     if (pullAmount > 0) {
@@ -114,8 +122,16 @@ export const calculateRetirementDrawdown = (params) => {
                             currentTaxable += (pullAmount * 0.25); // 50% cap gains * 50% inclusion
                         }
                         
-                        tax = getTax(currentTaxable, province);
-                        clawback = getOasClawback(currentTaxable, oAmount);
+                        // Deflate taxable income to calculate taxes using today's progressive brackets
+                        const realTaxable = currentTaxable / inflationFactor;
+                        const realOAmount = oAmount / inflationFactor;
+
+                        const realTax = getTax(realTaxable, province);
+                        const realClawback = getOasClawback(realTaxable, realOAmount);
+
+                        tax = realTax * inflationFactor;
+                        clawback = realClawback * inflationFactor;
+
                         currentCash += pullAmount;
                         netCash = currentCash - tax - clawback;
                         shortfall = currentTarget - netCash;

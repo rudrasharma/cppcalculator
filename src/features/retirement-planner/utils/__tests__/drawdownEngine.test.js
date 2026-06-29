@@ -68,7 +68,8 @@ describe('Retirement Drawdown Engine', () => {
         expect(year40.incomes.nonReg).toBeGreaterThan(60000); // Has to fund entire target
 
         const year65 = result.history.find(h => h.age === 65);
-        expect(year65.incomes.cpp).toBe(12000);
-        expect(year65.incomes.oas).toBe(8000);
+        const inflationFactor = Math.pow(1 + params.inflation, 65 - params.startAge);
+        expect(year65.incomes.cpp).toBeCloseTo(12000 * inflationFactor, 2);
+        expect(year65.incomes.oas).toBeCloseTo(8000 * inflationFactor, 2);
     });
 });
