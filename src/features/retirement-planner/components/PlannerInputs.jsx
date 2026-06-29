@@ -122,15 +122,15 @@ export const PlannerInputs = ({ state, updateField }) => {
                 
                 <h4 className="text-sm font-semibold text-slate-700 mt-6 mb-3 uppercase tracking-wider">Annual Savings (Until Retirement)</h4>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
+                    <div className="flex flex-col justify-end">
                         <label className="block text-sm font-medium text-slate-700 mb-1">TFSA Savings / Yr</label>
                         <MoneyInput value={state.contributions?.tfsa || 0} onChange={(val) => updateField('contributions', { ...state.contributions, tfsa: val })} />
                     </div>
-                    <div>
+                    <div className="flex flex-col justify-end">
                         <label className="block text-sm font-medium text-slate-700 mb-1">RRSP Savings / Yr</label>
                         <MoneyInput value={state.contributions?.rrsp || 0} onChange={(val) => updateField('contributions', { ...state.contributions, rrsp: val })} />
                     </div>
-                    <div>
+                    <div className="flex flex-col justify-end">
                         <label className="block text-sm font-medium text-slate-700 mb-1">Non-Reg Savings / Yr</label>
                         <MoneyInput value={state.contributions?.nonReg || 0} onChange={(val) => updateField('contributions', { ...state.contributions, nonReg: val })} />
                     </div>
