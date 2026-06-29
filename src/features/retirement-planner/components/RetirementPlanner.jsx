@@ -20,6 +20,7 @@ export default function RetirementPlanner({ isVisible = true }) {
         // Hydrate from memory where possible
         return {
             province: memory?.province || 'ON',
+            yearsInCanada: memory?.yearsInCanada || 40,
             currentAge: 40,
             startAge: 65,
             endAge: 90,

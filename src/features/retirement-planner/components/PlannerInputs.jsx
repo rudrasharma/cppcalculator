@@ -74,6 +74,24 @@ export const PlannerInputs = ({ state, updateField }) => {
                             className="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl focus:ring-indigo-500 focus:border-indigo-500 block p-3 transition-colors"
                         />
                     </div>
+                    <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-1 flex items-center justify-between">
+                            Years in Canada (at 65)
+                            <div className="group relative">
+                                <InfoIcon className="w-4 h-4 text-slate-400 cursor-help" />
+                                <div className="absolute bottom-full mb-2 right-0 w-64 p-2 bg-slate-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 shadow-xl font-normal">
+                                    Number of years lived in Canada between age 18 and 65. Used to calculate your eligible OAS amount.
+                                </div>
+                            </div>
+                        </label>
+                        <input 
+                            type="number" 
+                            min="0" max="47" 
+                            value={state.yearsInCanada ?? 40} 
+                            onChange={(e) => updateField('yearsInCanada', parseInt(e.target.value) || 0)}
+                            className="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl focus:ring-indigo-500 focus:border-indigo-500 block p-3 transition-colors"
+                        />
+                    </div>
                 </div>
             </div>
 

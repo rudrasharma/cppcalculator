@@ -38,6 +38,7 @@ export const calculateRetirementDrawdown = (params) => {
         pension,
         cpp,
         oas,
+        yearsInCanada = 40,
         drawdownOrder = ['nonReg', 'rrsp', 'lira', 'tfsa'],
         province = 'ON'
     } = params;
@@ -110,7 +111,16 @@ export const calculateRetirementDrawdown = (params) => {
         // Note: For simplistic planning, we assume employer pensions are also fully indexed.
         const pAmount = age >= num(pension.startAge) ? num(pension.amount) * inflationFactor : 0;
         const cAmount = age >= num(cpp.startAge) ? num(cpp.amount) * inflationFactor : 0;
-        let oAmount = age >= num(oas.startAge) ? num(oas.amount) * inflationFactor : 0;
+        
+        let oasEligibleBase = num(oas.amount);
+        const validYears = Math.min(Math.max(0, num(yearsInCanada)), 40);
+        if (validYears < 10) {
+            oasEligibleBase = 0; // Requires at least 10 years
+        } else if (validYears < 40) {
+            oasEligibleBase = oasEligibleBase * (validYears / 40);
+        }
+        
+        let oAmount = age >= num(oas.startAge) ? oasEligibleBase * inflationFactor : 0;
 
         let fixedTaxable = pAmount + cAmount + oAmount;
 

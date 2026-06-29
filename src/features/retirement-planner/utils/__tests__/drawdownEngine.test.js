@@ -123,4 +123,32 @@ describe('Retirement Drawdown Engine', () => {
         const inflationFactor = Math.pow(1 + params.inflation, 10);
         expect(year60.targetIncome).toBeCloseTo(60000 * inflationFactor, 2);
     });
+
+    it('prorates OAS based on years in Canada', () => {
+        const params = {
+            startAge: 65,
+            endAge: 70,
+            targetIncome: 50000,
+            inflation: 0.02,
+            returnRate: 0.05,
+            balances: { tfsa: 100000, rrsp: 0, nonReg: 0, lira: 0 },
+            pension: { amount: 0, startAge: 65 },
+            cpp: { amount: 0, startAge: 65 },
+            oas: { amount: 8000, startAge: 65 },
+            yearsInCanada: 20, // 20/40 = 50%
+            drawdownOrder: ['tfsa'],
+            province: 'ON'
+        };
+
+        const result = calculateRetirementDrawdown(params);
+        
+        const year65 = result.history[0];
+        // Expect OAS to be exactly 50% of the base
+        expect(year65.incomes.oas).toBe(4000);
+        
+        // Test < 10 years (should be 0)
+        const paramsNoOas = { ...params, yearsInCanada: 9 };
+        const resultNoOas = calculateRetirementDrawdown(paramsNoOas);
+        expect(resultNoOas.history[0].incomes.oas).toBe(0);
+    });
 });

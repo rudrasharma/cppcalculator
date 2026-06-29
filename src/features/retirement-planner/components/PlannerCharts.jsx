@@ -31,6 +31,14 @@ export const PlannerCharts = ({ results, state }) => {
                             </span>
                         </div>
                     ))}
+                    {chartMode === 'income' && payload.length > 0 && payload[0].payload && payload[0].payload.clawback > 0 && (
+                        <div className="mt-2 pt-2 border-t text-sm font-semibold flex justify-between">
+                            <span className="text-slate-500">OAS Clawback Tax</span>
+                            <span className="text-rose-600">
+                                -${Math.round(payload[0].payload.clawback).toLocaleString()}
+                            </span>
+                        </div>
+                    )}
                     {chartMode === 'income' && payload.length > 0 && payload[0].payload && payload[0].payload.targetIncome > 0 && (
                         <div className="mt-2 pt-2 border-t text-sm font-semibold flex justify-between">
                             <span className="text-slate-500">Shortfall</span>
@@ -64,6 +72,7 @@ export const PlannerCharts = ({ results, state }) => {
             withdrawRRSP: ((h.incomes.rrsp || 0) + (h.incomes.lira || 0)) / discountFactor,
             withdrawNonReg: (h.incomes.nonReg || 0) / discountFactor,
             shortfall: (h.shortfall || 0) / discountFactor,
+            clawback: (h.clawback || 0) / discountFactor,
             targetIncome: (h.targetIncome || 0) / discountFactor,
             netCash: (h.netCash || 0) / discountFactor
         };
