@@ -97,7 +97,7 @@ export default function RetirementPlanner({ isVisible = true }) {
                     {/* Right Column: Visualization & Metrics */}
                     <div className="lg:col-span-7 space-y-6">
                         <PlannerMetrics results={results} />
-                        <PlannerCharts results={results} />
+                        <PlannerCharts results={results} state={state} />
                     </div>
                 </div>
             </main>

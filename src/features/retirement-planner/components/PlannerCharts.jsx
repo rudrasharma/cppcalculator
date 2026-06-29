@@ -3,10 +3,14 @@ import {
     AreaChart, Area, ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer 
 } from 'recharts';
 
-export const PlannerCharts = ({ results }) => {
+export const PlannerCharts = ({ results, state }) => {
     const [chartMode, setChartMode] = useState('balances'); // 'balances' or 'income'
+    const [isReal, setIsReal] = useState(true);
     
     if (!results || !results.history || results.history.length === 0) return null;
+
+    const inflation = state?.inflation || 0.021;
+    const startAge = state?.startAge || results.history[0]?.age || 65;
 
     const formatYAxis = (value) => {
         if (value >= 1000000) return `$${(value / 1000000).toFixed(1)}M`;
@@ -17,8 +21,8 @@ export const PlannerCharts = ({ results }) => {
     const CustomTooltip = ({ active, payload, label }) => {
         if (active && payload && payload.length) {
             return (
-                <div className="bg-white p-4 border border-slate-200 shadow-xl rounded-xl">
-                    <p className="font-semibold text-slate-800 mb-2 border-b pb-2">Age {label}</p>
+                <div className="bg-white p-4 border border-slate-200 shadow-xl rounded-xl z-50">
+                    <p className="font-semibold text-slate-800 mb-2 border-b pb-2">Age {label} {isReal && <span className="text-xs font-normal text-slate-500 ml-1">($ Today)</span>}</p>
                     {payload.map((entry, index) => (
                         <div key={index} className="flex justify-between items-center gap-6 mb-1 text-sm">
                             <span style={{ color: entry.color }} className="font-medium">{entry.name}</span>
@@ -41,29 +45,50 @@ export const PlannerCharts = ({ results }) => {
         return null;
     };
 
-    const chartData = results.history.map(h => ({
-        age: h.age,
-        // Balances
-        tfsa: h.balances.tfsa,
-        rrsp: h.balances.rrsp,
-        nonReg: h.balances.nonReg,
-        lira: h.balances.lira,
-        // Incomes
-        pension: h.incomes.pension,
-        cpp: h.incomes.cpp,
-        oas: h.incomes.oas,
-        withdrawTFSA: h.incomes.tfsa,
-        withdrawRRSP: (h.incomes.rrsp || 0) + (h.incomes.lira || 0),
-        withdrawNonReg: h.incomes.nonReg,
-        shortfall: h.shortfall,
-        targetIncome: h.targetIncome,
-        netCash: h.netCash
-    }));
+    const chartData = results.history.map(h => {
+        const yearsDiff = h.age - startAge;
+        const discountFactor = isReal ? Math.pow(1 + inflation, yearsDiff) : 1;
+
+        return {
+            age: h.age,
+            // Balances
+            tfsa: (h.balances.tfsa || 0) / discountFactor,
+            rrsp: (h.balances.rrsp || 0) / discountFactor,
+            nonReg: (h.balances.nonReg || 0) / discountFactor,
+            lira: (h.balances.lira || 0) / discountFactor,
+            // Incomes
+            pension: (h.incomes.pension || 0) / discountFactor,
+            cpp: (h.incomes.cpp || 0) / discountFactor,
+            oas: (h.incomes.oas || 0) / discountFactor,
+            withdrawTFSA: (h.incomes.tfsa || 0) / discountFactor,
+            withdrawRRSP: ((h.incomes.rrsp || 0) + (h.incomes.lira || 0)) / discountFactor,
+            withdrawNonReg: (h.incomes.nonReg || 0) / discountFactor,
+            shortfall: (h.shortfall || 0) / discountFactor,
+            targetIncome: (h.targetIncome || 0) / discountFactor,
+            netCash: (h.netCash || 0) / discountFactor
+        };
+    });
 
     return (
         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 md:p-6 flex flex-col">
-            <div className="flex justify-between items-center mb-6">
-                <h3 className="text-lg font-semibold text-slate-800">Projections</h3>
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                <div className="flex items-center gap-3">
+                    <h3 className="text-lg font-semibold text-slate-800">Projections</h3>
+                    <div className="flex bg-slate-100 p-1 rounded-lg border border-slate-200/60">
+                        <button 
+                            onClick={() => setIsReal(true)}
+                            className={`px-2.5 py-1 text-xs font-medium rounded-md transition-colors ${isReal ? 'bg-white shadow-sm text-indigo-700' : 'text-slate-500 hover:text-slate-700'}`}
+                        >
+                            Real ($ Today)
+                        </button>
+                        <button 
+                            onClick={() => setIsReal(false)}
+                            className={`px-2.5 py-1 text-xs font-medium rounded-md transition-colors ${!isReal ? 'bg-white shadow-sm text-indigo-700' : 'text-slate-500 hover:text-slate-700'}`}
+                        >
+                            Nominal
+                        </button>
+                    </div>
+                </div>
                 <div className="flex bg-slate-100 p-1 rounded-xl">
                     <button 
                         onClick={() => setChartMode('balances')}
