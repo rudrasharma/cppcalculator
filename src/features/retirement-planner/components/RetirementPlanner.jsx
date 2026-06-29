@@ -39,6 +39,34 @@ export default function RetirementPlanner({ isVisible = true }) {
     });
 
     const [aiInsight, setAiInsight] = useState('');
+    const [isLoaded, setIsLoaded] = useState(false);
+
+    // Load from localStorage on mount (client-side only to prevent hydration mismatch)
+    useEffect(() => {
+        try {
+            const savedState = localStorage.getItem('retirementPlannerState');
+            if (savedState) {
+                const parsed = JSON.parse(savedState);
+                // Ensure global memory province overwrites local if exists
+                if (memory?.province) parsed.province = memory.province;
+                setState(parsed);
+            }
+        } catch (e) {
+            console.error("Failed to parse saved retirement state", e);
+        }
+        setIsLoaded(true);
+    }, []);
+
+    // Save to localStorage when state changes (only after initial load)
+    useEffect(() => {
+        if (isLoaded) {
+            try {
+                localStorage.setItem('retirementPlannerState', JSON.stringify(state));
+            } catch (e) {
+                console.error("Failed to save retirement state", e);
+            }
+        }
+    }, [state, isLoaded]);
 
     // Effect to auto-fill CPP if they have grossIncome in memory, but don't overwrite if they already typed something
     useEffect(() => {
