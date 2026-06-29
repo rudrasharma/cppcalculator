@@ -102,7 +102,7 @@ export const PlannerCharts = ({ results }) => {
                             <XAxis dataKey="age" tick={{fill: '#64748b'}} tickLine={false} axisLine={false} />
                             <YAxis tickFormatter={formatYAxis} tick={{fill: '#64748b'}} tickLine={false} axisLine={false} width={60} />
                             <RechartsTooltip content={<CustomTooltip />} />
-                            <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px' }} />
+                            <Legend iconType="circle" verticalAlign="bottom" height={36} />
                             
                             <Area type="monotone" dataKey="nonReg" name="Non-Registered" stackId="1" stroke="#f59e0b" fill="url(#colorNonReg)" strokeWidth={2} />
                             <Area type="monotone" dataKey="lira" name="LIRA" stackId="1" stroke="#0ea5e9" fill="#0ea5e9" fillOpacity={0.2} strokeWidth={2} />
@@ -115,7 +115,7 @@ export const PlannerCharts = ({ results }) => {
                             <XAxis dataKey="age" tick={{fill: '#64748b'}} tickLine={false} axisLine={false} />
                             <YAxis tickFormatter={formatYAxis} tick={{fill: '#64748b'}} tickLine={false} axisLine={false} width={60} />
                             <RechartsTooltip content={<CustomTooltip />} />
-                            <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px' }} />
+                            <Legend iconType="circle" verticalAlign="bottom" height={36} />
                             
                             <Bar dataKey="cpp" name="CPP (Gross)" stackId="a" fill="#6366f1" />
                             <Bar dataKey="oas" name="OAS (Gross)" stackId="a" fill="#8b5cf6" />
