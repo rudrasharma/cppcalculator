@@ -75,11 +75,11 @@ export const PlannerInputs = ({ state, updateField }) => {
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-1 flex items-center justify-between">
+                        <label className="block text-sm font-medium text-slate-700 mb-1 flex items-center gap-1.5">
                             Years in Canada (at 65)
-                            <div className="group relative">
-                                <InfoIcon className="w-4 h-4 text-slate-400 cursor-help" />
-                                <div className="absolute bottom-full mb-2 right-0 w-64 p-2 bg-slate-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 shadow-xl font-normal">
+                            <div className="group relative flex items-center">
+                                <InfoIcon className="w-3.5 h-3.5 text-slate-400 cursor-help" />
+                                <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-64 p-2 bg-slate-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 shadow-xl font-normal text-center">
                                     Number of years lived in Canada between age 18 and 65. Used to calculate your eligible OAS amount.
                                 </div>
                             </div>
