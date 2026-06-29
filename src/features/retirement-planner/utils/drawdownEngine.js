@@ -112,7 +112,10 @@ export const calculateRetirementDrawdown = (params) => {
         const pAmount = age >= num(pension.startAge) ? num(pension.amount) * inflationFactor : 0;
         const cAmount = age >= num(cpp.startAge) ? num(cpp.amount) * inflationFactor : 0;
         
-        let oasEligibleBase = num(oas.amount);
+        const baseOAS = 8560;
+        const delayYears = Math.max(0, Math.min(num(oas.startAge) - 65, 5));
+        let oasEligibleBase = baseOAS * (1 + (delayYears * 0.072));
+        
         const validYears = Math.min(Math.max(0, num(yearsInCanada)), 40);
         if (validYears < 10) {
             oasEligibleBase = 0; // Requires at least 10 years

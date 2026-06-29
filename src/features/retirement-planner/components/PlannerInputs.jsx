@@ -208,8 +208,22 @@ export const PlannerInputs = ({ state, updateField }) => {
 
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-1">OAS (Annual)</label>
-                            <MoneyInput value={state.oas.amount} onChange={(val) => updateField('oas', { ...state.oas, amount: val })} />
+                            <label className="block text-sm font-medium text-slate-700 mb-1 flex items-center justify-between">
+                                OAS (Annual)
+                                <span className="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded uppercase font-bold tracking-wider">Auto</span>
+                            </label>
+                            <div className="w-full bg-slate-100/50 border border-slate-200 text-slate-500 text-lg font-mono font-black rounded-2xl px-4 py-3 shadow-sm flex items-center">
+                                <span className="mr-2 text-slate-400">$</span>
+                                {(() => {
+                                    const base = 8560;
+                                    const delayYears = Math.max(0, Math.min((state.oas.startAge || 65) - 65, 5));
+                                    let calc = base * (1 + (delayYears * 0.072));
+                                    const valid = Math.min(Math.max(0, state.yearsInCanada ?? 40), 40);
+                                    if (valid < 10) calc = 0;
+                                    else calc = calc * (valid / 40);
+                                    return calc.toLocaleString(undefined, { maximumFractionDigits: 0 });
+                                })()}
+                            </div>
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-slate-700 mb-1">Starts at Age</label>

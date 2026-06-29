@@ -31,7 +31,7 @@ describe('Retirement Drawdown Engine', () => {
         expect(year1.age).toBe(65);
         expect(year1.incomes.pension).toBe(10000);
         expect(year1.incomes.cpp).toBe(12000);
-        expect(year1.incomes.oas).toBe(8000);
+        expect(year1.incomes.oas).toBe(8560);
         
         // Target is 50k. Base income is 30k. Tax on 30k in ON is roughly $3k.
         // So net is ~27k. Shortfall is ~23k.
@@ -71,7 +71,7 @@ describe('Retirement Drawdown Engine', () => {
         const year65 = result.history.find(h => h.age === 65);
         const inflationFactor = Math.pow(1 + params.inflation, 65 - params.startAge);
         expect(year65.incomes.cpp).toBeCloseTo(12000 * inflationFactor, 2);
-        expect(year65.incomes.oas).toBeCloseTo(8000 * inflationFactor, 2);
+        expect(year65.incomes.oas).toBeCloseTo(8560 * inflationFactor, 2);
     });
 
     it('simulates an accumulation phase before retirement correctly', () => {
@@ -143,8 +143,8 @@ describe('Retirement Drawdown Engine', () => {
         const result = calculateRetirementDrawdown(params);
         
         const year65 = result.history[0];
-        // Expect OAS to be exactly 50% of the base
-        expect(year65.incomes.oas).toBe(4000);
+        // Expect OAS to be exactly 50% of the base (8560 * 0.5 = 4280)
+        expect(year65.incomes.oas).toBe(4280);
         
         // Test < 10 years (should be 0)
         const paramsNoOas = { ...params, yearsInCanada: 9 };
