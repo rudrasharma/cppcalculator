@@ -285,7 +285,7 @@ export const calculateRetirementDrawdown = (params) => {
 
     const finalEstate = history.length > 0 
         ? history[history.length - 1].totalBalance 
-        : ((balances.tfsa || 0) + (balances.rrsp || 0) + (balances.nonReg || 0) + (balances.lira || 0));
+        : ((initialBalances?.tfsa || 0) + (initialBalances?.rrsp || 0) + (initialBalances?.nonReg || 0) + (initialBalances?.lira || 0));
 
     return {
         history,
