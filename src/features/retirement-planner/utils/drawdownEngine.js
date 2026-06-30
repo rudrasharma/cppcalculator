@@ -283,10 +283,14 @@ export const calculateRetirementDrawdown = (params) => {
         currentBalances.nonReg = (currentBalances.nonReg || 0) * (1 + returnRate);
     }
 
+    const finalEstate = history.length > 0 
+        ? history[history.length - 1].totalBalance 
+        : ((balances.tfsa || 0) + (balances.rrsp || 0) + (balances.nonReg || 0) + (balances.lira || 0));
+
     return {
         history,
         isDepleted,
         ageOfDepletion,
-        finalEstate: history[history.length - 1].totalBalance
+        finalEstate
     };
 };
