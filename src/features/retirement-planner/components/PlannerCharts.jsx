@@ -68,6 +68,7 @@ export const PlannerCharts = ({ results, state }) => {
             pension: (h.incomes.pension || 0) / discountFactor,
             cpp: (h.incomes.cpp || 0) / discountFactor,
             oas: (h.incomes.oas || 0) / discountFactor,
+            gis: (h.incomes.gis || 0) / discountFactor,
             withdrawTFSA: (h.incomes.tfsa || 0) / discountFactor,
             withdrawRRSP: ((h.incomes.rrsp || 0) + (h.incomes.lira || 0)) / discountFactor,
             withdrawNonReg: (h.incomes.nonReg || 0) / discountFactor,
@@ -153,6 +154,7 @@ export const PlannerCharts = ({ results, state }) => {
                             
                             <Bar dataKey="cpp" name="CPP (Gross)" stackId="a" fill="#6366f1" />
                             <Bar dataKey="oas" name="OAS (Gross)" stackId="a" fill="#8b5cf6" />
+                            <Bar dataKey="gis" name="GIS (Net)" stackId="a" fill="#db2777" />
                             <Bar dataKey="pension" name="Pension (Gross)" stackId="a" fill="#0ea5e9" />
                             <Bar dataKey="withdrawNonReg" name="Non-Reg (Gross)" stackId="a" fill="#f59e0b" />
                             <Bar dataKey="withdrawRRSP" name="RRSP/LIRA (Gross)" stackId="a" fill="#ec4899" />

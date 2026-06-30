@@ -1,4 +1,5 @@
 import { calculateFederalTax, calculateProvincialTax } from '../../tax/utils/taxEngine.js';
+import { GIS_PARAMS } from '../../../utils/constants.js';
 
 const OAS_CLAWBACK_THRESHOLD = 90997; // 2024 value approx
 const OAS_CLAWBACK_RATE = 0.15;
@@ -97,6 +98,7 @@ export const calculateRetirementDrawdown = (params) => {
                     pension: 0,
                     cpp: 0,
                     oas: 0,
+                    gis: 0,
                     nonReg: 0, rrsp: 0, lira: 0, tfsa: 0
                 },
                 tax: 0,
@@ -173,16 +175,27 @@ export const calculateRetirementDrawdown = (params) => {
         }
 
         // 2. Withdraw to hit target
-        let currentCash = pAmount + cAmount + oAmount + rrifForcedTaxable;
         let currentTaxable = fixedTaxable + rrifForcedTaxable;
         
+        const calculateGIS = (realTaxableExcludingOAS) => {
+            if (age < Math.max(65, num(oas.startAge))) return 0;
+            const clawback = Math.max(0, realTaxableExcludingOAS) * GIS_PARAMS.SINGLE.rate; 
+            const maxAnnualGIS = GIS_PARAMS.SINGLE.max * 12;
+            return Math.max(0, maxAnnualGIS - clawback);
+        };
+
         // Deflate to today's dollars to avoid tax bracket creep
         const realFixedTaxable = currentTaxable / inflationFactor;
         const realOAmount = oAmount / inflationFactor;
 
         let tax = getTax(realFixedTaxable, province) * inflationFactor;
         let clawback = getOasClawback(realFixedTaxable, realOAmount) * inflationFactor;
-        
+
+        // Base GIS before dynamic withdrawals
+        const realTaxableExcludingOAS = (currentTaxable - oAmount) / inflationFactor;
+        let currentGIS = calculateGIS(realTaxableExcludingOAS) * inflationFactor;
+
+        let currentCash = pAmount + cAmount + oAmount + rrifForcedTaxable + currentGIS;
         let netCash = currentCash - tax - clawback;
 
         let shortfall = currentTarget - netCash;
@@ -229,7 +242,12 @@ export const calculateRetirementDrawdown = (params) => {
                         tax = realTax * inflationFactor;
                         clawback = realClawback * inflationFactor;
 
-                        currentCash += pullAmount;
+                        const newRealTaxableExcludingOAS = (currentTaxable - oAmount) / inflationFactor;
+                        const newGIS = calculateGIS(newRealTaxableExcludingOAS) * inflationFactor;
+                        const gisDelta = newGIS - currentGIS;
+                        currentGIS = newGIS;
+
+                        currentCash += pullAmount + gisDelta;
                         netCash = currentCash - tax - clawback;
                         shortfall = currentTarget - netCash;
                         
@@ -265,6 +283,7 @@ export const calculateRetirementDrawdown = (params) => {
                 pension: pAmount,
                 cpp: cAmount,
                 oas: Math.max(0, oAmount - clawback),
+                gis: currentGIS,
                 ...withdrawals
             },
             tax,

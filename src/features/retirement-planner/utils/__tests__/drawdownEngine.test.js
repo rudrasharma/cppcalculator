@@ -185,4 +185,28 @@ describe('Retirement Drawdown Engine', () => {
         expect(year72.balances.nonReg).toBeGreaterThan(0);
         expect(year72.shortfall).toBe(0);
     });
+
+    it('calculates GIS for low-income seniors and dynamically adjusts during withdrawals', () => {
+        const params = {
+            startAge: 65,
+            endAge: 65,
+            targetIncome: 20000,
+            inflation: 0.0,
+            returnRate: 0.0,
+            balances: { tfsa: 0, rrsp: 0, nonReg: 0, lira: 0 },
+            pension: 0,
+            cpp: 0,
+            oas: 0 // Assume some nominal OAS or 0
+        };
+
+        // Case 1: No income, full GIS
+        const result1 = calculateRetirementDrawdown(params);
+        expect(result1.history[0].incomes.gis).toBeGreaterThan(13000); // Max single GIS is ~13,368
+
+        // Case 2: 10,000 pension income, 50% clawback means GIS drops by 5,000
+        const params2 = { ...params, pension: { amount: 10000, startAge: 65 } };
+        const result2 = calculateRetirementDrawdown(params2);
+        expect(result2.history[0].incomes.gis).toBeLessThan(result1.history[0].incomes.gis);
+        expect(result1.history[0].incomes.gis - result2.history[0].incomes.gis).toBeCloseTo(5000, -2);
+    });
 });
