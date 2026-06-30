@@ -81,10 +81,20 @@ export const calculateRetirementDrawdown = (params) => {
     let currentTarget = targetIncomeNum;
     let isDepleted = false;
     let ageOfDepletion = null;
+    let currentInflationFactor = 1;
 
     for (let age = currentAgeNum; age <= endAgeNum; age++) {
         const yearsDiff = age - currentAgeNum;
-        const inflationFactor = Math.pow(1 + inflationNum, yearsDiff);
+        
+        // Use generators for Monte Carlo if provided, otherwise static user input
+        const currentInflation = params.yearlyInflationGenerator ? params.yearlyInflationGenerator() : inflationNum;
+        const currentReturn = params.yearlyReturnGenerator ? params.yearlyReturnGenerator() : returnRateNum;
+
+        if (yearsDiff > 0) {
+            currentInflationFactor *= (1 + currentInflation);
+        }
+        
+        const inflationFactor = currentInflationFactor;
 
         if (age < startAgeNum) {
             // Accumulation Phase
@@ -109,16 +119,16 @@ export const calculateRetirementDrawdown = (params) => {
             });
             
             // Grow balances and add contributions
-            currentTarget = currentTarget * (1 + inflationNum);
+            currentTarget = currentTarget * (1 + currentInflation);
             
-            currentBalances.tfsa = ((currentBalances.tfsa || 0) + num(contributions?.tfsa)) * (1 + returnRateNum);
-            currentBalances.rrsp = ((currentBalances.rrsp || 0) + num(contributions?.rrsp)) * (1 + returnRateNum);
+            currentBalances.tfsa = ((currentBalances.tfsa || 0) + num(contributions?.tfsa)) * (1 + currentReturn);
+            currentBalances.rrsp = ((currentBalances.rrsp || 0) + num(contributions?.rrsp)) * (1 + currentReturn);
             
             const nonRegContrib = num(contributions?.nonReg);
-            currentBalances.nonReg = ((currentBalances.nonReg || 0) + nonRegContrib) * (1 + returnRateNum);
+            currentBalances.nonReg = ((currentBalances.nonReg || 0) + nonRegContrib) * (1 + currentReturn);
             currentBookValue.nonReg += nonRegContrib; // contributions directly increase book value
             
-            currentBalances.lira = (currentBalances.lira || 0) * (1 + returnRateNum); 
+            currentBalances.lira = (currentBalances.lira || 0) * (1 + currentReturn); 
             
             continue;
         }
@@ -294,12 +304,12 @@ export const calculateRetirementDrawdown = (params) => {
         });
 
         // 3. Grow remaining balances and inflate target
-        currentTarget = currentTarget * (1 + inflation);
+        currentTarget = currentTarget * (1 + currentInflation);
         
-        currentBalances.tfsa = (currentBalances.tfsa || 0) * (1 + returnRate);
-        currentBalances.rrsp = (currentBalances.rrsp || 0) * (1 + returnRate);
-        currentBalances.lira = (currentBalances.lira || 0) * (1 + returnRate);
-        currentBalances.nonReg = (currentBalances.nonReg || 0) * (1 + returnRate);
+        currentBalances.tfsa = (currentBalances.tfsa || 0) * (1 + currentReturn);
+        currentBalances.rrsp = (currentBalances.rrsp || 0) * (1 + currentReturn);
+        currentBalances.lira = (currentBalances.lira || 0) * (1 + currentReturn);
+        currentBalances.nonReg = (currentBalances.nonReg || 0) * (1 + currentReturn);
     }
 
     const finalEstate = history.length > 0 

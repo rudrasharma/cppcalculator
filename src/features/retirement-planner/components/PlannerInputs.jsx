@@ -1,7 +1,7 @@
 import React from 'react';
 import { MoneyInput, InfoIcon } from '../../../components/shared';
 
-export const PlannerInputs = ({ state, updateField }) => {
+export const PlannerInputs = ({ state, updateField, isMonteCarlo, monteCarloProfile, setMonteCarloProfile }) => {
     
     return (
         <div className="space-y-6">
@@ -268,6 +268,27 @@ export const PlannerInputs = ({ state, updateField }) => {
                         />
                     </div>
                 </div>
+
+                {isMonteCarlo && (
+                    <div className="mb-4 bg-indigo-50/50 p-4 rounded-xl border border-indigo-100">
+                        <label className="block text-sm font-semibold text-indigo-900 mb-1">Risk Profile</label>
+                        <div className="grid grid-cols-3 gap-2">
+                            {['Conservative', 'Balanced', 'Aggressive'].map((profile) => (
+                                <button
+                                    key={profile}
+                                    onClick={() => setMonteCarloProfile(profile)}
+                                    className={`px-2 py-2 text-xs font-medium rounded-lg border transition-all ${
+                                        monteCarloProfile === profile 
+                                        ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm' 
+                                        : 'bg-white text-indigo-700 border-indigo-200 hover:bg-indigo-50 hover:border-indigo-300'
+                                    }`}
+                                >
+                                    {profile}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                )}
 
                 <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1">Drawdown Strategy</label>

@@ -1,12 +1,41 @@
 import React from 'react';
 
-export const PlannerMetrics = ({ results }) => {
+export const PlannerMetrics = ({ results, state, isMonteCarlo, monteCarloResults }) => {
     if (!results || !results.history) return null;
 
     const { isDepleted, ageOfDepletion, finalEstate } = results;
+    
+    // Calculate real value
+    const inflation = state?.inflation || 0.021;
+    const baseAge = state?.currentAge || state?.startAge || results.history[0]?.age || 40;
+    const endAge = results.history.length > 0 ? results.history[results.history.length - 1].age : state?.endAge || 90;
+    const yearsDiff = Math.max(0, endAge - baseAge);
+    const realFinalEstate = finalEstate / Math.pow(1 + inflation, yearsDiff);
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className={`grid grid-cols-1 ${isMonteCarlo ? 'md:grid-cols-3' : 'md:grid-cols-2'} gap-4`}>
+            {isMonteCarlo && (
+                <div className="bg-indigo-600 p-6 rounded-2xl border border-indigo-700 shadow-sm text-white">
+                    <div className="flex items-start gap-4">
+                        <div className="p-3 rounded-xl bg-indigo-500/50 text-indigo-100">
+                            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h4 className="text-sm font-semibold text-indigo-200 mb-1">Probability of Success</h4>
+                            <div className="text-2xl font-bold">
+                                {monteCarloResults?.probabilityOfSuccess !== undefined 
+                                    ? `${Math.round(monteCarloResults.probabilityOfSuccess)}%`
+                                    : '--%'}
+                            </div>
+                            <p className="text-sm text-indigo-200/80 mt-1">
+                                Likelihood of not running out of money.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            )}
             <div className={`p-6 rounded-2xl border ${isDepleted ? 'bg-rose-50 border-rose-200' : 'bg-emerald-50 border-emerald-200'}`}>
                 <div className="flex items-start gap-4">
                     <div className={`p-3 rounded-xl ${isDepleted ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700'}`}>
@@ -34,21 +63,29 @@ export const PlannerMetrics = ({ results }) => {
                 </div>
             </div>
 
-            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
                 <div className="flex items-start gap-4">
-                    <div className="p-3 rounded-xl bg-indigo-50 text-indigo-700">
+                    <div className="p-3 rounded-xl bg-indigo-50 text-indigo-700 shrink-0">
                         <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                         </svg>
                     </div>
-                    <div>
+                    <div className="w-full">
                         <h4 className="text-sm font-semibold text-slate-700 mb-1">Final Estate Value</h4>
-                        <div className="text-2xl font-bold text-slate-900">
-                            ${Math.round(finalEstate).toLocaleString()}
+                        <div className="flex flex-col gap-1 w-full">
+                            <div className="flex justify-between items-end border-b border-slate-100 pb-2">
+                                <span className="text-2xl font-bold text-slate-900 leading-none">
+                                    ${Math.round(finalEstate).toLocaleString()}
+                                </span>
+                                <span className="text-xs font-semibold text-slate-400 uppercase tracking-wide">Nominal</span>
+                            </div>
+                            <div className="flex justify-between items-end pt-1">
+                                <span className="text-lg font-bold text-indigo-600 leading-none">
+                                    ${Math.round(realFinalEstate).toLocaleString()}
+                                </span>
+                                <span className="text-xs font-semibold text-indigo-400/80 uppercase tracking-wide">Today's $</span>
+                            </div>
                         </div>
-                        <p className="text-sm text-slate-500 mt-1">
-                            Estimated remaining value at your end planning age.
-                        </p>
                     </div>
                 </div>
             </div>
