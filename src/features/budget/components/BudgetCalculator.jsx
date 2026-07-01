@@ -188,7 +188,7 @@ export default function BudgetCalculator() {
                             <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-50 rounded-full blur-3xl -mr-32 -mt-32 opacity-50 pointer-events-none"></div>
                             
                             <h2 className="text-2xl font-black text-slate-900 mb-2">Upload Bank Statement</h2>
-                            <p className="text-slate-500 mb-8 max-w-md">Take screenshots of your bank or credit card statements and upload or paste them here. We'll use AI to categorize your spending and find optimizations.</p>
+                            <p className="text-slate-500 mb-8 max-w-md">Just take a screenshot of the transactions list from your bank or credit card statement and paste it here. <strong>You do NOT need to include any personal identifying information (PII)</strong> like your name, account number, or balance! We'll use AI to categorize your spending and find optimizations.</p>
 
                             <div 
                                 onClick={() => fileInputRef.current?.click()}
