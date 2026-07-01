@@ -12,6 +12,9 @@ import {
     FileTextIcon,
     RotateCcwIcon,
     HomeIcon,
+    Accordion,
+    ExternalLinkIcon,
+    DollarSignIcon
 } from '../../../components/shared';
 
 // Helper for CSV export
@@ -328,6 +331,22 @@ export const MortgageResults = ({ results, state }) => {
                         </tbody>
                     </table>
                 </div>
+            </div>
+
+            {/* Official Government Resources */}
+            <div className="pt-4">
+                <Accordion title="Official Government Resources" icon={ExternalLinkIcon}>
+                    <div className="flex flex-col gap-4">
+                        <a href="https://www.cmhc-schl.gc.ca/consumers/home-buying/mortgage-loan-insurance-for-consumers/what-are-the-general-requirements-to-qualify-for-homeowner-mortgage-loan-insurance" target="_blank" rel="noreferrer" className="flex items-center justify-between p-4 bg-indigo-50 rounded-2xl group transition-all hover:bg-indigo-100">
+                            <div className="flex items-center gap-3"><DollarSignIcon className="text-indigo-600" /> <span className="font-bold text-indigo-900 text-sm">CMHC: Mortgage Insurance Requirements</span></div>
+                            <ExternalLinkIcon size={16} className="text-indigo-400 group-hover:translate-x-1 transition-transform" />
+                        </a>
+                        <a href="https://www.canada.ca/en/financial-consumer-agency/services/mortgages/down-payment.html" target="_blank" rel="noreferrer" className="flex items-center justify-between p-4 bg-emerald-50 rounded-2xl group transition-all hover:bg-emerald-100">
+                            <div className="flex items-center gap-3"><DollarSignIcon className="text-emerald-600" /> <span className="font-bold text-emerald-900 text-sm">FCAC: Down Payment Rules & Guidelines</span></div>
+                            <ExternalLinkIcon size={16} className="text-emerald-400 group-hover:translate-x-1 transition-transform" />
+                        </a>
+                    </div>
+                </Accordion>
             </div>
 
             {/* Disclaimer */}
