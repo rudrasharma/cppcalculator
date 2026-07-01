@@ -1,7 +1,8 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 
 export default function BudgetDashboard({ data, onReset }) {
+    const [selectedCategory, setSelectedCategory] = useState(null);
     
     // Group transactions by category to feed the Pie chart
     const categoryData = useMemo(() => {
@@ -80,12 +81,16 @@ export default function BudgetDashboard({ data, onReset }) {
                         </div>
                     )}
                     
-                    <div className="mt-4 space-y-2">
+                    <div className="mt-4 space-y-1">
                         {categoryData.map((cat, i) => (
-                            <div key={cat.name} className="flex justify-between text-sm">
+                            <div 
+                                key={cat.name} 
+                                onClick={() => setSelectedCategory(selectedCategory === cat.name ? null : cat.name)}
+                                className={`flex justify-between text-sm p-2 rounded-xl cursor-pointer transition-colors ${selectedCategory === cat.name ? 'bg-indigo-50 shadow-sm' : 'hover:bg-slate-50'}`}
+                            >
                                 <div className="flex items-center gap-2">
                                     <div className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[i % COLORS.length] }}></div>
-                                    <span className="font-medium text-slate-600">{cat.name}</span>
+                                    <span className={`font-medium ${selectedCategory === cat.name ? 'text-indigo-700 font-bold' : 'text-slate-600'}`}>{cat.name}</span>
                                 </div>
                                 <span className="font-bold text-slate-900">{formatCurrency(cat.value)}</span>
                             </div>
@@ -136,9 +141,22 @@ export default function BudgetDashboard({ data, onReset }) {
             {/* TRANSACTIONS TABLE */}
             <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm">
                 <div className="px-8 py-6 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
-                    <h3 className="font-black text-slate-800">Extracted Transactions</h3>
+                    <h3 className="font-black text-slate-800 flex items-center gap-2">
+                        Extracted Transactions
+                        {selectedCategory && (
+                            <span className="text-sm font-bold text-indigo-500 bg-indigo-50 px-2 py-0.5 rounded-full">
+                                {selectedCategory}
+                                <button 
+                                    onClick={() => setSelectedCategory(null)}
+                                    className="ml-2 text-indigo-400 hover:text-indigo-600"
+                                >
+                                    &times;
+                                </button>
+                            </span>
+                        )}
+                    </h3>
                     <span className="text-xs font-bold bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full uppercase tracking-wide">
-                        {data.transactions?.length || 0} ITEMS
+                        {data.transactions ? (selectedCategory ? data.transactions.filter(t => t.category === selectedCategory).length : data.transactions.length) : 0} ITEMS
                     </span>
                 </div>
                 
@@ -153,7 +171,9 @@ export default function BudgetDashboard({ data, onReset }) {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
-                            {data.transactions && data.transactions.map((tx, idx) => (
+                            {data.transactions && data.transactions
+                                .filter(tx => !selectedCategory || tx.category === selectedCategory)
+                                .map((tx, idx) => (
                                 <tr key={idx} className="hover:bg-slate-50 transition-colors group">
                                     <td className="p-4 pl-8 text-sm text-slate-500 whitespace-nowrap">{tx.date}</td>
                                     <td className="p-4 text-sm font-bold text-slate-800">{tx.cleanName}</td>
