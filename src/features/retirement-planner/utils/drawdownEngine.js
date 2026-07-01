@@ -1,12 +1,9 @@
 import { calculateFederalTax, calculateProvincialTax } from '../../tax/utils/taxEngine.js';
 import { GIS_PARAMS } from '../../../utils/constants.js';
 
-const OAS_CLAWBACK_THRESHOLD = 90997; // 2024 value approx
+const OAS_CLAWBACK_THRESHOLD = 90997; // 2024 approx
 const OAS_CLAWBACK_RATE = 0.15;
 
-/**
- * Calculates the total tax (Federal + Provincial) for a given taxable income.
- */
 export const RRIF_MINIMUM_FACTORS = {
     71: 0.0528, 72: 0.0540, 73: 0.0553, 74: 0.0567, 75: 0.0582,
     76: 0.0598, 77: 0.0617, 78: 0.0636, 79: 0.0658, 80: 0.0682,
@@ -22,14 +19,12 @@ const getRrifFactor = (age) => {
 };
 
 const getTax = (taxableIncome, province) => {
+    if (taxableIncome <= 0) return 0;
     const fed = calculateFederalTax(taxableIncome, taxableIncome);
     const prov = calculateProvincialTax(taxableIncome, province);
     return fed + prov;
 };
 
-/**
- * Calculates the OAS clawback if taxable income exceeds the threshold.
- */
 const getOasClawback = (taxableIncome, oasAmount) => {
     if (taxableIncome <= OAS_CLAWBACK_THRESHOLD) return 0;
     const excess = taxableIncome - OAS_CLAWBACK_THRESHOLD;
@@ -37,289 +32,339 @@ const getOasClawback = (taxableIncome, oasAmount) => {
     return Math.min(clawback, oasAmount);
 };
 
-/**
- * Core engine for simulating retirement drawdown
- */
-export const calculateRetirementDrawdown = (params) => {
-    const {
-        currentAge,
-        startAge,
-        endAge,
-        targetIncome,
-        inflation,
-        returnRate,
-        balances: initialBalances,
-        contributions,
-        pension,
-        cpp,
-        oas,
-        yearsInCanada = 40,
-        drawdownOrder = ['nonReg', 'rrsp', 'lira', 'tfsa'],
-        province = 'ON'
-    } = params;
+const getOasEligibleBase = (yearsInCanada, startAge) => {
+    const baseOAS = 8560; // Approx max annual 2024
+    const validYears = Math.min(Math.max(0, yearsInCanada), 40);
+    let eligible = 0;
+    if (validYears >= 10 && validYears < 40) eligible = baseOAS * (validYears / 40);
+    else if (validYears >= 40) eligible = baseOAS;
 
+    const delayYears = Math.max(0, Math.min((parseFloat(startAge) || 0) - 65, 5));
+    return eligible * (1 + (delayYears * 0.072));
+};
+
+const calculateGIS = (familyIncome, hasSpouse, spouseGetsOAS) => {
+    let params;
+    if (!hasSpouse) {
+        params = GIS_PARAMS.SINGLE;
+    } else if (spouseGetsOAS) {
+        params = GIS_PARAMS.MARRIED_SPOUSE_OAS;
+    } else {
+        params = GIS_PARAMS.MARRIED_SPOUSE_NO_OAS;
+    }
+    if (familyIncome >= params.limit) return 0;
+    const annualMax = params.max * 12;
+    const gis = annualMax - (familyIncome * params.rate);
+    return Math.max(0, gis);
+};
+
+export const calculateRetirementDrawdown = (params) => {
     const num = (val) => parseFloat(val) || 0;
 
-    const startAgeNum = num(startAge);
-    const currentAgeNum = num(currentAge) || startAgeNum;
-    const endAgeNum = num(endAge);
-    const targetIncomeNum = num(targetIncome);
-    const inflationNum = num(inflation);
-    const returnRateNum = num(returnRate);
-    
+    const {
+        hasSpouse = false,
+        spouse = {},
+        currentAge, startAge, endAge, targetIncome,
+        inflation, returnRate, balances: initialBalances,
+        contributions, pension, cpp, oas, yearsInCanada = 40,
+        drawdownOrder = ['nonReg', 'rrsp', 'lira', 'tfsa'],
+        province = 'ON',
+        yearlyInflationGenerator, yearlyReturnGenerator
+    } = params;
+
+    const primaryStartAge = currentAge !== undefined ? num(currentAge) : num(startAge);
+    const primaryEndAge = Math.max(primaryStartAge, num(endAge));
+    const maxYears = primaryEndAge - primaryStartAge;
+
     const history = [];
-    let currentBalances = { 
-        tfsa: num(initialBalances?.tfsa),
-        rrsp: num(initialBalances?.rrsp),
-        nonReg: num(initialBalances?.nonReg),
-        lira: num(initialBalances?.lira),
+
+    let currentBalances = {
+        primary: { tfsa: num(initialBalances?.tfsa), rrsp: num(initialBalances?.rrsp), lira: num(initialBalances?.lira) },
+        spouse: { tfsa: num(spouse?.balances?.tfsa), rrsp: num(spouse?.balances?.rrsp), lira: num(spouse?.balances?.lira) },
+        joint: { nonReg: num(initialBalances?.nonReg) }
     };
-    let currentBookValue = {
-        nonReg: num(initialBalances?.nonRegBookValue) || num(initialBalances?.nonReg)
-    };
-    
-    let currentTarget = targetIncomeNum;
+    let currentBookValue = { nonReg: num(initialBalances?.nonRegBookValue) || num(initialBalances?.nonReg) };
+
+    let currentTarget = num(targetIncome);
     let isDepleted = false;
     let ageOfDepletion = null;
     let currentInflationFactor = 1;
+    let currentGIS = 0; 
 
-    for (let age = currentAgeNum; age <= endAgeNum; age++) {
-        const yearsDiff = age - currentAgeNum;
-        
-        // Use generators for Monte Carlo if provided, otherwise static user input
-        const currentInflation = params.yearlyInflationGenerator ? params.yearlyInflationGenerator() : inflationNum;
-        const currentReturn = params.yearlyReturnGenerator ? params.yearlyReturnGenerator() : returnRateNum;
+    for (let year = 0; year <= maxYears; year++) {
+        const pAge = primaryStartAge + year;
+        const sAge = hasSpouse ? num(spouse.currentAge) + year : null;
 
-        if (yearsDiff > 0) {
-            currentInflationFactor *= (1 + currentInflation);
-        }
-        
-        const inflationFactor = currentInflationFactor;
+        const currentInflation = yearlyInflationGenerator ? yearlyInflationGenerator() : num(inflation);
+        const currentReturn = yearlyReturnGenerator ? yearlyReturnGenerator() : num(returnRate);
 
-        if (age < startAgeNum) {
-            // Accumulation Phase
-            const totalBalance = (currentBalances.tfsa || 0) + (currentBalances.rrsp || 0) + (currentBalances.nonReg || 0) + (currentBalances.lira || 0);
-            
+        if (year > 0) currentInflationFactor *= (1 + currentInflation);
+        const infFactor = currentInflationFactor;
+
+        const pWorking = pAge < num(startAge);
+        const sWorking = hasSpouse && sAge < num(spouse.startAge);
+
+        const getTotalBalance = () => {
+            return Object.values(currentBalances.primary).reduce((a, b) => a + b, 0) +
+                   (hasSpouse ? Object.values(currentBalances.spouse).reduce((a, b) => a + b, 0) : 0) +
+                   currentBalances.joint.nonReg;
+        };
+
+        if (pWorking && (!hasSpouse || sWorking)) {
+            // Both working (or single working)
             history.push({
-                age,
-                balances: { ...currentBalances },
-                totalBalance,
-                incomes: {
-                    pension: 0,
-                    cpp: 0,
-                    oas: 0,
-                    gis: 0,
-                    nonReg: 0, rrsp: 0, lira: 0, tfsa: 0
+                age: pAge,
+                balances: {
+                    tfsa: currentBalances.primary.tfsa + (hasSpouse ? currentBalances.spouse.tfsa : 0),
+                    rrsp: currentBalances.primary.rrsp + (hasSpouse ? currentBalances.spouse.rrsp : 0),
+                    lira: currentBalances.primary.lira + (hasSpouse ? currentBalances.spouse.lira : 0),
+                    nonReg: currentBalances.joint.nonReg
                 },
-                tax: 0,
-                clawback: 0,
-                netCash: 0,
-                targetIncome: 0,
-                shortfall: 0
+                totalBalance: getTotalBalance(),
+                incomes: { pension: 0, cpp: 0, oas: 0, gis: 0, nonReg: 0, rrsp: 0, lira: 0, tfsa: 0 },
+                tax: 0, clawback: 0, netCash: 0, targetIncome: 0, shortfall: 0
             });
-            
-            // Grow balances and add contributions
+
             currentTarget = currentTarget * (1 + currentInflation);
-            
-            currentBalances.tfsa = ((currentBalances.tfsa || 0) + num(contributions?.tfsa)) * (1 + currentReturn);
-            currentBalances.rrsp = ((currentBalances.rrsp || 0) + num(contributions?.rrsp)) * (1 + currentReturn);
-            
+
+            // Contributions and Growth
+            currentBalances.primary.tfsa = (currentBalances.primary.tfsa + num(contributions?.tfsa)) * (1 + currentReturn);
+            currentBalances.primary.rrsp = (currentBalances.primary.rrsp + num(contributions?.rrsp)) * (1 + currentReturn);
+            currentBalances.primary.lira = (currentBalances.primary.lira) * (1 + currentReturn);
+
+            if (hasSpouse) {
+                currentBalances.spouse.tfsa = (currentBalances.spouse.tfsa + num(spouse?.contributions?.tfsa)) * (1 + currentReturn);
+                currentBalances.spouse.rrsp = (currentBalances.spouse.rrsp + num(spouse?.contributions?.rrsp)) * (1 + currentReturn);
+                currentBalances.spouse.lira = (currentBalances.spouse.lira) * (1 + currentReturn);
+            }
+
             const nonRegContrib = num(contributions?.nonReg);
-            currentBalances.nonReg = ((currentBalances.nonReg || 0) + nonRegContrib) * (1 + currentReturn);
-            currentBookValue.nonReg += nonRegContrib; // contributions directly increase book value
-            
-            currentBalances.lira = (currentBalances.lira || 0) * (1 + currentReturn); 
-            
+            currentBalances.joint.nonReg = (currentBalances.joint.nonReg + nonRegContrib) * (1 + currentReturn);
+            currentBookValue.nonReg += nonRegContrib;
+
             continue;
         }
 
-        // 1. Fixed Incomes (Indexed to inflation)
-        // Note: For simplistic planning, we assume employer pensions are also fully indexed.
-        const pAmount = age >= num(pension.startAge) ? num(pension.amount) * inflationFactor : 0;
-        const cAmount = age >= num(cpp.startAge) ? num(cpp.amount) * inflationFactor : 0;
-        
-        const baseOAS = 8560;
-        const delayYears = Math.max(0, Math.min(num(oas.startAge) - 65, 5));
-        let oasEligibleBase = baseOAS * (1 + (delayYears * 0.072));
-        
-        const validYears = Math.min(Math.max(0, num(yearsInCanada)), 40);
-        if (validYears < 10) {
-            oasEligibleBase = 0; // Requires at least 10 years
-        } else if (validYears < 40) {
-            oasEligibleBase = oasEligibleBase * (validYears / 40);
-        }
-        
-        let oAmount = age >= num(oas.startAge) ? oasEligibleBase * inflationFactor : 0;
+        // Drawdown phase for at least one person
+        let pPension = pAge >= num(pension.startAge) ? num(pension.amount) * infFactor : 0;
+        let pCPP = pAge >= num(cpp.startAge) ? num(cpp.amount) * infFactor : 0;
+        let pOAS = pAge >= num(oas.startAge) ? getOasEligibleBase(num(yearsInCanada), num(oas.startAge)) * infFactor : 0;
 
-        let fixedTaxable = pAmount + cAmount + oAmount;
+        let sPension = hasSpouse && sAge >= num(spouse.pension?.startAge) ? num(spouse.pension?.amount) * infFactor : 0;
+        let sCPP = hasSpouse && sAge >= num(spouse.cpp?.startAge) ? num(spouse.cpp?.amount) * infFactor : 0;
+        let sOAS = hasSpouse && sAge >= num(spouse.oas?.startAge) ? getOasEligibleBase(num(spouse.yearsInCanada), num(spouse.oas?.startAge)) * infFactor : 0;
 
-        let withdrawals = {
-            nonReg: 0,
-            rrsp: 0,
-            lira: 0,
-            tfsa: 0
-        };
-
-        const pullFromAccount = (acctType, amountNeeded) => {
-            const available = currentBalances[acctType] || 0;
-            const pulled = Math.min(available, amountNeeded);
-            currentBalances[acctType] -= pulled;
-            withdrawals[acctType] += pulled;
-            return pulled;
-        };
-
-        // --- RRIF/LIF Minimums ---
-        let rrifForcedTaxable = 0;
-        if (age >= 72) {
-            const rrifFactor = getRrifFactor(age);
-            
-            if ((currentBalances.rrsp || 0) > 0) {
-                const forcedRrsp = currentBalances.rrsp * rrifFactor;
-                rrifForcedTaxable += pullFromAccount('rrsp', forcedRrsp);
-            }
-            
-            if ((currentBalances.lira || 0) > 0) {
-                const forcedLira = currentBalances.lira * rrifFactor;
-                rrifForcedTaxable += pullFromAccount('lira', forcedLira);
+        // Pension Splitting (Simple 50% shift of DB Pension if age > 65)
+        if (hasSpouse && pAge >= 65 && sAge >= 65) {
+            if (pPension > sPension) {
+                const shift = (pPension - sPension) / 2;
+                pPension -= shift;
+                sPension += shift;
+            } else if (sPension > pPension) {
+                const shift = (sPension - pPension) / 2;
+                sPension -= shift;
+                pPension += shift;
             }
         }
 
-        // 2. Withdraw to hit target
-        let currentTaxable = fixedTaxable + rrifForcedTaxable;
-        
-        const calculateGIS = (realTaxableExcludingOAS) => {
-            if (age < Math.max(65, num(oas.startAge))) return 0;
-            const clawback = Math.max(0, realTaxableExcludingOAS) * GIS_PARAMS.SINGLE.rate; 
-            const maxAnnualGIS = GIS_PARAMS.SINGLE.max * 12;
-            return Math.max(0, maxAnnualGIS - clawback);
+        const pullFrom = (person, type, amount) => {
+            const avail = currentBalances[person][type];
+            const pull = Math.min(avail, amount);
+            currentBalances[person][type] -= pull;
+            return pull;
         };
 
-        // Deflate to today's dollars to avoid tax bracket creep
-        const realFixedTaxable = currentTaxable / inflationFactor;
-        const realOAmount = oAmount / inflationFactor;
+        const pullFromJoint = (amount) => {
+            const avail = currentBalances.joint.nonReg;
+            const pull = Math.min(avail, amount);
+            currentBalances.joint.nonReg -= pull;
+            return pull;
+        };
 
-        let tax = getTax(realFixedTaxable, province) * inflationFactor;
-        let clawback = getOasClawback(realFixedTaxable, realOAmount) * inflationFactor;
+        // Forced Minimums
+        let pRrifForced = pAge >= 72 ? pullFrom('primary', 'rrsp', currentBalances.primary.rrsp * getRrifFactor(pAge)) : 0;
+        let pLifForced = pAge >= 72 ? pullFrom('primary', 'lira', currentBalances.primary.lira * getRrifFactor(pAge)) : 0;
+        
+        let sRrifForced = hasSpouse && sAge >= 72 ? pullFrom('spouse', 'rrsp', currentBalances.spouse.rrsp * getRrifFactor(sAge)) : 0;
+        let sLifForced = hasSpouse && sAge >= 72 ? pullFrom('spouse', 'lira', currentBalances.spouse.lira * getRrifFactor(sAge)) : 0;
 
-        // Base GIS before dynamic withdrawals
-        const realTaxableExcludingOAS = (currentTaxable - oAmount) / inflationFactor;
-        let currentGIS = calculateGIS(realTaxableExcludingOAS) * inflationFactor;
+        let pTaxable = pPension + pCPP + pOAS + pRrifForced + pLifForced;
+        let sTaxable = sPension + sCPP + sOAS + sRrifForced + sLifForced;
 
-        let currentCash = pAmount + cAmount + oAmount + rrifForcedTaxable + currentGIS;
-        let netCash = currentCash - tax - clawback;
+        // Calculate tax based on real dollars
+        const pRealTaxable = pTaxable / infFactor;
+        const sRealTaxable = sTaxable / infFactor;
+        
+        let pTax = getTax(pRealTaxable, province) * infFactor;
+        let sTax = getTax(sRealTaxable, province) * infFactor;
+        
+        let pClawback = getOasClawback(pRealTaxable, pOAS / infFactor) * infFactor;
+        let sClawback = getOasClawback(sRealTaxable, sOAS / infFactor) * infFactor;
 
-        let shortfall = currentTarget - netCash;
-        let accountsExhausted = false;
+        // Family Income for GIS (Excluding OAS). Only eligible if at least one is 65+
+        let gisDelta = 0;
+        if (pAge >= 65 || (hasSpouse && sAge >= 65)) {
+            let famRealIncomeExOAS = ((pTaxable - pOAS) + (sTaxable - sOAS)) / infFactor;
+            let newGIS = calculateGIS(famRealIncomeExOAS, hasSpouse, sOAS > 0) * infFactor;
+            gisDelta = newGIS - currentGIS;
+            currentGIS = newGIS;
+        } else {
+            currentGIS = 0;
+        }
 
-        // Dynamic precision step withdrawal to approximate progressive tax brackets
-        while (shortfall > 10 && !accountsExhausted) {
-            let chunkFound = false;
-            
-            for (const acct of drawdownOrder) {
-                if ((currentBalances[acct] || 0) > 0) {
-                    // Pull a chunk to cover the shortfall + estimated tax drag
-                    let pullAmount = Math.min(1000 * inflationFactor, currentBalances[acct], shortfall * 1.5); 
-                    pullAmount = pullFromAccount(acct, pullAmount);
-                    
-                    if (pullAmount > 0) {
-                        chunkFound = true;
-                        
-                        if (acct === 'rrsp' || acct === 'lira') {
-                            currentTaxable += pullAmount;
-                        } else if (acct === 'nonReg') {
-                            const prePullBalance = currentBalances.nonReg + pullAmount;
-                            
-                            if (prePullBalance > 0 && prePullBalance > currentBookValue.nonReg) {
-                                const gainProportion = (prePullBalance - currentBookValue.nonReg) / prePullBalance;
-                                const realizedGain = pullAmount * gainProportion;
-                                currentTaxable += (realizedGain * 0.5); // 50% inclusion rate
+        let familyNetCash = (pTaxable + sTaxable) - (pTax + sTax) - (pClawback + sClawback) + gisDelta;
+        let shortfall = currentTarget - familyNetCash;
+
+        let withdrawals = { nonReg: 0, rrsp: pRrifForced + sRrifForced, lira: pLifForced + sLifForced, tfsa: 0 };
+
+        // Pull to meet shortfall
+        if (shortfall > 0) {
+            let accountsExhausted = false;
+
+            while (shortfall > 10 && !accountsExhausted) {
+                let chunkFound = false;
+                const chunk = Math.min(shortfall, 5000);
+
+                for (const acct of drawdownOrder) {
+                    if (chunkFound) break;
+
+                    if (acct === 'tfsa' || acct === 'rrsp' || acct === 'lira') {
+                        // Proportional pull from primary and spouse
+                        const pBal = currentBalances.primary[acct];
+                        const sBal = hasSpouse ? currentBalances.spouse[acct] : 0;
+                        const totalBal = pBal + sBal;
+
+                        if (totalBal > 0) {
+                            const pPull = pullFrom('primary', acct, chunk * (pBal / totalBal));
+                            const sPull = hasSpouse ? pullFrom('spouse', acct, chunk * (sBal / totalBal)) : 0;
+                            const totalPull = pPull + sPull;
+
+                            withdrawals[acct] += totalPull;
+
+                            if (acct === 'rrsp' || acct === 'lira') {
+                                // Add to taxable and recalculate tax
+                                pTaxable += pPull;
+                                sTaxable += sPull;
+
+                                pTax = getTax(pTaxable / infFactor, province) * infFactor;
+                                sTax = getTax(sTaxable / infFactor, province) * infFactor;
                                 
-                                const returnOfCapital = pullAmount - realizedGain;
-                                currentBookValue.nonReg = Math.max(0, currentBookValue.nonReg - returnOfCapital);
+                                pClawback = getOasClawback(pTaxable / infFactor, pOAS / infFactor) * infFactor;
+                                sClawback = getOasClawback(sTaxable / infFactor, sOAS / infFactor) * infFactor;
+                                
+                                let famRealIncomeExOAS = ((pTaxable - pOAS) + (sTaxable - sOAS)) / infFactor;
+                                if (pAge >= 65 || (hasSpouse && sAge >= 65)) {
+                                    currentGIS = calculateGIS(famRealIncomeExOAS, hasSpouse, sOAS > 0) * infFactor;
+                                } else {
+                                    currentGIS = 0;
+                                }
+
+                                let cashTaxableSources = pPension + sPension + pCPP + sCPP + pOAS + sOAS + withdrawals.rrsp + withdrawals.lira;
+                                familyNetCash = cashTaxableSources - (pTax + sTax) - (pClawback + sClawback) + currentGIS;
+                                shortfall = currentTarget - familyNetCash - withdrawals.nonReg - withdrawals.tfsa; // Adjust shortfall calculation
                             } else {
-                                // If book value >= balance (loss or flat), no taxable gain, but book value reduces
+                                // TFSA is not taxable
+                                shortfall -= totalPull;
+                            }
+                            chunkFound = true;
+                        }
+                    } else if (acct === 'nonReg') {
+                        if (currentBalances.joint.nonReg > 0) {
+                            // Non-Reg pull logic
+                            // Simplified for brevity: roughly 50% inclusion on gains
+                            let pullAmount = pullFromJoint(chunk);
+                            withdrawals.nonReg += pullAmount;
+
+                            const prePullBalance = currentBalances.joint.nonReg + pullAmount;
+                            if (prePullBalance > 0 && prePullBalance > currentBookValue.nonReg) {
+                                const gainProp = (prePullBalance - currentBookValue.nonReg) / prePullBalance;
+                                const realizedGain = pullAmount * gainProp;
+                                
+                                // Split gain between primary and spouse
+                                const pGain = realizedGain / (hasSpouse ? 2 : 1);
+                                const sGain = hasSpouse ? realizedGain / 2 : 0;
+                                
+                                pTaxable += (pGain * 0.5);
+                                sTaxable += (sGain * 0.5);
+
+                                pTax = getTax(pTaxable / infFactor, province) * infFactor;
+                                sTax = getTax(sTaxable / infFactor, province) * infFactor;
+                                
+                                pClawback = getOasClawback(pTaxable / infFactor, pOAS / infFactor) * infFactor;
+                                sClawback = getOasClawback(sTaxable / infFactor, sOAS / infFactor) * infFactor;
+                                
+                                let famRealIncomeExOAS = ((pTaxable - pOAS) + (sTaxable - sOAS)) / infFactor;
+                                if (pAge >= 65 || (hasSpouse && sAge >= 65)) {
+                                    currentGIS = calculateGIS(famRealIncomeExOAS, hasSpouse, sOAS > 0) * infFactor;
+                                } else {
+                                    currentGIS = 0;
+                                }
+
+                                currentBookValue.nonReg = Math.max(0, currentBookValue.nonReg - (pullAmount - realizedGain));
+                            } else {
                                 currentBookValue.nonReg = Math.max(0, currentBookValue.nonReg - pullAmount);
                             }
+
+                            let cashTaxableSources = pPension + sPension + pCPP + sCPP + pOAS + sOAS + withdrawals.rrsp + withdrawals.lira;
+                            familyNetCash = cashTaxableSources - (pTax + sTax) - (pClawback + sClawback) + currentGIS;
+                            shortfall = currentTarget - familyNetCash - withdrawals.nonReg - withdrawals.tfsa;
+                            chunkFound = true;
                         }
-                        
-                        // Deflate taxable income to calculate taxes using today's progressive brackets
-                        const realTaxable = currentTaxable / inflationFactor;
-                        const realOAmount = oAmount / inflationFactor;
-
-                        const realTax = getTax(realTaxable, province);
-                        const realClawback = getOasClawback(realTaxable, realOAmount);
-
-                        tax = realTax * inflationFactor;
-                        clawback = realClawback * inflationFactor;
-
-                        const newRealTaxableExcludingOAS = (currentTaxable - oAmount) / inflationFactor;
-                        const newGIS = calculateGIS(newRealTaxableExcludingOAS) * inflationFactor;
-                        const gisDelta = newGIS - currentGIS;
-                        currentGIS = newGIS;
-
-                        currentCash += pullAmount + gisDelta;
-                        netCash = currentCash - tax - clawback;
-                        shortfall = currentTarget - netCash;
-                        
-                        break; 
                     }
                 }
+                if (!chunkFound) accountsExhausted = true;
             }
-
-            if (!chunkFound) accountsExhausted = true;
         }
 
         if (shortfall < -10) {
-            // We have a surplus from forced minimums! Reinvest into Non-Reg
-            const surplusCash = -shortfall;
-            currentBalances.nonReg = (currentBalances.nonReg || 0) + surplusCash;
-            currentBookValue.nonReg += surplusCash;
-            // Target is fully met
+            // Surplus, reinvest in non-reg
+            currentBalances.joint.nonReg -= shortfall;
+            currentBookValue.nonReg -= shortfall;
             shortfall = 0;
         }
 
         if (shortfall > 100 && !isDepleted) {
             isDepleted = true;
-            ageOfDepletion = age;
+            ageOfDepletion = pAge;
         }
 
-        const totalBalance = (currentBalances.tfsa || 0) + (currentBalances.rrsp || 0) + (currentBalances.nonReg || 0) + (currentBalances.lira || 0);
-
         history.push({
-            age,
-            balances: { ...currentBalances },
-            totalBalance,
+            age: pAge,
+            balances: {
+                tfsa: currentBalances.primary.tfsa + (hasSpouse ? currentBalances.spouse.tfsa : 0),
+                rrsp: currentBalances.primary.rrsp + (hasSpouse ? currentBalances.spouse.rrsp : 0),
+                lira: currentBalances.primary.lira + (hasSpouse ? currentBalances.spouse.lira : 0),
+                nonReg: currentBalances.joint.nonReg
+            },
+            totalBalance: getTotalBalance(),
             incomes: {
-                pension: pAmount,
-                cpp: cAmount,
-                oas: Math.max(0, oAmount - clawback),
+                pension: pPension + sPension,
+                cpp: pCPP + sCPP,
+                oas: Math.max(0, pOAS - pClawback) + Math.max(0, sOAS - sClawback),
                 gis: currentGIS,
                 ...withdrawals
             },
-            tax,
-            clawback,
-            netCash,
+            tax: pTax + sTax,
+            clawback: pClawback + sClawback,
+            netCash: currentTarget - (shortfall < 10 ? 0 : shortfall),
             targetIncome: currentTarget,
-            shortfall: Math.max(0, shortfall)
+            shortfall: shortfall < 10 ? 0 : shortfall
         });
 
-        // 3. Grow remaining balances and inflate target
+        // Growth
         currentTarget = currentTarget * (1 + currentInflation);
-        
-        currentBalances.tfsa = (currentBalances.tfsa || 0) * (1 + currentReturn);
-        currentBalances.rrsp = (currentBalances.rrsp || 0) * (1 + currentReturn);
-        currentBalances.lira = (currentBalances.lira || 0) * (1 + currentReturn);
-        currentBalances.nonReg = (currentBalances.nonReg || 0) * (1 + currentReturn);
+        currentBalances.primary.tfsa *= (1 + currentReturn);
+        currentBalances.primary.rrsp *= (1 + currentReturn);
+        currentBalances.primary.lira *= (1 + currentReturn);
+        if (hasSpouse) {
+            currentBalances.spouse.tfsa *= (1 + currentReturn);
+            currentBalances.spouse.rrsp *= (1 + currentReturn);
+            currentBalances.spouse.lira *= (1 + currentReturn);
+        }
+        currentBalances.joint.nonReg *= (1 + currentReturn);
     }
 
-    const finalEstate = history.length > 0 
-        ? history[history.length - 1].totalBalance 
-        : ((initialBalances?.tfsa || 0) + (initialBalances?.rrsp || 0) + (initialBalances?.nonReg || 0) + (initialBalances?.lira || 0));
+    const finalEstate = history.length > 0 ? history[history.length - 1].totalBalance : getTotalBalance();
 
-    return {
-        history,
-        isDepleted,
-        ageOfDepletion,
-        finalEstate
-    };
+    return { history, isDepleted, ageOfDepletion, finalEstate };
 };

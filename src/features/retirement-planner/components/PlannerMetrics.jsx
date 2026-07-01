@@ -52,7 +52,7 @@ export const PlannerMetrics = ({ results, state, isMonteCarlo, monteCarloResults
                     <div>
                         <h4 className="text-sm font-semibold text-slate-700 mb-1">Retirement Status</h4>
                         <div className={`text-2xl font-bold ${isDepleted ? 'text-rose-700' : 'text-emerald-700'}`}>
-                            {isDepleted ? `Depleted at Age ${ageOfDepletion}` : 'Fully Funded'}
+                            {isDepleted ? `Depleted at Age ${ageOfDepletion}${state?.hasSpouse ? ' (Applicant)' : ''}` : 'Fully Funded'}
                         </div>
                         <p className={`text-sm mt-1 ${isDepleted ? 'text-rose-600' : 'text-emerald-600'}`}>
                             {isDepleted 

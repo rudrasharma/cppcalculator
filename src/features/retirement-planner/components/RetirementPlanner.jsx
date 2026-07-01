@@ -42,7 +42,25 @@ export default function RetirementPlanner({ isVisible = true }) {
             pension: { amount: 0, startAge: 65 },
             cpp: { amount: 0, startAge: 65 },
             oas: { amount: 8000, startAge: 65 }, // Standard OAS base
-            drawdownOrder: ['nonReg', 'rrsp', 'lira', 'tfsa']
+            drawdownOrder: ['nonReg', 'rrsp', 'lira', 'tfsa'],
+            hasSpouse: false,
+            spouse: {
+                currentAge: 40,
+                startAge: 65,
+                yearsInCanada: 40,
+                balances: {
+                    tfsa: 0,
+                    rrsp: 0,
+                    lira: 0
+                },
+                contributions: {
+                    tfsa: 0,
+                    rrsp: 0
+                },
+                pension: { amount: 0, startAge: 65 },
+                cpp: { amount: 0, startAge: 65 },
+                oas: { amount: 8000, startAge: 65 }
+            }
         };
     });
 
@@ -57,6 +75,22 @@ export default function RetirementPlanner({ isVisible = true }) {
                 const parsed = JSON.parse(savedState);
                 // Ensure global memory province overwrites local if exists
                 if (memory?.province) parsed.province = memory.province;
+                
+                // Schema migration: Add spouse object if it doesn't exist
+                if (parsed.hasSpouse === undefined) parsed.hasSpouse = false;
+                if (!parsed.spouse) {
+                    parsed.spouse = {
+                        currentAge: 40,
+                        startAge: 65,
+                        yearsInCanada: 40,
+                        balances: { tfsa: 0, rrsp: 0, lira: 0 },
+                        contributions: { tfsa: 0, rrsp: 0 },
+                        pension: { amount: 0, startAge: 65 },
+                        cpp: { amount: 0, startAge: 65 },
+                        oas: { amount: 8000, startAge: 65 }
+                    };
+                }
+
                 setState(parsed);
             }
         } catch (e) {
@@ -163,6 +197,7 @@ export default function RetirementPlanner({ isVisible = true }) {
                             state={state} 
                             updateField={updateField} 
                             isMonteCarlo={isMonteCarlo}
+                            setIsMonteCarlo={setIsMonteCarlo}
                             monteCarloProfile={monteCarloProfile}
                             setMonteCarloProfile={setMonteCarloProfile}
                         />
