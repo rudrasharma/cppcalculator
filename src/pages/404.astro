@@ -4,6 +4,9 @@
  * Provides a user-friendly error page with navigation back to the main site
  */
 
+import AnalyticsHead from '../components/shared/AnalyticsHead.astro';
+import { PostHogProviderWrapper } from '../components/PostHogProviderWrapper.jsx';
+
 interface Props {}
 
 const SITE_TITLE = "Page Not Found | LoonieFi";
@@ -32,10 +35,12 @@ const canonicalURL = new URL('/404', Astro.site || Astro.url.origin);
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:title" content={SITE_TITLE} />
     <meta name="twitter:description" content={SITE_DESCRIPTION} />
+
+    <AnalyticsHead />
   </head>
 
   <body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col items-center justify-center p-6 text-center antialiased">
-    
+    <PostHogProviderWrapper client:load>
     <main class="bg-white p-8 md:p-12 rounded-[2.5rem] shadow-2xl shadow-indigo-100 border border-slate-100 max-w-lg w-full">
       <div class="mb-6 relative inline-block">
         <div class="absolute inset-0 bg-indigo-100 rounded-full blur-xl opacity-50 animate-pulse" aria-hidden="true"></div>
@@ -66,7 +71,7 @@ const canonicalURL = new URL('/404', Astro.site || Astro.url.origin);
     <footer class="mt-8 text-slate-400 text-xs font-medium">
       Error Code: 404_LOONIE_MISSING
     </footer>
-
+    </PostHogProviderWrapper>
   </body>
 </html>
 

@@ -5,6 +5,7 @@
  */
 
 import { PostHogProviderWrapper } from '../components/PostHogProviderWrapper.jsx';
+import AnalyticsHead from '../components/shared/AnalyticsHead.astro';
 
 interface Props {
   frontmatter: {
@@ -95,17 +96,7 @@ const articleSchema = {
     <script type="application/ld+json" set:html={JSON.stringify(articleSchema)} />
 
     {/* Google Analytics 4 (GA4) */}
-    <script 
-      async 
-      src="https://www.googletagmanager.com/gtag/js?id=G-DS4P8VC6WQ"
-      is:inline
-    ></script>
-    <script is:inline>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-DS4P8VC6WQ');
-    </script>
+    <AnalyticsHead />
 
     <style is:global>
       /* No math-specific styles needed */

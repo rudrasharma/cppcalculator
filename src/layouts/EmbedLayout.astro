@@ -7,6 +7,7 @@
 
 import '../styles/global.css';
 import { PostHogProviderWrapper } from '../components/PostHogProviderWrapper.jsx';
+import AnalyticsHead from '../components/shared/AnalyticsHead.astro';
 
 interface Props {
   title: string;
@@ -64,6 +65,7 @@ const schema = {
         display: none !important;
       }
     </style>
+    <AnalyticsHead />
   </head>
   <body class="font-sans antialiased text-slate-900 selection:bg-indigo-100 selection:text-indigo-900 bg-transparent py-4 px-2 sm:px-4 max-w-5xl mx-auto">
     <PostHogProviderWrapper client:load>
