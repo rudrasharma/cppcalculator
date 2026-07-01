@@ -10,25 +10,53 @@ const breadcrumbPath = [
 ---
 
 <BaseLayout 
-  title="AI Budget Analyzer - Secure & Private | LoonieFi" 
-  description="Upload a screenshot of your bank statement and let our AI categorize your spending, find optimization opportunities, and visualize your cash flow. 100% private and secure."
+  title="Free AI Budget Calculator & Bank Statement Analyzer" 
+  description="Automatically categorize your expenses and find hidden savings with our free AI Budget Calculator. Simply paste a screenshot of your bank statement for instant, private cash flow analysis."
 >
   <main class="py-12 px-6 w-full flex flex-col min-h-screen">
     <div class="max-w-6xl mx-auto w-full mb-8">
         <Breadcrumbs crumbs={breadcrumbPath} />
         
         <header class="pt-8 pb-4 text-center md:text-left animate-fade-in">
-            <h1 class="text-3xl md:text-4xl font-black text-slate-900 tracking-tight mb-2">
-                AI Budget Analyzer
+            <h1 class="text-3xl md:text-5xl font-black text-slate-900 tracking-tight mb-4">
+                AI Budget Calculator
             </h1>
-            <p class="text-slate-500 font-medium max-w-2xl">
-                Upload a screenshot of your statement. We'll automatically categorize your transactions and find hidden savings. Your data is processed securely in memory and never saved.
+            <p class="text-slate-500 font-medium max-w-2xl text-lg">
+                The fastest way to track your spending. Upload a screenshot of your bank or credit card statement and let our AI instantly categorize your transactions and visualize your cash flow.
             </p>
         </header>
     </div>
 
-    <div class="flex-grow flex flex-col w-full relative z-10">
+    <div class="flex-grow flex flex-col w-full relative z-10 mb-16">
         <BudgetCalculator client:load />
     </div>
+    
+    <article class="max-w-4xl mx-auto w-full text-slate-600 space-y-8 pb-12">
+        <section>
+            <h2 class="text-2xl font-bold text-slate-900 mb-3">How does the AI Bank Statement Analyzer work?</h2>
+            <p class="leading-relaxed">
+                Traditional budgeting apps require you to link your bank accounts using tools like Plaid or manually type out every single transaction into a spreadsheet. Our <strong>free AI Budget Calculator</strong> changes that. By leveraging advanced vision AI, you simply paste a screenshot of your bank statement or credit card bill. The AI securely reads the image, extracts the merchants, standardizes messy bank text (turning "POS PURCHASE 1234 UBER*EATS" into "Uber Eats"), and categorizes your spending into logical groups.
+            </p>
+        </section>
+        
+        <section>
+            <h2 class="text-2xl font-bold text-slate-900 mb-3">Is my financial data safe?</h2>
+            <p class="leading-relaxed mb-4">
+                <strong>100% Yes. We do not want your data.</strong> Privacy is the core feature of our analyzer:
+            </p>
+            <ul class="list-disc pl-6 space-y-2">
+                <li><strong>No account linking required:</strong> We never ask for your bank login or passwords.</li>
+                <li><strong>Zero data storage:</strong> The AI processes your image directly in memory. Nothing is saved to our servers, and we have no database attached to this tool. As soon as you refresh the page, your data is gone forever.</li>
+                <li><strong>Anonymous analysis:</strong> You are encouraged to censor or crop out your name, account number, and overall balance before uploading the screenshot. The AI only needs to see the transaction lines.</li>
+            </ul>
+        </section>
+        
+        <section>
+            <h2 class="text-2xl font-bold text-slate-900 mb-3">What insights will I get?</h2>
+            <p class="leading-relaxed">
+                Once analyzed, you'll receive a comprehensive breakdown of your cash flow, including total income versus expenses, a beautiful interactive donut chart of your spending by category, a daily timeline to spot spending spikes, and a leaderboard of your top merchants. You can even export the cleaned, categorized data directly to a CSV file for use in Excel or Google Sheets.
+            </p>
+        </section>
+    </article>
   </main>
 </BaseLayout>
