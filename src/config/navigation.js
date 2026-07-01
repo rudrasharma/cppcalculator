@@ -100,15 +100,26 @@ export const ALL_TOOLS = [
         icon: 'TrendingUpIcon'
     },
     { 
-        id: 'retirementplanner',
+        id: 'budget',
+        categoryId: 'home',
+        href: '/calculator/budget/', 
+        label: 'AI Budget Analyzer', 
+        shortLabel: 'Budget AI',
+        title: 'AI Budget Analyzer',
+        subtitle: 'Securely extract and categorize your spending with AI',
+        description: 'Upload your bank statements and let AI instantly categorize your expenses and find savings.',
+        icon: 'WandIcon'
+    },
+    { 
+        id: 'retirement',
         categoryId: 'retirement',
         href: '/retirement-planner/', 
         label: 'Retirement Planner', 
-        shortLabel: 'Planner',
-        title: 'Retirement Planner (Monte Carlo)',
-        subtitle: 'Comprehensive financial independence tracker',
-        description: 'Simulate your drawdown strategy, sequence of returns, and final estate value.',
-        icon: 'TrendingUpIcon'
+        shortLabel: 'Retirement',
+        title: 'Canadian Retirement Planner',
+        subtitle: 'CPP, OAS, RRSP & TFSA Projections',
+        description: 'Project your retirement income including CPP, OAS, RRSP, and TFSA drawdowns.',
+        icon: 'PiggyBankIcon'
     },
     { 
         id: 'cpp',
@@ -120,6 +131,17 @@ export const ALL_TOOLS = [
         subtitle: 'Estimate your future CPP monthly payments',
         description: 'Calculate your future monthly income from the Canada Pension Plan.',
         icon: 'ChartIcon'
+    },
+    { 
+        id: 'compound',
+        categoryId: 'retirement',
+        href: '/compound-interest-calculator/', 
+        label: 'Compound Interest', 
+        shortLabel: 'Compound',
+        title: 'Compound Interest Calculator',
+        subtitle: 'Visualize your long-term wealth growth',
+        description: 'Calculate how your investments will grow over time with compound interest.',
+        icon: 'BarChartIcon'
     },
     { 
         id: 'cagr',
