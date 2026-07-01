@@ -103,7 +103,7 @@ export default function BudgetCalculator() {
         setError(null);
 
         try {
-            const res = await fetch('/api/ai/budget-analyzer', {
+            const res = await fetch('/api/ai/budget-analyzer/', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ images: redactedImages })
