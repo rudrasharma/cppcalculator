@@ -13,8 +13,6 @@ describe('Retirement Calculator UI Integration', () => {
         useRetirementMath.mockReturnValue({
             grandTotal: 3000,
             cpp: { total: 1800, base: 1500, enhanced: 300, adjustment: 0 },
-            oas: { total: 700, gross: 700, clawback: 0 },
-            gis: { total: 500, note: 'GIS eligible' },
             breakevenData: [{ age: 65, Early: 1000, Standard: 1200, Deferred: 1500, Selected: 1200 }],
             years: [2024, 2025],
             insights: [],
@@ -46,8 +44,6 @@ describe('Retirement Calculator UI Integration', () => {
         useRetirementMath.mockReturnValue({
             grandTotal: 4500,
             cpp: { total: 2500, base: 2000, enhanced: 500, adjustment: 0 },
-            oas: { total: 1000, gross: 1000, clawback: 0 },
-            gis: { total: 1000, note: 'GIS eligible' },
             breakevenData: [{ age: 65, Early: 2000, Standard: 2500, Deferred: 3000, Selected: 2500 }],
             years: [2024, 2025],
             insights: [],

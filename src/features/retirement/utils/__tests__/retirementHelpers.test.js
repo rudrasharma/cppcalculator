@@ -16,10 +16,8 @@ describe('retirementHelpers', () => {
 
   describe('calculateDisplayValues', () => {
     const mockResults = {
-      grandTotal: 3000,
-      cpp: { total: 1200 },
-      oas: { total: 800 },
-      gis: { total: 1000 }
+      grandTotal: 1200,
+      cpp: { total: 1200 }
     };
 
     it('applies inflation correctly (Future Dollars)', () => {
