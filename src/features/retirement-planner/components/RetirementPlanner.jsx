@@ -130,10 +130,6 @@ export default function RetirementPlanner({ isVisible = true }) {
         }
     }, [memory?.grossIncome]);
 
-    const [isMonteCarlo, setIsMonteCarlo] = useState(false);
-    const [monteCarloResults, setMonteCarloResults] = useState(null);
-    const [isCalculatingMC, setIsCalculatingMC] = useState(false);
-    const [monteCarloProfile, setMonteCarloProfile] = useState('Balanced');
 
     const updateField = (field, value) => {
         setState(prev => {
@@ -148,32 +144,7 @@ export default function RetirementPlanner({ isVisible = true }) {
 
     const results = useMemo(() => calculateRetirementDrawdown(state), [state]);
 
-    // Handle Monte Carlo Web Worker
-    useEffect(() => {
-        if (!isMonteCarlo) return;
 
-        setIsCalculatingMC(true);
-        const worker = new Worker(new URL('../workers/monteCarloWorker.js', import.meta.url), { type: 'module' });
-        
-        worker.onmessage = (e) => {
-            if (e.data.error) {
-                console.error("Monte Carlo Error:", e.data.error);
-            } else {
-                setMonteCarloResults(e.data);
-            }
-            setIsCalculatingMC(false);
-        };
-
-        // Debounce sending state to worker
-        const timer = setTimeout(() => {
-            worker.postMessage({ state, riskProfile: monteCarloProfile });
-        }, 500);
-
-        return () => {
-            clearTimeout(timer);
-            worker.terminate();
-        };
-    }, [state, isMonteCarlo, monteCarloProfile]);
 
     const handleAIUpdate = (updates) => {
         setState(prev => ({ ...prev, ...updates }));
@@ -203,10 +174,6 @@ export default function RetirementPlanner({ isVisible = true }) {
                         <PlannerInputs 
                             state={state} 
                             updateField={updateField} 
-                            isMonteCarlo={isMonteCarlo}
-                            setIsMonteCarlo={setIsMonteCarlo}
-                            monteCarloProfile={monteCarloProfile}
-                            setMonteCarloProfile={setMonteCarloProfile}
                         />
                     </div>
 
@@ -215,16 +182,10 @@ export default function RetirementPlanner({ isVisible = true }) {
                         <PlannerMetrics 
                             results={results} 
                             state={state}
-                            isMonteCarlo={isMonteCarlo}
-                            monteCarloResults={monteCarloResults}
                         />
                         <PlannerCharts 
                             results={results} 
                             state={state} 
-                            isMonteCarlo={isMonteCarlo}
-                            setIsMonteCarlo={setIsMonteCarlo}
-                            isCalculatingMC={isCalculatingMC}
-                            monteCarloResults={monteCarloResults}
                         />
                     </div>
                 </div>

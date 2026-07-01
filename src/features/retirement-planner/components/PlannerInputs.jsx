@@ -299,53 +299,6 @@ export const PlannerInputs = ({ state, updateField, isMonteCarlo, setIsMonteCarl
                             </select>
                         </div>
 
-                        <div className="md:col-span-2 mt-2 bg-slate-50 p-4 rounded-xl border border-slate-200">
-                            <label className="flex items-center gap-3 cursor-pointer">
-                                <div className="relative inline-block w-10 h-5">
-                                    <input 
-                                        type="checkbox" 
-                                        className="opacity-0 w-0 h-0 peer" 
-                                        checked={isMonteCarlo}
-                                        onChange={(e) => {
-                                            if (setIsMonteCarlo) setIsMonteCarlo(e.target.checked);
-                                            if (setMonteCarloProfile && e.target.checked) setMonteCarloProfile('balanced');
-                                        }}
-                                    />
-                                    <span className="absolute cursor-pointer top-0 left-0 right-0 bottom-0 bg-slate-300 rounded-full transition-colors peer-checked:bg-indigo-500"></span>
-                                    <span className="absolute left-[2px] bottom-[2px] bg-white w-4 h-4 rounded-full transition-transform peer-checked:translate-x-5"></span>
-                                </div>
-                                <div>
-                                    <span className="text-sm font-semibold text-slate-800 block">Enable Monte Carlo Simulation</span>
-                                    <span className="text-xs text-slate-500 block">Stress test your plan against market volatility</span>
-                                </div>
-                            </label>
-                            
-                            {isMonteCarlo && (
-                                <div className="mt-4 pt-4 border-t border-slate-200">
-                                    <label className="block text-sm font-medium text-slate-700 mb-2">Risk Profile (Volatility)</label>
-                                    <div className="grid grid-cols-3 gap-2">
-                                        {[
-                                            { id: 'conservative', label: 'Conservative', dev: '6%' },
-                                            { id: 'balanced', label: 'Balanced', dev: '11%' },
-                                            { id: 'aggressive', label: 'Aggressive', dev: '15%' }
-                                        ].map(profile => (
-                                            <button
-                                                key={profile.id}
-                                                onClick={() => setMonteCarloProfile(profile.id)}
-                                                className={`p-2 rounded-lg border text-sm text-center transition-colors ${
-                                                    monteCarloProfile === profile.id 
-                                                        ? 'bg-indigo-50 border-indigo-500 text-indigo-700 font-semibold'
-                                                        : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
-                                                }`}
-                                            >
-                                                <div className="block">{profile.label}</div>
-                                                <div className="text-xs font-normal opacity-70">±{profile.dev}</div>
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-                        </div>
                     </div>
                 </div>
             )}

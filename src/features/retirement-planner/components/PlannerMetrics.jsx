@@ -1,6 +1,6 @@
 import React from 'react';
 
-export const PlannerMetrics = ({ results, state, isMonteCarlo, monteCarloResults }) => {
+export const PlannerMetrics = ({ results, state }) => {
     if (!results || !results.history) return null;
 
     const { isDepleted, ageOfDepletion, finalEstate } = results;
@@ -13,29 +13,7 @@ export const PlannerMetrics = ({ results, state, isMonteCarlo, monteCarloResults
     const realFinalEstate = finalEstate / Math.pow(1 + inflation, yearsDiff);
 
     return (
-        <div className={`grid grid-cols-1 ${isMonteCarlo ? 'md:grid-cols-3' : 'md:grid-cols-2'} gap-4`}>
-            {isMonteCarlo && (
-                <div className="bg-indigo-600 p-6 rounded-2xl border border-indigo-700 shadow-sm text-white">
-                    <div className="flex items-start gap-4">
-                        <div className="p-3 rounded-xl bg-indigo-500/50 text-indigo-100">
-                            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                            </svg>
-                        </div>
-                        <div>
-                            <h4 className="text-sm font-semibold text-indigo-200 mb-1">Probability of Success</h4>
-                            <div className="text-2xl font-bold">
-                                {monteCarloResults?.probabilityOfSuccess !== undefined 
-                                    ? `${Math.round(monteCarloResults.probabilityOfSuccess)}%`
-                                    : '--%'}
-                            </div>
-                            <p className="text-sm text-indigo-200/80 mt-1">
-                                Likelihood of not running out of money.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            )}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className={`p-6 rounded-2xl border ${isDepleted ? 'bg-rose-50 border-rose-200' : 'bg-emerald-50 border-emerald-200'}`}>
                 <div className="flex items-start gap-4">
                     <div className={`p-3 rounded-xl ${isDepleted ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700'}`}>
