@@ -1,5 +1,5 @@
 import React from 'react';
-import { CalendarIcon } from '../../../components/shared';
+import { CalendarIcon, Accordion, ExternalLinkIcon, DollarSignIcon } from '../../../components/shared';
 import { IconBase } from '../../../components/shared/IconBase';
 
 const WalletIcon = React.memo((props) => (
@@ -144,6 +144,22 @@ export default function ParentalLeaveResults({
                 <p className="mt-6 text-center text-xs text-slate-400 font-medium max-w-2xl mx-auto">
                     * Note: Service Canada pays bi-weekly. This is a pre-tax estimate. Actual net amount will be lower depending on your tax bracket.
                 </p>
+            </div>
+
+            {/* Official Government Resources */}
+            <div className="pt-4 max-w-3xl mx-auto w-full">
+                <Accordion title="Official Government Resources" icon={ExternalLinkIcon}>
+                    <div className="flex flex-col gap-4">
+                        <a href="https://www.canada.ca/en/services/benefits/ei/ei-maternity-parental.html" target="_blank" rel="noreferrer" className="flex items-center justify-between p-4 bg-indigo-50 rounded-2xl group transition-all hover:bg-indigo-100">
+                            <div className="flex items-center gap-3"><DollarSignIcon className="text-indigo-600" /> <span className="font-bold text-indigo-900 text-sm">Service Canada: EI Maternity & Parental Rules</span></div>
+                            <ExternalLinkIcon size={16} className="text-indigo-400 group-hover:translate-x-1 transition-transform" />
+                        </a>
+                        <a href="https://www.rqap.gouv.qc.ca/en" target="_blank" rel="noreferrer" className="flex items-center justify-between p-4 bg-emerald-50 rounded-2xl group transition-all hover:bg-emerald-100">
+                            <div className="flex items-center gap-3"><DollarSignIcon className="text-emerald-600" /> <span className="font-bold text-emerald-900 text-sm">Retraite Québec: QPIP Details</span></div>
+                            <ExternalLinkIcon size={16} className="text-emerald-400 group-hover:translate-x-1 transition-transform" />
+                        </a>
+                    </div>
+                </Accordion>
             </div>
 
         </div>
