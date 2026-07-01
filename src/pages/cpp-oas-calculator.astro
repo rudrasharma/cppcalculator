@@ -57,9 +57,16 @@ const faqSchema = {
         <h1 class="text-4xl md:text-5xl font-black text-slate-900 mb-4 tracking-tighter">
           CPP Calculator [{CURRENT_APP_YEAR}]
         </h1>
-        <p class="text-lg text-slate-600 max-w-2xl mx-auto">
+        <p class="text-lg text-slate-600 max-w-2xl mx-auto mb-6">
           Accurate estimates for your Canada Pension Plan benefits, including the new enhanced CPP rules.
         </p>
+
+        <div class="inline-flex items-center gap-3 bg-indigo-50 border border-indigo-100 px-4 py-3 rounded-xl max-w-2xl mx-auto text-left shadow-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-500 shrink-0"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+            <p class="text-sm text-indigo-900">
+                <strong>Looking for OAS and GIS?</strong> We've moved our full household income and Old Age Security calculations to the new, comprehensive <a href="/retirement-planner/" class="font-bold underline decoration-indigo-400 underline-offset-2 hover:text-indigo-600 transition-colors">Retirement Planner</a>.
+            </p>
+        </div>
       </header>
 
       <Calculator client:load isVisible={true} />
