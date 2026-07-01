@@ -12,13 +12,13 @@ const RETIREMENT_PLANNER_SUGGESTIONS = [
     { label: 'Pension Safety', value: 'I have a $40k/yr DB pension. How much RRSP do I need to hit $80k income?' }
 ];
 
-export default function RetirementPlanner({ isVisible = true }) {
+export default function RetirementPlanner({ isVisible = true, initialStateOverride = null }) {
     const { memory, updateMemory } = useFinancialMemory();
 
     // Core state
     const [state, setState] = useState(() => {
-        // Hydrate from memory where possible
-        return {
+        // Hydrate from memory where possible, unless override is provided
+        const baseState = {
             province: memory?.province || 'ON',
             yearsInCanada: memory?.yearsInCanada || 40,
             currentAge: 40,
@@ -64,6 +64,11 @@ export default function RetirementPlanner({ isVisible = true }) {
                 oas: { amount: 8000, startAge: 65 }
             }
         };
+
+        if (initialStateOverride) {
+            return { ...baseState, ...initialStateOverride };
+        }
+        return baseState;
     });
 
     const [aiInsight, setAiInsight] = useState('');
@@ -71,6 +76,11 @@ export default function RetirementPlanner({ isVisible = true }) {
 
     // Load from localStorage on mount (client-side only to prevent hydration mismatch)
     useEffect(() => {
+        if (initialStateOverride) {
+            setIsLoaded(true);
+            return;
+        }
+
         try {
             const savedState = localStorage.getItem('retirementPlannerState');
             if (savedState) {

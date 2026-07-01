@@ -2,7 +2,7 @@
 // src/pages/calculator/cpp-oas/[scenario].astro
 
 import BaseLayout from '../../../layouts/BaseLayout.astro';
-import Calculator from '../../../features/retirement/components/index.jsx';
+import RetirementPlanner from '../../../features/retirement-planner/components/RetirementPlanner.jsx';
 import Breadcrumbs from '../../../components/shared/Breadcrumbs.astro';
 import { CPP_SCENARIOS } from '../../../data/seo-scenarios';
 import { TAX_YEAR_CONFIG } from '../../../config/taxYears.js';
@@ -142,15 +142,24 @@ const faqSchema = {
           <div class="absolute top-0 right-0 w-64 h-64 bg-indigo-500/30 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
       </div>
 
-      <Calculator 
+      <RetirementPlanner 
         client:load 
-        initialRetirementAge={scenario.age}
-        initialYearsInCanada={scenario.years}
-        initialIncome={scenario.income}
-        initialMaritalStatus={scenario.married}
-        initialSpouseIncome={scenario.spouseIncome || ''}
-        initialChildCount={scenario.childCount || 0}
-        initialDob="1965-01-01" 
+        initialStateOverride={{
+            startAge: scenario.age,
+            yearsInCanada: scenario.years,
+            workingIncome: parseInt(scenario.income),
+            hasSpouse: scenario.married,
+            spouse: {
+                startAge: scenario.age,
+                workingIncome: scenario.spouseIncome ? parseInt(scenario.spouseIncome) : 0,
+                yearsInCanada: scenario.years,
+                balances: { tfsa: 0, rrsp: 0, lira: 0 },
+                contributions: { tfsa: 0, rrsp: 0 },
+                pension: { amount: 0, startAge: scenario.age },
+                cpp: { amount: 0, startAge: scenario.age },
+                oas: { amount: 8000, startAge: scenario.age }
+            }
+        }}
       />
 
       {/* --- INSIGHTS --- */}
