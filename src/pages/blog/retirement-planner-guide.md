@@ -1,6 +1,6 @@
 ---
 title: "The Ultimate Guide to Canadian Retirement Drawdown Planning [2025]"
-pubDate: 2025-10-15
+pubDate: 2026-06-30
 prerender: true
 description: "Master your Canadian retirement with our step-by-step guide to using the LoonieFi Retirement Planner. Learn how to simulate your asset drawdown and government benefits."
 slug: "retirement-planner-guide"
