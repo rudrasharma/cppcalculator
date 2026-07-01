@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { TrashIcon } from '../../../components/shared/Icons';
 
 // Extended categories for the dropdown
@@ -52,6 +52,37 @@ export default function BudgetDashboard({ data, onReset }) {
             .map(key => ({ name: key, value: groups[key] }))
             .sort((a, b) => b.value - a.value); // sort largest to smallest
     }, [localData.transactions]);
+
+    // Group transactions by date for the timeline
+    const timelineData = useMemo(() => {
+        const groups = {};
+        let filtered = localData.transactions.filter(t => t.category !== 'Internal Transfer' && t.amount > 0);
+        if (selectedCategory) filtered = filtered.filter(t => t.category === selectedCategory);
+        
+        filtered.forEach(t => {
+            if (!groups[t.date]) groups[t.date] = 0;
+            groups[t.date] += t.amount;
+        });
+        return Object.keys(groups)
+            .map(date => ({ date, amount: groups[date] }))
+            .sort((a, b) => new Date(a.date) - new Date(b.date));
+    }, [localData.transactions, selectedCategory]);
+
+    // Group transactions by merchant for the leaderboard
+    const merchantData = useMemo(() => {
+        const groups = {};
+        let filtered = localData.transactions.filter(t => t.category !== 'Internal Transfer' && t.amount > 0);
+        if (selectedCategory) filtered = filtered.filter(t => t.category === selectedCategory);
+
+        filtered.forEach(t => {
+            if (!groups[t.cleanName]) groups[t.cleanName] = 0;
+            groups[t.cleanName] += t.amount;
+        });
+        return Object.keys(groups)
+            .map(name => ({ name, amount: groups[name] }))
+            .sort((a, b) => b.amount - a.amount)
+            .slice(0, 5);
+    }, [localData.transactions, selectedCategory]);
 
     const COLORS = ['#6366f1', '#14b8a6', '#f43f5e', '#f59e0b', '#8b5cf6', '#0ea5e9', '#10b981', '#64748b', '#ec4899', '#6b7280'];
 
@@ -240,6 +271,94 @@ export default function BudgetDashboard({ data, onReset }) {
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            {/* ADDITIONAL VISUALIZATIONS */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                {/* TIMELINE CHART */}
+                <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
+                    <h3 className="text-lg font-black text-slate-800 mb-6 flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                        Daily Spending Timeline
+                    </h3>
+                    {timelineData.length > 0 ? (
+                        <div className="h-64">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <AreaChart data={timelineData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                                    <defs>
+                                        <linearGradient id="colorAmount" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
+                                            <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                                        </linearGradient>
+                                    </defs>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                                    <XAxis 
+                                        dataKey="date" 
+                                        tick={{ fill: '#94a3b8', fontSize: 12 }}
+                                        tickLine={false}
+                                        axisLine={false}
+                                        tickFormatter={(str) => {
+                                            const parts = str.split('-');
+                                            return `${parts[1]}/${parts[2]}`;
+                                        }}
+                                    />
+                                    <YAxis 
+                                        tick={{ fill: '#94a3b8', fontSize: 12 }}
+                                        tickLine={false}
+                                        axisLine={false}
+                                        tickFormatter={(val) => `$${val}`}
+                                    />
+                                    <Tooltip 
+                                        formatter={(value) => formatCurrency(value)}
+                                        labelStyle={{ color: '#64748b', fontWeight: 'bold', marginBottom: '4px' }}
+                                        contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)' }}
+                                    />
+                                    <Area type="monotone" dataKey="amount" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#colorAmount)" />
+                                </AreaChart>
+                            </ResponsiveContainer>
+                        </div>
+                    ) : (
+                        <div className="h-64 flex items-center justify-center text-slate-400 text-sm font-medium">
+                            No timeline data available.
+                        </div>
+                    )}
+                </div>
+
+                {/* MERCHANTS CHART */}
+                <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
+                    <h3 className="text-lg font-black text-slate-800 mb-6 flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-rose-500"></span>
+                        Top Merchants
+                    </h3>
+                    {merchantData.length > 0 ? (
+                        <div className="h-64">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart data={merchantData} layout="vertical" margin={{ top: 0, right: 10, left: 0, bottom: 0 }}>
+                                    <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
+                                    <XAxis type="number" hide />
+                                    <YAxis 
+                                        dataKey="name" 
+                                        type="category" 
+                                        axisLine={false} 
+                                        tickLine={false}
+                                        width={120}
+                                        tick={{ fill: '#64748b', fontSize: 12, fontWeight: 'bold' }}
+                                    />
+                                    <Tooltip 
+                                        formatter={(value) => formatCurrency(value)}
+                                        cursor={{ fill: '#f8fafc' }}
+                                        contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)' }}
+                                    />
+                                    <Bar dataKey="amount" fill="#f43f5e" radius={[0, 4, 4, 0]} barSize={24} />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </div>
+                    ) : (
+                        <div className="h-64 flex items-center justify-center text-slate-400 text-sm font-medium">
+                            No merchant data available.
+                        </div>
+                    )}
                 </div>
             </div>
 
