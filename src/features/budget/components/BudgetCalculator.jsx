@@ -1,0 +1,217 @@
+import React, { useState, useRef } from 'react';
+import RedactionCanvas from './RedactionCanvas';
+import BudgetDashboard from './BudgetDashboard';
+import { ShieldCheckIcon, AlertTriangleIcon } from '../../../components/shared/Icons';
+
+export default function BudgetCalculator() {
+    const [appState, setAppState] = useState('UPLOAD'); // UPLOAD, REDACT, ANALYZING, DASHBOARD
+    const [rawImage, setRawImage] = useState(null);
+    const [redactedImage, setRedactedImage] = useState(null);
+    const [budgetData, setBudgetData] = useState(null);
+    const [error, setError] = useState(null);
+
+    const fileInputRef = useRef(null);
+
+    const handleFileSelect = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        if (!file.type.startsWith('image/')) {
+            setError("Please upload an image file (PNG, JPEG). PDF support is coming soon!");
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            setRawImage(event.target.result);
+            setAppState('REDACT');
+            setError(null);
+        };
+        reader.readAsDataURL(file);
+    };
+
+    const handleLoadSample = () => {
+        setAppState('ANALYZING');
+        setTimeout(() => {
+            setBudgetData({
+                transactions: [
+                    { date: "2023-10-01", cleanName: "FreshCo Supermarket", amount: 145.20, category: "Food & Groceries" },
+                    { date: "2023-10-02", cleanName: "Starbucks", amount: 6.50, category: "Dining Out" },
+                    { date: "2023-10-03", cleanName: "Property Tax", amount: 350.00, category: "Housing" },
+                    { date: "2023-10-04", cleanName: "Enbridge Gas", amount: 85.00, category: "Utilities" },
+                    { date: "2023-10-05", cleanName: "Netflix", amount: 15.99, category: "Recreational" },
+                    { date: "2023-10-06", cleanName: "Uber", amount: 24.50, category: "Transportation" },
+                    { date: "2023-10-10", cleanName: "Costco Wholesale", amount: 312.45, category: "Food & Groceries" }
+                ],
+                insights: [
+                    "You spend a significant portion on Food & Groceries. Buying in bulk at Costco is great, but watch out for impulse buys!",
+                    "Your Dining Out expenses are low, which is excellent for saving money.",
+                    "Consider setting up a dedicated sinking fund for your Property Taxes to smooth out your monthly cash flow."
+                ],
+                totals: {
+                    income: 0,
+                    expenses: 939.64
+                }
+            });
+            setAppState('DASHBOARD');
+        }, 1500);
+    };
+
+    const handleAnalyze = async (base64Image) => {
+        setRedactedImage(base64Image);
+        setAppState('ANALYZING');
+        setError(null);
+
+        try {
+            const res = await fetch('/api/ai/budget-analyzer', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ image: base64Image })
+            });
+
+            const data = await res.json();
+            
+            if (!res.ok) {
+                throw new Error(data.error || "Failed to analyze image");
+            }
+
+            setBudgetData(data);
+            setAppState('DASHBOARD');
+        } catch (err) {
+            console.error(err);
+            setError(err.message || "An error occurred during analysis.");
+            setAppState('REDACT'); 
+        }
+    };
+
+    const resetApp = () => {
+        setAppState('UPLOAD');
+        setRawImage(null);
+        setRedactedImage(null);
+        setBudgetData(null);
+        setError(null);
+    };
+
+    return (
+        <div className="max-w-6xl mx-auto w-full">
+            {error && (
+                <div className="mb-6 p-4 rounded-2xl bg-rose-50 border border-rose-100 flex items-start gap-3 text-rose-800 animate-fade-in">
+                    <div className="mt-0.5"><AlertTriangleIcon className="w-5 h-5 text-rose-500" /></div>
+                    <div>
+                        <h4 className="font-bold">Error</h4>
+                        <p className="text-sm">{error}</p>
+                    </div>
+                </div>
+            )}
+
+            {appState === 'UPLOAD' && (
+                <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 items-start animate-fade-in">
+                    
+                    <div className="lg:col-span-3">
+                        <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-50 rounded-full blur-3xl -mr-32 -mt-32 opacity-50 pointer-events-none"></div>
+                            
+                            <h2 className="text-2xl font-black text-slate-900 mb-2">Upload Bank Statement</h2>
+                            <p className="text-slate-500 mb-8 max-w-md">Take a screenshot of your bank or credit card statement and upload it here. We'll use AI to categorize your spending and find optimizations.</p>
+
+                            <div 
+                                onClick={() => fileInputRef.current?.click()}
+                                className="border-3 border-dashed border-slate-200 hover:border-indigo-400 bg-slate-50 hover:bg-indigo-50/50 rounded-2xl p-12 text-center cursor-pointer transition-colors group"
+                            >
+                                <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm group-hover:scale-110 transition-transform text-indigo-500">
+                                    <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                                    </svg>
+                                </div>
+                                <h3 className="text-lg font-bold text-slate-700 mb-1">Click to upload screenshot</h3>
+                                <p className="text-sm text-slate-400">PNG, JPG up to 10MB</p>
+                                <input 
+                                    type="file" 
+                                    accept="image/png, image/jpeg" 
+                                    className="hidden" 
+                                    ref={fileInputRef}
+                                    onChange={handleFileSelect}
+                                />
+                            </div>
+
+                            <div className="mt-6 flex items-center justify-center gap-4">
+                                <div className="h-px bg-slate-200 flex-1"></div>
+                                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">OR</span>
+                                <div className="h-px bg-slate-200 flex-1"></div>
+                            </div>
+
+                            <div className="mt-6 text-center">
+                                <button onClick={handleLoadSample} className="text-sm font-bold text-indigo-600 hover:text-indigo-700 hover:underline">
+                                    Try it with a sample statement
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="lg:col-span-2 space-y-6">
+                        <div className="bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl p-8 text-white shadow-xl relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none"></div>
+                            
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="w-10 h-10 bg-emerald-500/20 rounded-full flex items-center justify-center text-emerald-400">
+                                    <ShieldCheckIcon className="w-5 h-5" />
+                                </div>
+                                <h3 className="font-black text-lg">100% Private & Secure</h3>
+                            </div>
+                            <p className="text-slate-300 text-sm leading-relaxed mb-6">
+                                We take your privacy seriously. Your data is processed securely and is <strong>never stored in any database.</strong>
+                            </p>
+                            
+                            <ul className="space-y-4">
+                                <li className="flex gap-3 text-sm text-slate-200">
+                                    <svg className="w-5 h-5 text-indigo-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
+                                    <span><strong>Local Censor Tool:</strong> You will have the opportunity to blur out account numbers and names before analysis.</span>
+                                </li>
+                                <li className="flex gap-3 text-sm text-slate-200">
+                                    <svg className="w-5 h-5 text-indigo-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                    <span><strong>Zero Storage Guarantee:</strong> Your statement is analyzed in memory and immediately discarded.</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {appState === 'REDACT' && (
+                <RedactionCanvas 
+                    imageUrl={rawImage} 
+                    onComplete={handleAnalyze} 
+                    onCancel={resetApp} 
+                />
+            )}
+
+            {appState === 'ANALYZING' && (
+                <div className="flex flex-col items-center justify-center py-32 animate-fade-in">
+                    <div className="relative w-24 h-24 mb-8">
+                        <div className="absolute inset-0 border-4 border-slate-100 rounded-full"></div>
+                        <div className="absolute inset-0 border-4 border-indigo-500 rounded-full border-t-transparent animate-spin"></div>
+                        <div className="absolute inset-0 flex items-center justify-center text-indigo-500">
+                            <svg className="w-8 h-8 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <h2 className="text-2xl font-black text-slate-900 mb-2">Analyzing your spending...</h2>
+                    <p className="text-slate-500 text-center max-w-md">Our AI is reading your transactions, standardizing the merchant names, and categorizing your expenses to find optimization opportunities.</p>
+                </div>
+            )}
+
+            {appState === 'DASHBOARD' && budgetData && (
+                <BudgetDashboard 
+                    data={budgetData} 
+                    onReset={resetApp} 
+                />
+            )}
+        </div>
+    );
+}

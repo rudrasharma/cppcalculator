@@ -1,0 +1,34 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import BudgetCalculator from '../../../features/budget/components/BudgetCalculator.jsx';
+import Breadcrumbs from '../../../components/shared/Breadcrumbs.astro';
+
+const breadcrumbPath = [
+  { label: 'Calculators', href: '/calculator/' },
+  { label: 'Budget Analyzer', href: Astro.url.pathname }
+];
+---
+
+<BaseLayout 
+  title="AI Budget Analyzer - Secure & Private | LoonieFi" 
+  description="Upload a screenshot of your bank statement and let our AI categorize your spending, find optimization opportunities, and visualize your cash flow. 100% private and secure."
+>
+  <main class="py-12 px-6 w-full flex flex-col min-h-screen">
+    <div class="max-w-6xl mx-auto w-full mb-8">
+        <Breadcrumbs crumbs={breadcrumbPath} />
+        
+        <header class="pt-8 pb-4 text-center md:text-left animate-fade-in">
+            <h1 class="text-3xl md:text-4xl font-black text-slate-900 tracking-tight mb-2">
+                AI Budget Analyzer
+            </h1>
+            <p class="text-slate-500 font-medium max-w-2xl">
+                Upload a screenshot of your statement. We'll automatically categorize your transactions and find hidden savings. Your data is processed securely in memory and never saved.
+            </p>
+        </header>
+    </div>
+
+    <div class="flex-grow flex flex-col w-full relative z-10">
+        <BudgetCalculator client:load />
+    </div>
+  </main>
+</BaseLayout>
