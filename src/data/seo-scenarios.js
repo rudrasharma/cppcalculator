@@ -122,9 +122,35 @@ export const MORTGAGE_SCENARIOS = [
     },
     {
         slug: 'first-national-mortgage-calculator',
-        homePrice: 500000, downPayment: 100000, rate: 5.25, amortization: 25, freq: 'monthly',
+        homePrice: 500000, downPayment: 100000, rate: 4.89, amortization: 25, freq: 'monthly',
         label: "First National Mortgage Calculator",
-        desc: "Calculate payments for First National Financial LP, Canada's largest non-bank mortgage lender."
+        desc: "Estimate payments for First National Financial, Canada's largest non-bank mortgage lender."
+    },
+
+    // --- 4. AFFORDABILITY & QUALIFICATION ---
+    {
+        slug: 'mortgage-affordability-calculator',
+        calculationMode: 'affordability',
+        grossIncome: 100000, monthlyDebt: 500,
+        homePrice: 400000, downPayment: 25000, rate: 4.99, amortization: 25, freq: 'monthly',
+        label: "Mortgage Affordability Calculator",
+        desc: "Calculate exactly how much house you can afford based on your income and existing debt."
+    },
+    {
+        slug: 'gds-tds-calculator',
+        calculationMode: 'affordability',
+        grossIncome: 100000, monthlyDebt: 500,
+        homePrice: 400000, downPayment: 25000, rate: 4.99, amortization: 25, freq: 'monthly',
+        label: "GDS and TDS Calculator",
+        desc: "Calculate your Gross Debt Service (GDS) and Total Debt Service (TDS) ratios to see if you qualify for a mortgage."
+    },
+    {
+        slug: 'cmhc-mortgage-qualifier',
+        calculationMode: 'affordability',
+        grossIncome: 100000, monthlyDebt: 500,
+        homePrice: 400000, downPayment: 25000, rate: 4.99, amortization: 25, freq: 'monthly',
+        label: "CMHC Mortgage Qualifier",
+        desc: "Test your financial profile against standard CMHC qualification guidelines and stress test rules."
     },
     {
         slug: 'mcap-mortgage-calculator',

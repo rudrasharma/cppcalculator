@@ -15,9 +15,10 @@ export function getStaticPaths() {
     }));
 }
 
-const { label, desc, principal, homePrice, downPayment, rate, amortization, freq, lumpSums, province, isToronto, isFirstTimeBuyer, showStressTest, calculationMode } = Astro.props;
+const { label, desc, principal, homePrice, downPayment, rate, amortization, freq, lumpSums, province, isToronto, isFirstTimeBuyer, showStressTest, calculationMode, grossIncome, otherIncome, monthlyDebt } = Astro.props;
 
 const isRenewal = calculationMode === 'renewal';
+const isAffordability = calculationMode === 'affordability';
 
 const initialStateOverride = {
     calculationMode: calculationMode || 'purchase',
@@ -30,6 +31,9 @@ const initialStateOverride = {
     isToronto: isToronto || false,
     isFirstTimeBuyer: isFirstTimeBuyer || false,
     showStressTest: showStressTest || false,
+    grossIncome: grossIncome,
+    otherIncome: otherIncome,
+    monthlyDebt: monthlyDebt,
     lumpSums: lumpSums ? lumpSums.map((ls, i) => ({
         id: Date.now() + i,
         amount: ls.amount,
@@ -126,7 +130,24 @@ const schema = {
 const faqSchema = {
   "@context": "https://schema.org",
   "@type": "FAQPage",
-  "mainEntity": [
+  "mainEntity": isAffordability ? [
+    {
+      "@type": "Question",
+      "name": "What are the GDS and TDS ratios?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Gross Debt Service (GDS) is the percentage of your income needed to pay your housing costs (mortgage, taxes, heating, and 50% of condo fees). Total Debt Service (TDS) includes your housing costs plus all other debt payments (car loans, credit cards). CMHC limits are typically 39% for GDS and 44% for TDS."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How much house can I afford?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The amount of house you can afford depends primarily on your down payment and your income. Lenders use a stress test rate (your contract rate plus 2%) to calculate your debt service ratios. If your ratios fall within the 39% GDS and 44% TDS limits, you generally qualify."
+      }
+    }
+  ] : [
     {
       "@type": "Question",
       "name": isRenewal ? `What will my payment be on renewal for a ${homePriceStr} balance?` : `What is the payment on a ${homePriceStr} mortgage at ${safeRate}%?`,
@@ -233,7 +254,16 @@ const relatedScenarios = MORTGAGE_SCENARIOS
       
       <div>
           <h2 class="text-xl font-black text-slate-900 mb-4 tracking-tight">Scenario Breakdown</h2>
-          {isRenewal ? (
+          {isAffordability ? (
+              <>
+                  <p class="mb-4">
+                  Using this affordability calculator, you can determine if you qualify for a <strong>{homePriceStr}</strong> mortgage based on your income and debts. Lenders across Canada use Gross Debt Service (GDS) and Total Debt Service (TDS) ratios to determine how much you can borrow.
+                  </p>
+                  <p class="mb-4">
+                  The standard CMHC guidelines dictate that your GDS should not exceed 39% of your gross annual income, and your TDS (which includes car loans, credit cards, and other obligations) should not exceed 44%. To qualify, lenders will also stress-test your application at a qualifying rate (usually your contract rate plus 2%).
+                  </p>
+              </>
+          ) : isRenewal ? (
               <>
                   <p class="mb-4">
                   If you are renewing or refinancing a remaining mortgage balance of <strong>{homePriceStr}</strong> at a current interest rate of <strong>{safeRate}%</strong>, your new estimated payment will be <strong>{monthlyPaymentStr}</strong> ({safeFreq.replace('-', ' ')}).
