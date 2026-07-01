@@ -105,7 +105,7 @@ describe('Retirement Drawdown Engine', () => {
         // Accumulation phase
         const year50 = result.history[0];
         expect(year50.age).toBe(50);
-        expect(year50.targetIncome).toBe(0); // No target income during accumulation
+        expect(year50.targetIncome).toBe(60000); // Target income is tracked during accumulation, but offset by working income
         expect(year50.incomes.tfsa).toBe(0); // No withdrawals
         expect(year50.incomes.rrsp).toBe(0); 
 

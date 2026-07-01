@@ -114,6 +114,10 @@ export const PlannerInputs = ({ state, updateField, isMonteCarlo, setIsMonteCarl
                                 <input type="number" min="18" max="80" value={pState.currentAge || 40} onChange={(e) => updatePField('currentAge', parseInt(e.target.value) || 40)} className="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl focus:ring-indigo-500 focus:border-indigo-500 block p-3" />
                             </div>
                             <div>
+                                <label className="block text-sm font-medium text-slate-700 mb-1">Current Working Income (Net)</label>
+                                <MoneyInput value={pState.workingIncome} onChange={(val) => updatePField('workingIncome', val)} placeholder="e.g. 60000" />
+                            </div>
+                            <div>
                                 <label className="block text-sm font-medium text-slate-700 mb-1">Start Retirement Age</label>
                                 <input type="number" min="30" max="80" value={pState.startAge} onChange={(e) => updatePField('startAge', parseInt(e.target.value) || 65)} className="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl focus:ring-indigo-500 focus:border-indigo-500 block p-3" />
                             </div>
@@ -282,6 +286,19 @@ export const PlannerInputs = ({ state, updateField, isMonteCarlo, setIsMonteCarl
                             />
                         </div>
                         
+                        <div className="md:col-span-2">
+                            <label className="block text-sm font-medium text-slate-700 mb-1">Drawdown Strategy</label>
+                            <select 
+                                value={state.drawdownOrder?.join(',') || 'nonReg,rrsp,lira,tfsa'} 
+                                onChange={(e) => updateField('drawdownOrder', e.target.value.split(','))}
+                                className="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl focus:ring-indigo-500 focus:border-indigo-500 block p-3 transition-colors cursor-pointer"
+                            >
+                                <option value="nonReg,rrsp,lira,tfsa">Standard (Non-Reg → RRSP → TFSA)</option>
+                                <option value="rrsp,lira,nonReg,tfsa">Tax-heavy First (RRSP/LIRA → Non-Reg → TFSA)</option>
+                                <option value="tfsa,nonReg,rrsp,lira">Tax-free First (TFSA → Non-Reg → RRSP/LIRA)</option>
+                            </select>
+                        </div>
+
                         <div className="md:col-span-2 mt-2 bg-slate-50 p-4 rounded-xl border border-slate-200">
                             <label className="flex items-center gap-3 cursor-pointer">
                                 <div className="relative inline-block w-10 h-5">

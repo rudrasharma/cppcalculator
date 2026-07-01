@@ -65,6 +65,7 @@ export const PlannerCharts = ({ results, state, isMonteCarlo, setIsMonteCarlo, i
             nonReg: (h.balances.nonReg || 0) / discountFactor,
             lira: (h.balances.lira || 0) / discountFactor,
             // Incomes
+            workingIncome: (h.incomes.workingIncome || 0) / discountFactor,
             pension: (h.incomes.pension || 0) / discountFactor,
             cpp: (h.incomes.cpp || 0) / discountFactor,
             oas: (h.incomes.oas || 0) / discountFactor,
@@ -229,6 +230,7 @@ export const PlannerCharts = ({ results, state, isMonteCarlo, setIsMonteCarlo, i
                             <RechartsTooltip content={<CustomTooltip />} />
                             <Legend iconType="circle" verticalAlign="bottom" height={36} />
                             
+                            <Bar dataKey="workingIncome" name="Working Income (Net)" stackId="a" fill="#3b82f6" />
                             <Bar dataKey="cpp" name="CPP (Gross)" stackId="a" fill="#6366f1" />
                             <Bar dataKey="oas" name="OAS (Gross)" stackId="a" fill="#8b5cf6" />
                             <Bar dataKey="gis" name="GIS (Net)" stackId="a" fill="#db2777" />

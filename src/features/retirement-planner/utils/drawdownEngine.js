@@ -104,45 +104,15 @@ export const calculateRetirementDrawdown = (params) => {
         const pWorking = pAge < num(startAge);
         const sWorking = hasSpouse && sAge < num(spouse.startAge);
 
-        const getTotalBalance = () => {
-            return Object.values(currentBalances.primary).reduce((a, b) => a + b, 0) +
-                   (hasSpouse ? Object.values(currentBalances.spouse).reduce((a, b) => a + b, 0) : 0) +
-                   currentBalances.joint.nonReg;
-        };
+        // Apply Working Income offsets
+        let pWorkingIncome = pWorking ? num(params.workingIncome) * infFactor : 0;
+        let sWorkingIncome = sWorking ? num(spouse.workingIncome) * infFactor : 0;
+        let familyWorkingIncome = pWorkingIncome + sWorkingIncome;
 
+        // Safeguard: If everyone is working (pure accumulation phase), assume their income fully covers their lifestyle
+        // so we don't accidentally drain the portfolio before they retire if they didn't input a working income.
         if (pWorking && (!hasSpouse || sWorking)) {
-            // Both working (or single working)
-            history.push({
-                age: pAge,
-                balances: {
-                    tfsa: currentBalances.primary.tfsa + (hasSpouse ? currentBalances.spouse.tfsa : 0),
-                    rrsp: currentBalances.primary.rrsp + (hasSpouse ? currentBalances.spouse.rrsp : 0),
-                    lira: currentBalances.primary.lira + (hasSpouse ? currentBalances.spouse.lira : 0),
-                    nonReg: currentBalances.joint.nonReg
-                },
-                totalBalance: getTotalBalance(),
-                incomes: { pension: 0, cpp: 0, oas: 0, gis: 0, nonReg: 0, rrsp: 0, lira: 0, tfsa: 0 },
-                tax: 0, clawback: 0, netCash: 0, targetIncome: 0, shortfall: 0
-            });
-
-            currentTarget = currentTarget * (1 + currentInflation);
-
-            // Contributions and Growth
-            currentBalances.primary.tfsa = (currentBalances.primary.tfsa + num(contributions?.tfsa)) * (1 + currentReturn);
-            currentBalances.primary.rrsp = (currentBalances.primary.rrsp + num(contributions?.rrsp)) * (1 + currentReturn);
-            currentBalances.primary.lira = (currentBalances.primary.lira) * (1 + currentReturn);
-
-            if (hasSpouse) {
-                currentBalances.spouse.tfsa = (currentBalances.spouse.tfsa + num(spouse?.contributions?.tfsa)) * (1 + currentReturn);
-                currentBalances.spouse.rrsp = (currentBalances.spouse.rrsp + num(spouse?.contributions?.rrsp)) * (1 + currentReturn);
-                currentBalances.spouse.lira = (currentBalances.spouse.lira) * (1 + currentReturn);
-            }
-
-            const nonRegContrib = num(contributions?.nonReg);
-            currentBalances.joint.nonReg = (currentBalances.joint.nonReg + nonRegContrib) * (1 + currentReturn);
-            currentBookValue.nonReg += nonRegContrib;
-
-            continue;
+            familyWorkingIncome = Math.max(currentTarget, familyWorkingIncome);
         }
 
         // Drawdown phase for at least one person
@@ -215,6 +185,21 @@ export const calculateRetirementDrawdown = (params) => {
         let familyNetCash = (pTaxable + sTaxable) - (pTax + sTax) - (pClawback + sClawback) + gisDelta;
         let shortfall = currentTarget - familyNetCash;
 
+        let utilizedWorkingIncome = 0;
+        if (shortfall > 0) {
+            utilizedWorkingIncome = Math.min(shortfall, familyWorkingIncome);
+            shortfall -= utilizedWorkingIncome;
+        }
+
+        // Safeguard: If everyone is working (pure accumulation phase), assume their income fully covers their lifestyle
+        // so we don't accidentally drain the portfolio before they retire if they didn't input a working income.
+        if (pWorking && (!hasSpouse || sWorking)) {
+            if (shortfall > 0) {
+                utilizedWorkingIncome += shortfall;
+                shortfall = 0;
+            }
+        }
+
         let withdrawals = { nonReg: 0, rrsp: pRrifForced + sRrifForced, lira: pLifForced + sLifForced, tfsa: 0 };
 
         // Pull to meet shortfall
@@ -261,7 +246,19 @@ export const calculateRetirementDrawdown = (params) => {
 
                                 let cashTaxableSources = pPension + sPension + pCPP + sCPP + pOAS + sOAS + withdrawals.rrsp + withdrawals.lira;
                                 familyNetCash = cashTaxableSources - (pTax + sTax) - (pClawback + sClawback) + currentGIS;
-                                shortfall = currentTarget - familyNetCash - withdrawals.nonReg - withdrawals.tfsa; // Adjust shortfall calculation
+                                shortfall = currentTarget - familyNetCash - withdrawals.nonReg - withdrawals.tfsa;
+
+                                utilizedWorkingIncome = 0;
+                                if (shortfall > 0) {
+                                    utilizedWorkingIncome = Math.min(shortfall, familyWorkingIncome);
+                                    shortfall -= utilizedWorkingIncome;
+                                }
+                                if (pWorking && (!hasSpouse || sWorking)) {
+                                    if (shortfall > 0) {
+                                        utilizedWorkingIncome += shortfall;
+                                        shortfall = 0;
+                                    }
+                                }
                             } else {
                                 // TFSA is not taxable
                                 shortfall -= totalPull;
@@ -308,6 +305,18 @@ export const calculateRetirementDrawdown = (params) => {
                             let cashTaxableSources = pPension + sPension + pCPP + sCPP + pOAS + sOAS + withdrawals.rrsp + withdrawals.lira;
                             familyNetCash = cashTaxableSources - (pTax + sTax) - (pClawback + sClawback) + currentGIS;
                             shortfall = currentTarget - familyNetCash - withdrawals.nonReg - withdrawals.tfsa;
+
+                            utilizedWorkingIncome = 0;
+                            if (shortfall > 0) {
+                                utilizedWorkingIncome = Math.min(shortfall, familyWorkingIncome);
+                                shortfall -= utilizedWorkingIncome;
+                            }
+                            if (pWorking && (!hasSpouse || sWorking)) {
+                                if (shortfall > 0) {
+                                    utilizedWorkingIncome += shortfall;
+                                    shortfall = 0;
+                                }
+                            }
                             chunkFound = true;
                         }
                     }
@@ -328,6 +337,12 @@ export const calculateRetirementDrawdown = (params) => {
             ageOfDepletion = pAge;
         }
 
+        const getTotalBalance = () => {
+            return Object.values(currentBalances.primary).reduce((a, b) => a + b, 0) +
+                   (hasSpouse ? Object.values(currentBalances.spouse).reduce((a, b) => a + b, 0) : 0) +
+                   currentBalances.joint.nonReg;
+        };
+
         history.push({
             age: pAge,
             balances: {
@@ -338,6 +353,7 @@ export const calculateRetirementDrawdown = (params) => {
             },
             totalBalance: getTotalBalance(),
             incomes: {
+                workingIncome: utilizedWorkingIncome,
                 pension: pPension + sPension,
                 cpp: pCPP + sCPP,
                 oas: Math.max(0, pOAS - pClawback) + Math.max(0, sOAS - sClawback),
@@ -351,8 +367,23 @@ export const calculateRetirementDrawdown = (params) => {
             shortfall: shortfall < 10 ? 0 : shortfall
         });
 
-        // Growth
+        // Growth and Contributions
         currentTarget = currentTarget * (1 + currentInflation);
+        
+        // Process Contributions if working (added before growth so they compound)
+        if (pWorking) {
+            currentBalances.primary.tfsa += num(contributions?.tfsa);
+            currentBalances.primary.rrsp += num(contributions?.rrsp);
+            currentBalances.joint.nonReg += (num(contributions?.nonReg) / (hasSpouse && sWorking ? 2 : 1));
+            currentBookValue.nonReg += (num(contributions?.nonReg) / (hasSpouse && sWorking ? 2 : 1));
+        }
+        if (sWorking) {
+            currentBalances.spouse.tfsa += num(spouse.contributions?.tfsa);
+            currentBalances.spouse.rrsp += num(spouse.contributions?.rrsp);
+            currentBalances.joint.nonReg += (num(spouse.contributions?.nonReg) / (pWorking ? 2 : 1));
+            currentBookValue.nonReg += (num(spouse.contributions?.nonReg) / (pWorking ? 2 : 1));
+        }
+
         currentBalances.primary.tfsa *= (1 + currentReturn);
         currentBalances.primary.rrsp *= (1 + currentReturn);
         currentBalances.primary.lira *= (1 + currentReturn);

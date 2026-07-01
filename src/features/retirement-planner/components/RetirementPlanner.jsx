@@ -24,12 +24,13 @@ export default function RetirementPlanner({ isVisible = true }) {
             currentAge: 40,
             startAge: 65,
             endAge: 90,
+            workingIncome: 60000,
             targetIncome: 60000,
             inflation: 0.021,
             returnRate: 0.05,
             balances: {
-                tfsa: 0,
-                rrsp: 0,
+                tfsa: 20000,
+                rrsp: 50000,
                 nonReg: 0,
                 nonRegBookValue: 0,
                 lira: 0
@@ -47,6 +48,7 @@ export default function RetirementPlanner({ isVisible = true }) {
             spouse: {
                 currentAge: 40,
                 startAge: 65,
+                workingIncome: 60000,
                 yearsInCanada: 40,
                 balances: {
                     tfsa: 0,
@@ -78,10 +80,13 @@ export default function RetirementPlanner({ isVisible = true }) {
                 
                 // Schema migration: Add spouse object if it doesn't exist
                 if (parsed.hasSpouse === undefined) parsed.hasSpouse = false;
+                if (parsed.workingIncome === undefined) parsed.workingIncome = 60000;
+                
                 if (!parsed.spouse) {
                     parsed.spouse = {
                         currentAge: 40,
                         startAge: 65,
+                        workingIncome: 60000,
                         yearsInCanada: 40,
                         balances: { tfsa: 0, rrsp: 0, lira: 0 },
                         contributions: { tfsa: 0, rrsp: 0 },
@@ -89,6 +94,8 @@ export default function RetirementPlanner({ isVisible = true }) {
                         cpp: { amount: 0, startAge: 65 },
                         oas: { amount: 8000, startAge: 65 }
                     };
+                } else if (parsed.spouse.workingIncome === undefined) {
+                    parsed.spouse.workingIncome = 60000;
                 }
 
                 setState(parsed);
