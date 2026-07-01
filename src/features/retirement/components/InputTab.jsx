@@ -39,7 +39,7 @@ export default function InputTab({
     return (
         <>
         <div className="animate-fade-in space-y-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
+            <div className="max-w-2xl mx-auto">
                 {/* COLUMN 1: PROFILE & FAMILY */}
                 <div className="space-y-6">
                     <div className="flex items-center gap-2 text-indigo-600 mb-2">
@@ -104,17 +104,6 @@ export default function InputTab({
                                 <button onClick={() => setChildren([...children, 2010])} className="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1.5 py-1 px-2 rounded-lg hover:bg-indigo-50 transition-colors">+ Add Child</button>
                             </div>
                         )}
-                    </div>
-                </div>
-
-                {/* COLUMN 2: FINANCIALS */}
-                <div className="space-y-6">
-                    <div className="flex items-center gap-2 text-emerald-600 mb-2">
-                        <DollarSignIcon size={20} />
-                        <h3 className="text-xs font-bold uppercase tracking-wider">Financial & Residency</h3>
-                    </div>
-                    
-                    <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
                     </div>
                 </div>
             </div>
