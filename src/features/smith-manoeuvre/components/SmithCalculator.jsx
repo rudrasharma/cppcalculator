@@ -5,7 +5,7 @@ import { SmithMetrics } from './SmithMetrics';
 import { SmithCharts } from './SmithCharts';
 import { SmithAuditTable } from './SmithAuditTable';
 import { SmithNarrative } from './SmithNarrative';
-import { ScaleIcon, RotateCcwIcon, AICommandBar, StrategyCard, AICopilot } from '../../../components/shared';
+import { ScaleIcon, RotateCcwIcon, AICommandBar, StrategyCard, AICopilot, Accordion, ExternalLinkIcon, DollarSignIcon } from '../../../components/shared';
 import { useFinancialMemory } from '../../../hooks/useFinancialMemory';
 
 const SMITH_SUGGESTIONS = [
@@ -189,6 +189,22 @@ export default function SmithCalculator({ isVisible = true }) {
                         <SmithNarrative results={data} totalAdvantage={totalAdvantage} currency={currencyFormatter} amortizationYears={aYears} />
                         <SmithCharts results={data} amortizationYears={aYears} currency={currencyFormatter} />
                         <SmithAuditTable annualData={annualData} currency={currencyFormatter} handleExportCSV={handleExportCSV} />
+
+                        {/* Official CRA Resources */}
+                        <div className="pt-4">
+                            <Accordion title="Official CRA Resources" icon={ExternalLinkIcon}>
+                                <div className="flex flex-col gap-4">
+                                    <a href="https://www.canada.ca/en/revenue-agency/services/tax/individuals/topics/about-your-tax-return/tax-return/completing-a-tax-return/deductions-credits-expenses/line-22100-carrying-charges-interest-expenses.html" target="_blank" rel="noreferrer" className="flex items-center justify-between p-4 bg-indigo-50 rounded-2xl group transition-all hover:bg-indigo-100">
+                                        <div className="flex items-center gap-3"><DollarSignIcon className="text-indigo-600" /> <span className="font-bold text-indigo-900 text-sm">CRA: Deducting Interest Expenses</span></div>
+                                        <ExternalLinkIcon size={16} className="text-indigo-400 group-hover:translate-x-1 transition-transform" />
+                                    </a>
+                                    <a href="https://www.canada.ca/en/revenue-agency/services/tax/individuals/topics/about-your-tax-return/tax-return/completing-a-tax-return/personal-income/line-12700-capital-gains/you-calculate-your-capital-gain-loss.html" target="_blank" rel="noreferrer" className="flex items-center justify-between p-4 bg-emerald-50 rounded-2xl group transition-all hover:bg-emerald-100">
+                                        <div className="flex items-center gap-3"><DollarSignIcon className="text-emerald-600" /> <span className="font-bold text-emerald-900 text-sm">CRA: Calculating Capital Gains</span></div>
+                                        <ExternalLinkIcon size={16} className="text-emerald-400 group-hover:translate-x-1 transition-transform" />
+                                    </a>
+                                </div>
+                            </Accordion>
+                        </div>
                     </div>
                 </div>
             </div>
