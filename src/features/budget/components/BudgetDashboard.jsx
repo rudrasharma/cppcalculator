@@ -10,6 +10,7 @@ const CATEGORIES = [
 
 export default function BudgetDashboard({ data, onReset }) {
     const [selectedCategory, setSelectedCategory] = useState(null);
+    const [selectedDate, setSelectedDate] = useState(null);
     const [localData, setLocalData] = useState({ transactions: [], insights: [] });
     const [sortConfig, setSortConfig] = useState({ key: 'date', direction: 'desc' });
 
@@ -103,6 +104,10 @@ export default function BudgetDashboard({ data, onReset }) {
         
         if (selectedCategory) {
             filtered = filtered.filter(t => t.category === selectedCategory);
+        }
+        
+        if (selectedDate) {
+            filtered = filtered.filter(t => t.date === selectedDate);
         }
 
         return filtered.sort((a, b) => {
@@ -278,14 +283,34 @@ export default function BudgetDashboard({ data, onReset }) {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
                 {/* TIMELINE CHART */}
                 <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
-                    <h3 className="text-lg font-black text-slate-800 mb-6 flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                        Daily Spending Timeline
-                    </h3>
+                    <div className="flex justify-between items-center mb-6">
+                        <h3 className="text-lg font-black text-slate-800 flex items-center gap-2">
+                            <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                            Daily Spending Timeline
+                        </h3>
+                        {selectedDate && (
+                            <button 
+                                onClick={() => setSelectedDate(null)}
+                                className="text-xs font-bold text-emerald-600 bg-emerald-50 hover:bg-emerald-100 px-3 py-1 rounded-full transition-colors"
+                            >
+                                Clear Date: {selectedDate} ×
+                            </button>
+                        )}
+                    </div>
                     {timelineData.length > 0 ? (
                         <div className="h-64">
                             <ResponsiveContainer width="100%" height="100%">
-                                <AreaChart data={timelineData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                                <AreaChart 
+                                    data={timelineData} 
+                                    margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+                                    onClick={(e) => {
+                                        if (e && e.activePayload && e.activePayload.length > 0) {
+                                            const clickedDate = e.activePayload[0].payload.date;
+                                            setSelectedDate(selectedDate === clickedDate ? null : clickedDate);
+                                        }
+                                    }}
+                                    style={{ cursor: 'pointer' }}
+                                >
                                     <defs>
                                         <linearGradient id="colorAmount" x1="0" y1="0" x2="0" y2="1">
                                             <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
