@@ -84,12 +84,14 @@ export default function ResultsTab({
                             </div>
                             
                             {displayTotal > 0 && (
-                                <div className="mt-6 md:mt-8">
-                                    <div className="flex h-3 md:h-4 w-full rounded-full overflow-hidden bg-white/10 p-0.5 border border-white/5 ring-4 ring-white/5">
-                                        <div style={{ width: `100%` }} className="bg-gradient-to-r from-indigo-600 to-indigo-400 rounded-full transition-all duration-1000 ease-out shadow-[0_0_15px_rgba(99,102,241,0.4)]" />
+                                <div className="mt-6 md:mt-8 space-y-3 border-t border-white/10 pt-4 md:pt-6">
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-slate-400 font-bold uppercase text-[10px] tracking-widest">Base (Core)</span>
+                                        <span className="font-mono font-black text-white">${(cpp.base * inflationFactor * taxFactor).toLocaleString(undefined, {maximumFractionDigits:0})}</span>
                                     </div>
-                                    <div className="flex gap-4 md:gap-6 mt-3 md:mt-4 text-[9px] md:text-[10px] font-black tracking-[0.1em] uppercase text-slate-400">
-                                        <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full bg-indigo-500"></div> CPP</div>
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-slate-400 font-bold uppercase text-[10px] tracking-widest flex items-center gap-1">Enhanced</span>
+                                        <span className="font-mono font-black text-emerald-400">+${(cpp.enhanced * inflationFactor * taxFactor).toLocaleString(undefined, {maximumFractionDigits:0})}</span>
                                     </div>
                                 </div>
                             )}
@@ -183,28 +185,18 @@ export default function ResultsTab({
                 </div>
             )}
 
-            {/* BREAKDOWN CARDS */}
-            <div className="max-w-md mx-auto">
-                <div className="bg-white p-5 md:p-6 rounded-3xl border border-slate-200 relative overflow-hidden group shadow-sm transition-all hover:shadow-md hover:-translate-y-1">
-                    <div className="absolute top-0 left-0 w-full h-1.5 bg-indigo-500"></div>
-                    <h3 className="font-black text-slate-800 mb-4 md:mb-6 flex items-center gap-2 uppercase text-xs tracking-widest leading-none">
-                        {TrendingUpIcon && <TrendingUpIcon size={18} className="text-indigo-600"/>} CPP Projection
-                    </h3>
-                    <div className="space-y-3 md:space-y-4">
-                        <div className="flex justify-between items-center text-sm">
-                            <span className="text-slate-500 font-bold uppercase text-[10px]">Base (Core)</span>
-                            <span className="font-mono font-black text-slate-800">${(cpp.base * inflationFactor * taxFactor).toFixed(2)}</span>
-                        </div>
-                        <div className="flex justify-between items-center text-sm">
-                            <span className="text-slate-500 font-bold uppercase text-[10px] flex items-center gap-1">Enhanced</span>
-                            <span className="font-mono font-black text-emerald-600">+${(cpp.enhanced * inflationFactor * taxFactor).toFixed(2)}</span>
-                        </div>
-                        <div className="pt-4 md:pt-5 border-t-2 border-slate-50 flex justify-between items-end">
-                            <span className="text-slate-900 font-black text-[10px] uppercase tracking-widest">Gross Monthly</span>
-                            <span className="text-xl md:text-2xl font-black text-slate-900 font-mono tracking-tighter">${displayCPP.toFixed(2)}</span>
-                        </div>
-                    </div>
+            {/* PROMOTIONAL BANNER */}
+            <div className="bg-gradient-to-r from-indigo-50 to-indigo-100/50 border border-indigo-200 p-5 md:p-6 rounded-2xl flex flex-col sm:flex-row items-center gap-4 justify-between shadow-sm relative overflow-hidden group">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 group-hover:opacity-20 transition-opacity"></div>
+                <div>
+                    <h4 className="font-black text-indigo-900 text-sm md:text-base mb-1">Looking for OAS and GIS estimates?</h4>
+                    <p className="text-indigo-800 text-xs md:text-sm leading-relaxed">
+                        Try our new comprehensive <a href="/retirement-planner/" className="font-bold underline decoration-indigo-400 underline-offset-4 hover:text-indigo-600 transition-colors">Retirement Planner</a> which models full household income, sequence of returns, and OAS clawbacks.
+                    </p>
                 </div>
+                <a href="/retirement-planner/" className="shrink-0 bg-indigo-600 text-white font-black text-xs uppercase tracking-widest px-5 py-3 rounded-xl hover:bg-indigo-700 transition-colors shadow-md active:scale-95 whitespace-nowrap">
+                    Go to Planner
+                </a>
             </div>
 
             {/* CHART SECTION - OPTIMIZED FOR MOBILE */}

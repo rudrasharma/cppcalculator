@@ -7,8 +7,7 @@ import {
 import { CURRENT_YEAR, getYMPE, getYAMPE } from '../../../utils/constants';
 
 export default function InputTab({ 
-    dob, setDob, retirementAge, setRetirementAge, isMarried, setIsMarried, 
-    spouseDob, setSpouseDob, spouseIncome, setSpouseIncome, 
+    dob, setDob, retirementAge, setRetirementAge, 
     showChildren, setShowChildren, children, setChildren,
     livedInCanadaAllLife, setLivedInCanadaAllLife, yearsInCanada, setYearsInCanada,
     otherIncome, setOtherIncome,
@@ -66,24 +65,9 @@ export default function InputTab({
                         <div className="flex justify-between text-[10px] text-slate-400 mt-2 font-bold uppercase tracking-widest px-1"><span>Early (60)</span><span>Standard (65)</span><span>Deferred (70)</span></div>
                     </div>
 
+
+
                     <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-                        <label className="flex items-center gap-4 p-4 border rounded-2xl cursor-pointer hover:bg-slate-50 transition-all group">
-                            <input type="checkbox" checked={isMarried} onChange={(e) => setIsMarried(e.target.checked)} className="w-5 h-5 text-indigo-600 rounded-lg focus:ring-indigo-500 border-slate-300" />
-                            <div className="flex-1">
-                                <span className="font-bold text-slate-800 block text-sm">I have a Spouse / Partner</span>
-                                <span className="text-xs text-slate-500 leading-none">Used for CPP survivor benefit estimates.</span>
-                            </div>
-                        </label>
-
-                        {isMarried && (
-                            <div className="animate-fade-in space-y-5 pl-5 border-l-2 border-indigo-100 ml-2">
-                                <div>
-                                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1.5">Spouse Birth Date</label>
-                                    <input type="date" value={spouseDob} onChange={(e) => setSpouseDob(e.target.value)} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-base outline-none focus:ring-2 focus:ring-indigo-500 transition-all" />
-                                </div>
-                            </div>
-                        )}
-
                         <label className="flex items-center gap-4 p-4 border rounded-2xl cursor-pointer hover:bg-slate-50 transition-all group">
                             <input type="checkbox" checked={showChildren} onChange={(e) => setShowChildren(e.target.checked)} className="w-5 h-5 text-indigo-600 rounded-lg focus:ring-indigo-500 border-slate-300" />
                             <div className="flex-1">
@@ -307,9 +291,9 @@ export default function InputTab({
 
                     <button 
                         onClick={() => { setActiveTab('results'); window.scrollTo({ top: 0, behavior: 'smooth' }); }} 
-                        className="bg-indigo-600 hover:bg-indigo-700 text-white font-black py-4 px-12 rounded-2xl shadow-xl shadow-indigo-200 transition-all transform hover:-translate-y-1 active:scale-95 flex items-center gap-3 uppercase tracking-widest text-xs"
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white font-black py-4 px-8 rounded-2xl shadow-xl shadow-indigo-200 transition-all transform hover:-translate-y-1 active:scale-95 flex items-center gap-3 uppercase tracking-widest text-xs"
                     >
-                        Analyze Forecast <ArrowRightIcon size={20} />
+                        Calculate CPP Estimate <ArrowRightIcon size={20} />
                     </button>
                 </div>
             </div>
@@ -346,7 +330,7 @@ export default function InputTab({
                             }} 
                             className="bg-indigo-600 hover:bg-indigo-700 text-white font-black py-4 px-6 rounded-2xl shadow-xl shadow-indigo-100 transition-all flex items-center gap-3 active:scale-95"
                         >
-                            <span className="text-[10px] uppercase tracking-[0.2em] font-black">Analyze</span>
+                            <span className="text-[10px] uppercase tracking-[0.2em] font-black">Calculate CPP</span>
                             <ArrowRightIcon size={20} />
                         </button>
                     </div>

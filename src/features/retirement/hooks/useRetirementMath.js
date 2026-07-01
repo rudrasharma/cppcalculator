@@ -6,8 +6,7 @@ import {
 } from '../../../utils/constants';
 
 export const useRetirementMath = ({
-    earnings, dob, retirementAge, yearsInCanada, otherIncome,
-    isMarried, spouseDob, spouseIncome, forceAllowance, children = []
+    earnings, dob, retirementAge, children = []
 }) => {
     return useMemo(() => {
         const birthYear = parseInt(dob.split('-')[0]);
@@ -173,5 +172,5 @@ export const useRetirementMath = ({
             userIsDistinct,
             selectedAge: retirementAge
         };
-    }, [earnings, dob, retirementAge, yearsInCanada, otherIncome, isMarried, spouseDob, spouseIncome, forceAllowance, children]);
+    }, [earnings, dob, retirementAge, children]);
 };

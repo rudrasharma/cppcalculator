@@ -33,12 +33,10 @@ export default function Calculator({
     const [avgSalaryInput, setAvgSalaryInput] = useState(() => memory.grossIncome ? String(memory.grossIncome) : initialIncome ? String(initialIncome) : '');
     const [otherIncome, setOtherIncome] = useState(''); 
     const [livedInCanadaAllLife, setLivedInCanadaAllLife] = useState(initialYearsInCanada >= 40); 
-    const [isMarried, setIsMarried] = useState(() => memory.maritalStatus === 'MARRIED' || initialMaritalStatus);
     const [showChildren, setShowChildren] = useState(false);
     const [showGrid, setShowGrid] = useState(false);
     const [showNet, setShowNet] = useState(false);
     const [aiInsight, setAiInsight] = useState('');
-    const [spouseDob, setSpouseDob] = useState('1985-01-01');
     const [spouseIncome, setSpouseIncome] = useState(initialSpouseIncome ? String(initialSpouseIncome) : '');
     const [forceAllowance, setForceAllowance] = useState(false);
 
@@ -50,7 +48,7 @@ export default function Calculator({
     const [comparisonSnapshot, setComparisonSnapshot] = useState(null);
 
     const birthYear = parseInt(dob.split('-')[0]);
-    const results = useRetirementMath({ earnings, dob, retirementAge, yearsInCanada, otherIncome, isMarried, spouseDob, spouseIncome, forceAllowance, children });
+    const results = useRetirementMath({ earnings, dob, retirementAge, children });
     const displayValues = useMemo(() => calculateDisplayValues(results, false, showNet, retirementAge, birthYear, 0.15), [results, showNet, retirementAge, birthYear]);
 
     useEffect(() => { setMounted(true); }, []);
@@ -65,7 +63,6 @@ export default function Calculator({
             setEarnings(applyAverageSalary(earnings, val, results.years, birthYear));
         }
     };
-    const updateMarital = (val) => { setIsMarried(val); updateMemory({ maritalStatus: val ? 'MARRIED' : 'SINGLE' }); };
 
     // Hydration Effect
     useEffect(() => {
@@ -78,7 +75,7 @@ export default function Calculator({
     const handleAIUpdate = useCallback((updates) => {
         if (updates.retirementAge) setRetirementAge(Number(updates.retirementAge));
         if (updates.dob) updateDOB(updates.dob);
-        if (typeof updates.isMarried !== 'undefined') updateMarital(updates.isMarried);
+        if (typeof updates.dob !== 'undefined') updateDOB(updates.dob);
         if (updates.avgSalaryInput !== undefined) updateIncome(String(updates.avgSalaryInput));
         if (updates.earningsUpdate) { setEarnings(prev => ({ ...prev, ...updates.earningsUpdate })); setShowGrid(true); }
         if (updates.strategy_insight) setAiInsight(updates.strategy_insight);
@@ -88,14 +85,14 @@ export default function Calculator({
         <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-indigo-100 flex flex-col min-h-0" style={{ paddingBottom: activeTab === 'input' ? '100px' : '60px' }}> 
             <main className="max-w-5xl mx-auto p-4 md:p-8 w-full mt-6">
                 {/* AI HERO SECTION (Hidden for Copilot)
-                <AICommandBar endpoint="/api/ai/retirement" suggestions={RETIREMENT_SUGGESTIONS} onUpdate={handleAIUpdate} context={{ dob, retirementAge, isMarried, yearsInCanada }} globalMemory={memory} />
+                <AICommandBar endpoint="/api/ai/retirement" suggestions={RETIREMENT_SUGGESTIONS} onUpdate={handleAIUpdate} context={{ dob, retirementAge, yearsInCanada }} globalMemory={memory} />
                 <StrategyCard insight={aiInsight} />
                 */}
 
                 {/* AI Copilot Persistent Sidebar/Bottom-sheet */}
                 <AICopilot 
                     onUpdate={handleAIUpdate}
-                    context={{ calculatorId: 'retirement', dob, retirementAge, yearsInCanada, isMarried, avgSalaryInput, spouseIncome, childCount: children.length }}
+                    context={{ calculatorId: 'retirement', dob, retirementAge, yearsInCanada, avgSalaryInput, childCount: children.length }}
                     globalMemory={memory}
                 />
                 <div className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden mb-12">
@@ -109,10 +106,8 @@ export default function Calculator({
                         {activeTab === 'input' && (
                             <InputTab 
                                 dob={dob} setDob={updateDOB} retirementAge={retirementAge} setRetirementAge={setRetirementAge}
-                                isMarried={isMarried} setIsMarried={updateMarital} spouseDob={spouseDob} setSpouseDob={setSpouseDob}
-                                spouseIncome={spouseIncome} setSpouseIncome={setSpouseIncome} showChildren={showChildren} setShowChildren={setShowChildren}
-                                children={children} setChildren={setChildren} livedInCanadaAllLife={livedInCanadaAllLife} setLivedInCanadaAllLife={setLivedInCanadaAllLife}
-                                yearsInCanada={yearsInCanada} setYearsInCanada={setYearsInCanada} otherIncome={otherIncome} setOtherIncome={setOtherIncome}
+                                showChildren={showChildren} setShowChildren={setShowChildren}
+                                children={children} setChildren={setChildren}
                                 earnings={earnings} setEarnings={setEarnings} avgSalaryInput={avgSalaryInput} setAvgSalaryInput={updateIncome}
                                 results={results} birthYear={birthYear} displayTotal={displayValues.displayTotal} copyLink={() => {}} copySuccess={copySuccess}
                                 setActiveTab={setActiveTab} isVisible={isVisible} mounted={mounted}
