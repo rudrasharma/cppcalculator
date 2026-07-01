@@ -138,5 +138,30 @@ test.describe('Phase 2: Critical Path E2E Testing', () => {
         // Verify it synced (homeValue)
         await expect(page.getByRole('textbox', { name: 'Home Value' })).toHaveValue('999,999');
     });
-});
 
+    test('CPP Calculator Import Journey', async ({ page }) => {
+        await page.goto('/cpp-oas-calculator/');
+        await page.waitForLoadState('networkidle');
+
+        // Click the Official Data Import block
+        await page.locator('text=Official Data Import').first().click();
+
+        // Verify the modal opened
+        await expect(page.getByRole('heading', { name: /Import CPP Data/i })).toBeVisible();
+
+        // Fill textarea with dummy MSCA data
+        await page.locator('#import-textarea').fill('Year   Pensionable Earnings\\n2022   $64,900.00\\n2021   $61,600.00');
+
+        // Click Analyze Text
+        await page.getByRole('button', { name: /Analyze Text/i }).click();
+
+        // Click Confirm Import
+        await page.getByRole('button', { name: /Confirm Import/i }).click();
+
+        // Switch to the Results Tab
+        await page.locator('text=2. View Estimate').click();
+
+        // Verify the results tab becomes active and generates a chart
+        await expect(page.locator('text=Monthly Forecast').first()).toBeVisible();
+    });
+});
