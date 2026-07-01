@@ -10,6 +10,7 @@ const UsersIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" vie
 const GraduationCapIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>;
 const TrendingUpIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>;
 const XIcon = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>;
+import { WandIcon, PiggyBankIcon, BarChartIcon } from '../Icons';
 
 const ICON_MAP = {
     ChartIcon,
@@ -17,7 +18,10 @@ const ICON_MAP = {
     HomeIcon,
     UsersIcon,
     GraduationCapIcon,
-    TrendingUpIcon
+    TrendingUpIcon,
+    WandIcon,
+    PiggyBankIcon,
+    BarChartIcon
 };
 
 export const ToolDrawer = ({ isOpen, onClose, activeId, onSelect, isSuite = false }) => {
