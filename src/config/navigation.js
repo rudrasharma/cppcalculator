@@ -132,17 +132,7 @@ export const ALL_TOOLS = [
         description: 'Calculate your future monthly income from the Canada Pension Plan.',
         icon: 'ChartIcon'
     },
-    { 
-        id: 'compound',
-        categoryId: 'retirement',
-        href: '/compound-interest-calculator/', 
-        label: 'Compound Interest', 
-        shortLabel: 'Compound',
-        title: 'Compound Interest Calculator',
-        subtitle: 'Visualize your long-term wealth growth',
-        description: 'Calculate how your investments will grow over time with compound interest.',
-        icon: 'BarChartIcon'
-    },
+
     { 
         id: 'cagr',
         categoryId: 'retirement',
