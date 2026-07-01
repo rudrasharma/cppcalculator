@@ -45,6 +45,7 @@ export default function Calculator({
     // UI State
     const [showAbout, setShowAbout] = useState(false);
     const [showImport, setShowImport] = useState(false);
+    const [importText, setImportText] = useState('');
     const [copySuccess, setCopySuccess] = useState(false);
     const [comparisonSnapshot, setComparisonSnapshot] = useState(null);
 
@@ -116,8 +117,20 @@ export default function Calculator({
                                 results={results} birthYear={birthYear} displayTotal={displayValues.displayTotal} copyLink={() => {}} copySuccess={copySuccess}
                                 setActiveTab={setActiveTab} isVisible={isVisible} mounted={mounted}
                                 hasEarnings={Object.keys(earnings).length > 0} showGrid={showGrid} setShowGrid={setShowGrid}
-                                applyAverageSalary={() => setEarnings(applyAverageSalary(earnings, avgSalaryInput, results.years, birthYear))}
+                                applyAverageSalary={() => setEarnings(applyAverageSalary({}, avgSalaryInput, results.years, birthYear))}
                                 setShowImport={setShowImport}
+                            />
+                        )}
+                        {showImport && (
+                            <ImportModal 
+                                onClose={() => setShowImport(false)} 
+                                importText={importText} 
+                                setImportText={setImportText} 
+                                onImport={(data) => {
+                                    setEarnings(data);
+                                    setShowImport(false);
+                                    setImportText('');
+                                }} 
                             />
                         )}
                         {activeTab === 'results' && (
