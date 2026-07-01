@@ -16,6 +16,27 @@ test.describe('Phase 2: Critical Path E2E Testing', () => {
         await expect(page.locator('text=/\\$\\d+,\\d{3}/').first()).toBeVisible();
     });
 
+    test('Retirement Planner User Journey', async ({ page }) => {
+        await page.goto('/retirement-planner/');
+        await page.waitForLoadState('networkidle');
+
+        // Input Target Income
+        const targetIncome = page.getByPlaceholder('e.g. 60000').first();
+        await targetIncome.fill('75000');
+
+        // Enable Spouse by clicking the label text
+        const spouseLabel = page.locator('text=Include Spouse');
+        await spouseLabel.click();
+
+        // Switch to Spouse Tab
+        const spouseTab = page.getByRole('button', { name: /Spouse/i });
+        await spouseTab.click();
+
+        // Check if Final Estate Value renders
+        await expect(page.locator('text=/Final Estate Value/i').first()).toBeVisible();
+        await expect(page.locator('text=/Retirement Status/i').first()).toBeVisible();
+    });
+
     test('Mortgage Calculator User Journey', async ({ page }) => {
         await page.goto('/mortgage-calculator/');
         await page.waitForLoadState('networkidle');

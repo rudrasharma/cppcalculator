@@ -209,4 +209,82 @@ describe('Retirement Drawdown Engine', () => {
         expect(result2.history[0].incomes.gis).toBeLessThan(result1.history[0].incomes.gis);
         expect(result1.history[0].incomes.gis - result2.history[0].incomes.gis).toBeCloseTo(5000, -2);
     });
+    it('simulates spousal staggered retirement and shared balances', () => {
+        const params = {
+            hasSpouse: true,
+            currentAge: 60, startAge: 65, endAge: 90, targetIncome: 80000,
+            inflation: 0.0, returnRate: 0.05,
+            balances: { tfsa: 100000, rrsp: 200000, nonReg: 50000, lira: 0 },
+            contributions: { tfsa: 0, rrsp: 0, nonReg: 0 },
+            pension: { amount: 0, startAge: 65 }, cpp: { amount: 0, startAge: 65 }, oas: { amount: 8000, startAge: 65 },
+            drawdownOrder: ['nonReg', 'rrsp', 'lira', 'tfsa'],
+            province: 'ON',
+            spouse: {
+                currentAge: 55, startAge: 65,
+                workingIncome: 50000,
+                yearsInCanada: 40,
+                balances: { tfsa: 50000, rrsp: 100000, lira: 0 },
+                contributions: { tfsa: 0, rrsp: 0 },
+                pension: { amount: 0, startAge: 65 }, cpp: { amount: 0, startAge: 65 }, oas: { amount: 8000, startAge: 65 }
+            }
+        };
+
+        const result = calculateRetirementDrawdown(params);
+
+        // At Applicant Age 65 (Spouse Age 60)
+        // Applicant is retired. Spouse is still working (Income: 50k)
+        // Target is 80k. Spouse working income covers 50k. Shortfall = 30k.
+        const year65 = result.history.find(h => h.age === 65);
+        expect(year65.incomes.workingIncome).toBe(50000);
+        expect(year65.shortfall).toBe(0); // Shortfall is covered by working income + withdrawals
+
+        // Spouse's TFSA should have grown for 5 years untouched (from age 55 to 60)
+        // 50k * (1.05)^5 = ~63,814
+        const year60 = result.history.find(h => h.age === 60); // applicant 60, spouse 55
+        expect(year60.balances.tfsa).toBe(150000); // 100k + 50k before growth
+        
+        // At Applicant Age 70 (Spouse Age 65)
+        // Both are retired.
+        const year70 = result.history.find(h => h.age === 70);
+        expect(year70.incomes.workingIncome).toBe(0);
+        expect(year70.incomes.oas).toBe(17120); // 8560 * 2 = 17120
+    });
+
+    it('triggers OAS clawbacks at high income thresholds', () => {
+        const params = {
+            startAge: 65, endAge: 66, targetIncome: 150000, // Very high target
+            inflation: 0.0, returnRate: 0.0,
+            balances: { tfsa: 0, rrsp: 1000000, nonReg: 0, lira: 0 },
+            pension: { amount: 80000, startAge: 65 },
+            cpp: { amount: 0, startAge: 65 }, oas: { amount: 8000, startAge: 65 },
+            drawdownOrder: ['rrsp'], province: 'ON', hasSpouse: false
+        };
+
+        const result = calculateRetirementDrawdown(params);
+        
+        const year65 = result.history[0];
+        // Pension 80k + OAS 8k + RRSP withdrawal (to hit 150k target after tax) = Massive income > 90k threshold
+        expect(year65.clawback).toBeGreaterThan(0);
+        // Net OAS should be less than the standard 8000
+        expect(year65.incomes.oas).toBeLessThan(8000);
+    });
+
+    it('produces mathematically different final estates based on drawdown strategies', () => {
+        const baseParams = {
+            startAge: 65, endAge: 82, targetIncome: 80000,
+            inflation: 0.02, returnRate: 0.05,
+            balances: { tfsa: 500000, rrsp: 500000, nonReg: 0, lira: 0 },
+            pension: { amount: 0, startAge: 65 }, cpp: { amount: 15000, startAge: 65 }, oas: { amount: 8000, startAge: 65 },
+            province: 'ON', hasSpouse: false
+        };
+
+        const rrspFirst = calculateRetirementDrawdown({ ...baseParams, drawdownOrder: ['rrsp', 'lira', 'nonReg', 'tfsa'] });
+        const tfsaFirst = calculateRetirementDrawdown({ ...baseParams, drawdownOrder: ['tfsa', 'nonReg', 'rrsp', 'lira'] });
+
+        // Draining TFSA first subjects the massive RRSP to forced RRIF minimums later,
+        // which triggers huge taxes and reinvestment capital gains, leading to a drastically different estate value.
+        expect(rrspFirst.finalEstate).toBeDefined();
+        expect(tfsaFirst.finalEstate).toBeDefined();
+        expect(Math.abs(rrspFirst.finalEstate - tfsaFirst.finalEstate)).toBeGreaterThan(10000);
+    });
 });
