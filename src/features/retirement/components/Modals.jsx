@@ -90,7 +90,7 @@ export function ImportModal({ onClose, importText, setImportText, onImport }) {
 
     return (
         <div 
-            className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-fade-in"
+            className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-fade-in"
             role="dialog"
             aria-modal="true"
             aria-labelledby="import-title"
