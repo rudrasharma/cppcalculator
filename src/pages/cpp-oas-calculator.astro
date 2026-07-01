@@ -6,7 +6,6 @@
 
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Calculator from '../features/retirement/components/index.jsx';
-import { CPP_SCENARIOS } from '../data/seo-scenarios';
 import { TAX_YEAR_CONFIG } from '../config/taxYears.js';
 const { CURRENT_APP_YEAR, CPP, OAS } = TAX_YEAR_CONFIG;
 
@@ -70,52 +69,6 @@ const faqSchema = {
       </header>
 
       <Calculator client:load isVisible={true} />
-
-      <section class="mt-20 pt-10 border-t border-slate-200" aria-labelledby="scenarios-heading">
-        <h2 id="scenarios-heading" class="text-2xl font-black text-slate-900 mb-6 text-center">Popular Retirement Scenarios</h2>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" role="list">
-          {CPP_SCENARIOS.slice(0, 6).map((scene) => (
-            <article role="listitem">
-              <a 
-                href={`/calculator/cpp-oas/${scene.slug}/`}
-                class="block p-4 rounded-xl border border-slate-200 bg-white hover:border-indigo-500 hover:shadow-md transition-all group"
-                aria-label={`View ${scene.label} scenario`}
-              >
-                <div class="flex items-center justify-between mb-2">
-                  <span class="text-[10px] font-black uppercase tracking-widest text-indigo-500 bg-indigo-50 px-2 py-1 rounded">
-                    {scene.age < 65 ? 'Early' : scene.age > 65 ? 'Deferred' : 'Standard'}
-                  </span>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-300 group-hover:text-indigo-500 transition-colors" aria-hidden="true">
-                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                    <polyline points="12 5 19 12 12 19"></polyline>
-                  </svg>
-                </div>
-                <h3 class="font-bold text-slate-900 text-sm mb-1 group-hover:text-indigo-700 transition-colors">
-                  {scene.label}
-                </h3>
-                <p class="text-xs text-slate-500 line-clamp-2">
-                  {scene.desc}
-                </p>
-              </a>
-            </article>
-          ))}
-        </div>
-
-        <div class="text-center mt-8">
-          <a 
-            href="/calculator/cpp-oas/browse/" 
-            class="inline-flex items-center gap-2 text-sm font-bold text-slate-600 hover:text-indigo-600 transition-colors"
-            aria-label="Browse all CPP and OAS retirement scenarios"
-          >
-            View All Scenarios
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <line x1="5" y1="12" x2="19" y2="12"></line>
-              <polyline points="12 5 19 12 12 19"></polyline>
-            </svg>
-          </a>
-        </div>
-      </section>
     </section>
   </main>
 </BaseLayout>
