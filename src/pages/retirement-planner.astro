@@ -2,10 +2,59 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { RetirementPlanner } from '../features/retirement-planner/components';
 
-const title = "Retirement Drawdown Planner | LoonieFi";
-const description = "A simplistic retirement planner for Canadians. Project how long your RRSP, TFSA, Non-Registered accounts, and pensions will last in retirement.";
+const title = "Retirement Planner & Drawdown Calculator [2025] | LoonieFi";
+const description = "Plan your Canadian retirement with our free drawdown calculator. Estimate how long your RRSP, TFSA, CPP, OAS, and pensions will last based on your target income.";
+const canonicalURL = new URL('/retirement-planner', Astro.site || Astro.url.origin);
+
+const softwareSchema = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": title,
+  "description": description,
+  "url": canonicalURL.toString(),
+  "applicationCategory": "FinanceApplication",
+  "operatingSystem": "All",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "CAD"
+  }
+};
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How much do I need to retire in Canada?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The amount you need to retire in Canada depends entirely on your target lifestyle and retirement age. A common rule of thumb is aiming for 70% of your pre-retirement income. Using our Retirement Planner, you can input your specific expenses, government benefits (like CPP and OAS), and current portfolio to see exactly how long your money will last."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does this calculator include CPP and OAS?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes! Our Retirement Planner automatically estimates your Canada Pension Plan (CPP) and Old Age Security (OAS) payouts based on your income and retirement age. It factors these government benefits into your overall cash flow so you know exactly how much you need to withdraw from your own savings each year."
+      }
+    }
+  ]
+};
 ---
 
 <BaseLayout title={title} description={description}>
-    <RetirementPlanner client:load />
+    <script type="application/ld+json" set:html={JSON.stringify(softwareSchema)} />
+    <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
+    
+    <main class="w-full">
+        <header class="sr-only">
+            <h1>Canadian Retirement Planner [2025]</h1>
+            <p>A comprehensive drawdown calculator to help you project how long your RRSP, TFSA, Non-Registered accounts, CPP, OAS, and pensions will last in retirement against inflation.</p>
+        </header>
+
+        <RetirementPlanner client:load />
+    </main>
 </BaseLayout>
