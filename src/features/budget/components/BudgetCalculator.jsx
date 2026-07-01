@@ -8,6 +8,8 @@ export default function BudgetCalculator() {
     const [rawImages, setRawImages] = useState([]);
     const [budgetData, setBudgetData] = useState(null);
     const [error, setError] = useState(null);
+    const [progress, setProgress] = useState(0);
+    const [progressMessage, setProgressMessage] = useState("Initializing AI Engine...");
 
     const fileInputRef = useRef(null);
     const canvasRefs = useRef([]);
@@ -34,6 +36,40 @@ export default function BudgetCalculator() {
 
         window.addEventListener('paste', handlePaste);
         return () => window.removeEventListener('paste', handlePaste);
+    }, [appState]);
+
+    // Progress bar simulation
+    useEffect(() => {
+        if (appState !== 'ANALYZING') {
+            setProgress(0);
+            setProgressMessage("Initializing AI Engine...");
+            return;
+        }
+
+        const messages = [
+            "Scanning images for text...",
+            "Extracting merchant names...",
+            "Standardizing transactions...",
+            "Categorizing expenses...",
+            "Generating financial insights...",
+            "Finalizing report..."
+        ];
+
+        let currentMsg = 0;
+        let currentProg = 0;
+
+        const interval = setInterval(() => {
+            currentProg += Math.random() * 5 + 2;
+            if (currentProg > 95) currentProg = 95; // stall at 95% until done
+            setProgress(currentProg);
+
+            if (currentProg > (currentMsg + 1) * 15 && currentMsg < messages.length - 1) {
+                currentMsg++;
+                setProgressMessage(messages[currentMsg]);
+            }
+        }, 800);
+
+        return () => clearInterval(interval);
     }, [appState]);
 
     const processFiles = (files) => {
@@ -260,18 +296,23 @@ export default function BudgetCalculator() {
             )}
 
             {appState === 'ANALYZING' && (
-                <div className="flex flex-col items-center justify-center py-32 animate-fade-in">
-                    <div className="relative w-24 h-24 mb-8">
-                        <div className="absolute inset-0 border-4 border-slate-100 rounded-full"></div>
-                        <div className="absolute inset-0 border-4 border-indigo-500 rounded-full border-t-transparent animate-spin"></div>
-                        <div className="absolute inset-0 flex items-center justify-center text-indigo-500">
-                            <svg className="w-8 h-8 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                            </svg>
+                <div className="flex flex-col items-center justify-center py-32 animate-fade-in w-full max-w-xl mx-auto">
+                    <div className="w-full mb-8">
+                        <div className="flex justify-between text-sm font-bold text-slate-700 mb-2">
+                            <span>{progressMessage}</span>
+                            <span>{Math.round(progress)}%</span>
+                        </div>
+                        <div className="w-full bg-slate-100 rounded-full h-4 overflow-hidden shadow-inner border border-slate-200">
+                            <div 
+                                className="bg-gradient-to-r from-indigo-500 to-violet-600 h-full rounded-full transition-all duration-500 ease-out relative"
+                                style={{ width: `${progress}%` }}
+                            >
+                                <div className="absolute inset-0 bg-white/20 w-full h-full" style={{ backgroundImage: 'linear-gradient(45deg,rgba(255,255,255,.15) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.15) 50%,rgba(255,255,255,.15) 75%,transparent 75%,transparent)', backgroundSize: '1rem 1rem' }}></div>
+                            </div>
                         </div>
                     </div>
                     <h2 className="text-2xl font-black text-slate-900 mb-2">Analyzing your spending...</h2>
-                    <p className="text-slate-500 text-center max-w-md">Our AI is reading your transactions across {rawImages.length} image{rawImages.length > 1 ? 's' : ''}, standardizing merchant names, and finding optimization opportunities.</p>
+                    <p className="text-slate-500 text-center">Our AI is reading your transactions across {rawImages.length} image{rawImages.length > 1 ? 's' : ''}, standardizing merchant names, and finding optimization opportunities.</p>
                 </div>
             )}
 
