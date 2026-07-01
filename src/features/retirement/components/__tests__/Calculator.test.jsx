@@ -59,11 +59,5 @@ describe('Retirement Calculator UI Integration', () => {
         // 4500 -> "4,500"
         const totalDisplays = screen.getAllByText(/\$4,500/);
         expect(totalDisplays.length).toBeGreaterThan(0);
-
-        // Switch to results tab
-        const resultsTabButton = screen.getByText(/2. View Estimate/i);
-        fireEvent.click(resultsTabButton);
-
-        expect(screen.getAllByText(/\$4,500/i).length).toBeGreaterThan(0);
     });
 });

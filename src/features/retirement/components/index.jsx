@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRetirementMath } from '../hooks/useRetirementMath';
-import { useUrlTab } from '../../../hooks/useUrlTab';
 import { applyAverageSalary, calculateDisplayValues, calculateComparisonMessage } from '../utils/retirementHelpers';
 import { loadStateFromUrl, syncStateToUrl } from '../utils/urlSync';
 import { AboutModal, ImportModal } from './Modals';
@@ -26,7 +25,6 @@ export default function Calculator({
     const [retirementAge, setRetirementAge] = useState(initialRetirementAge);
     const [yearsInCanada, setYearsInCanada] = useState(() => memory.yearsInCanada || initialYearsInCanada);
     const [earnings, setEarnings] = useState({});
-    const [activeTab, setActiveTab] = useUrlTab('input', 'step');
     const [mounted, setMounted] = useState(false); 
     
     // --- INPUT STATE ---
@@ -82,7 +80,7 @@ export default function Calculator({
     }, [updateMemory, earnings, results.years, birthYear]);
 
     return (
-        <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-indigo-100 flex flex-col min-h-0" style={{ paddingBottom: activeTab === 'input' ? '100px' : '60px' }}> 
+        <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-indigo-100 flex flex-col min-h-0" style={{ paddingBottom: '60px' }}> 
             <main className="max-w-5xl mx-auto p-4 md:p-8 w-full mt-6">
                 {/* AI HERO SECTION (Hidden for Copilot)
                 <AICommandBar endpoint="/api/ai/retirement" suggestions={RETIREMENT_SUGGESTIONS} onUpdate={handleAIUpdate} context={{ dob, retirementAge, yearsInCanada }} globalMemory={memory} />
@@ -95,27 +93,21 @@ export default function Calculator({
                     context={{ calculatorId: 'retirement', dob, retirementAge, yearsInCanada, avgSalaryInput, childCount: children.length }}
                     globalMemory={memory}
                 />
-                <div className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden mb-12">
-                    <div className="p-2 bg-slate-50 border-b border-slate-200">
-                        <div className="flex bg-slate-200/50 p-1 rounded-xl">
-                            <button onClick={() => setActiveTab('input')} className={`flex-1 py-2.5 text-sm font-bold text-center rounded-lg transition-all ${activeTab === 'input' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>1. Profile & History</button>
-                            <button onClick={() => setActiveTab('results')} className={`flex-1 py-2.5 text-sm font-bold text-center rounded-lg transition-all ${activeTab === 'results' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>2. View Estimate</button>
-                        </div>
-                    </div>
-                    <div className="p-6 md:p-8">
-                        {activeTab === 'input' && (
-                            <InputTab 
-                                dob={dob} setDob={updateDOB} retirementAge={retirementAge} setRetirementAge={setRetirementAge}
-                                showChildren={showChildren} setShowChildren={setShowChildren}
-                                children={children} setChildren={setChildren}
-                                earnings={earnings} setEarnings={setEarnings} avgSalaryInput={avgSalaryInput} setAvgSalaryInput={updateIncome}
-                                results={results} birthYear={birthYear} displayTotal={displayValues.displayTotal} copyLink={() => {}} copySuccess={copySuccess}
-                                setActiveTab={setActiveTab} isVisible={isVisible} mounted={mounted}
-                                hasEarnings={Object.keys(earnings).length > 0} showGrid={showGrid} setShowGrid={setShowGrid}
-                                applyAverageSalary={() => setEarnings(applyAverageSalary({}, avgSalaryInput, results.years, birthYear))}
-                                setShowImport={setShowImport}
-                            />
-                        )}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                    {/* Left Column: Inputs */}
+                    <div className="lg:col-span-5 space-y-6">
+                        <InputTab 
+                            dob={dob} setDob={updateDOB} retirementAge={retirementAge} setRetirementAge={setRetirementAge}
+                            showChildren={showChildren} setShowChildren={setShowChildren}
+                            children={children} setChildren={setChildren}
+                            earnings={earnings} setEarnings={setEarnings} avgSalaryInput={avgSalaryInput} setAvgSalaryInput={updateIncome}
+                            results={results} birthYear={birthYear} displayTotal={displayValues.displayTotal} copyLink={() => {}} copySuccess={copySuccess}
+                            isVisible={isVisible} mounted={mounted}
+                            hasEarnings={Object.keys(earnings).length > 0} showGrid={showGrid} setShowGrid={setShowGrid}
+                            applyAverageSalary={() => setEarnings(applyAverageSalary({}, avgSalaryInput, results.years, birthYear))}
+                            setShowImport={setShowImport}
+                        />
+
                         {showImport && (
                             <ImportModal 
                                 onClose={() => setShowImport(false)} 
@@ -128,17 +120,19 @@ export default function Calculator({
                                 }} 
                             />
                         )}
-                        {activeTab === 'results' && (
-                            <ResultsTab 
-                                results={results} hasEarnings={Object.keys(earnings).length > 0} setActiveTab={setActiveTab} birthYear={birthYear}
-                                copyLink={() => {}} copySuccess={copySuccess} displayTotal={displayValues.displayTotal} displayCPP={displayValues.displayCPP}
-                                displayCPP={displayValues.displayCPP} cppPerc={displayValues.cppPerc}
-                                retirementAge={retirementAge} setRetirementAge={setRetirementAge}
-                                comparisonSnapshot={comparisonSnapshot} saveComparison={() => {}} clearComparison={() => {}} comparisonData={{}}
-                                inflationFactor={1} taxFactor={1} chartSelection={null} setChartSelection={() => {}}
-                                lineVisibility={{Early:true, Standard:true, Deferred:true, Selected:true}} setLineVisibility={() => {}}
-                            />
-                        )}
+                    </div>
+
+                    {/* Right Column: Visualization & Metrics */}
+                    <div className="lg:col-span-7 space-y-6">
+                        <ResultsTab 
+                            results={results} hasEarnings={Object.keys(earnings).length > 0} birthYear={birthYear}
+                            copyLink={() => {}} copySuccess={copySuccess} displayTotal={displayValues.displayTotal} displayCPP={displayValues.displayCPP}
+                            cppPerc={displayValues.cppPerc}
+                            retirementAge={retirementAge} setRetirementAge={setRetirementAge}
+                            comparisonSnapshot={comparisonSnapshot} saveComparison={() => {}} clearComparison={() => {}} comparisonData={{}}
+                            inflationFactor={1} taxFactor={1} chartSelection={null} setChartSelection={() => {}}
+                            lineVisibility={{Early:true, Standard:true, Deferred:true, Selected:true}} setLineVisibility={() => {}}
+                        />
                     </div>
                 </div>
             </main>

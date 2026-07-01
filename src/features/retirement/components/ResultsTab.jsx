@@ -9,7 +9,7 @@ import {
 } from '../../../components/shared';
 
 export default function ResultsTab({ 
-    results, hasEarnings, setActiveTab, copyLink, copySuccess, 
+    results, hasEarnings, copyLink, copySuccess, 
     displayTotal = 0, displayCPP = 0,
     cppPerc = 0,
     retirementAge, setRetirementAge, 
@@ -51,7 +51,7 @@ export default function ResultsTab({
                     {InfoIcon && <InfoIcon className="text-amber-500 mt-1 shrink-0" size={24} />}
                     <div>
                         <h4 className="font-bold text-amber-900">Data Missing</h4>
-                        <p className="text-amber-800 text-sm mt-1 leading-relaxed">Forecast is currently <strong>$0</strong>. <button onClick={() => setActiveTab('input')} className="font-black underline decoration-2 underline-offset-2 hover:text-amber-950 transition-colors">Go to Step 1</button> to add earnings.</p>
+                        <p className="text-amber-800 text-sm mt-1 leading-relaxed">Forecast is currently <strong>$0</strong>. Add your earnings in the inputs panel to generate a projection.</p>
                     </div>
                 </div>
             )}
@@ -271,11 +271,7 @@ export default function ResultsTab({
                 </div>
             </div>
 
-            <div className="flex justify-center pt-8 md:pt-12">
-                <button onClick={() => {setActiveTab('input'); window.scrollTo(0,0)}} className="text-slate-400 hover:text-indigo-600 text-[10px] font-black flex items-center gap-3 transition-all uppercase tracking-[0.3em] group">
-                    {RotateCcwIcon && <RotateCcwIcon size={24} className="group-hover:rotate-[-360deg] transition-transform duration-700"/>} Return to Parameters
-                </button>
-            </div>
+
 
             {/* ACCORDIONS SECTION */}
             <div className="max-w-3xl mx-auto space-y-4 md:space-y-6 pb-20">
