@@ -28,6 +28,9 @@ const initialState = {
     propertyTaxes: 0,
     heating: 0,
     condoFees: 0,
+    grossIncome: 120000,
+    otherIncome: 0,
+    monthlyDebt: 0,
     prepayments: {
         monthlyIncrease: 0,
     },
@@ -73,6 +76,12 @@ function mortgageReducer(state, action) {
             return { ...state, heating: action.payload };
         case 'SET_CONDO_FEES':
             return { ...state, condoFees: action.payload };
+        case 'SET_GROSS_INCOME':
+            return { ...state, grossIncome: action.payload };
+        case 'SET_OTHER_INCOME':
+            return { ...state, otherIncome: action.payload };
+        case 'SET_MONTHLY_DEBT':
+            return { ...state, monthlyDebt: action.payload };
         case 'SET_PREPAYMENT':
             return { 
                 ...state, 
@@ -204,6 +213,9 @@ export const useMortgageMath = (initialStateOverride = null) => {
         if (params.has('pt')) dispatch({ type: 'SET_PROPERTY_TAXES', payload: parseFloat(params.get('pt')) || 0 });
         if (params.has('ht')) dispatch({ type: 'SET_HEATING', payload: parseFloat(params.get('ht')) || 0 });
         if (params.has('cf')) dispatch({ type: 'SET_CONDO_FEES', payload: parseFloat(params.get('cf')) || 0 });
+        if (params.has('gi')) dispatch({ type: 'SET_GROSS_INCOME', payload: parseFloat(params.get('gi')) || 0 });
+        if (params.has('oi')) dispatch({ type: 'SET_OTHER_INCOME', payload: parseFloat(params.get('oi')) || 0 });
+        if (params.has('md')) dispatch({ type: 'SET_MONTHLY_DEBT', payload: parseFloat(params.get('md')) || 0 });
     }, [initialStateOverride]);
 
     useEffect(() => {
@@ -230,6 +242,9 @@ export const useMortgageMath = (initialStateOverride = null) => {
         if (state.propertyTaxes > 0) params.set('pt', state.propertyTaxes); else params.delete('pt');
         if (state.heating > 0) params.set('ht', state.heating); else params.delete('ht');
         if (state.condoFees > 0) params.set('cf', state.condoFees); else params.delete('cf');
+        if (state.grossIncome > 0) params.set('gi', state.grossIncome); else params.delete('gi');
+        if (state.otherIncome > 0) params.set('oi', state.otherIncome); else params.delete('oi');
+        if (state.monthlyDebt > 0) params.set('md', state.monthlyDebt); else params.delete('md');
 
         const newUrl = `${window.location.pathname}?${params.toString()}`;
         window.history.replaceState(null, '', newUrl);

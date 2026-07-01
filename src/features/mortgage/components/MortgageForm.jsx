@@ -11,6 +11,7 @@ import {
     SparklesIcon,
     RotateCcwIcon,
     HomeIcon,
+    ShieldCheckIcon
 } from '../../../components/shared';
 import { PAYMENT_FREQUENCIES, COMPOUNDING_PERIODS } from '../utils/mortgageEngine';
 import { PROVINCES } from '../utils/lttEngine';
@@ -39,10 +40,12 @@ export const MortgageForm = ({ state, dispatch }) => {
         termYears, paymentFrequency, compounding, customPayment, startDate, 
         prepayments, lumpSums, province, isToronto, isFirstTimeBuyer, showStressTest,
         propertyTaxes, heating, condoFees,
-        calculationMode
+        calculationMode,
+        grossIncome, otherIncome, monthlyDebt
     } = state;
 
     const isRenewal = calculationMode === 'renewal';
+    const isAffordability = calculationMode === 'affordability';
     
     // Ensure CMHC max 25 year rule is reflected in the UI dropdown if < 20% down
     const actualDownPayment = downPaymentType === 'percent' ? homePrice * (downPayment / 100) : downPayment;
@@ -69,7 +72,14 @@ export const MortgageForm = ({ state, dispatch }) => {
                     className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${calculationMode === 'renewal' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200' : 'text-slate-500 hover:bg-slate-50'}`}
                 >
                     <RotateCcwIcon size={14} />
-                    Renewal / Refi
+                    Renewal
+                </button>
+                <button
+                    onClick={() => dispatch({ type: 'SET_CALCULATION_MODE', payload: 'affordability' })}
+                    className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${calculationMode === 'affordability' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200' : 'text-slate-500 hover:bg-slate-50'}`}
+                >
+                    <ShieldCheckIcon size={14} />
+                    Affordability
                 </button>
             </div>
 
@@ -116,6 +126,35 @@ export const MortgageForm = ({ state, dispatch }) => {
                                     </div>
                                     <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tight group-hover:text-slate-700 transition-colors">First-Time Buyer</span>
                                 </label>
+                            </div>
+                        </div>
+                    )}
+
+                    {isAffordability && (
+                        <div className="bg-indigo-50/50 p-5 rounded-2xl border border-indigo-100 space-y-4 mb-6">
+                            <h3 className="text-sm font-black text-indigo-900 flex items-center gap-2 uppercase tracking-tighter">
+                                <ShieldCheckIcon size={16} className="text-indigo-600" />
+                                Qualification Profile
+                            </h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <MoneyInput
+                                    label="Gross Annual Income"
+                                    subLabel="Before tax income"
+                                    value={grossIncome}
+                                    onChange={(val) => dispatch({ type: 'SET_GROSS_INCOME', payload: parseFloat(val) || 0 })}
+                                />
+                                <MoneyInput
+                                    label="Annual Rental/Other Income"
+                                    subLabel="Add 50% of expected rent"
+                                    value={otherIncome}
+                                    onChange={(val) => dispatch({ type: 'SET_OTHER_INCOME', payload: parseFloat(val) || 0 })}
+                                />
+                                <MoneyInput
+                                    label="Monthly Debt Payments"
+                                    subLabel="Car loans, credit cards, etc"
+                                    value={monthlyDebt}
+                                    onChange={(val) => dispatch({ type: 'SET_MONTHLY_DEBT', payload: parseFloat(val) || 0 })}
+                                />
                             </div>
                         </div>
                     )}

@@ -14,7 +14,9 @@ import {
     HomeIcon,
     Accordion,
     ExternalLinkIcon,
-    DollarSignIcon
+    DollarSignIcon,
+    ShieldCheckIcon,
+    AlertTriangleIcon
 } from '../../../components/shared';
 
 // Helper for CSV export
@@ -60,6 +62,23 @@ export const MortgageResults = ({ results, state }) => {
     const timeSavedMonths = Math.round((savings.time - timeSavedYears) * 12);
     const isPrepaying = savings.time > 0.01 || savings.interest > 1;
 
+    // Affordability Calculations
+    const isAffordability = calculationMode === 'affordability';
+    const totalGrossIncome = state.grossIncome + state.otherIncome;
+    const monthlyGrossIncome = totalGrossIncome / 12;
+
+    // To qualify in Canada, we must use the stress-tested mortgage payment (usually Contract Rate + 2%)
+    const baseMonthlyPayment = pithPayment - (state.propertyTaxes / 12) - state.heating - (state.condoFees / 2);
+    const stressMonthlyPayment = baseMonthlyPayment > 0 ? baseMonthlyPayment * (stressTest.payment / monthlyPayment) : 0;
+    const qualifyingPITH = stressMonthlyPayment + (state.propertyTaxes / 12) + state.heating + (state.condoFees / 2);
+
+    const gds = monthlyGrossIncome > 0 ? (qualifyingPITH / monthlyGrossIncome) * 100 : 0;
+    const tds = monthlyGrossIncome > 0 ? ((qualifyingPITH + state.monthlyDebt) / monthlyGrossIncome) * 100 : 0;
+    
+    const gdsPass = gds <= 39;
+    const tdsPass = tds <= 44;
+    const isAffordable = gdsPass && tdsPass;
+
     // Closing Costs Breakdown
     const estLegalFees = 1200;
     const estTitleInsurance = 300;
@@ -68,6 +87,54 @@ export const MortgageResults = ({ results, state }) => {
 
     return (
         <div className="flex flex-col gap-8">
+            {isAffordability && (
+                <div className={`p-6 md:p-8 rounded-[2rem] border-2 shadow-xl ${isAffordable ? 'bg-emerald-50 border-emerald-200 shadow-emerald-100' : 'bg-rose-50 border-rose-200 shadow-rose-100'}`}>
+                    <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6">
+                        <div className="flex items-center gap-3">
+                            <div className={`p-3 rounded-2xl ${isAffordable ? 'bg-emerald-500' : 'bg-rose-500'}`}>
+                                {isAffordable ? <ShieldCheckIcon size={24} className="text-white" /> : <AlertTriangleIcon size={24} className="text-white" />}
+                            </div>
+                            <div>
+                                <h2 className={`text-xl font-black uppercase tracking-tight ${isAffordable ? 'text-emerald-900' : 'text-rose-900'}`}>
+                                    {isAffordable ? 'You likely qualify!' : 'Qualification at risk'}
+                                </h2>
+                                <p className={`text-xs font-bold uppercase tracking-widest ${isAffordable ? 'text-emerald-600' : 'text-rose-600'}`}>
+                                    Based on standard CMHC guidelines
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
+                            <div className="flex justify-between items-center mb-2">
+                                <span className="text-xs font-black text-slate-500 uppercase tracking-widest">GDS Ratio</span>
+                                <span className={`text-xs font-black uppercase px-2 py-1 rounded-md ${gdsPass ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}`}>
+                                    Max 39%
+                                </span>
+                            </div>
+                            <div className={`text-3xl font-black tracking-tighter ${gdsPass ? 'text-slate-800' : 'text-rose-600'}`}>
+                                {gds.toFixed(1)}%
+                            </div>
+                            <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase">Housing costs / Gross Income</p>
+                        </div>
+                        
+                        <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
+                            <div className="flex justify-between items-center mb-2">
+                                <span className="text-xs font-black text-slate-500 uppercase tracking-widest">TDS Ratio</span>
+                                <span className={`text-xs font-black uppercase px-2 py-1 rounded-md ${tdsPass ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}`}>
+                                    Max 44%
+                                </span>
+                            </div>
+                            <div className={`text-3xl font-black tracking-tighter ${tdsPass ? 'text-slate-800' : 'text-rose-600'}`}>
+                                {tds.toFixed(1)}%
+                            </div>
+                            <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase">Housing + Debt / Gross Income</p>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Payment Hero */}
             <div className="bg-slate-900 text-white p-8 md:p-10 rounded-[2.5rem] shadow-2xl relative overflow-hidden flex flex-col justify-center min-h-[200px] border-4 border-slate-800">
                 <div className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 bg-indigo-500 rounded-full blur-[80px] opacity-20 pointer-events-none"></div>

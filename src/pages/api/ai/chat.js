@@ -117,7 +117,12 @@ function getInstructionsAndTools(calculatorId, context, globalMemory) {
         
         When a user interacts:
         1. If they describe a purchase or renewal (e.g., "Buying a $800k house with 20% down at 4.2% rate"): Call 'update_mortgage_calculator' with extracted values.
-        2. If they ask a general question: DO NOT call 'update_mortgage_calculator'. Simply answer in the text response.
+        2. If they describe an affordability scenario (e.g., "I make $10k net a month and want to buy a $1.34M house, with $3000/mo rental income"): 
+           - Set calculationMode to 'affordability'
+           - Convert net income to a rough ANNUAL gross income estimate if necessary. (e.g. $10k/mo net is roughly $170k/yr gross).
+           - CRITICAL: You must ensure all income and debt fields are ANNUALIZED or correct based on their schema description (grossIncome is annual, otherIncome is annual, monthlyDebt is monthly). If the user gives a monthly rental income like $3000/mo, you MUST multiply it by 12 and pass 36000 for otherIncome!
+           - Set grossIncome, otherIncome, and monthlyDebt.
+        3. If they ask a general question: DO NOT call 'update_mortgage_calculator'. Simply answer in the text response.
         
         ${commonInstructions}`;
 
@@ -128,7 +133,7 @@ function getInstructionsAndTools(calculatorId, context, globalMemory) {
           parameters: {
             type: "OBJECT",
             properties: {
-              calculationMode: { type: "STRING", enum: ["purchase", "renewal"] },
+              calculationMode: { type: "STRING", enum: ["purchase", "renewal", "affordability"] },
               homePrice: { type: "NUMBER" },
               downPayment: { type: "NUMBER" },
               downPaymentType: { type: "STRING", enum: ["dollar", "percent"] },
@@ -145,6 +150,9 @@ function getInstructionsAndTools(calculatorId, context, globalMemory) {
               propertyTaxes: { type: "NUMBER" },
               heating: { type: "NUMBER" },
               condoFees: { type: "NUMBER" },
+              grossIncome: { type: "NUMBER", description: "Gross Annual Income before tax" },
+              otherIncome: { type: "NUMBER", description: "Annual rental or other secondary income" },
+              monthlyDebt: { type: "NUMBER", description: "Monthly payments for other debts like car loans" },
               prepayments: {
                 type: "OBJECT",
                 properties: {
