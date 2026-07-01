@@ -1,15 +1,43 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
+import { TrashIcon } from '../../../components/shared/Icons';
+
+// Extended categories for the dropdown
+const CATEGORIES = [
+    "Housing", "Food & Groceries", "Dining Out", "Transportation", 
+    "Utilities", "Recreational", "Income", "Healthcare", "Shopping", "Other"
+];
 
 export default function BudgetDashboard({ data, onReset }) {
     const [selectedCategory, setSelectedCategory] = useState(null);
-    
+    const [localData, setLocalData] = useState({ transactions: [], insights: [] });
+    const [sortConfig, setSortConfig] = useState({ key: 'date', direction: 'desc' });
+
+    // Initialize localData once when data prop arrives
+    useEffect(() => {
+        if (data && data.transactions) {
+            setLocalData({
+                transactions: [...data.transactions],
+                insights: data.insights || []
+            });
+        }
+    }, [data]);
+
+    // Recalculate totals dynamically
+    const computedTotals = useMemo(() => {
+        let income = 0;
+        let expenses = 0;
+        localData.transactions.forEach(t => {
+            if (t.amount > 0) expenses += t.amount;
+            else income += Math.abs(t.amount); // amount might be negative for income
+        });
+        return { income, expenses };
+    }, [localData.transactions]);
+
     // Group transactions by category to feed the Pie chart
     const categoryData = useMemo(() => {
-        if (!data || !data.transactions) return [];
         const groups = {};
-        
-        data.transactions.forEach(t => {
+        localData.transactions.forEach(t => {
             if (t.amount > 0) { // Only graph expenses for the donut
                 if (!groups[t.category]) groups[t.category] = 0;
                 groups[t.category] += t.amount;
@@ -19,15 +47,80 @@ export default function BudgetDashboard({ data, onReset }) {
         return Object.keys(groups)
             .map(key => ({ name: key, value: groups[key] }))
             .sort((a, b) => b.value - a.value); // sort largest to smallest
-    }, [data]);
+    }, [localData.transactions]);
 
-    const COLORS = ['#6366f1', '#14b8a6', '#f43f5e', '#f59e0b', '#8b5cf6', '#0ea5e9', '#10b981', '#64748b'];
+    const COLORS = ['#6366f1', '#14b8a6', '#f43f5e', '#f59e0b', '#8b5cf6', '#0ea5e9', '#10b981', '#64748b', '#ec4899', '#6b7280'];
 
     const formatCurrency = (val) => {
         return new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD' }).format(val);
     };
 
+    const handleSort = (key) => {
+        let direction = 'asc';
+        if (sortConfig.key === key && sortConfig.direction === 'asc') {
+            direction = 'desc';
+        }
+        setSortConfig({ key, direction });
+    };
+
+    const getSortedAndFilteredTransactions = () => {
+        let filtered = localData.transactions;
+        
+        if (selectedCategory) {
+            filtered = filtered.filter(t => t.category === selectedCategory);
+        }
+
+        return filtered.sort((a, b) => {
+            if (a[sortConfig.key] < b[sortConfig.key]) {
+                return sortConfig.direction === 'asc' ? -1 : 1;
+            }
+            if (a[sortConfig.key] > b[sortConfig.key]) {
+                return sortConfig.direction === 'asc' ? 1 : -1;
+            }
+            return 0;
+        });
+    };
+
+    const updateCategory = (index, newCategory) => {
+        const updated = [...localData.transactions];
+        updated[index].category = newCategory;
+        setLocalData({ ...localData, transactions: updated });
+    };
+
+    const deleteTransaction = (index) => {
+        const updated = [...localData.transactions];
+        updated.splice(index, 1);
+        setLocalData({ ...localData, transactions: updated });
+    };
+
+    const exportToCSV = () => {
+        const headers = ["Date", "Merchant", "Category", "Amount"];
+        const rows = localData.transactions.map(t => [
+            t.date, 
+            `"${t.cleanName.replace(/"/g, '""')}"`, // escape quotes
+            t.category, 
+            t.amount
+        ]);
+        
+        const csvContent = [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", "budget_analysis.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
     if (!data) return null;
+
+    const displayedTransactions = getSortedAndFilteredTransactions();
+
+    const SortIcon = ({ active, direction }) => {
+        if (!active) return <span className="ml-1 text-slate-300 opacity-50">⇅</span>;
+        return <span className="ml-1 text-indigo-500">{direction === 'asc' ? '↑' : '↓'}</span>;
+    };
 
     return (
         <div className="animate-fade-in w-full pb-12">
@@ -36,12 +129,20 @@ export default function BudgetDashboard({ data, onReset }) {
                     <h2 className="text-3xl font-black text-slate-900 tracking-tight">AI Budget Analysis</h2>
                     <p className="text-slate-500 font-medium">Your spending categorized and optimized.</p>
                 </div>
-                <button 
-                    onClick={onReset}
-                    className="px-5 py-2 rounded-full text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors"
-                >
-                    Analyze Another
-                </button>
+                <div className="flex gap-3">
+                    <button 
+                        onClick={exportToCSV}
+                        className="px-5 py-2 rounded-full text-sm font-bold text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 transition-colors shadow-sm"
+                    >
+                        Export CSV
+                    </button>
+                    <button 
+                        onClick={onReset}
+                        className="px-5 py-2 rounded-full text-sm font-bold text-white bg-slate-900 hover:bg-slate-800 transition-colors shadow-sm"
+                    >
+                        Analyze Another
+                    </button>
+                </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
@@ -113,8 +214,8 @@ export default function BudgetDashboard({ data, onReset }) {
                         </div>
 
                         <div className="space-y-4 relative z-10">
-                            {data.insights && data.insights.length > 0 ? (
-                                data.insights.map((insight, idx) => (
+                            {localData.insights && localData.insights.length > 0 ? (
+                                localData.insights.map((insight, idx) => (
                                     <div key={idx} className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-5 hover:bg-white/15 transition-colors">
                                         <p className="leading-relaxed font-medium text-indigo-50">{insight}</p>
                                     </div>
@@ -127,11 +228,11 @@ export default function BudgetDashboard({ data, onReset }) {
                         <div className="mt-8 flex gap-6 border-t border-white/20 pt-6 relative z-10">
                             <div>
                                 <div className="text-xs font-bold uppercase tracking-wider text-indigo-200 mb-1">Total Expenses</div>
-                                <div className="text-2xl font-black text-white">{formatCurrency(data.totals?.expenses || 0)}</div>
+                                <div className="text-2xl font-black text-white">{formatCurrency(computedTotals.expenses)}</div>
                             </div>
                             <div>
                                 <div className="text-xs font-bold uppercase tracking-wider text-indigo-200 mb-1">Total Income</div>
-                                <div className="text-2xl font-black text-white">{formatCurrency(data.totals?.income || 0)}</div>
+                                <div className="text-2xl font-black text-white">{formatCurrency(computedTotals.income)}</div>
                             </div>
                         </div>
                     </div>
@@ -144,11 +245,11 @@ export default function BudgetDashboard({ data, onReset }) {
                     <h3 className="font-black text-slate-800 flex items-center gap-2">
                         Extracted Transactions
                         {selectedCategory && (
-                            <span className="text-sm font-bold text-indigo-500 bg-indigo-50 px-2 py-0.5 rounded-full">
-                                {selectedCategory}
+                            <span className="text-sm font-bold text-indigo-500 bg-indigo-50 px-3 py-1 rounded-full">
+                                Filter: {selectedCategory}
                                 <button 
                                     onClick={() => setSelectedCategory(null)}
-                                    className="ml-2 text-indigo-400 hover:text-indigo-600"
+                                    className="ml-2 text-indigo-400 hover:text-indigo-600 font-bold"
                                 >
                                     &times;
                                 </button>
@@ -156,37 +257,67 @@ export default function BudgetDashboard({ data, onReset }) {
                         )}
                     </h3>
                     <span className="text-xs font-bold bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full uppercase tracking-wide">
-                        {data.transactions ? (selectedCategory ? data.transactions.filter(t => t.category === selectedCategory).length : data.transactions.length) : 0} ITEMS
+                        {displayedTransactions.length} ITEMS
                     </span>
                 </div>
                 
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                         <thead>
-                            <tr className="bg-white border-b border-slate-100 text-xs uppercase tracking-wider font-black text-slate-400">
-                                <th className="p-4 pl-8">Date</th>
-                                <th className="p-4">Merchant / Description</th>
-                                <th className="p-4">Category</th>
-                                <th className="p-4 pr-8 text-right">Amount</th>
+                            <tr className="bg-white border-b border-slate-100 text-xs uppercase tracking-wider font-black text-slate-400 cursor-pointer select-none">
+                                <th className="p-4 pl-8 hover:bg-slate-50 transition-colors" onClick={() => handleSort('date')}>
+                                    Date <SortIcon active={sortConfig.key === 'date'} direction={sortConfig.direction} />
+                                </th>
+                                <th className="p-4 hover:bg-slate-50 transition-colors" onClick={() => handleSort('cleanName')}>
+                                    Merchant <SortIcon active={sortConfig.key === 'cleanName'} direction={sortConfig.direction} />
+                                </th>
+                                <th className="p-4 hover:bg-slate-50 transition-colors" onClick={() => handleSort('category')}>
+                                    Category <SortIcon active={sortConfig.key === 'category'} direction={sortConfig.direction} />
+                                </th>
+                                <th className="p-4 text-right hover:bg-slate-50 transition-colors" onClick={() => handleSort('amount')}>
+                                    Amount <SortIcon active={sortConfig.key === 'amount'} direction={sortConfig.direction} />
+                                </th>
+                                <th className="p-4 pr-8 text-center w-12"></th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
-                            {data.transactions && data.transactions
-                                .filter(tx => !selectedCategory || tx.category === selectedCategory)
-                                .map((tx, idx) => (
-                                <tr key={idx} className="hover:bg-slate-50 transition-colors group">
-                                    <td className="p-4 pl-8 text-sm text-slate-500 whitespace-nowrap">{tx.date}</td>
-                                    <td className="p-4 text-sm font-bold text-slate-800">{tx.cleanName}</td>
-                                    <td className="p-4">
-                                        <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-600 group-hover:bg-indigo-50 group-hover:text-indigo-700 transition-colors">
-                                            {tx.category}
-                                        </span>
-                                    </td>
-                                    <td className="p-4 pr-8 text-sm font-black text-slate-900 text-right">
-                                        {formatCurrency(tx.amount)}
-                                    </td>
-                                </tr>
-                            ))}
+                            {displayedTransactions.map((tx) => {
+                                // Find original index for mutations
+                                const originalIndex = localData.transactions.indexOf(tx);
+                                
+                                return (
+                                    <tr key={originalIndex} className="hover:bg-slate-50 transition-colors group">
+                                        <td className="p-4 pl-8 text-sm text-slate-500 whitespace-nowrap">{tx.date}</td>
+                                        <td className="p-4 text-sm font-bold text-slate-800">{tx.cleanName}</td>
+                                        <td className="p-4">
+                                            <select
+                                                value={tx.category}
+                                                onChange={(e) => updateCategory(originalIndex, e.target.value)}
+                                                className="bg-slate-100 text-slate-700 text-xs font-bold rounded-lg px-2 py-1.5 border-none outline-none focus:ring-2 focus:ring-indigo-500 hover:bg-indigo-50 hover:text-indigo-700 transition-colors cursor-pointer appearance-none"
+                                            >
+                                                {!CATEGORIES.includes(tx.category) && (
+                                                    <option value={tx.category}>{tx.category}</option>
+                                                )}
+                                                {CATEGORIES.map(cat => (
+                                                    <option key={cat} value={cat}>{cat}</option>
+                                                ))}
+                                            </select>
+                                        </td>
+                                        <td className="p-4 text-sm font-black text-slate-900 text-right">
+                                            {formatCurrency(tx.amount)}
+                                        </td>
+                                        <td className="p-4 pr-8 text-right">
+                                            <button 
+                                                onClick={() => deleteTransaction(originalIndex)}
+                                                className="p-1.5 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                                                title="Delete transaction"
+                                            >
+                                                <TrashIcon className="w-4 h-4" />
+                                            </button>
+                                        </td>
+                                    </tr>
+                                );
+                            })}
                         </tbody>
                     </table>
                 </div>
