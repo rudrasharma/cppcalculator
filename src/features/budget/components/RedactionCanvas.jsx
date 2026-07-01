@@ -1,12 +1,23 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, forwardRef, useImperativeHandle } from 'react';
 
-export default function RedactionCanvas({ imageUrl, onComplete, onCancel }) {
+const RedactionCanvas = forwardRef(({ imageUrl, index }, ref) => {
     const canvasRef = useRef(null);
     const containerRef = useRef(null);
     const [isDrawing, setIsDrawing] = useState(false);
     const [startPos, setStartPos] = useState(null);
     const [currentPos, setCurrentPos] = useState(null);
     const [rectangles, setRectangles] = useState([]);
+    
+    useImperativeHandle(ref, () => ({
+        getBase64: () => {
+            if (!canvasRef.current) return null;
+            return canvasRef.current.toDataURL('image/jpeg', 0.8);
+        },
+        undo: () => {
+            setRectangles(rectangles.slice(0, -1));
+        },
+        canUndo: rectangles.length > 0
+    }));
     
     // Load image and setup canvas
     useEffect(() => {
@@ -112,53 +123,26 @@ export default function RedactionCanvas({ imageUrl, onComplete, onCancel }) {
         setCurrentPos(null);
     };
 
-    const handleUndo = () => {
-        setRectangles(rectangles.slice(0, -1));
-    };
-
-    const handleComplete = () => {
-        // Export final canvas as base64
-        const base64 = canvasRef.current.toDataURL('image/jpeg', 0.8);
-        onComplete(base64);
-    };
-
     return (
-        <div className="flex flex-col animate-fade-in w-full">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-                <div>
-                    <h2 className="text-2xl font-black text-slate-900">Censor Private Info</h2>
-                    <p className="text-slate-500">Click and drag to draw black boxes over your Name, Account Numbers, and Balances.</p>
-                </div>
-                <div className="flex gap-3 w-full md:w-auto">
+        <div className="flex flex-col animate-fade-in w-full mb-8">
+            <div className="flex justify-between items-center mb-2 px-2">
+                <span className="text-sm font-bold text-slate-500">Image {index + 1}</span>
+                {rectangles.length > 0 && (
                     <button 
-                        onClick={onCancel}
-                        className="px-5 py-2.5 rounded-full text-slate-600 font-bold bg-slate-100 hover:bg-slate-200 transition-colors flex-1 md:flex-none text-center"
+                        onClick={() => setRectangles(rectangles.slice(0, -1))}
+                        className="text-xs font-bold text-indigo-500 hover:text-indigo-600 transition-colors"
                     >
-                        Cancel
+                        Undo last redaction
                     </button>
-                    <button 
-                        onClick={handleUndo}
-                        disabled={rectangles.length === 0}
-                        className="px-5 py-2.5 rounded-full text-slate-700 font-bold bg-white border border-slate-200 hover:bg-slate-50 disabled:opacity-50 transition-colors flex-1 md:flex-none text-center"
-                    >
-                        Undo
-                    </button>
-                    <button 
-                        onClick={handleComplete}
-                        className="px-6 py-2.5 rounded-full text-white font-bold bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-500/20 transition-colors flex-1 md:flex-none text-center"
-                    >
-                        Analyze Data
-                    </button>
-                </div>
+                )}
             </div>
-
             <div 
                 ref={containerRef}
                 className="w-full bg-slate-100 rounded-3xl overflow-hidden border-2 border-slate-200 cursor-crosshair relative shadow-inner"
             >
                 <div className="absolute top-4 left-4 bg-slate-900/80 backdrop-blur text-white text-xs font-bold px-3 py-1.5 rounded-full pointer-events-none flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    Local Censor Mode Active
+                    Local Censor Mode
                 </div>
                 <canvas 
                     ref={canvasRef}
@@ -170,10 +154,8 @@ export default function RedactionCanvas({ imageUrl, onComplete, onCancel }) {
                     style={{ maxHeight: '70vh', objectFit: 'contain' }}
                 />
             </div>
-            
-            <p className="text-xs text-center text-slate-400 mt-4 max-w-xl mx-auto">
-                Any black boxes you draw are permanent and flattened into the image. Our servers and the AI will completely ignore those sections.
-            </p>
         </div>
     );
-}
+});
+
+export default RedactionCanvas;

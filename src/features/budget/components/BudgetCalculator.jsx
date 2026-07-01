@@ -1,33 +1,64 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import RedactionCanvas from './RedactionCanvas';
 import BudgetDashboard from './BudgetDashboard';
 import { ShieldCheckIcon, AlertTriangleIcon } from '../../../components/shared/Icons';
 
 export default function BudgetCalculator() {
     const [appState, setAppState] = useState('UPLOAD'); // UPLOAD, REDACT, ANALYZING, DASHBOARD
-    const [rawImage, setRawImage] = useState(null);
-    const [redactedImage, setRedactedImage] = useState(null);
+    const [rawImages, setRawImages] = useState([]);
     const [budgetData, setBudgetData] = useState(null);
     const [error, setError] = useState(null);
 
     const fileInputRef = useRef(null);
+    const canvasRefs = useRef([]);
 
-    const handleFileSelect = (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        
-        if (!file.type.startsWith('image/')) {
-            setError("Please upload an image file (PNG, JPEG). PDF support is coming soon!");
-            return;
-        }
+    // Listen for paste events anywhere in the window
+    useEffect(() => {
+        if (appState !== 'UPLOAD' && appState !== 'REDACT') return;
 
-        const reader = new FileReader();
-        reader.onload = (event) => {
-            setRawImage(event.target.result);
+        const handlePaste = (e) => {
+            const items = e.clipboardData?.items;
+            if (!items) return;
+
+            const imageFiles = [];
+            for (let i = 0; i < items.length; i++) {
+                if (items[i].type.startsWith('image/')) {
+                    imageFiles.push(items[i].getAsFile());
+                }
+            }
+
+            if (imageFiles.length > 0) {
+                processFiles(imageFiles);
+            }
+        };
+
+        window.addEventListener('paste', handlePaste);
+        return () => window.removeEventListener('paste', handlePaste);
+    }, [appState]);
+
+    const processFiles = (files) => {
+        const promises = files.map(file => {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(e.target.result);
+                reader.readAsDataURL(file);
+            });
+        });
+
+        Promise.all(promises).then(base64Images => {
+            setRawImages(prev => [...prev, ...base64Images]);
             setAppState('REDACT');
             setError(null);
-        };
-        reader.readAsDataURL(file);
+        });
+    };
+
+    const handleFileSelect = (e) => {
+        const files = Array.from(e.target.files).filter(f => f.type.startsWith('image/'));
+        if (files.length === 0) {
+            setError("Please upload image files (PNG, JPEG).");
+            return;
+        }
+        processFiles(files);
     };
 
     const handleLoadSample = () => {
@@ -57,8 +88,17 @@ export default function BudgetCalculator() {
         }, 1500);
     };
 
-    const handleAnalyze = async (base64Image) => {
-        setRedactedImage(base64Image);
+    const handleAnalyze = async () => {
+        // Collect base64 strings from all canvas refs
+        const redactedImages = canvasRefs.current
+            .map(ref => ref?.getBase64())
+            .filter(Boolean);
+
+        if (redactedImages.length === 0) {
+            setError("No valid images to analyze.");
+            return;
+        }
+
         setAppState('ANALYZING');
         setError(null);
 
@@ -66,7 +106,7 @@ export default function BudgetCalculator() {
             const res = await fetch('/api/ai/budget-analyzer', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ image: base64Image })
+                body: JSON.stringify({ images: redactedImages })
             });
 
             const data = await res.json();
@@ -86,10 +126,10 @@ export default function BudgetCalculator() {
 
     const resetApp = () => {
         setAppState('UPLOAD');
-        setRawImage(null);
-        setRedactedImage(null);
+        setRawImages([]);
         setBudgetData(null);
         setError(null);
+        canvasRefs.current = [];
     };
 
     return (
@@ -112,7 +152,7 @@ export default function BudgetCalculator() {
                             <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-50 rounded-full blur-3xl -mr-32 -mt-32 opacity-50 pointer-events-none"></div>
                             
                             <h2 className="text-2xl font-black text-slate-900 mb-2">Upload Bank Statement</h2>
-                            <p className="text-slate-500 mb-8 max-w-md">Take a screenshot of your bank or credit card statement and upload it here. We'll use AI to categorize your spending and find optimizations.</p>
+                            <p className="text-slate-500 mb-8 max-w-md">Take screenshots of your bank or credit card statements and upload or paste them here. We'll use AI to categorize your spending and find optimizations.</p>
 
                             <div 
                                 onClick={() => fileInputRef.current?.click()}
@@ -123,11 +163,12 @@ export default function BudgetCalculator() {
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                                     </svg>
                                 </div>
-                                <h3 className="text-lg font-bold text-slate-700 mb-1">Click to upload screenshot</h3>
-                                <p className="text-sm text-slate-400">PNG, JPG up to 10MB</p>
+                                <h3 className="text-lg font-bold text-slate-700 mb-1">Click to upload or press Ctrl+V to paste</h3>
+                                <p className="text-sm text-slate-400">PNG, JPG up to 10MB. Multiple files allowed.</p>
                                 <input 
                                     type="file" 
                                     accept="image/png, image/jpeg" 
+                                    multiple
                                     className="hidden" 
                                     ref={fileInputRef}
                                     onChange={handleFileSelect}
@@ -183,11 +224,39 @@ export default function BudgetCalculator() {
             )}
 
             {appState === 'REDACT' && (
-                <RedactionCanvas 
-                    imageUrl={rawImage} 
-                    onComplete={handleAnalyze} 
-                    onCancel={resetApp} 
-                />
+                <div className="flex flex-col animate-fade-in w-full">
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 sticky top-4 z-20 bg-white/80 backdrop-blur-md p-4 rounded-3xl border border-slate-200 shadow-sm">
+                        <div>
+                            <h2 className="text-2xl font-black text-slate-900">Censor Private Info</h2>
+                            <p className="text-slate-500 text-sm">Click and drag to draw black boxes over anything private. Press Ctrl+V to paste more images.</p>
+                        </div>
+                        <div className="flex gap-3 w-full md:w-auto">
+                            <button 
+                                onClick={resetApp}
+                                className="px-5 py-2.5 rounded-full text-slate-600 font-bold bg-slate-100 hover:bg-slate-200 transition-colors flex-1 md:flex-none text-center"
+                            >
+                                Cancel
+                            </button>
+                            <button 
+                                onClick={handleAnalyze}
+                                className="px-6 py-2.5 rounded-full text-white font-bold bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-500/20 transition-colors flex-1 md:flex-none text-center"
+                            >
+                                Analyze {rawImages.length} Image{rawImages.length > 1 ? 's' : ''}
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div className="space-y-4">
+                        {rawImages.map((img, i) => (
+                            <RedactionCanvas 
+                                key={i}
+                                index={i}
+                                imageUrl={img} 
+                                ref={el => canvasRefs.current[i] = el}
+                            />
+                        ))}
+                    </div>
+                </div>
             )}
 
             {appState === 'ANALYZING' && (
@@ -202,7 +271,7 @@ export default function BudgetCalculator() {
                         </div>
                     </div>
                     <h2 className="text-2xl font-black text-slate-900 mb-2">Analyzing your spending...</h2>
-                    <p className="text-slate-500 text-center max-w-md">Our AI is reading your transactions, standardizing the merchant names, and categorizing your expenses to find optimization opportunities.</p>
+                    <p className="text-slate-500 text-center max-w-md">Our AI is reading your transactions across {rawImages.length} image{rawImages.length > 1 ? 's' : ''}, standardizing merchant names, and finding optimization opportunities.</p>
                 </div>
             )}
 

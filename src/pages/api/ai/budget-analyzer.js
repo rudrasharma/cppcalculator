@@ -5,10 +5,10 @@ export const prerender = false;
 export async function POST({ request }) {
     try {
         const body = await request.json();
-        const { image } = body;
+        const { images } = body;
 
-        if (!image) {
-            return new Response(JSON.stringify({ error: "Missing image data" }), { status: 400 });
+        if (!images || !Array.isArray(images) || images.length === 0) {
+            return new Response(JSON.stringify({ error: "Missing images data" }), { status: 400 });
         }
 
         // Initialize Gemini
@@ -21,10 +21,17 @@ export async function POST({ request }) {
         // Using gemini-1.5-flash for speed with multimodal tasks
         const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-        // Parse base64 string
-        // format: data:image/jpeg;base64,...
-        const mimeType = image.match(/data:(.*?);base64/)[1];
-        const base64Data = image.replace(/^data:image\/\w+;base64,/, "");
+        // Parse base64 strings
+        const imageParts = images.map(img => {
+            const mimeType = img.match(/data:(.*?);base64/)[1];
+            const base64Data = img.replace(/^data:image\/\w+;base64,/, "");
+            return {
+                inlineData: {
+                    data: base64Data,
+                    mimeType
+                }
+            };
+        });
 
         const prompt = `
         You are an expert financial analyst. Analyze the provided bank or credit card statement image.
@@ -53,14 +60,7 @@ export async function POST({ request }) {
         Return ONLY raw JSON. No markdown formatting, no \`\`\`json block. Just the JSON object.
         `;
 
-        const imagePart = {
-            inlineData: {
-                data: base64Data,
-                mimeType
-            }
-        };
-
-        const result = await model.generateContent([prompt, imagePart]);
+        const result = await model.generateContent([prompt, ...imageParts]);
         const responseText = result.response.text();
         
         // Clean up markdown if the AI mistakenly includes it
