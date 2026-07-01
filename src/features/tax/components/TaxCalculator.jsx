@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { calculateTakeHome } from '../utils/taxEngine';
-import { MoneyInput, NativeSelect, RangeSlider, AICommandBar, StrategyCard, AICopilot } from '../../../components/shared';
+import { MoneyInput, NativeSelect, RangeSlider, AICommandBar, StrategyCard, AICopilot, Accordion, ExternalLinkIcon, DollarSignIcon } from '../../../components/shared';
 import { TAX_YEAR_CONFIG } from '../../../config/taxYears';
 import { useFinancialMemory } from '../../../hooks/useFinancialMemory';
 
@@ -247,6 +247,23 @@ const TaxCalculator = ({ initialIncome = 75000, initialProvince = 'ON', isEmbedd
                                 </p>
                             </div>
                         </div>
+
+                        {/* Official CRA Resources */}
+                        <div className="pt-4">
+                            <Accordion title="Official CRA Resources" icon={ExternalLinkIcon}>
+                                <div className="flex flex-col gap-4">
+                                    <a href="https://www.canada.ca/en/revenue-agency/services/tax/individuals/frequently-asked-questions-individuals/canadian-income-tax-rates-individuals-current-previous-years.html" target="_blank" rel="noreferrer" className="flex items-center justify-between p-4 bg-indigo-50 rounded-2xl group transition-all hover:bg-indigo-100">
+                                        <div className="flex items-center gap-3"><DollarSignIcon className="text-indigo-600" /> <span className="font-bold text-indigo-900 text-sm">Current CRA Tax Rates</span></div>
+                                        <ExternalLinkIcon size={16} className="text-indigo-400 group-hover:translate-x-1 transition-transform" />
+                                    </a>
+                                    <a href="https://www.canada.ca/en/revenue-agency/services/tax/individuals/topics/rrsps-related-plans/contributing-a-rrsp-prpp/contributions-affect-your-rrsp-prpp-deduction-limit.html" target="_blank" rel="noreferrer" className="flex items-center justify-between p-4 bg-emerald-50 rounded-2xl group transition-all hover:bg-emerald-100">
+                                        <div className="flex items-center gap-3"><DollarSignIcon className="text-emerald-600" /> <span className="font-bold text-emerald-900 text-sm">RRSP Deduction Limits</span></div>
+                                        <ExternalLinkIcon size={16} className="text-emerald-400 group-hover:translate-x-1 transition-transform" />
+                                    </a>
+                                </div>
+                            </Accordion>
+                        </div>
+
                     </div>
                 </div>
             </div>
