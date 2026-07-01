@@ -38,6 +38,11 @@ export async function POST({ request }) {
         Extract all visible financial transactions. 
         Ignore any blurred, blacked-out, or censored regions—do not attempt to guess them.
 
+        CRITICAL DEDUPLICATION RULE: 
+        If multiple statements are uploaded (e.g. a bank statement and a credit card statement), you will often see a payment leaving the bank account, and the exact same payment arriving on the credit card statement. 
+        Categorize ALL credit card payments, bill payments to credit cards, and internal transfers between accounts strictly as "Internal Transfer". 
+        Do not categorize credit card payments as "Expenses" or "Other", as this will double-count the user's spending.
+
         Format your response EXACTLY as a JSON object matching this schema:
         {
           "transactions": [
@@ -45,7 +50,7 @@ export async function POST({ request }) {
               "date": "YYYY-MM-DD",
               "cleanName": "Standardized Merchant Name (e.g., 'Walmart' instead of 'WM SUPERCENTER #1234')",
               "amount": Number (positive for expenses, negative for income/refunds),
-              "category": "String (e.g., 'Housing', 'Food & Groceries', 'Dining Out', 'Transportation', 'Utilities', 'Recreational', 'Income', 'Other')"
+              "category": "String (e.g., 'Housing', 'Food & Groceries', 'Dining Out', 'Transportation', 'Utilities', 'Recreational', 'Income', 'Internal Transfer', 'Other')"
             }
           ],
           "insights": [
@@ -53,7 +58,7 @@ export async function POST({ request }) {
           ],
           "totals": {
             "income": Number,
-            "expenses": Number (positive total of all expense amounts)
+            "expenses": Number (positive total of all expense amounts, EXCLUDING 'Internal Transfer')
           }
         }
 

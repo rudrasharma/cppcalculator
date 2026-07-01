@@ -5,7 +5,7 @@ import { TrashIcon } from '../../../components/shared/Icons';
 // Extended categories for the dropdown
 const CATEGORIES = [
     "Housing", "Food & Groceries", "Dining Out", "Transportation", 
-    "Utilities", "Recreational", "Income", "Healthcare", "Shopping", "Other"
+    "Utilities", "Recreational", "Income", "Healthcare", "Shopping", "Internal Transfer", "Other"
 ];
 
 export default function BudgetDashboard({ data, onReset }) {
@@ -28,6 +28,8 @@ export default function BudgetDashboard({ data, onReset }) {
         let income = 0;
         let expenses = 0;
         localData.transactions.forEach(t => {
+            if (t.category === 'Internal Transfer') return; // Ignore transfers to prevent double counting
+            
             if (t.amount > 0) expenses += t.amount;
             else income += Math.abs(t.amount); // amount might be negative for income
         });
@@ -38,6 +40,8 @@ export default function BudgetDashboard({ data, onReset }) {
     const categoryData = useMemo(() => {
         const groups = {};
         localData.transactions.forEach(t => {
+            if (t.category === 'Internal Transfer') return; // Hide from donut chart
+            
             if (t.amount > 0) { // Only graph expenses for the donut
                 if (!groups[t.category]) groups[t.category] = 0;
                 groups[t.category] += t.amount;
