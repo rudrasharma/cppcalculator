@@ -239,33 +239,128 @@ function getInstructionsAndTools(calculatorId, context, globalMemory) {
       break;
 
     case 'retirement':
-    case 'cpp-oas':
-      systemInstruction = `You are LoonieFi's Retirement Hero, an expert on Canadian retirement income, CPP pension calculations, and OAS benefits.
+    case 'retirement-planner':
+      systemInstruction = `You are LoonieFi's Retirement Hero, an expert on Canadian retirement income, asset drawdown, and pension calculations.
         Your goal is to help users estimate their future retirement cash flows and pension calculations.
         
-        Current Page Context (Retirement Calculator): ${JSON.stringify(context || {})}
+        Current Page Context (Retirement Planner): ${JSON.stringify(context || {})}
         Global User Profile: ${JSON.stringify(globalMemory || {})}
         
         When a user interacts:
-        1. If they describe their retirement timeline and profile (e.g. "I'm 40, make $90k, and want to retire at 65"): Call 'update_retirement_calculator' with extracted values.
-        2. If they ask a general question: DO NOT call 'update_retirement_calculator'. Simply answer in the text response.
+        1. If they describe their retirement timeline and profile (e.g. "I'm 40, make $90k, and want to retire at 65. I have $50k in my TFSA"): Call 'update_retirement_planner' with extracted values.
+        2. If they ask a general question: DO NOT call 'update_retirement_planner'. Simply answer in the text response.
+        
+        FINANCIAL GUARDRAILS (STRICT):
+        - Province: Must be 2-letter code.
         
         ${commonInstructions}`;
 
       tools = [{
         functionDeclarations: [{
-          name: "update_retirement_calculator",
-          description: "Updates retirement profile and earnings history.",
+          name: "update_retirement_planner",
+          description: "Updates retirement profile, balances, and savings.",
           parameters: {
             type: "OBJECT",
             properties: {
-              dob: { type: "STRING", description: "ISO Date (YYYY-MM-DD)" },
-              retirementAge: { type: "NUMBER" },
+              province: { type: "STRING" },
               yearsInCanada: { type: "NUMBER" },
-              isMarried: { type: "BOOLEAN" },
-              avgSalaryInput: { type: "NUMBER" },
-              spouseIncome: { type: "NUMBER" },
-              childCount: { type: "NUMBER" }
+              currentAge: { type: "NUMBER" },
+              startAge: { type: "NUMBER", description: "Age at which retirement begins" },
+              endAge: { type: "NUMBER", description: "Age at which projection ends" },
+              workingIncome: { type: "NUMBER" },
+              targetIncome: { type: "NUMBER", description: "Desired annual retirement income" },
+              inflation: { type: "NUMBER", description: "Annual inflation rate (e.g. 0.021 for 2.1%)" },
+              returnRate: { type: "NUMBER", description: "Annual investment return rate (e.g. 0.05 for 5%)" },
+              balances: {
+                type: "OBJECT",
+                properties: {
+                  tfsa: { type: "NUMBER" },
+                  rrsp: { type: "NUMBER" },
+                  nonReg: { type: "NUMBER" },
+                  nonRegBookValue: { type: "NUMBER" },
+                  lira: { type: "NUMBER" }
+                }
+              },
+              contributions: {
+                type: "OBJECT",
+                properties: {
+                  tfsa: { type: "NUMBER" },
+                  rrsp: { type: "NUMBER" },
+                  nonReg: { type: "NUMBER" }
+                }
+              },
+              pension: {
+                type: "OBJECT",
+                properties: {
+                  amount: { type: "NUMBER" },
+                  startAge: { type: "NUMBER" }
+                }
+              },
+              cpp: {
+                type: "OBJECT",
+                properties: {
+                  amount: { type: "NUMBER" },
+                  startAge: { type: "NUMBER" }
+                }
+              },
+              oas: {
+                type: "OBJECT",
+                properties: {
+                  amount: { type: "NUMBER" },
+                  startAge: { type: "NUMBER" }
+                }
+              },
+              drawdownOrder: { 
+                type: "ARRAY", 
+                items: { type: "STRING" },
+                description: "Order to withdraw from accounts (e.g. ['nonReg', 'rrsp', 'lira', 'tfsa'])"
+              },
+              hasSpouse: { type: "BOOLEAN" },
+              spouse: {
+                type: "OBJECT",
+                properties: {
+                  currentAge: { type: "NUMBER" },
+                  startAge: { type: "NUMBER" },
+                  workingIncome: { type: "NUMBER" },
+                  yearsInCanada: { type: "NUMBER" },
+                  balances: {
+                    type: "OBJECT",
+                    properties: {
+                      tfsa: { type: "NUMBER" },
+                      rrsp: { type: "NUMBER" },
+                      lira: { type: "NUMBER" }
+                    }
+                  },
+                  contributions: {
+                    type: "OBJECT",
+                    properties: {
+                      tfsa: { type: "NUMBER" },
+                      rrsp: { type: "NUMBER" }
+                    }
+                  },
+                  pension: {
+                    type: "OBJECT",
+                    properties: {
+                      amount: { type: "NUMBER" },
+                      startAge: { type: "NUMBER" }
+                    }
+                  },
+                  cpp: {
+                    type: "OBJECT",
+                    properties: {
+                      amount: { type: "NUMBER" },
+                      startAge: { type: "NUMBER" }
+                    }
+                  },
+                  oas: {
+                    type: "OBJECT",
+                    properties: {
+                      amount: { type: "NUMBER" },
+                      startAge: { type: "NUMBER" }
+                    }
+                  }
+                }
+              }
             }
           }
         }]
@@ -338,7 +433,8 @@ function getInstructionsAndTools(calculatorId, context, globalMemory) {
               grossIncome: { type: "NUMBER", description: "Annual gross income in CAD" },
               province: { type: "STRING", description: "2-letter province code (e.g., ON, BC, AB, QC)" },
               rrspContribution: { type: "NUMBER", description: "Annual RRSP contribution in CAD" },
-              employerMatchPercent: { type: "NUMBER", description: "Employer RRSP match percentage (0-10)" }
+              employerMatchPercent: { type: "NUMBER", description: "Employer RRSP match percentage (0-10)" },
+              period: { type: "STRING", enum: ["yearly", "monthly", "bi-weekly"], description: "The pay period to display the tax results in" }
             }
           }
         }]

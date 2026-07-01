@@ -159,14 +159,18 @@ const getWelcomeMessage = (calculatorId) => {
     case 'tax':
       return { role: 'assistant', content: base + "Ask me questions like:\n- *\"I make $80,000 in Ontario\"*\n- *\"What if I contribute $6,000 to my RRSP?\"*\n- *\"Explain CPP and EI deductions\"*" };
     case 'ccb':
+    case 'child-benefit':
       return { role: 'assistant', content: base + "Ask me questions like:\n- *\"I have two kids aged 4 and 8 in BC\"*\n- *\"How does my income affect the CCB?\"*\n- *\"What if my salary increases to $120,000?\"*" };
     case 'parental':
+    case 'parental-leave':
       return { role: 'assistant', content: base + "Ask me questions like:\n- *\"Compare standard vs extended leave\"*\n- *\"I make $90k and want to take 12 months\"*\n- *\"What is the EI maximum for this year?\"*" };
     case 'resp':
       return { role: 'assistant', content: base + "Ask me questions like:\n- *\"How do I max out the CESG grant?\"*\n- *\"What if I contribute $200 a month?\"*\n- *\"Explain the Canada Learning Bond\"*" };
     case 'retirement':
-      return { role: 'assistant', content: base + "Ask me questions like:\n- *\"When should I take CPP?\"*\n- *\"How much OAS will I get at 65?\"*\n- *\"What if I delay CPP to 70?\"*" };
+    case 'retirement-planner':
+      return { role: 'assistant', content: base + "Ask me questions like:\n- *\"I'm 45 and make $100k, when can I retire?\"*\n- *\"What if I have $200k in my TFSA?\"*\n- *\"How long will my money last if I need $60k a year?\"*" };
     case 'smith':
+    case 'smith-manoeuvre':
       return { role: 'assistant', content: base + "Ask me questions like:\n- *\"What is the Smith Manoeuvre?\"*\n- *\"I have a $500k mortgage and $100k in equity\"*\n- *\"How much tax refund will I get?\"*" };
     case 'cagr':
       return { role: 'assistant', content: base + "Ask me questions like:\n- *\"If I invest $10k at 7% for 20 years?\"*\n- *\"What is my CAGR if my portfolio went from $50k to $80k in 3 years?\"*\n- *\"Calculate Rule of 72 for 8% return\"*" };
