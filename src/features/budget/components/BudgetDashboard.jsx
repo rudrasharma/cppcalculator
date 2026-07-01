@@ -236,38 +236,38 @@ export default function BudgetDashboard({ data, onReset }) {
 
                 {/* AI INSIGHTS */}
                 <div className="lg:col-span-2">
-                    <div className="bg-gradient-to-br from-indigo-500 to-violet-600 rounded-3xl p-8 text-white h-full relative overflow-hidden shadow-xl">
-                        <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none"></div>
+                    <div className="bg-white border border-slate-200 rounded-3xl p-8 text-slate-800 h-full relative overflow-hidden shadow-sm">
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-50 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none"></div>
                         
                         <div className="flex items-center gap-3 mb-6 relative z-10">
-                            <div className="w-10 h-10 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center">
-                                <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <div className="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center">
+                                <svg className="w-5 h-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                                 </svg>
                             </div>
-                            <h3 className="font-black text-xl">AI Optimization Insights</h3>
+                            <h3 className="font-black text-xl text-slate-900">AI Optimization Insights</h3>
                         </div>
 
                         <div className="space-y-4 relative z-10">
                             {localData.insights && localData.insights.length > 0 ? (
                                 localData.insights.map((insight, idx) => (
-                                    <div key={idx} className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-5 hover:bg-white/15 transition-colors">
-                                        <p className="leading-relaxed font-medium text-indigo-50">{insight}</p>
+                                    <div key={idx} className="bg-slate-50 border border-slate-100 rounded-2xl p-5 hover:bg-slate-100 transition-colors">
+                                        <p className="leading-relaxed font-medium text-slate-700">{insight}</p>
                                     </div>
                                 ))
                             ) : (
-                                <p className="text-indigo-200">No specific insights generated for this period.</p>
+                                <p className="text-slate-500">No specific insights generated for this period.</p>
                             )}
                         </div>
                         
-                        <div className="mt-8 flex gap-6 border-t border-white/20 pt-6 relative z-10">
+                        <div className="mt-8 flex gap-6 border-t border-slate-200 pt-6 relative z-10">
                             <div>
-                                <div className="text-xs font-bold uppercase tracking-wider text-indigo-200 mb-1">Total Expenses</div>
-                                <div className="text-2xl font-black text-white">{formatCurrency(computedTotals.expenses)}</div>
+                                <div className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Total Expenses</div>
+                                <div className="text-2xl font-black text-slate-900">{formatCurrency(computedTotals.expenses)}</div>
                             </div>
                             <div>
-                                <div className="text-xs font-bold uppercase tracking-wider text-indigo-200 mb-1">Total Income</div>
-                                <div className="text-2xl font-black text-white">{formatCurrency(computedTotals.income)}</div>
+                                <div className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Total Income</div>
+                                <div className="text-2xl font-black text-slate-900">{formatCurrency(computedTotals.income)}</div>
                             </div>
                         </div>
                     </div>
