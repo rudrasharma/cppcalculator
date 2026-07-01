@@ -18,8 +18,8 @@ export async function POST({ request }) {
         }
 
         const genAI = new GoogleGenerativeAI(apiKey);
-        // Using gemini-1.5-flash for speed with multimodal tasks
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        // Using gemini-3.5-flash for speed with multimodal tasks
+        const model = genAI.getGenerativeModel({ model: "gemini-3.5-flash" });
 
         // Parse base64 strings
         const imageParts = images.map(img => {
