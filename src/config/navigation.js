@@ -100,6 +100,17 @@ export const ALL_TOOLS = [
         icon: 'TrendingUpIcon'
     },
     { 
+        id: 'retirementplanner',
+        categoryId: 'retirement',
+        href: '/retirement-planner/', 
+        label: 'Retirement Planner', 
+        shortLabel: 'Planner',
+        title: 'Retirement Planner (Monte Carlo)',
+        subtitle: 'Comprehensive financial independence tracker',
+        description: 'Simulate your drawdown strategy, sequence of returns, and final estate value.',
+        icon: 'TrendingUpIcon'
+    },
+    { 
         id: 'cpp',
         categoryId: 'retirement',
         href: '/cpp-oas-calculator/', 
