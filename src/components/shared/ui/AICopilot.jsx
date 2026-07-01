@@ -179,6 +179,69 @@ const getWelcomeMessage = (calculatorId) => {
   }
 };
 
+const getSuggestions = (calculatorId) => {
+  switch (calculatorId) {
+    case 'mortgage':
+      return [
+        { label: "📊 Fixed vs Variable", text: "What is the historical difference between a 5-year fixed and variable rate?" },
+        { label: "⚡ Increase Payment", text: "If I increase my payment by $500 a month, how many years do I shave off my mortgage?" },
+        { label: "🛡️ CMHC Insurance", text: "Can you explain how CMHC insurance works and how much it adds to my mortgage?" }
+      ];
+    case 'tax':
+      return [
+        { label: "💰 Explain Marginal Rate", text: "Can you explain what my marginal tax rate means and how it affects my next dollar earned?" },
+        { label: "🛡️ Max RRSP Contribution", text: "Calculate how much tax I will save if I make the maximum allowable RRSP contribution." },
+        { label: "🍁 Compare Provinces", text: "How does my current take-home pay compare if I lived in Alberta or British Columbia instead?" }
+      ];
+    case 'ccb':
+    case 'child-benefit':
+      return [
+        { label: "👶 Add a Child", text: "What happens to my benefit if I have another child?" },
+        { label: "📈 Income Thresholds", text: "At what income level does the CCB start to get clawed back?" },
+        { label: "♿ Disability Component", text: "Explain how the Child Disability Benefit (CDB) works." }
+      ];
+    case 'parental':
+    case 'parental-leave':
+      return [
+        { label: "⚖️ Standard vs Extended", text: "What are the financial tradeoffs between standard and extended parental leave?" },
+        { label: "🤝 Sharing Weeks", text: "How does sharing weeks between partners increase our total leave time?" },
+        { label: "📊 Max EI Benefit", text: "What is the maximum EI benefit amount for this year?" }
+      ];
+    case 'resp':
+      return [
+        { label: "🎯 Maximize CESG", text: "How much do I need to contribute each year to get the maximum CESG grant?" },
+        { label: "📈 Growth Projection", text: "Show me a projection if I earn a 7% return over 18 years." },
+        { label: "📚 Canada Learning Bond", text: "Explain the Canada Learning Bond (CLB) and who is eligible." }
+      ];
+    case 'retirement':
+    case 'retirement-planner':
+      return [
+        { label: "📉 Drawdown Strategy", text: "Why should I withdraw from my Non-Registered accounts before my RRSP?" },
+        { label: "🛑 Maximize OAS", text: "At what income level does the OAS clawback begin?" },
+        { label: "⏳ Delaying CPP to 70", text: "How much more CPP will I get if I delay taking it until age 70?" }
+      ];
+    case 'smith':
+    case 'smith-manoeuvre':
+      return [
+        { label: "🔄 Explain the Strategy", text: "Explain the Smith Manoeuvre in simple terms." },
+        { label: "💸 Capitalizing Interest", text: "What does it mean to capitalize the interest on the investment loan?" },
+        { label: "⚠️ Risks & Downsides", text: "What are the biggest risks of using the Smith Manoeuvre?" }
+      ];
+    case 'cagr':
+      return [
+        { label: "📐 Rule of 72", text: "Explain the Rule of 72 and how it applies to my return rate." },
+        { label: "📈 Inflation Impact", text: "How does inflation affect my real rate of return?" },
+        { label: "🔄 Monthly vs Yearly", text: "How much difference does monthly compounding make vs yearly compounding?" }
+      ];
+    default:
+      return [
+        { label: "💰 Explain Marginal Rate", text: "Can you explain what my marginal tax rate means and how it affects my next dollar earned?" },
+        { label: "🛡️ Max RRSP Contribution", text: "Calculate how much tax I will save if I make the maximum allowable RRSP contribution." },
+        { label: "🍁 Compare Provinces", text: "How does my current take-home pay compare if I lived in Alberta or British Columbia instead?" }
+      ];
+  }
+};
+
 export const AICopilot = ({ onUpdate, context, globalMemory }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -303,11 +366,7 @@ export const AICopilot = ({ onUpdate, context, globalMemory }) => {
   };
 
   // Pre-configured quick action prompts
-  const suggestions = [
-    { label: "💰 Explain Marginal Rate", text: "Can you explain what my marginal tax rate means and how it affects my next dollar earned?" },
-    { label: "🛡️ Max RRSP Contribution", text: "Calculate how much tax I will save if I make the maximum allowable RRSP contribution." },
-    { label: "🍁 Compare other provinces", text: "How does my current take-home pay compare if I lived in Alberta or British Columbia instead?" }
-  ];
+  const suggestions = getSuggestions(context?.calculatorId);
 
   if (!mounted) return null;
 
