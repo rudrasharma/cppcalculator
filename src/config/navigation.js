@@ -114,11 +114,11 @@ export const ALL_TOOLS = [
         id: 'cpp',
         categoryId: 'retirement',
         href: '/cpp-oas-calculator/', 
-        label: 'CPP & OAS', 
-        shortLabel: 'CPP & OAS',
-        title: 'Government Retirement Benefits',
-        subtitle: 'Estimates for CPP, Old Age Security (OAS), and GIS',
-        description: 'Calculate your future monthly income from government pensions.',
+        label: 'CPP Calculator', 
+        shortLabel: 'CPP Calc',
+        title: 'Canada Pension Plan Calculator',
+        subtitle: 'Estimate your future CPP monthly payments',
+        description: 'Calculate your future monthly income from the Canada Pension Plan.',
         icon: 'ChartIcon'
     },
     { 

@@ -12,7 +12,7 @@ import { useFinancialMemory } from '../../../hooks/useFinancialMemory';
 const RETIREMENT_SUGGESTIONS = [
     { label: 'Stop Working at 55', value: 'I turn 40 this year and make $100k. What if I stop working at age 55?' },
     { label: 'Gap Years', value: 'I make $80k but I didn’t work at all from ages 20 to 25.' },
-    { label: 'Defer OAS/CPP', value: 'I make $75k. How much more do I get if I retire at 70 instead of 65?' }
+    { label: 'Defer CPP', value: 'I make $75k. How much more do I get if I retire at 70 instead of 65?' }
 ];
 
 export default function Calculator({ 
@@ -137,8 +137,8 @@ export default function Calculator({
                             <ResultsTab 
                                 results={results} hasEarnings={Object.keys(earnings).length > 0} setActiveTab={setActiveTab} birthYear={birthYear}
                                 copyLink={() => {}} copySuccess={copySuccess} displayTotal={displayValues.displayTotal} displayCPP={displayValues.displayCPP}
-                                displayOAS={displayValues.displayOAS} displayGIS={displayValues.displayGIS} cppPerc={displayValues.cppPerc}
-                                oasPerc={displayValues.oasPerc} gisPerc={displayValues.gisPerc} retirementAge={retirementAge} setRetirementAge={setRetirementAge}
+                                displayCPP={displayValues.displayCPP} cppPerc={displayValues.cppPerc}
+                                retirementAge={retirementAge} setRetirementAge={setRetirementAge}
                                 comparisonSnapshot={comparisonSnapshot} saveComparison={() => {}} clearComparison={() => {}} comparisonData={{}}
                                 inflationFactor={1} taxFactor={1} chartSelection={null} setChartSelection={() => {}}
                                 lineVisibility={{Early:true, Standard:true, Deferred:true, Selected:true}} setLineVisibility={() => {}}

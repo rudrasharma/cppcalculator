@@ -71,7 +71,7 @@ export default function InputTab({
                             <input type="checkbox" checked={isMarried} onChange={(e) => setIsMarried(e.target.checked)} className="w-5 h-5 text-indigo-600 rounded-lg focus:ring-indigo-500 border-slate-300" />
                             <div className="flex-1">
                                 <span className="font-bold text-slate-800 block text-sm">I have a Spouse / Partner</span>
-                                <span className="text-xs text-slate-500 leading-none">Helps estimate household GIS supplement eligibility.</span>
+                                <span className="text-xs text-slate-500 leading-none">Used for CPP survivor benefit estimates.</span>
                             </div>
                         </label>
 
@@ -81,13 +81,6 @@ export default function InputTab({
                                     <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1.5">Spouse Birth Date</label>
                                     <input type="date" value={spouseDob} onChange={(e) => setSpouseDob(e.target.value)} className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-base outline-none focus:ring-2 focus:ring-indigo-500 transition-all" />
                                 </div>
-                                <MoneyInput
-                                    label="Spouse Annual Retirement Income"
-                                    subLabel="Estimate their total annual taxable income in retirement (CPP, Pensions, RRIF). Exclude OAS and GIS. Helps determine household GIS."
-                                    value={spouseIncome || ''}
-                                    onChange={(value) => setSpouseIncome(value)}
-                                    className="[&_label]:text-[10px] [&_label]:text-slate-500"
-                                />
                             </div>
                         )}
 
@@ -122,32 +115,6 @@ export default function InputTab({
                     </div>
                     
                     <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
-                        <label className="flex items-center justify-between cursor-pointer p-4 bg-slate-50 rounded-2xl border border-slate-100 hover:border-slate-200 transition-all">
-                            <div className="flex-1">
-                                <span className="text-sm font-bold text-slate-800 block">Canadian Resident Entire Adult Life?</span>
-                                <span className="text-xs text-slate-500">Age 18 to present / 65.</span>
-                            </div>
-                            <div className={`w-12 h-6 flex items-center rounded-full p-1 transition-colors ${livedInCanadaAllLife ? 'bg-emerald-500 shadow-inner' : 'bg-slate-300'}`}>
-                                <input type="checkbox" checked={livedInCanadaAllLife} onChange={(e) => setLivedInCanadaAllLife(e.target.checked)} className="hidden" />
-                                <div className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-200 ${livedInCanadaAllLife ? 'translate-x-6' : ''}`}></div>
-                            </div>
-                        </label>
-
-                        {!livedInCanadaAllLife && (
-                            <div className="animate-fade-in bg-white p-4 rounded-xl border border-slate-100">
-                                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">Total Years Residing in Canada (After Age 18)</label>
-                                <input type="number" min="0" max="47" value={yearsInCanada} onChange={(e) => setYearsInCanada(parseInt(e.target.value) || 0)} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all font-mono text-base" />
-                                <p className="text-[10px] text-slate-400 mt-2 font-medium italic">* OAS requires 40 years for full payment. 10 years minimum to qualify at age 65.</p>
-                            </div>
-                        )}
-
-                        <MoneyInput
-                            label="Personal Retirement Income (Taxable)"
-                            subLabel="Estimate your annual taxable income in retirement (excluding OAS/GIS). Includes workplace pensions, RRSP/RRIF withdrawals, and interest. Used for the OAS Recovery Tax calculation."
-                            value={otherIncome || ''}
-                            onChange={(value) => setOtherIncome(value)}
-                        />
-                        <p className="text-[10px] text-slate-400 mt-2 font-medium">Do not include TFSA withdrawals.</p>
                     </div>
                 </div>
             </div>

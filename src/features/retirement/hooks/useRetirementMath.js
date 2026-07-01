@@ -1,8 +1,8 @@
 // src/hooks/useRetirementMath.js
 import { useMemo } from 'react';
 import { 
-    getYMPE, getYAMPE, MAX_BASE_CPP_2025, MAX_OAS_2025, 
-    OAS_CLAWBACK_THRESHOLD_2025, GIS_PARAMS, CURRENT_YEAR 
+    getYMPE, getYAMPE, MAX_BASE_CPP_2025,
+    CURRENT_YEAR 
 } from '../../../utils/constants';
 
 export const useRetirementMath = ({
@@ -113,46 +113,7 @@ export const useRetirementMath = ({
         
         const finalCPP = baseCppAt65 * (1 + (cppAdjustmentPercent / 100));
 
-        // --- 7. OAS, GIS, Clawback (Standard Logic) ---
-        const validYears = Math.min(Math.max(0, yearsInCanada), 40);
-        const baseOASAt65 = MAX_OAS_2025 * (validYears / 40);
-        let oasGross = 0;
-        if (retirementAge >= 65) {
-            const oasMonthsDeferred = Math.min((retirementAge - 65) * 12, 60);
-            oasGross = baseOASAt65 * (1 + (oasMonthsDeferred * 0.6 / 100));
-        }
-
-        const annualCPP = finalCPP * 12;
-        const annualOAS = oasGross * 12;
-        const annualOther = parseFloat(otherIncome) || 0;
-        const totalNetWorldIncome = annualOther + annualCPP + annualOAS;
-        
-        let oasClawbackMonthly = 0;
-        if (retirementAge >= 65 && totalNetWorldIncome > OAS_CLAWBACK_THRESHOLD_2025) {
-            oasClawbackMonthly = ((totalNetWorldIncome - OAS_CLAWBACK_THRESHOLD_2025) * 0.15) / 12;
-        }
-        const finalOAS = Math.max(0, oasGross - oasClawbackMonthly);
-
-        let gisAmount = 0;
-        let gisNote = "GIS starts at age 65";
-        if (retirementAge >= 65) {
-            let params = GIS_PARAMS.SINGLE;
-            let combinedIncome = annualCPP + annualOther;
-            if (isMarried) {
-                const spouseAnnual = parseFloat(spouseIncome) || 0;
-                combinedIncome += spouseAnnual;
-                const spBirthYear = parseInt(spouseDob.split('-')[0]);
-                const spouseAgeAtRetirement = (birthYear + retirementAge) - spBirthYear;
-
-                if (spouseAgeAtRetirement >= 65) params = GIS_PARAMS.MARRIED_SPOUSE_OAS;
-                else if (spouseAgeAtRetirement >= 60) params = forceAllowance ? GIS_PARAMS.MARRIED_SPOUSE_ALLOWANCE : GIS_PARAMS.MARRIED_SPOUSE_NO_OAS;
-                else params = GIS_PARAMS.MARRIED_SPOUSE_NO_OAS;
-            }
-            const annualClawback = Math.max(0, combinedIncome) * params.rate;
-            gisAmount = Math.max(0, params.max - (annualClawback / 12));
-        }
-
-        // --- 8. Generate Insights (For CRDO) ---
+        // --- 7. Insights (For CRDO) ---
         const insights = [];
         const droppedCrdoCount = yearData.length - afterCrdoYears.length;
         if (droppedCrdoCount > 0) {
@@ -162,16 +123,12 @@ export const useRetirementMath = ({
             });
         }
         if (retirementAge < 65) insights.push({ type: 'opportunity', text: `Retiring at ${retirementAge} reduces CPP by ${Math.abs(cppAdjustmentPercent).toFixed(1)}%.` });
-        if (gisAmount > 0) insights.push({ type: 'success', text: `You qualify for ~$${gisAmount.toFixed(0)}/mo in GIS.` });
 
-        // --- 9. Breakeven Data Calculation ---
+        // --- 8. Breakeven Data Calculation ---
         const breakevenData = [];
         const age65CPP = baseCppAt65;
-        const age65OAS = MAX_OAS_2025 * (validYears / 40); 
-        
         const age60CPP = baseCppAt65 * 0.64; 
         const age70CPP = baseCppAt65 * 1.42;
-        const age70OAS = age65OAS * 1.36;
 
         let cum60 = 0, cum65 = 0, cum70 = 0, cumSelected = 0;
         let crossover65 = null, crossover70 = null;
@@ -181,17 +138,15 @@ export const useRetirementMath = ({
         for (let age = 60; age <= 95; age++) {
             // Early (60)
             if (age >= 60) cum60 += (age60CPP * 12);
-            if (age >= 65) cum60 += (age65OAS * 12);
 
             // Standard (65)
-            if (age >= 65) cum65 += (age65CPP * 12) + (age65OAS * 12);
+            if (age >= 65) cum65 += (age65CPP * 12);
 
             // Deferred (70)
-            if (age >= 70) cum70 += (age70CPP * 12) + (age70OAS * 12);
+            if (age >= 70) cum70 += (age70CPP * 12);
 
             // User Selected
             if (age >= retirementAge) cumSelected += (finalCPP * 12);
-            if (age >= (retirementAge < 65 ? 65 : retirementAge)) cumSelected += (finalOAS * 12); 
 
             // Crossovers
             if (!crossover65 && cum65 > cum60 && age > 65) crossover65 = age;
@@ -210,9 +165,7 @@ export const useRetirementMath = ({
 
         return {
             cpp: { total: finalCPP, base: baseBenefit, enhanced: enhancedBenefit, adjustment: cppAdjustmentPercent },
-            oas: { total: finalOAS, gross: oasGross, clawback: oasClawbackMonthly },
-            gis: { total: gisAmount, note: gisNote },
-            grandTotal: finalCPP + finalOAS + gisAmount,
+            grandTotal: finalCPP,
             breakevenData,
             years: initialYears,
             insights, 

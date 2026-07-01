@@ -10,8 +10,8 @@ import {
 
 export default function ResultsTab({ 
     results, hasEarnings, setActiveTab, copyLink, copySuccess, 
-    displayTotal = 0, displayCPP = 0, displayOAS = 0, displayGIS = 0, 
-    cppPerc = 0, oasPerc = 0, gisPerc = 0, 
+    displayTotal = 0, displayCPP = 0,
+    cppPerc = 0,
     retirementAge, setRetirementAge, 
     comparisonSnapshot, saveComparison, clearComparison, comparisonData, 
     inflationFactor = 1, taxFactor = 1,
@@ -27,8 +27,6 @@ export default function ResultsTab({
     // --- SAFETY GUARDS ---
     const safeResults = results || {};
     const cpp = safeResults.cpp || { base: 0, enhanced: 0, total: 0 };
-    const oas = safeResults.oas || { gross: 0, clawback: 0, total: 0 };
-    const gis = safeResults.gis || { total: 0, note: '' };
     // const crossovers = safeResults.crossovers || {}; // Unused currently
     const breakevenData = safeResults.breakevenData || [];
 
@@ -88,14 +86,10 @@ export default function ResultsTab({
                             {displayTotal > 0 && (
                                 <div className="mt-6 md:mt-8">
                                     <div className="flex h-3 md:h-4 w-full rounded-full overflow-hidden bg-white/10 p-0.5 border border-white/5 ring-4 ring-white/5">
-                                        <div style={{ width: `${cppPerc}%` }} className="bg-gradient-to-r from-indigo-600 to-indigo-400 rounded-l-full transition-all duration-1000 ease-out shadow-[0_0_15px_rgba(99,102,241,0.4)]" />
-                                        <div style={{ width: `${oasPerc}%` }} className="bg-gradient-to-r from-amber-600 to-amber-400 transition-all duration-1000 shadow-[0_0_15px_rgba(245,158,11,0.4)]" />
-                                        <div style={{ width: `${gisPerc}%` }} className="bg-gradient-to-r from-emerald-600 to-emerald-400 rounded-r-full transition-all duration-1000 shadow-[0_0_15px_rgba(16,185,129,0.4)]" />
+                                        <div style={{ width: `100%` }} className="bg-gradient-to-r from-indigo-600 to-indigo-400 rounded-full transition-all duration-1000 ease-out shadow-[0_0_15px_rgba(99,102,241,0.4)]" />
                                     </div>
                                     <div className="flex gap-4 md:gap-6 mt-3 md:mt-4 text-[9px] md:text-[10px] font-black tracking-[0.1em] uppercase text-slate-400">
                                         <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full bg-indigo-500"></div> CPP</div>
-                                        <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full bg-amber-500"></div> OAS</div>
-                                        {gisPerc > 0 && <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full bg-emerald-500"></div> GIS</div>}
                                     </div>
                                 </div>
                             )}
@@ -190,7 +184,7 @@ export default function ResultsTab({
             )}
 
             {/* BREAKDOWN CARDS */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+            <div className="max-w-md mx-auto">
                 <div className="bg-white p-5 md:p-6 rounded-3xl border border-slate-200 relative overflow-hidden group shadow-sm transition-all hover:shadow-md hover:-translate-y-1">
                     <div className="absolute top-0 left-0 w-full h-1.5 bg-indigo-500"></div>
                     <h3 className="font-black text-slate-800 mb-4 md:mb-6 flex items-center gap-2 uppercase text-xs tracking-widest leading-none">
@@ -208,49 +202,6 @@ export default function ResultsTab({
                         <div className="pt-4 md:pt-5 border-t-2 border-slate-50 flex justify-between items-end">
                             <span className="text-slate-900 font-black text-[10px] uppercase tracking-widest">Gross Monthly</span>
                             <span className="text-xl md:text-2xl font-black text-slate-900 font-mono tracking-tighter">${displayCPP.toFixed(2)}</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div className="bg-white p-5 md:p-6 rounded-3xl border border-slate-200 relative overflow-hidden group shadow-sm transition-all hover:shadow-md hover:-translate-y-1">
-                    <div className="absolute top-0 left-0 w-full h-1.5 bg-amber-500"></div>
-                    <h3 className="font-black text-slate-800 mb-4 md:mb-6 flex items-center gap-2 uppercase text-xs tracking-widest leading-none">
-                        {HomeIcon && <HomeIcon size={18} className="text-amber-600"/>} OAS Projection
-                    </h3>
-                    <div className="space-y-3 md:space-y-4">
-                        <div className="flex justify-between items-center text-sm">
-                            <span className="text-slate-500 font-bold uppercase text-[10px]">OAS Amount</span>
-                            <span className="font-mono font-black text-slate-800">${(oas.gross * inflationFactor * taxFactor).toFixed(2)}</span>
-                        </div>
-                        {oas.clawback > 0 && (
-                            <div className="flex justify-between items-center text-[10px] bg-rose-50 p-2 md:p-3 rounded-2xl border border-rose-100 text-rose-700 font-black uppercase tracking-tighter animate-fade-in shadow-inner">
-                                <span>Recovery Tax</span>
-                                <span className="font-mono">-${(oas.clawback * inflationFactor * taxFactor).toFixed(2)}</span>
-                            </div>
-                        )}
-                        <div className="pt-4 md:pt-5 border-t-2 border-slate-50 flex justify-between items-end">
-                            <span className="text-slate-900 font-black text-[10px] uppercase tracking-widest">Estimated Net</span>
-                            <span className="text-xl md:text-2xl font-black text-slate-900 font-mono tracking-tighter">${displayOAS.toFixed(2)}</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="bg-white p-5 md:p-6 rounded-3xl border border-slate-200 relative overflow-hidden group shadow-sm transition-all hover:shadow-md hover:-translate-y-1">
-                    <div className="absolute top-0 left-0 w-full h-1.5 bg-emerald-500"></div>
-                    <h3 className="font-black text-slate-800 mb-4 md:mb-6 flex items-center gap-2 uppercase text-xs tracking-widest leading-none">
-                        {HeartHandshakeIcon && <HeartHandshakeIcon size={18} className="text-emerald-600"/>} Low Income
-                    </h3>
-                    <div className="space-y-3 md:space-y-4">
-                        <div className="flex justify-between items-center text-sm">
-                            <span className="text-slate-500 font-bold uppercase text-[10px]">GIS Supplement</span>
-                            <span className="font-mono font-black text-emerald-600">${displayGIS.toFixed(2)}</span>
-                        </div>
-                        <div className="text-[10px] text-slate-400 font-bold leading-relaxed italic p-3 bg-slate-50 rounded-2xl border border-slate-100 shadow-inner">
-                            {gis.note || "Analysis based on provided taxable household retirement income figures."}
-                        </div>
-                        <div className="pt-4 md:pt-5 border-t-2 border-slate-50 flex justify-between items-end">
-                            <span className="text-slate-900 font-black text-[10px] uppercase tracking-widest">Total Monthly</span>
-                            <span className="text-xl md:text-2xl font-black text-slate-900 font-mono tracking-tighter">${displayGIS.toFixed(2)}</span>
                         </div>
                     </div>
                 </div>
@@ -345,16 +296,9 @@ export default function ResultsTab({
                     <p className="mt-4">LoonieFi models these tiered contributions to accurately forecast the 'Enhanced' portion of your future monthly check.</p>
                 </Accordion>
 
-                <Accordion title="OAS Recovery Tax (Clawbacks)" icon={SafeFilterIcon}>
-                    <p className="mb-4">The Old Age Security (OAS) pension is subject to a 'Recovery Tax' if your total annual retirement income exceeds the threshold established by the CRA ($90,997 for the 2024 tax year).</p>
-                    <p className="font-bold text-slate-800">For every dollar your net income exceeds this threshold, your monthly OAS payment is reduced by 15 cents.</p>
-                    <p className="mt-2 text-slate-500 font-medium">LoonieFi automatically calculates this reduction based on the 'Personal Retirement Income' you provide in Step 1.</p>
-                </Accordion>
-
                 <Accordion title="Government Resources & Links" icon={SafeBookOpenIcon}>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <a href="https://www.canada.ca/en/services/benefits/publicpensions/cpp/payment-amounts.html" target="_blank" rel="noreferrer" className="text-indigo-600 font-black text-xs uppercase tracking-widest flex items-center justify-between bg-indigo-50/50 p-4 rounded-2xl border border-indigo-100 hover:bg-indigo-100 transition-all">CPP Rates {ExternalLinkIcon && <ExternalLinkIcon size={16}/>}</a>
-                        <a href="https://www.canada.ca/en/services/benefits/publicpensions/old-age-security/payments.html" target="_blank" rel="noreferrer" className="text-indigo-600 font-black text-xs uppercase tracking-widest flex items-center justify-between bg-indigo-50/50 p-4 rounded-2xl border border-indigo-100 hover:bg-indigo-100 transition-all">OAS Thresholds {ExternalLinkIcon && <ExternalLinkIcon size={16}/>}</a>
                         <a href="https://www.canada.ca/en/employment-social-development/services/my-account.html" target="_blank" rel="noreferrer" className="text-indigo-600 font-black text-xs uppercase tracking-widest flex items-center justify-between bg-indigo-50/50 p-4 rounded-2xl border border-indigo-100 hover:bg-indigo-100 transition-all">My Service Canada {ExternalLinkIcon && <ExternalLinkIcon size={16}/>}</a>
                         <a href="https://www.canada.ca/en/services/benefits/publicpensions/cpp/cpp-enhancement.html" target="_blank" rel="noreferrer" className="text-indigo-600 font-black text-xs uppercase tracking-widest flex items-center justify-between bg-indigo-50/50 p-4 rounded-2xl border border-indigo-100 hover:bg-indigo-100 transition-all">Enhancement Guide {ExternalLinkIcon && <ExternalLinkIcon size={16}/>}</a>
                     </div>

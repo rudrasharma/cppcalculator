@@ -54,23 +54,15 @@ export const calculateDisplayValues = (results, useFutureDollars, showNet, retir
     const taxFactor = showNet ? (1 - taxRate) : 1; 
     
     const displayTotal = (results.grandTotal || 0) * inflationFactor * taxFactor;
-    const displayCPP = (results.cpp.total || 0) * inflationFactor * taxFactor;
-    const displayOAS = (results.oas.total || 0) * inflationFactor * taxFactor;
-    const displayGIS = (results.gis.total || 0) * inflationFactor * taxFactor;
+    const displayCPP = (results.cpp?.total || 0) * inflationFactor * taxFactor;
 
-    const totalRaw = displayTotal || 1; 
-    const cppPerc = (displayCPP / totalRaw) * 100;
-    const oasPerc = (displayOAS / totalRaw) * 100;
-    const gisPerc = (displayGIS / totalRaw) * 100;
+    // Percentages for stacked bar chart (only CPP now)
+    const cppPerc = displayTotal > 0 ? (displayCPP / displayTotal) * 100 : 0;
 
     return {
         displayTotal,
         displayCPP,
-        displayOAS,
-        displayGIS,
         cppPerc,
-        oasPerc,
-        gisPerc,
         inflationFactor,
         taxFactor
     };
