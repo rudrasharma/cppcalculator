@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
 import { calculateRate, calculateFutureValue, calculatePresentValue, calculateDuration, generateGrowthSeries } from '../utils/cagrEngine';
-import { MoneyInput, TrendingUpIcon, RotateCcwIcon, InfoIcon, CalculatorIcon, ArrowRightIcon, ScaleIcon, TrendingDownIcon, NativeSelect, AICommandBar, StrategyCard, AICopilot } from '../../../components/shared';
+import { MoneyInput, TrendingUpIcon, RotateCcwIcon, InfoIcon, CalculatorIcon, ArrowRightIcon, ScaleIcon, TrendingDownIcon, NativeSelect, AICommandBar, StrategyCard, AICopilot, Accordion, ExternalLinkIcon, DollarSignIcon } from '../../../components/shared';
 import { useFinancialMemory } from '../../../hooks/useFinancialMemory';
 
 const MODES = {
@@ -142,6 +142,23 @@ export default function CAGRCalculator({ isVisible = true }) {
                         </div>
                     </div>
                 </div>
+
+                {/* Authoritative Resources */}
+                <div className="pt-8">
+                    <Accordion title="Authoritative Resources" icon={ExternalLinkIcon}>
+                        <div className="flex flex-col gap-4">
+                            <a href="https://www.investopedia.com/terms/c/cagr.asp" target="_blank" rel="noreferrer" className="flex items-center justify-between p-4 bg-indigo-50 rounded-2xl group transition-all hover:bg-indigo-100">
+                                <div className="flex items-center gap-3"><DollarSignIcon className="text-indigo-600" /> <span className="font-bold text-indigo-900 text-sm">Investopedia: How to Calculate CAGR</span></div>
+                                <ExternalLinkIcon size={16} className="text-indigo-400 group-hover:translate-x-1 transition-transform" />
+                            </a>
+                            <a href="https://www.canada.ca/en/financial-consumer-agency/services/savings-investments/investing-basics.html" target="_blank" rel="noreferrer" className="flex items-center justify-between p-4 bg-emerald-50 rounded-2xl group transition-all hover:bg-emerald-100">
+                                <div className="flex items-center gap-3"><DollarSignIcon className="text-emerald-600" /> <span className="font-bold text-emerald-900 text-sm">FCAC: The Power of Compound Interest</span></div>
+                                <ExternalLinkIcon size={16} className="text-emerald-400 group-hover:translate-x-1 transition-transform" />
+                            </a>
+                        </div>
+                    </Accordion>
+                </div>
+
             </div>
         </div>
     );
