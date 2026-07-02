@@ -20,6 +20,11 @@ export const SALARIES = [
   120000, 125000, 145000, 150000, 155000
 ];
 
+export const HOME_PRICES = [
+  300000, 400000, 500000, 600000, 700000, 800000, 
+  900000, 1000000, 1250000, 1500000, 2000000
+];
+
 export const FAMILY_SCENARIOS = [
   { slug: 'single-1-child', status: 'SINGLE', count: 1, label: "Single Parent (1 Child)" },
   { slug: 'single-2-children', status: 'SINGLE', count: 2, label: "Single Parent (2 Children)" },
@@ -180,27 +185,6 @@ export const MORTGAGE_SCENARIOS = [
         province: 'AB',
         label: "Calgary Mortgage Calculator",
         desc: "Estimate Calgary mortgage payments with Alberta's low closing fees and CMHC insurance for 5% down."
-    },
-    {
-        slug: 'alberta-mortgage-calculator',
-        homePrice: 450000, downPayment: 22500, rate: 5.0, amortization: 25, freq: 'monthly',
-        province: 'AB',
-        label: "Alberta Mortgage Calculator",
-        desc: "Calculate mortgage payments across Alberta, accounting for local registration fees and CMHC rules."
-    },
-    {
-        slug: 'ontario-mortgage-calculator',
-        homePrice: 850000, downPayment: 170000, rate: 5.0, amortization: 25, freq: 'monthly',
-        province: 'ON',
-        label: "Ontario Mortgage Calculator",
-        desc: "Estimate Ontario mortgage payments and Land Transfer Tax over the life of your loan."
-    },
-    {
-        slug: 'bc-mortgage-calculator',
-        homePrice: 950000, downPayment: 190000, rate: 5.0, amortization: 25, freq: 'monthly',
-        province: 'BC',
-        label: "BC Mortgage Calculator",
-        desc: "Calculate British Columbia mortgage payments and LTT to understand total cost of ownership."
     },
     {
         slug: 'montreal-mortgage-calculator',

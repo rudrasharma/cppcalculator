@@ -32,6 +32,18 @@ export default defineConfig({
     '/grocery-inflation-calculator': {
       status: 301,
       destination: '/'
+    },
+    '/calculator/mortgage/ontario-mortgage-calculator': {
+      status: 301,
+      destination: '/calculator/mortgage/ontario/500000/'
+    },
+    '/calculator/mortgage/alberta-mortgage-calculator': {
+      status: 301,
+      destination: '/calculator/mortgage/alberta/500000/'
+    },
+    '/calculator/mortgage/bc-mortgage-calculator': {
+      status: 301,
+      destination: '/calculator/mortgage/bc/500000/'
     }
   },
   
