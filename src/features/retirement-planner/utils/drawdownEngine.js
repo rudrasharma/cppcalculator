@@ -1,4 +1,5 @@
 import { calculateFederalTax, calculateProvincialTax } from '../../tax/utils/taxEngine.js';
+import { calculateAll } from '../../child-benefit/utils/benefitEngine.js';
 import { GIS_PARAMS } from '../../../utils/constants.js';
 
 const OAS_CLAWBACK_THRESHOLD = 90997; // 2024 approx
@@ -69,6 +70,7 @@ export const calculateRetirementDrawdown = (params) => {
         contributions, pension, cpp, oas, yearsInCanada = 40,
         drawdownOrder = ['nonReg', 'rrsp', 'lira', 'tfsa'],
         province = 'ON',
+        children = [],
         yearlyInflationGenerator, yearlyReturnGenerator
     } = params;
 
@@ -90,6 +92,8 @@ export const calculateRetirementDrawdown = (params) => {
     let ageOfDepletion = null;
     let currentInflationFactor = 1;
     let currentGIS = 0; 
+    let previousYearAFNI = (num(params.workingIncome) + (hasSpouse ? num(spouse.workingIncome) : 0));
+    const currentCalendarYear = new Date().getFullYear();
 
     for (let year = 0; year <= maxYears; year++) {
         const pAge = primaryStartAge + year;
@@ -182,7 +186,24 @@ export const calculateRetirementDrawdown = (params) => {
             currentGIS = 0;
         }
 
-        let familyNetCash = (pTaxable + sTaxable) - (pTax + sTax) - (pClawback + sClawback) + gisDelta;
+        let currentCCB = 0;
+        if (children && children.length > 0) {
+            const thisYear = currentCalendarYear + year;
+            const childList = children.map(by => ({
+                age: thisYear - by,
+                disability: false
+            })).filter(c => c.age >= 0 && c.age < 18);
+
+            if (childList.length > 0) {
+                // CCB is based on the previous year's AFNI, which is nominal dollars.
+                // We use calculateAll and then convert the CCB back to real (inflation adjusted) dollars for the engine
+                const benefit = calculateAll(previousYearAFNI, childList, false, province, hasSpouse ? 'MARRIED' : 'SINGLE', false);
+                // CCB is tax free
+                currentCCB = benefit.federal * infFactor; 
+            }
+        }
+
+        let familyNetCash = (pTaxable + sTaxable) - (pTax + sTax) - (pClawback + sClawback) + gisDelta + currentCCB;
         let shortfall = currentTarget - familyNetCash;
 
         let utilizedWorkingIncome = 0;
@@ -358,6 +379,7 @@ export const calculateRetirementDrawdown = (params) => {
                 cpp: pCPP + sCPP,
                 oas: Math.max(0, pOAS - pClawback) + Math.max(0, sOAS - sClawback),
                 gis: currentGIS,
+                ccb: currentCCB,
                 ...withdrawals
             },
             tax: pTax + sTax,
@@ -368,6 +390,15 @@ export const calculateRetirementDrawdown = (params) => {
         });
 
         // Growth and Contributions
+        const currentContribs = pWorking ? contributions : { tfsa: 0, rrsp: 0, nonReg: 0 };
+        const sContribs = sWorking ? spouse.contributions : { tfsa: 0, rrsp: 0, nonReg: 0 };
+
+        // Update AFNI for next year's CCB (nominal dollars)
+        let totalTaxableReal = pTaxable + sTaxable; // Does not include working income which is handled separately
+        if (pWorking) totalTaxableReal += num(params.workingIncome) * infFactor;
+        if (sWorking) totalTaxableReal += num(spouse.workingIncome) * infFactor;
+        previousYearAFNI = totalTaxableReal / infFactor; // converting back to nominal for CCB calculator(added before growth so they compound)
+        
         currentTarget = currentTarget * (1 + currentInflation);
         
         // Process Contributions if working (added before growth so they compound)

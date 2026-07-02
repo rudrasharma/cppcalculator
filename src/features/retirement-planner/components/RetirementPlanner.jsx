@@ -43,6 +43,7 @@ export default function RetirementPlanner({ isVisible = true, initialStateOverri
             pension: { amount: 0, startAge: 65 },
             cpp: { amount: 0, startAge: 65 },
             oas: { amount: 8000, startAge: 65 }, // Standard OAS base
+            children: [],
             drawdownOrder: ['nonReg', 'rrsp', 'lira', 'tfsa'],
             hasSpouse: false,
             spouse: {
@@ -91,6 +92,7 @@ export default function RetirementPlanner({ isVisible = true, initialStateOverri
                 // Schema migration: Add spouse object if it doesn't exist
                 if (parsed.hasSpouse === undefined) parsed.hasSpouse = false;
                 if (parsed.workingIncome === undefined) parsed.workingIncome = 60000;
+                if (parsed.children === undefined) parsed.children = [];
                 
                 if (!parsed.spouse) {
                     parsed.spouse = {
