@@ -1,0 +1,126 @@
+---
+import BaseLayout from '../../../../layouts/BaseLayout.astro';
+import CPPCalculator from '../../../../features/retirement/components/index.jsx';
+import Breadcrumbs from '../../../../components/shared/Breadcrumbs.astro';
+import { SALARIES } from '../../../../data/seo-scenarios.js';
+import { TAX_YEAR_CONFIG } from '../../../../config/taxYears.js';
+
+const { CURRENT_APP_YEAR, CPP } = TAX_YEAR_CONFIG;
+
+export const prerender = true;
+
+export function getStaticPaths() {
+    const AGES = [60, 65, 70];
+    let paths = [];
+    AGES.forEach((age) => {
+        SALARIES.forEach((salary) => {
+            paths.push({
+                params: {
+                    age: age.toString(),
+                    salary: salary.toString()
+                },
+                props: {
+                    age,
+                    salary
+                }
+            });
+        });
+    });
+    return paths;
+}
+
+const { age, salary } = Astro.props;
+
+const formatter = new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD', maximumFractionDigits: 0 });
+const salaryStr = formatter.format(salary);
+
+const label = `CPP Benefits at Age ${age} with a ${salaryStr} Salary`;
+const desc = `Estimate your Canada Pension Plan (CPP) retirement benefits if you retire at age ${age} with an average career salary of ${salaryStr}. Find out your expected monthly payouts for ${CURRENT_APP_YEAR}.`;
+
+const canonicalURL = new URL(Astro.url.pathname, Astro.site || Astro.url.origin);
+
+const breadcrumbPath = [
+  { label: 'CPP Calculator', href: '/cpp-oas-calculator/' },
+  { label: 'Scenarios', href: '/calculator/cpp/browse/' },
+  { label: `Age ${age}, ${salaryStr}`, href: Astro.url.pathname }
+];
+
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": label,
+  "applicationCategory": "FinanceApplication",
+  "operatingSystem": "Web",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "CAD"
+  },
+  "description": desc
+};
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": `How much CPP will I get if I retire at ${age} with a ${salaryStr} salary?`,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": `Your exact Canada Pension Plan (CPP) payout depends on your lifetime contributions, but retiring at age ${age} with an average salary of ${salaryStr} will yield a specific monthly benefit. Use our free calculator to see your precise ${CURRENT_APP_YEAR} estimate.`
+      }
+    }
+  ]
+};
+
+---
+
+<BaseLayout 
+    title={`[${CURRENT_APP_YEAR}] ${label} | LoonieFi`} 
+    description={desc}
+    canonicalURL={canonicalURL}
+>
+    <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+    <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
+
+    <main class="bg-slate-50 min-h-screen pb-16">
+        
+        <div class="bg-white border-b border-slate-200">
+            <div class="max-w-6xl mx-auto px-4 py-8">
+                <Breadcrumbs crumbs={breadcrumbPath} />
+                
+                <div class="mt-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
+                    <div class="max-w-2xl animate-fade-in">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-xs font-black tracking-widest uppercase border border-indigo-100">
+                                Age {age}
+                            </span>
+                            <span class="text-sm font-bold text-slate-400 uppercase tracking-widest">Retirement Estimate</span>
+                        </div>
+                        <h1 class="text-3xl md:text-5xl font-black text-slate-900 tracking-tight leading-tight mb-4">
+                            CPP Benefits at Age <span class="text-indigo-600">{age}</span> with a <span class="text-indigo-600">{salaryStr}</span> Salary
+                        </h1>
+                        <p class="text-lg text-slate-600 font-medium leading-relaxed">
+                            {desc}
+                        </p>
+                    </div>
+
+                    <div class="bg-indigo-50 p-6 rounded-2xl border border-indigo-100 min-w-[280px] animate-fade-in" style="animation-delay: 100ms;">
+                        <div class="text-sm font-bold text-indigo-800 uppercase tracking-wider mb-2">Did You Know?</div>
+                        <div class="text-xs text-indigo-600 leading-relaxed">
+                            {age === 60 ? "Taking CPP early at age 60 permanently reduces your monthly payout by 36% compared to age 65." : age === 70 ? "Deferring your CPP to age 70 permanently increases your monthly payout by 42% compared to age 65." : "Age 65 is the standard age to start receiving your full, unadjusted CPP retirement pension."}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="max-w-6xl mx-auto mt-[-2rem] relative z-10 px-4">
+            <div class="bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-200 overflow-hidden animate-fade-in" style="animation-delay: 200ms;">
+                <CPPCalculator client:load initialRetirementAge={age} initialIncome={salary} />
+            </div>
+        </div>
+        
+    </main>
+</BaseLayout>
