@@ -266,7 +266,7 @@ export const calculateRetirementDrawdown = (params) => {
                                 }
 
                                 let cashTaxableSources = pPension + sPension + pCPP + sCPP + pOAS + sOAS + withdrawals.rrsp + withdrawals.lira;
-                                familyNetCash = cashTaxableSources - (pTax + sTax) - (pClawback + sClawback) + currentGIS;
+                                familyNetCash = cashTaxableSources - (pTax + sTax) - (pClawback + sClawback) + currentGIS + currentCCB;
                                 shortfall = currentTarget - familyNetCash - withdrawals.nonReg - withdrawals.tfsa;
 
                                 utilizedWorkingIncome = 0;
@@ -324,7 +324,7 @@ export const calculateRetirementDrawdown = (params) => {
                             }
 
                             let cashTaxableSources = pPension + sPension + pCPP + sCPP + pOAS + sOAS + withdrawals.rrsp + withdrawals.lira;
-                            familyNetCash = cashTaxableSources - (pTax + sTax) - (pClawback + sClawback) + currentGIS;
+                            familyNetCash = cashTaxableSources - (pTax + sTax) - (pClawback + sClawback) + currentGIS + currentCCB;
                             shortfall = currentTarget - familyNetCash - withdrawals.nonReg - withdrawals.tfsa;
 
                             utilizedWorkingIncome = 0;
