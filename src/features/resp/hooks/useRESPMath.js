@@ -25,7 +25,7 @@ export function useRESPMath(initialStateOverride) {
     useEffect(() => {
         setMounted(true);
         const params = new URLSearchParams(window.location.search);
-        const newState = { ...DEFAULT_STATE };
+        const newState = { ...DEFAULT_STATE, ...initialStateOverride };
         
         if (params.has('bal')) newState.currentBalance = parseFloat(params.get('bal')) || DEFAULT_STATE.currentBalance;
         if (params.has('ret')) newState.annualReturn = parseFloat(params.get('ret')) || DEFAULT_STATE.annualReturn;

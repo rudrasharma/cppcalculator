@@ -25,6 +25,10 @@ export const HOME_PRICES = [
   900000, 1000000, 1250000, 1500000, 2000000
 ];
 
+export const RESP_CONTRIBUTIONS = [
+  500, 1000, 2500, 5000, 10000
+];
+
 export const FAMILY_SCENARIOS = [
   { slug: 'single-1-child', status: 'SINGLE', count: 1, label: "Single Parent (1 Child)" },
   { slug: 'single-2-children', status: 'SINGLE', count: 2, label: "Single Parent (2 Children)" },

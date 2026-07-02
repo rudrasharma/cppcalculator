@@ -1,0 +1,147 @@
+---
+import BaseLayout from '../../../../layouts/BaseLayout.astro';
+import RESPCalculator from '../../../../features/resp/components/RESPCalculator.jsx';
+import Breadcrumbs from '../../../../components/shared/Breadcrumbs.astro';
+import { PROVINCES as PROVINCE_LIST, RESP_CONTRIBUTIONS } from '../../../../data/seo-scenarios.js';
+import { TAX_YEAR_CONFIG } from '../../../../config/taxYears.js';
+
+const { CURRENT_APP_YEAR } = TAX_YEAR_CONFIG;
+
+export const prerender = true;
+
+export function getStaticPaths() {
+    const PROVINCE_LIST = [
+        { code: 'ON', name: 'Ontario', slug: 'ontario' },
+        { code: 'BC', name: 'British Columbia', slug: 'bc' },
+        { code: 'AB', name: 'Alberta', slug: 'alberta' },
+        { code: 'QC', name: 'Quebec', slug: 'quebec' },
+        { code: 'NS', name: 'Nova Scotia', slug: 'nova-scotia' },
+        { code: 'MB', name: 'Manitoba', slug: 'manitoba' },
+        { code: 'SK', name: 'Saskatchewan', slug: 'saskatchewan' },
+        { code: 'NB', name: 'New Brunswick', slug: 'new-brunswick' },
+        { code: 'NL', name: 'Newfoundland and Labrador', slug: 'newfoundland' },
+        { code: 'PE', name: 'Prince Edward Island', slug: 'pei' },
+    ];
+    const RESP_CONTRIBUTIONS = [500, 1000, 2500, 5000, 10000];
+
+    let paths = [];
+    PROVINCE_LIST.forEach((prov) => {
+        RESP_CONTRIBUTIONS.forEach((amount) => {
+            paths.push({
+                params: {
+                    province: prov.slug,
+                    contribution: amount.toString()
+                },
+                props: {
+                    prov,
+                    amount
+                }
+            });
+        });
+    });
+    return paths;
+}
+
+const { prov, amount } = Astro.props;
+const safeProvince = prov.code;
+
+const initialStateOverride = {
+    province: prov.name,
+    contributionAmount: amount,
+    contributionFrequency: 'Annually'
+};
+
+const formatter = new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD', maximumFractionDigits: 0 });
+const amountStr = formatter.format(amount);
+const provinceName = prov.name;
+
+const label = `RESP Grants for a ${amountStr} Annual Contribution in ${provinceName}`;
+const desc = `Maximize your Canada Education Savings Grant (CESG) by calculating the returns on a ${amountStr}/year RESP contribution in ${provinceName}. See your projected child education fund balance for ${CURRENT_APP_YEAR}.`;
+
+const canonicalURL = new URL(Astro.url.pathname, Astro.site || Astro.url.origin);
+
+const breadcrumbPath = [
+  { label: 'RESP Calculator', href: '/resp-calculator/' },
+  { label: 'Scenarios', href: '/calculator/resp/browse/' },
+  { label: `${amountStr}/yr in ${prov.code}`, href: Astro.url.pathname }
+];
+
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": label,
+  "applicationCategory": "FinanceApplication",
+  "operatingSystem": "Web",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "CAD"
+  },
+  "description": desc
+};
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": `What grants do I get for contributing ${amountStr} a year to an RESP in ${provinceName}?`,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": `Contributing ${amountStr} annually to a Registered Education Savings Plan (RESP) in ${provinceName} makes you eligible for the federal 20% Canada Education Savings Grant (CESG) match. Depending on your income level, you may also qualify for the Canada Learning Bond (CLB) or specific provincial incentives.`
+      }
+    }
+  ]
+};
+
+---
+
+<BaseLayout 
+    title={`[${CURRENT_APP_YEAR}] ${label} | LoonieFi`} 
+    description={desc}
+    canonicalURL={canonicalURL}
+>
+    <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+    <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
+
+    <main class="bg-slate-50 min-h-screen pb-16">
+        
+        <div class="bg-white border-b border-slate-200">
+            <div class="max-w-6xl mx-auto px-4 py-8">
+                <Breadcrumbs crumbs={breadcrumbPath} />
+                
+                <div class="mt-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
+                    <div class="max-w-2xl animate-fade-in">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-xs font-black tracking-widest uppercase border border-indigo-100">
+                                {prov.code}
+                            </span>
+                            <span class="text-sm font-bold text-slate-400 uppercase tracking-widest">Education Savings</span>
+                        </div>
+                        <h1 class="text-3xl md:text-5xl font-black text-slate-900 tracking-tight leading-tight mb-4">
+                            RESP Grants for a <span class="text-indigo-600">{amountStr}</span> Annual Contribution in {provinceName}
+                        </h1>
+                        <p class="text-lg text-slate-600 font-medium leading-relaxed">
+                            {desc}
+                        </p>
+                    </div>
+
+                    <div class="bg-indigo-50 p-6 rounded-2xl border border-indigo-100 min-w-[280px] animate-fade-in" style="animation-delay: 100ms;">
+                        <div class="text-sm font-bold text-indigo-800 uppercase tracking-wider mb-2">Max Match Goal</div>
+                        <div class="text-xs text-indigo-600 leading-relaxed">
+                            The federal government matches 20% of your contributions up to $2,500 per year. To get the maximum $500 annual CESG grant, aim to contribute at least $208.33 per month per child.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="max-w-6xl mx-auto mt-[-2rem] relative z-10 px-4">
+            <div class="bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-200 overflow-hidden animate-fade-in" style="animation-delay: 200ms;">
+                <RESPCalculator client:load initialStateOverride={initialStateOverride} />
+            </div>
+        </div>
+        
+    </main>
+</BaseLayout>
