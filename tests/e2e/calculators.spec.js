@@ -158,9 +158,6 @@ test.describe('Phase 2: Critical Path E2E Testing', () => {
         // Click Confirm Import
         await page.getByRole('button', { name: /Confirm Import/i }).click();
 
-        // Switch to the Results Tab
-        await page.locator('text=2. View Estimate').click();
-
         // Verify the results tab becomes active and generates a chart
         await expect(page.locator('text=Monthly Forecast').first()).toBeVisible();
     });
