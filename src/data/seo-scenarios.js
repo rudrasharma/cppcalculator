@@ -29,6 +29,14 @@ export const RESP_CONTRIBUTIONS = [
   500, 1000, 2500, 5000, 10000
 ];
 
+export const CAGR_AMOUNTS = [
+  1000, 5000, 10000, 50000, 100000
+];
+
+export const CAGR_YEARS = [
+  5, 10, 15, 20, 25, 30
+];
+
 export const FAMILY_SCENARIOS = [
   { slug: 'single-1-child', status: 'SINGLE', count: 1, label: "Single Parent (1 Child)" },
   { slug: 'single-2-children', status: 'SINGLE', count: 2, label: "Single Parent (2 Children)" },

@@ -1,0 +1,135 @@
+---
+import BaseLayout from '../../../../layouts/BaseLayout.astro';
+import CAGRCalculator from '../../../../features/cagr/components/CAGRCalculator.jsx';
+import Breadcrumbs from '../../../../components/shared/Breadcrumbs.astro';
+import { CAGR_AMOUNTS, CAGR_YEARS } from '../../../../data/seo-scenarios.js';
+import { TAX_YEAR_CONFIG } from '../../../../config/taxYears.js';
+
+const { CURRENT_APP_YEAR } = TAX_YEAR_CONFIG;
+
+export const prerender = true;
+
+export function getStaticPaths() {
+    const CAGR_AMOUNTS = [1000, 5000, 10000, 50000, 100000];
+    const CAGR_YEARS = [5, 10, 15, 20, 25, 30];
+
+    let paths = [];
+    CAGR_AMOUNTS.forEach((amount) => {
+        CAGR_YEARS.forEach((years) => {
+            paths.push({
+                params: {
+                    amount: amount.toString(),
+                    years: years.toString()
+                },
+                props: {
+                    amount,
+                    years
+                }
+            });
+        });
+    });
+    return paths;
+}
+
+const { amount, years } = Astro.props;
+
+const initialStateOverride = {
+    startValue: amount,
+    years: years,
+    mode: 'FUTURE',
+    rate: 8.0
+};
+
+const formatter = new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD', maximumFractionDigits: 0 });
+const amountStr = formatter.format(amount);
+
+const label = `Projected Growth of ${amountStr} over ${years} Years`;
+const desc = `Calculate the future value of a ${amountStr} investment over ${years} years. See how compound interest and an 8% historical return rate can multiply your wealth.`;
+
+const canonicalURL = new URL(Astro.url.pathname, Astro.site || Astro.url.origin);
+
+const breadcrumbPath = [
+  { label: 'CAGR Calculator', href: '/cagr-calculator/' },
+  { label: 'Scenarios', href: '/calculator/cagr/browse/' },
+  { label: `${amountStr} over ${years} Years`, href: Astro.url.pathname }
+];
+
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": label,
+  "applicationCategory": "FinanceApplication",
+  "operatingSystem": "Web",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "CAD"
+  },
+  "description": desc
+};
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": `How much will ${amountStr} grow in ${years} years?`,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": `If you invest ${amountStr} today and leave it to grow for ${years} years at an average historical stock market return of 8%, you can project its future value using our compound interest calculator. Compound interest allows your money to grow exponentially over time.`
+      }
+    }
+  ]
+};
+
+---
+
+<BaseLayout 
+    title={`[${CURRENT_APP_YEAR}] ${label} | LoonieFi`} 
+    description={desc}
+    canonicalURL={canonicalURL}
+>
+    <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+    <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
+
+    <main class="bg-slate-50 min-h-screen pb-16">
+        
+        <div class="bg-white border-b border-slate-200">
+            <div class="max-w-6xl mx-auto px-4 py-8">
+                <Breadcrumbs crumbs={breadcrumbPath} />
+                
+                <div class="mt-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
+                    <div class="max-w-2xl animate-fade-in">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-xs font-black tracking-widest uppercase border border-indigo-100">
+                                {years} Years
+                            </span>
+                            <span class="text-sm font-bold text-slate-400 uppercase tracking-widest">Compound Interest</span>
+                        </div>
+                        <h1 class="text-3xl md:text-5xl font-black text-slate-900 tracking-tight leading-tight mb-4">
+                            Projected Growth of <span class="text-indigo-600">{amountStr}</span> over {years} Years
+                        </h1>
+                        <p class="text-lg text-slate-600 font-medium leading-relaxed">
+                            {desc}
+                        </p>
+                    </div>
+
+                    <div class="bg-indigo-50 p-6 rounded-2xl border border-indigo-100 min-w-[280px] animate-fade-in" style="animation-delay: 100ms;">
+                        <div class="text-sm font-bold text-indigo-800 uppercase tracking-wider mb-2">The Magic of Compounding</div>
+                        <div class="text-xs text-indigo-600 leading-relaxed">
+                            By leaving your initial {amountStr} investment untouched for {years} years, the interest you earn begins earning interest on itself, leading to exponential growth over time.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="max-w-6xl mx-auto mt-[-2rem] relative z-10 px-4">
+            <div class="bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-200 overflow-hidden animate-fade-in" style="animation-delay: 200ms;">
+                <CAGRCalculator client:load initialStateOverride={initialStateOverride} />
+            </div>
+        </div>
+        
+    </main>
+</BaseLayout>

@@ -21,13 +21,13 @@ const CAGR_SUGGESTIONS = [
     { label: 'Time Horizon', value: 'How long will it take to hit $1M starting with $50k and $2000/mo at 7%?' }
 ];
 
-export default function CAGRCalculator({ isVisible = true }) {
+export default function CAGRCalculator({ isVisible = true, initialStateOverride = {} }) {
     const { memory, updateMemory } = useFinancialMemory();
-    const [mode, setMode] = useState('FUTURE'); 
-    const [startValue, setStartValue] = useState(() => memory.portfolioBalance || 10000);
-    const [endValue, setEndValue] = useState(100000);
-    const [years, setYears] = useState(10);
-    const [rate, setRate] = useState(7.0);
+    const [mode, setMode] = useState(initialStateOverride.mode || 'FUTURE'); 
+    const [startValue, setStartValue] = useState(() => initialStateOverride.startValue || memory.portfolioBalance || 10000);
+    const [endValue, setEndValue] = useState(initialStateOverride.endValue || 100000);
+    const [years, setYears] = useState(initialStateOverride.years || 10);
+    const [rate, setRate] = useState(initialStateOverride.rate || 7.0);
     const [hasContribution, setHasContribution] = useState(false);
     const [contribution, setContribution] = useState(500);
     const [frequency, setFrequency] = useState('Monthly');
