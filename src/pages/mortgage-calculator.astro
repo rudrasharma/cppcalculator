@@ -5,30 +5,52 @@
 
 import BaseLayout from '../layouts/BaseLayout.astro';
 import MortgageCalculator from '../features/mortgage/components/MortgageCalculator.jsx';
+import TrustBadge from '../components/shared/TrustBadge.astro';
+import { TAX_YEAR_CONFIG } from '../config/taxYears.js';
 
-const title = "Canadian Mortgage Calculator | Accelerated Paydown Tool";
-const description = "Calculate your Canadian mortgage payments with semi-annual compounding. Explore how lump sum payments and increased monthly contributions can save you thousands in interest and years off your mortgage.";
+const { CURRENT_APP_YEAR } = TAX_YEAR_CONFIG;
+
+const title = `[${CURRENT_APP_YEAR}] Canadian Mortgage Calculator | Accelerated Paydown Tool`;
+const description = `Calculate your ${CURRENT_APP_YEAR} Canadian mortgage payments with semi-annual compounding. Explore how lump sum payments and increased monthly contributions can save you thousands in interest and years off your mortgage.`;
 ---
 
 <BaseLayout 
   title={title} 
   description={description}
 >
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": `How often does Canadian mortgage interest compound in ${CURRENT_APP_YEAR}?`,
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "By law, fixed-rate mortgages in Canada are compounded semi-annually (twice a year). Variable-rate mortgages are typically compounded monthly."
+        }
+      }
+    ]
+  })} />
   
   {/* TITLE SECTION */}
   <header class="max-w-6xl mx-auto px-4 pt-8 text-center md:text-left animate-fade-in">
     <div class="flex flex-col md:flex-row justify-between items-center gap-4">
       <div>
-        <h1 class="text-2xl font-black text-slate-900 flex items-center gap-2 justify-center md:justify-start">
-          Mortgage Calculator
-        </h1>
+        <div class="flex items-center gap-3 mb-4 justify-center md:justify-start">
+            <h1 class="text-3xl md:text-5xl font-black text-slate-900 tracking-tight">
+              Mortgage Calculator [{CURRENT_APP_YEAR}]
+            </h1>
+        </div>
+        <div class="mb-4 flex justify-center md:justify-start">
+            <TrustBadge dateStr={CURRENT_APP_YEAR.toString()} sourceStr="CMHC & Provincial LTT Rates" />
+        </div>
         <p class="text-slate-500 text-sm font-medium">
           Canadian specific compounding and accelerated paydown options
         </p>
       </div>
 
       <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 border border-slate-200">
-        <div class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" aria-hidden="true"></div>
         <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">
           Semi-Annual Compounding (Fixed Rate)
         </span>

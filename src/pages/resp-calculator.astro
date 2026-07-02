@@ -1,11 +1,46 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import RESPCalculator from '../features/resp/components/RESPCalculator';
+import TrustBadge from '../components/shared/TrustBadge.astro';
+import { TAX_YEAR_CONFIG } from '../config/taxYears.js';
 
-const title = "RESP Calculator: Maximize Your Education Savings | LoonieFi";
-const description = "Calculate your projected Registered Education Savings Plan (RESP) balance. Plan for CESG grants, CLB eligibility, and provincial incentives in Canada.";
+const { CURRENT_APP_YEAR } = TAX_YEAR_CONFIG;
+
+const title = `[${CURRENT_APP_YEAR}] RESP Calculator: Maximize Your Education Savings | LoonieFi`;
+const description = `Calculate your projected ${CURRENT_APP_YEAR} Registered Education Savings Plan (RESP) balance. Plan for CESG grants, CLB eligibility, and provincial incentives in Canada.`;
 ---
 
 <BaseLayout title={title} description={description}>
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": `What is the maximum CESG grant for an RESP in ${CURRENT_APP_YEAR}?`,
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": `In ${CURRENT_APP_YEAR}, the government matches 20% of your RESP contributions through the Canada Education Savings Grant (CESG), up to a maximum of $500 per year (which requires a $2,500 contribution). The lifetime CESG limit is $7,200 per child.`
+          }
+        }
+      ]
+    })} />
+
+    <header class="max-w-6xl mx-auto px-4 pt-8 pb-4 text-center md:text-left animate-fade-in">
+      <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+        <div>
+          <h1 class="text-3xl md:text-5xl font-black text-slate-900 tracking-tight mb-2">
+            RESP Calculator [{CURRENT_APP_YEAR}]
+          </h1>
+          <p class="text-slate-500 text-sm font-medium">
+            Maximize your Canada Education Savings Grants (CESG)
+          </p>
+        </div>
+        <div class="flex justify-center md:justify-start">
+            <TrustBadge dateStr="Jan 2026" sourceStr="CESG Grant Limits" />
+        </div>
+      </div>
+    </header>
+
     <RESPCalculator client:load />
 </BaseLayout>

@@ -2,9 +2,13 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import TaxCalculator from '../features/tax/components/TaxCalculator.jsx';
 import Breadcrumbs from '../components/shared/Breadcrumbs.astro';
+import TrustBadge from '../components/shared/TrustBadge.astro';
+import { TAX_YEAR_CONFIG } from '../config/taxYears.js';
 
-const title = "2026 Canadian Income Tax & Take-Home Pay Calculator | LoonieFi";
-const description = "Calculate your 2026 Canadian federal and provincial income tax, CPP, and EI deductions. See your monthly and bi-weekly take-home pay with our privacy-first tool.";
+const { CURRENT_APP_YEAR } = TAX_YEAR_CONFIG;
+
+const title = `[${CURRENT_APP_YEAR}] Canadian Income Tax & Take-Home Pay Calculator | LoonieFi`;
+const description = `Calculate your ${CURRENT_APP_YEAR} Canadian federal and provincial income tax, CPP, and EI deductions. See your monthly and bi-weekly take-home pay with our privacy-first tool.`;
 const canonicalURL = new URL('/income-tax-calculator', Astro.site || Astro.url.origin);
 
 const breadcrumbPath = [
@@ -24,10 +28,26 @@ const softwareSchema = {
   },
   "description": description
 };
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": `What are the federal tax brackets for ${CURRENT_APP_YEAR}?`,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": `For ${CURRENT_APP_YEAR}, the federal tax brackets are 15% on the first $57,375, 20.5% on the next $57,374, 26% on the next $63,100, 29% on the next $77,932, and 33% on income over $255,781.`
+      }
+    }
+  ]
+};
 ---
 
 <BaseLayout title={title} description={description}>
     <script type="application/ld+json" set:html={JSON.stringify(softwareSchema)} />
+    <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
 
     <main class="max-w-6xl mx-auto px-6 py-12 md:py-20 animate-fade-in w-full">
         
@@ -36,11 +56,16 @@ const softwareSchema = {
         <header class="mb-12 text-center md:text-left">
             <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-6">
                 <div>
-                    <h1 class="text-4xl md:text-6xl font-black text-slate-900 mb-4 tracking-tight">
-                        Income Tax <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-amber-500 italic">& Take-Home</span>
-                    </h1>
+                    <div class="flex items-center gap-3 mb-4">
+                        <h1 class="text-4xl md:text-6xl font-black text-slate-900 tracking-tight">
+                            Income Tax <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-amber-500 italic">& Take-Home</span> [{CURRENT_APP_YEAR}]
+                        </h1>
+                    </div>
+                    <div class="mb-6">
+                        <TrustBadge dateStr="Jan 2026" sourceStr="CRA & Provincial Tax Brackets" />
+                    </div>
                     <p class="text-lg text-slate-600 max-w-2xl font-medium">
-                        Estimate your 2026 net pay after federal and provincial taxes, CPP enhancement, and EI premiums. 
+                        Estimate your {CURRENT_APP_YEAR} net pay after federal and provincial taxes, CPP enhancement, and EI premiums. 
                     </p>
                 </div>
                 <a href="/calculator/income-tax/browse/" class="inline-flex items-center gap-2 px-6 py-3 bg-white border border-slate-200 rounded-2xl text-xs font-black uppercase tracking-widest text-slate-600 hover:text-indigo-600 hover:border-indigo-200 transition-all shadow-sm">

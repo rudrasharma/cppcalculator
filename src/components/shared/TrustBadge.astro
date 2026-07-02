@@ -1,0 +1,15 @@
+---
+export interface Props {
+    dateStr: string; // e.g. "July 2026" or "2026"
+    sourceStr: string; // e.g. "CRA Indexed Rates", "CMHC & Provincial Rates"
+}
+
+const { dateStr, sourceStr } = Astro.props;
+---
+
+<div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 border border-slate-200">
+    <div class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" aria-hidden="true"></div>
+    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+        Data: {sourceStr} ({dateStr})
+    </span>
+</div>

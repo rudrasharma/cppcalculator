@@ -1,9 +1,13 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { RetirementPlanner } from '../features/retirement-planner/components';
+import TrustBadge from '../components/shared/TrustBadge.astro';
+import { TAX_YEAR_CONFIG } from '../config/taxYears.js';
 
-const title = "Retirement Planner & Drawdown Calculator [2026] | LoonieFi";
-const description = "Plan your Canadian retirement with our free drawdown calculator. Estimate how long your RRSP, TFSA, CPP, OAS, and pensions will last based on your target income.";
+const { CURRENT_APP_YEAR } = TAX_YEAR_CONFIG;
+
+const title = `[${CURRENT_APP_YEAR}] Retirement Planner & Drawdown Calculator | LoonieFi`;
+const description = `Plan your Canadian retirement with our free drawdown calculator. Estimate how long your RRSP, TFSA, CPP, OAS, and pensions will last based on your target income in ${CURRENT_APP_YEAR}.`;
 const canonicalURL = new URL('/retirement-planner', Astro.site || Astro.url.origin);
 
 const softwareSchema = {
@@ -50,9 +54,20 @@ const faqSchema = {
     <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
     
     <main class="w-full">
-        <header class="sr-only">
-            <h1>Canadian Retirement Planner [2026]</h1>
-            <p>A comprehensive drawdown calculator to help you project how long your RRSP, TFSA, Non-Registered accounts, CPP, OAS, and pensions will last in retirement against inflation.</p>
+        <header class="max-w-6xl mx-auto px-4 pt-8 pb-4 text-center md:text-left animate-fade-in">
+          <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+            <div>
+              <h1 class="text-3xl md:text-5xl font-black text-slate-900 tracking-tight mb-2">
+                Retirement Planner [{CURRENT_APP_YEAR}]
+              </h1>
+              <p class="text-slate-500 text-sm font-medium">
+                Drawdown calculator for RRSP, TFSA, CPP, and OAS
+              </p>
+            </div>
+            <div class="flex justify-center md:justify-start">
+                <TrustBadge dateStr={CURRENT_APP_YEAR.toString()} sourceStr="CRA Contribution Limits" />
+            </div>
+          </div>
         </header>
 
         <RetirementPlanner client:load />

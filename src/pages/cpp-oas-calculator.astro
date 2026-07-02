@@ -6,6 +6,7 @@
 
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Calculator from '../features/retirement/components/index.jsx';
+import TrustBadge from '../components/shared/TrustBadge.astro';
 import { TAX_YEAR_CONFIG } from '../config/taxYears.js';
 const { CURRENT_APP_YEAR, CPP, OAS } = TAX_YEAR_CONFIG;
 
@@ -56,6 +57,9 @@ const faqSchema = {
         <h1 class="text-4xl md:text-5xl font-black text-slate-900 mb-4 tracking-tighter">
           CPP Calculator [{CURRENT_APP_YEAR}]
         </h1>
+        <div class="mb-6 flex justify-center">
+            <TrustBadge dateStr="Jan 2026" sourceStr="Service Canada Maximums" />
+        </div>
         <p class="text-lg text-slate-600 max-w-2xl mx-auto mb-6">
           Accurate estimates for your Canada Pension Plan benefits, including the new enhanced CPP rules.
         </p>

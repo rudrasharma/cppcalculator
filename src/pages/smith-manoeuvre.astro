@@ -1,15 +1,36 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import SmithCalculator from '../features/smith-manoeuvre/components/SmithCalculator.jsx';
+import TrustBadge from '../components/shared/TrustBadge.astro';
+import { TAX_YEAR_CONFIG } from '../config/taxYears.js';
 
-const title = "Canadian Smith Manoeuvre Calculator | Tax-Deductible Mortgage Tool";
-const description = "Calculate how the Smith Manoeuvre can make your Canadian mortgage tax-deductible. Forecast net worth growth by re-advancing principal into deductible investment debt.";
+const { CURRENT_APP_YEAR } = TAX_YEAR_CONFIG;
+
+const title = `[${CURRENT_APP_YEAR}] Canadian Smith Manoeuvre Calculator | Tax-Deductible Mortgage Tool`;
+const description = `Calculate how the Smith Manoeuvre can make your Canadian mortgage tax-deductible in ${CURRENT_APP_YEAR}. Forecast net worth growth by re-advancing principal into deductible investment debt.`;
 ---
 
 <BaseLayout title={title} description={description}>
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is the Smith Manoeuvre in Canada?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The Smith Manoeuvre is a financial strategy in Canada that involves converting the non-tax-deductible interest of a residential mortgage into a tax-deductible investment loan, legally reducing your taxes while building a portfolio."
+        }
+      }
+    ]
+  })} />
   <main class="py-12 bg-slate-50 min-h-screen">
     <div class="max-w-6xl mx-auto px-4 mb-10 text-center md:text-left">
-        <h1 class="text-4xl font-black text-slate-900 mb-4 tracking-tight">Smith Manoeuvre Estimator</h1>
+        <h1 class="text-3xl md:text-5xl font-black text-slate-900 mb-4 tracking-tight">Smith Manoeuvre [{CURRENT_APP_YEAR}]</h1>
+        <div class="mb-4 flex justify-center md:justify-start">
+            <TrustBadge dateStr={CURRENT_APP_YEAR.toString()} sourceStr="Latest CRA Rules" />
+        </div>
         <p class="text-lg text-slate-600 max-w-3xl">
             Convert your non-deductible mortgage interest into a tax-deductible investment loan. 
             Accelerate your wealth building using the standard Canadian re-advanceable mortgage strategy.

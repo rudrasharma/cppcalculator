@@ -6,22 +6,40 @@
 
 import BaseLayout from '../layouts/BaseLayout.astro';
 import CAGRCalculator from '../features/cagr/components/CAGRCalculator.jsx';
+import TrustBadge from '../components/shared/TrustBadge.astro';
+import { TAX_YEAR_CONFIG } from '../config/taxYears.js';
 
-const title = "CAGR Calculator | Compound Annual Growth Rate";
-const description = "Calculate the precise annual growth rate required to grow your investment from a starting value to an ending value over a specific period.";
+const { CURRENT_APP_YEAR } = TAX_YEAR_CONFIG;
+
+const title = `[${CURRENT_APP_YEAR}] CAGR Calculator | Compound Annual Growth Rate`;
+const description = `Calculate the precise annual growth rate required to grow your investment from a starting value to an ending value over a specific period.`;
 ---
 
 <BaseLayout 
   title={title} 
   description={description}
 >
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is a good CAGR for investments?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "A good Compound Annual Growth Rate (CAGR) depends on the asset class. Historically, a diversified stock market index like the S&P 500 has returned around 7% to 10% annually after inflation."
+        }
+      }
+    ]
+  })} />
   
   {/* TITLE SECTION */}
   <header class="max-w-6xl mx-auto px-4 pt-8 text-center md:text-left animate-fade-in">
     <div class="flex flex-col md:flex-row justify-between items-center gap-4">
       <div>
-        <h1 class="text-2xl font-black text-slate-900 flex items-center gap-2 justify-center md:justify-start">
-          CAGR Calculator
+        <h1 class="text-3xl md:text-5xl font-black text-slate-900 tracking-tight mb-2 flex items-center justify-center md:justify-start">
+          CAGR Calculator [{CURRENT_APP_YEAR}]
         </h1>
         <p class="text-slate-500 text-sm font-medium">
           Measure the consistent growth rate of your investments
@@ -29,11 +47,8 @@ const description = "Calculate the precise annual growth rate required to grow y
       </div>
 
       {/* OPTIONAL: Trust Badge */}
-      <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 border border-slate-200">
-        <div class="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" aria-hidden="true"></div>
-        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">
-          Standard Financial Formula
-        </span>
+      <div class="mb-4 flex justify-center md:justify-start">
+          <TrustBadge dateStr={CURRENT_APP_YEAR.toString()} sourceStr="Standard Financial Formula" />
       </div>
     </div>
   </header>

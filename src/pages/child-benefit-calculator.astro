@@ -6,6 +6,7 @@
 
 import BaseLayout from '../layouts/BaseLayout.astro';
 import HouseholdBenefits from '../features/child-benefit/components/HouseholdBenefits.jsx';
+import TrustBadge from '../components/shared/TrustBadge.astro';
 import { TAX_YEAR_CONFIG } from '../config/taxYears.js';
 const { CURRENT_APP_YEAR, CCB } = TAX_YEAR_CONFIG;
 
@@ -74,11 +75,8 @@ const faqSchema = {
       </div>
 
       {/* TRUST BADGE SPECIFIC TO CCB DATA */}
-      <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 border border-slate-200">
-        <div class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" aria-hidden="true"></div>
-        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">
-          Data: CRA Indexed Rates (July {CURRENT_APP_YEAR})
-        </span>
+      <div class="mb-4 flex justify-center md:justify-start">
+          <TrustBadge dateStr={`July ${CURRENT_APP_YEAR}`} sourceStr="CRA Indexed Rates" />
       </div>
     </div>
   </header>
