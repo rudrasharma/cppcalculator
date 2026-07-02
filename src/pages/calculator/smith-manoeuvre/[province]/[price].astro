@@ -1,0 +1,133 @@
+---
+import BaseLayout from '../../../../layouts/BaseLayout.astro';
+import SmithCalculator from '../../../../features/smith-manoeuvre/components/SmithCalculator.jsx';
+import Breadcrumbs from '../../../../components/shared/Breadcrumbs.astro';
+import { PROVINCES as PROVINCE_LIST, HOME_PRICES } from '../../../../data/seo-scenarios.js';
+import { TAX_YEAR_CONFIG } from '../../../../config/taxYears.js';
+
+const { CURRENT_APP_YEAR } = TAX_YEAR_CONFIG;
+
+export const prerender = true;
+
+export function getStaticPaths() {
+    let paths = [];
+    PROVINCE_LIST.forEach((prov) => {
+        HOME_PRICES.forEach((price) => {
+            paths.push({
+                params: {
+                    province: prov.slug,
+                    price: price.toString()
+                },
+                props: {
+                    prov,
+                    price
+                }
+            });
+        });
+    });
+    return paths;
+}
+
+const { prov, price } = Astro.props;
+const safeProvince = prov.code;
+
+const initialStateOverride = {
+    homeValue: price,
+    mortgageBalance: price * 0.8, // Assume 20% down
+    marginalTaxRate: 0.35 // Default assumption
+};
+
+const formatter = new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD', maximumFractionDigits: 0 });
+const homePriceStr = formatter.format(price);
+const provinceName = prov.name;
+
+const label = `Smith Manoeuvre on a ${homePriceStr} Home in ${provinceName}`;
+const desc = `Calculate tax deductions and net worth growth by implementing the Smith Manoeuvre on a ${homePriceStr} home in ${provinceName}. See how re-advancing your mortgage builds wealth faster.`;
+
+const canonicalURL = new URL(Astro.url.pathname, Astro.site || Astro.url.origin);
+
+const breadcrumbPath = [
+  { label: 'Smith Manoeuvre', href: '/smith-manoeuvre/' },
+  { label: 'Scenarios', href: '/calculator/smith-manoeuvre/browse/' },
+  { label: `${homePriceStr} in ${prov.code}`, href: Astro.url.pathname }
+];
+
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": label,
+  "applicationCategory": "FinanceApplication",
+  "operatingSystem": "Web",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "CAD"
+  },
+  "description": desc
+};
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": `How does the Smith Manoeuvre work for a ${homePriceStr} home in ${provinceName}?`,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": `If you own a ${homePriceStr} home in ${provinceName} with a re-advanceable mortgage (HELOC), you can borrow against the principal you pay down each month to invest in income-producing assets. The interest on this investment loan becomes tax-deductible against your provincial and federal income taxes.`
+      }
+    }
+  ]
+};
+
+---
+
+<BaseLayout 
+    title={`[${CURRENT_APP_YEAR}] ${label} | LoonieFi`} 
+    description={desc}
+    canonicalURL={canonicalURL}
+>
+    <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+    <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
+
+    <main class="bg-slate-50 min-h-screen pb-16">
+        
+        <div class="bg-white border-b border-slate-200">
+            <div class="max-w-6xl mx-auto px-4 py-8">
+                <Breadcrumbs crumbs={breadcrumbPath} />
+                
+                <div class="mt-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
+                    <div class="max-w-2xl animate-fade-in">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-xs font-black tracking-widest uppercase border border-indigo-100">
+                                {prov.code}
+                            </span>
+                            <span class="text-sm font-bold text-slate-400 uppercase tracking-widest">Tax Strategy Estimate</span>
+                        </div>
+                        <h1 class="text-3xl md:text-5xl font-black text-slate-900 tracking-tight leading-tight mb-4">
+                            Smith Manoeuvre on a <span class="text-indigo-600">{homePriceStr}</span> Home in {provinceName}
+                        </h1>
+                        <p class="text-lg text-slate-600 font-medium leading-relaxed">
+                            {desc}
+                        </p>
+                    </div>
+
+                    <div class="bg-indigo-50 p-6 rounded-2xl border border-indigo-100 min-w-[280px] animate-fade-in" style="animation-delay: 100ms;">
+                        <div class="text-sm font-bold text-indigo-800 uppercase tracking-wider mb-2">Strategy Value</div>
+                        <div class="text-xs text-indigo-600 leading-relaxed">
+                            By converting a non-deductible mortgage into a tax-deductible investment loan, you can accelerate your wealth creation and generate substantial annual tax refunds.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="max-w-6xl mx-auto mt-[-2rem] relative z-10 px-4">
+            <div class="bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-200 overflow-hidden animate-fade-in" style="animation-delay: 200ms;">
+                <SmithCalculator client:load initialStateOverride={initialStateOverride} />
+            </div>
+        </div>
+        
+    </main>
+</BaseLayout>

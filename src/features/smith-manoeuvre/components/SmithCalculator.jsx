@@ -14,14 +14,15 @@ const SMITH_SUGGESTIONS = [
     { label: 'Accelerator', value: 'I want to re-invest my tax refunds into my mortgage to pay it off faster.' }
 ];
 
-export default function SmithCalculator({ isVisible = true }) {
+export default function SmithCalculator({ isVisible = true, initialStateOverride = {} }) {
     const { memory, updateMemory } = useFinancialMemory();
-    // 1. Initial State
-    const [hVal, setHValueState] = useState(() => memory.homeValue || 600000);
-    const [mBal, setMBalanceState] = useState(() => memory.mortgageBalance || 400000);
-    const [mRate, setMRate] = useState(0.045);
-    const [hRate, setHRate] = useState(0.055);
-    const [tRate, setTRate] = useState(0.35);
+    
+    // Fallbacks: Use override first, then memory, then default
+    const [hVal, setHValueState] = useState(() => initialStateOverride.homeValue || memory.homeValue || 600000);
+    const [mBal, setMBalanceState] = useState(() => initialStateOverride.mortgageBalance || memory.mortgageBalance || (initialStateOverride.homeValue ? initialStateOverride.homeValue * 0.8 : 400000));
+    const [mRate, setMRate] = useState(initialStateOverride.mortgageRate || 0.045);
+    const [hRate, setHRate] = useState(initialStateOverride.helocRate || 0.055);
+    const [tRate, setTRate] = useState(initialStateOverride.marginalTaxRate || 0.35);
     
     const [gRate, setGRate] = useState(0.05);
     const [dYield, setDYield] = useState(0.02);
