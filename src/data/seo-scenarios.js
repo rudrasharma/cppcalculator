@@ -37,6 +37,14 @@ export const CAGR_YEARS = [
   5, 10, 15, 20, 25, 30
 ];
 
+export const RETIREMENT_AGES = [
+  50, 55, 60, 65, 70
+];
+
+export const RETIREMENT_INCOMES = [
+  40000, 60000, 80000, 100000, 120000
+];
+
 export const FAMILY_SCENARIOS = [
   { slug: 'single-1-child', status: 'SINGLE', count: 1, label: "Single Parent (1 Child)" },
   { slug: 'single-2-children', status: 'SINGLE', count: 2, label: "Single Parent (2 Children)" },

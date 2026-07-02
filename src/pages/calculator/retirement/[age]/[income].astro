@@ -1,0 +1,133 @@
+---
+import BaseLayout from '../../../../layouts/BaseLayout.astro';
+import RetirementPlanner from '../../../../features/retirement-planner/components/RetirementPlanner.jsx';
+import Breadcrumbs from '../../../../components/shared/Breadcrumbs.astro';
+import { RETIREMENT_AGES, RETIREMENT_INCOMES } from '../../../../data/seo-scenarios.js';
+import { TAX_YEAR_CONFIG } from '../../../../config/taxYears.js';
+
+const { CURRENT_APP_YEAR } = TAX_YEAR_CONFIG;
+
+export const prerender = true;
+
+export function getStaticPaths() {
+    const RETIREMENT_AGES = [50, 55, 60, 65, 70];
+    const RETIREMENT_INCOMES = [40000, 60000, 80000, 100000, 120000];
+
+    let paths = [];
+    RETIREMENT_AGES.forEach((age) => {
+        RETIREMENT_INCOMES.forEach((income) => {
+            paths.push({
+                params: {
+                    age: age.toString(),
+                    income: income.toString()
+                },
+                props: {
+                    age,
+                    income
+                }
+            });
+        });
+    });
+    return paths;
+}
+
+const { age, income } = Astro.props;
+
+const initialStateOverride = {
+    startAge: age,
+    targetIncome: income
+};
+
+const formatter = new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD', maximumFractionDigits: 0 });
+const incomeStr = formatter.format(income);
+
+const label = `Retiring at Age ${age} with a ${incomeStr} Target Income`;
+const desc = `Calculate if you can retire at age ${age} and maintain a ${incomeStr}/year lifestyle. Plan your RRSP, TFSA, CPP, and OAS withdrawals with our free drawdown calculator.`;
+
+const canonicalURL = new URL(Astro.url.pathname, Astro.site || Astro.url.origin);
+
+const breadcrumbPath = [
+  { label: 'Retirement Planner', href: '/retirement-planner/' },
+  { label: 'Scenarios', href: '/calculator/retirement/browse/' },
+  { label: `Age ${age}, ${incomeStr}/yr`, href: Astro.url.pathname }
+];
+
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": label,
+  "applicationCategory": "FinanceApplication",
+  "operatingSystem": "Web",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "CAD"
+  },
+  "description": desc
+};
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": `How much portfolio do I need to retire at ${age} with ${incomeStr} a year?`,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": `To safely retire at age ${age} and withdraw ${incomeStr} annually, you need a substantial portfolio spread across RRSPs, TFSAs, and Non-Registered accounts. Use our free Retirement Planner to factor in your CPP and OAS payouts, and see exactly how long your money will last.`
+      }
+    }
+  ]
+};
+
+---
+
+<BaseLayout 
+    title={`[${CURRENT_APP_YEAR}] ${label} | LoonieFi`} 
+    description={desc}
+    canonicalURL={canonicalURL}
+>
+    <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+    <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
+
+    <main class="bg-slate-50 min-h-screen pb-16">
+        
+        <div class="bg-white border-b border-slate-200">
+            <div class="max-w-6xl mx-auto px-4 py-8">
+                <Breadcrumbs crumbs={breadcrumbPath} />
+                
+                <div class="mt-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
+                    <div class="max-w-2xl animate-fade-in">
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-xs font-black tracking-widest uppercase border border-indigo-100">
+                                Age {age}
+                            </span>
+                            <span class="text-sm font-bold text-slate-400 uppercase tracking-widest">Drawdown Plan</span>
+                        </div>
+                        <h1 class="text-3xl md:text-5xl font-black text-slate-900 tracking-tight leading-tight mb-4">
+                            Retiring at Age <span class="text-indigo-600">{age}</span> with a <span class="text-indigo-600">{incomeStr}</span> Target Income
+                        </h1>
+                        <p class="text-lg text-slate-600 font-medium leading-relaxed">
+                            {desc}
+                        </p>
+                    </div>
+
+                    <div class="bg-indigo-50 p-6 rounded-2xl border border-indigo-100 min-w-[280px] animate-fade-in" style="animation-delay: 100ms;">
+                        <div class="text-sm font-bold text-indigo-800 uppercase tracking-wider mb-2">Did You Know?</div>
+                        <div class="text-xs text-indigo-600 leading-relaxed">
+                            {age < 60 ? "Retiring before age 60 means you cannot start collecting CPP right away. You will need to rely entirely on your own portfolio for income during these bridge years." : age === 65 ? "Age 65 is the standard age to start receiving full, unadjusted CPP and OAS benefits, which significantly reduces the pressure on your personal savings." : "Delaying retirement allows your investments more time to grow, and deferring CPP/OAS increases your guaranteed government payouts."}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="max-w-6xl mx-auto mt-[-2rem] relative z-10 px-4">
+            <div class="bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-200 overflow-hidden animate-fade-in" style="animation-delay: 200ms;">
+                <RetirementPlanner client:load initialStateOverride={initialStateOverride} />
+            </div>
+        </div>
+        
+    </main>
+</BaseLayout>
