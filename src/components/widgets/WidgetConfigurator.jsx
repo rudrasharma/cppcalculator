@@ -27,6 +27,9 @@ export default function WidgetConfigurator() {
 ></iframe>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/iframe-resizer/4.3.9/iframeResizer.min.js"></script>
 <script>iFrameResize({ log: false }, '#looniefi-widget-${selectedWidget.id}')</script>
+<div style="text-align: center; font-size: 11px; margin-top: 8px; font-family: sans-serif;">
+    <a href="https://looniefi.ca" target="_blank" style="color: #6366f1; text-decoration: none;">Powered by LoonieFi Calculators</a>
+</div>
 <!-- End LoonieFi Widget -->`;
 
     const handleCopy = async () => {
