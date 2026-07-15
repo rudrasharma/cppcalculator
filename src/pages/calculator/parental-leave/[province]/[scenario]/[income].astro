@@ -79,7 +79,7 @@ if (hasPartner) {
 const durationText = planType === 'EXTENDED' ? '18 months' : '12 months';
 const title = `EI Payment Estimate: ${weeklyPay}/wk for ${salaryFormatted} Income in ${provinceName} | LoonieFi`;
 const description = `With an income of ${salaryFormatted}, you qualify for approx. ${weeklyPay} per week on the ${durationText} plan. ${insightText}`;
-const canonicalURL = new URL(Astro.url.pathname, Astro.site || Astro.url.origin);
+const canonicalURL = new URL('/parental-leave-calculator/', Astro.site || Astro.url.origin);
 
 // Breadcrumbs
 const breadcrumbPath = [
@@ -134,7 +134,7 @@ const faqSchema = {
 };
 ---
 
-<BaseLayout title={title} description={description}>
+<BaseLayout canonicalURL={canonicalURL} title={title} description={description}>
   <script type="application/ld+json" set:html={JSON.stringify(softwareSchema)} />
   <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
   

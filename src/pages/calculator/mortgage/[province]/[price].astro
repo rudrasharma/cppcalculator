@@ -73,7 +73,7 @@ const provinceName = PROVINCES[safeProvince];
 const label = `${provinceName} Mortgage Calculator`;
 const desc = `Calculate exact mortgage payments, CMHC insurance, and Land Transfer Taxes for a ${homePriceStr} home in ${provinceName}. Monthly payments estimated at ${monthlyPaymentStr}.`;
 
-const canonicalURL = new URL(Astro.url.pathname, Astro.site || Astro.url.origin);
+const canonicalURL = new URL('/mortgage-calculator/', Astro.site || Astro.url.origin);
 
 const breadcrumbPath = [
   { label: 'Mortgage', href: '/mortgage-calculator/' },

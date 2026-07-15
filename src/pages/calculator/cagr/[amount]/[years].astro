@@ -46,7 +46,7 @@ const amountStr = formatter.format(amount);
 const label = `Projected Growth of ${amountStr} over ${years} Years`;
 const desc = `Calculate the future value of a ${amountStr} investment over ${years} years. See how compound interest and an 8% historical return rate can multiply your wealth.`;
 
-const canonicalURL = new URL(Astro.url.pathname, Astro.site || Astro.url.origin);
+const canonicalURL = new URL('/cagr-calculator/', Astro.site || Astro.url.origin);
 
 const breadcrumbPath = [
   { label: 'CAGR Calculator', href: '/cagr-calculator/' },

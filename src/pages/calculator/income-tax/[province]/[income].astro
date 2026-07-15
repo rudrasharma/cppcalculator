@@ -56,7 +56,7 @@ const annualNet = currency.format(serverResults.annual.net);
 // 4. SEO METADATA
 const title = `Take-Home Pay on ${salaryFormatted} in ${provinceName} [2026] | LoonieFi`;
 const description = `With a gross annual income of ${salaryFormatted} in ${provinceName}, your estimated take-home pay is ${annualNet} per year. Your marginal tax rate is ${percentFormatter.format(marginalRate)}.`;
-const canonicalURL = new URL(Astro.url.pathname, Astro.site || Astro.url.origin);
+const canonicalURL = new URL('/income-tax-calculator/', Astro.site || Astro.url.origin);
 
 // Breadcrumbs
 const breadcrumbPath = [
@@ -88,7 +88,7 @@ const softwareSchema = {
 };
 ---
 
-<BaseLayout title={title} description={description}>
+<BaseLayout canonicalURL={canonicalURL} title={title} description={description}>
   <script type="application/ld+json" set:html={JSON.stringify(softwareSchema)} />
   
   <main class="animate-fade-in">

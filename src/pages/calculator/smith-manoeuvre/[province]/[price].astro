@@ -44,7 +44,7 @@ const provinceName = prov.name;
 const label = `Smith Manoeuvre on a ${homePriceStr} Home in ${provinceName}`;
 const desc = `Calculate tax deductions and net worth growth by implementing the Smith Manoeuvre on a ${homePriceStr} home in ${provinceName}. See how re-advancing your mortgage builds wealth faster.`;
 
-const canonicalURL = new URL(Astro.url.pathname, Astro.site || Astro.url.origin);
+const canonicalURL = new URL('/smith-manoeuvre/', Astro.site || Astro.url.origin);
 
 const breadcrumbPath = [
   { label: 'Smith Manoeuvre', href: '/smith-manoeuvre/' },

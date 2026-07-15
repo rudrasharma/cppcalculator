@@ -37,7 +37,7 @@ const salaryStr = formatter.format(salary);
 const label = `CPP Benefits at Age ${age} with a ${salaryStr} Salary`;
 const desc = `Estimate your Canada Pension Plan (CPP) retirement benefits if you retire at age ${age} with an average career salary of ${salaryStr}. Find out your expected monthly payouts for ${CURRENT_APP_YEAR}.`;
 
-const canonicalURL = new URL(Astro.url.pathname, Astro.site || Astro.url.origin);
+const canonicalURL = new URL('/cpp-oas-calculator/', Astro.site || Astro.url.origin);
 
 const breadcrumbPath = [
   { label: 'CPP Calculator', href: '/cpp-oas-calculator/' },

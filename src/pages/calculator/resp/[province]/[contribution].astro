@@ -58,7 +58,7 @@ const provinceName = prov.name;
 const label = `RESP Grants for a ${amountStr} Annual Contribution in ${provinceName}`;
 const desc = `Maximize your Canada Education Savings Grant (CESG) by calculating the returns on a ${amountStr}/year RESP contribution in ${provinceName}. See your projected child education fund balance for ${CURRENT_APP_YEAR}.`;
 
-const canonicalURL = new URL(Astro.url.pathname, Astro.site || Astro.url.origin);
+const canonicalURL = new URL('/resp-calculator/', Astro.site || Astro.url.origin);
 
 const breadcrumbPath = [
   { label: 'RESP Calculator', href: '/resp-calculator/' },

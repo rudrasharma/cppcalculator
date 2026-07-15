@@ -105,7 +105,7 @@ const hasPst = serverResults.cmhcPST > 0;
 const interestSaved = formatter.format(savingsResults.savings.interest);
 const yearsSaved = savingsResults.savings.time.toFixed(1);
 
-const canonicalURL = new URL(Astro.url.pathname, Astro.site || Astro.url.origin);
+const canonicalURL = new URL('/mortgage-calculator/', Astro.site || Astro.url.origin);
 
 const breadcrumbPath = [
   { label: 'Mortgage', href: '/mortgage-calculator/' },
@@ -184,7 +184,7 @@ const relatedScenarios = MORTGAGE_SCENARIOS
     .slice(0, 3);
 ---
 
-<BaseLayout 
+<BaseLayout canonicalURL={canonicalURL} 
   title={`${label} - Free Canadian Calculator`} 
   description={`${desc} Your estimated monthly payment is ${monthlyPaymentStr}.`}
 >

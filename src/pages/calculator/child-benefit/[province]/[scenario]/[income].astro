@@ -79,7 +79,7 @@ const benefitListString = insights.length > 0 ? `, plus ${insights.join(' and ')
 // 7. SEO METADATA
 const title = `CCB Estimate: ${monthlyFormatted}/mo for ${familyLabel} in ${provinceName} | LoonieFi`;
 const description = `Based on a household income of ${salaryFormatted}, a ${familyLabel} in ${provinceName} qualifies for approximately ${annualFormatted} per year in government support. This ${benefitListString}`;
-const canonicalURL = new URL(Astro.url.pathname, Astro.site || Astro.url.origin);
+const canonicalURL = new URL('/child-benefit-calculator/', Astro.site || Astro.url.origin);
 
 // Breadcrumbs
 const breadcrumbPath = [
@@ -134,7 +134,7 @@ const faqSchema = {
 };
 ---
 
-<BaseLayout title={title} description={description}>
+<BaseLayout canonicalURL={canonicalURL} title={title} description={description}>
   <script type="application/ld+json" set:html={JSON.stringify(softwareSchema)} />
   <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
   
