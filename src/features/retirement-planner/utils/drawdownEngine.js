@@ -120,13 +120,13 @@ export const calculateRetirementDrawdown = (params) => {
         }
 
         // Drawdown phase for at least one person
-        let pPension = pAge >= num(pension.startAge) ? num(pension.amount) * infFactor : 0;
-        let pCPP = pAge >= num(cpp.startAge) ? num(cpp.amount) * infFactor : 0;
-        let pOAS = pAge >= num(oas.startAge) ? getOasEligibleBase(num(yearsInCanada), num(oas.startAge)) * infFactor : 0;
+        let pPension = pAge >= (pension?.startAge !== undefined ? num(pension.startAge) : 65) ? num(pension?.amount) * infFactor : 0;
+        let pCPP = pAge >= (cpp?.startAge !== undefined ? num(cpp.startAge) : 65) ? num(cpp?.amount) * infFactor : 0;
+        let pOAS = pAge >= (oas?.startAge !== undefined ? num(oas.startAge) : 65) ? getOasEligibleBase(num(yearsInCanada), oas?.startAge !== undefined ? num(oas.startAge) : 65) * infFactor : 0;
 
-        let sPension = hasSpouse && sAge >= num(spouse.pension?.startAge) ? num(spouse.pension?.amount) * infFactor : 0;
-        let sCPP = hasSpouse && sAge >= num(spouse.cpp?.startAge) ? num(spouse.cpp?.amount) * infFactor : 0;
-        let sOAS = hasSpouse && sAge >= num(spouse.oas?.startAge) ? getOasEligibleBase(num(spouse.yearsInCanada), num(spouse.oas?.startAge)) * infFactor : 0;
+        let sPension = hasSpouse && sAge >= (spouse.pension?.startAge !== undefined ? num(spouse.pension.startAge) : 65) ? num(spouse.pension?.amount) * infFactor : 0;
+        let sCPP = hasSpouse && sAge >= (spouse.cpp?.startAge !== undefined ? num(spouse.cpp.startAge) : 65) ? num(spouse.cpp?.amount) * infFactor : 0;
+        let sOAS = hasSpouse && sAge >= (spouse.oas?.startAge !== undefined ? num(spouse.oas.startAge) : 65) ? getOasEligibleBase(spouse.yearsInCanada !== undefined ? num(spouse.yearsInCanada) : 40, spouse.oas?.startAge !== undefined ? num(spouse.oas.startAge) : 65) * infFactor : 0;
 
         // Pension Splitting (Simple 50% shift of DB Pension if age > 65)
         if (hasSpouse && pAge >= 65 && sAge >= 65) {

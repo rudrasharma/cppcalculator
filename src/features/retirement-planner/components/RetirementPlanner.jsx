@@ -1,10 +1,11 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { PlannerInputs } from './PlannerInputs';
 import { PlannerCharts } from './PlannerCharts';
+import { PlannerTable } from './PlannerTable';
 import { PlannerMetrics } from './PlannerMetrics';
 import { calculateRetirementDrawdown } from '../utils/drawdownEngine';
 import { useFinancialMemory } from '../../../hooks/useFinancialMemory';
-import { AICommandBar, StrategyCard, AICopilot, Accordion, ExternalLinkIcon, DollarSignIcon } from '../../../components/shared';
+import { AICommandBar, StrategyCard, AICopilot, Accordion, ExternalLinkIcon, DollarSignIcon, BarChartIcon } from '../../../components/shared';
 
 const RETIREMENT_PLANNER_SUGGESTIONS = [
     { label: 'Basic Drawdown', value: 'I am retiring at 65 with $500k in RRSP and $200k in TFSA. Target income is $60k/year.' },
@@ -199,6 +200,13 @@ export default function RetirementPlanner({ isVisible = true, initialStateOverri
                             results={results} 
                             state={state} 
                         />
+                        
+                        {/* Year-by-Year Breakdown Table */}
+                        <div className="pt-4">
+                            <Accordion title="View Year-by-Year Breakdown" icon={BarChartIcon}>
+                                <PlannerTable results={results} state={state} />
+                            </Accordion>
+                        </div>
                         
                         {/* Authoritative Government Resources */}
                         <div className="pt-4">
