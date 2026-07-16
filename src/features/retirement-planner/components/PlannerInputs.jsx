@@ -293,6 +293,21 @@ export const PlannerInputs = ({ state, updateField, isMonteCarlo, setIsMonteCarl
                                 <input type="number" min="60" max="70" value={pState.cpp.startAge} onChange={(e) => updatePPension('cpp', 'startAge', parseInt(e.target.value) || 65)} className="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl focus:ring-indigo-500 focus:border-indigo-500 block p-3" />
                             </div>
                         </div>
+
+                        <div className="grid grid-cols-1 gap-4 border-t border-slate-100 pt-6">
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 mb-1 flex items-center gap-1.5">
+                                    OAS Start Age
+                                    <div className="group relative flex items-center">
+                                        <InfoIcon className="w-3.5 h-3.5 text-slate-400 cursor-help" />
+                                        <div className="absolute bottom-full mb-2 right-0 w-64 p-2 bg-slate-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 shadow-xl font-normal text-left">
+                                            Delaying OAS beyond 65 increases your benefit by 0.6% per month (7.2% per year), up to age 70.
+                                        </div>
+                                    </div>
+                                </label>
+                                <input type="number" min="65" max="70" value={pState.oas.startAge} onChange={(e) => updatePPension('oas', 'startAge', parseInt(e.target.value) || 65)} className="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl focus:ring-indigo-500 focus:border-indigo-500 block p-3" />
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}
