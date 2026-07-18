@@ -162,8 +162,18 @@ export const useRetirementMath = ({
             breakevenData.push(dataPoint);
         }
 
+        const finalBase = baseBenefit * (1 + (cppAdjustmentPercent / 100));
+        const finalEnhanced = enhancedBenefit * (1 + (cppAdjustmentPercent / 100));
+
         return {
-            cpp: { total: finalCPP, base: baseBenefit, enhanced: enhancedBenefit, adjustment: cppAdjustmentPercent },
+            cpp: { 
+                total: finalCPP, 
+                base: finalBase, 
+                enhanced: finalEnhanced, 
+                adjustment: cppAdjustmentPercent,
+                rawBaseAt65: baseBenefit,
+                rawEnhancedAt65: enhancedBenefit
+            },
             grandTotal: finalCPP,
             breakevenData,
             years: initialYears,

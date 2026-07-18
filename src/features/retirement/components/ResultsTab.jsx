@@ -72,8 +72,7 @@ export default function ResultsTab({
                         </button>
                     </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 items-center">
-                        <div>
+                        <div className="w-full max-w-md">
                             <h2 className="text-slate-400 text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] mb-2 leading-none">Monthly Forecast</h2>
                             <div className="flex items-baseline gap-2 flex-wrap">
                                 {/* Adjusted Font Size for Mobile */}
@@ -96,46 +95,8 @@ export default function ResultsTab({
                                 </div>
                             )}
                         </div>
-
-                        {/* Scenarios Card: Reduced padding for mobile */}
-                        <div className="bg-white/5 rounded-[1.5rem] md:rounded-[2rem] p-5 md:p-8 border border-white/10 backdrop-blur-md shadow-2xl">
-                            <div className="flex justify-between items-center mb-4 md:mb-6">
-                                <label className="text-xs md:text-sm font-bold text-slate-200">Test Scenarios</label>
-                                <div className="bg-indigo-500 text-white text-[9px] md:text-[10px] font-black px-2 py-1 rounded-lg uppercase tracking-wider shadow-lg ring-2 ring-indigo-500/20">
-                                    Age: {retirementAge}
-                                </div>
-                            </div>
-                            
-                            <div className="space-y-6 md:space-y-8">
-                                <input 
-                                    type="range" min="60" max="70" step="1" value={retirementAge} 
-                                    onChange={(e) => setRetirementAge(parseInt(e.target.value))} 
-                                    className="w-full h-2 bg-slate-800 rounded-full appearance-none cursor-pointer accent-indigo-400" 
-                                />
-                                
-                                <div className="flex flex-col gap-3">
-                                    {!comparisonSnapshot ? (
-                                        <button 
-                                            onClick={saveComparison} 
-                                            className="w-full py-3 md:py-4 text-xs md:text-sm font-black rounded-xl md:rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white transition-all flex items-center justify-center gap-2 shadow-xl shadow-indigo-900/40 active:scale-95 uppercase tracking-widest"
-                                        >
-                                            {ScaleIcon && <ScaleIcon size={18} />} Snapshot Age {retirementAge}
-                                        </button>
-                                    ) : (
-                                        <div className="grid grid-cols-6 gap-2">
-                                            <button onClick={clearComparison} className="col-span-1 p-3 md:p-4 bg-rose-500/20 text-rose-300 border border-rose-500/30 rounded-xl md:rounded-2xl hover:bg-rose-500/30 transition-all flex justify-center items-center" title="Clear Comparison">{XIcon && <XIcon size={20} />}</button>
-                                            <div className="col-span-5 bg-indigo-500/10 border border-indigo-500/20 p-3 md:p-4 rounded-xl md:rounded-2xl text-center flex flex-col justify-center">
-                                                <div className="text-[9px] font-bold text-indigo-400 uppercase tracking-widest leading-none mb-1">Comparing to Baseline</div>
-                                                <div className="text-xs md:text-sm font-black text-white">Age {comparisonSnapshot.age}</div>
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </div>
-            </div>
 
             {comparisonSnapshot && (
                 <div className="bg-white rounded-[2rem] border-2 border-indigo-50 overflow-hidden animate-fade-in shadow-xl">
