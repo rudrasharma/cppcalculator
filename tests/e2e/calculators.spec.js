@@ -139,7 +139,7 @@ test.describe('Phase 2: Critical Path E2E Testing', () => {
     test('Cross-Calculator Memory Sync Journey', async ({ page }) => {
         // Go to Mortgage and set Home Price
         await page.goto('/mortgage-calculator/');
-        await page.waitForLoadState('networkidle');
+        await expect(page.getByLabel('Asking Price')).toBeVisible();
 
         await page.getByLabel('Asking Price').fill('999999');
         
@@ -147,7 +147,7 @@ test.describe('Phase 2: Critical Path E2E Testing', () => {
         
         // Go to smith manoeuvre which uses homeValue synced from Mortgage
         await page.goto('/smith-manoeuvre/');
-        await page.waitForLoadState('networkidle');
+        await expect(page.getByRole('textbox', { name: 'Home Value' })).toBeVisible();
 
         // Verify it synced (homeValue)
         await expect(page.getByRole('textbox', { name: 'Home Value' })).toHaveValue('999,999');
@@ -155,7 +155,7 @@ test.describe('Phase 2: Critical Path E2E Testing', () => {
 
     test('CPP Calculator Import Journey', async ({ page }) => {
         await page.goto('/cpp-oas-calculator/');
-        await page.waitForLoadState('networkidle');
+        await expect(page.getByText('Official Data Import')).toBeVisible();
 
         // Click the Official Data Import block
         await page.locator('text=Official Data Import').first().click();
