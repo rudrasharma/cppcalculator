@@ -100,10 +100,10 @@ export const calculatePayrollDeductions = (grossIncome) => {
  * Main calculation stitcher
  */
 export const calculateTakeHome = (grossIncome, rrspContribution, provinceCode, employerMatchPercent = 0) => {
-    // Total RRSP contribution (User $ + Employer %) reduces taxable income
+    // Employer match is a taxable benefit that is exactly offset by an RRSP deduction, making it tax-neutral.
+    // Therefore, only the user's out-of-pocket RRSP contribution reduces their base taxable income.
     const employerMatchAmount = grossIncome * (employerMatchPercent / 100);
-    const totalRRSP = rrspContribution + employerMatchAmount;
-    const taxableIncome = Math.max(0, grossIncome - totalRRSP);
+    const taxableIncome = Math.max(0, grossIncome - rrspContribution);
     
     let fedTax = calculateFederalTax(taxableIncome, grossIncome);
     const provTax = calculateProvincialTax(taxableIncome, provinceCode);
