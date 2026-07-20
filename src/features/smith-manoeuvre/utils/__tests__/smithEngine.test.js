@@ -79,7 +79,7 @@ describe('Smith Manoeuvre Engine', () => {
         
         // When NOT reinvesting, pocketed cash should be accumulated
         expect(lastWithout.cumulativePocketedCash).toBeGreaterThan(0);
-        expect(lastWith.cumulativePocketedCash).toBe(0);
+        expect(lastWith.cumulativePocketedCash).toBeCloseTo(0, 2);
     });
 
     test('initialHelocLumpSum correctly initializes balances at Month 0', () => {
@@ -106,7 +106,7 @@ describe('Smith Manoeuvre Engine', () => {
             initialHelocLumpSum: 400000 // Total 900k (90%) -> Should cap at 80% (300k lump sum)
         });
 
-        expect(results[0].smithHelocBalance).toBe(300000); // 500k mortgage + 300k HELOC = 800k (80%)
+        expect(results[0].smithHelocBalance).toBe(150000); // 500k mortgage + 150k HELOC = 650k (65% limit OSFI rule)
         
         // Throughout the strategy, HELOC should never exceed 650k (65% of 1M)
         const maxHeloc = Math.max(...results.map(r => r.smithHelocBalance));
@@ -118,8 +118,8 @@ describe('Smith Manoeuvre Engine', () => {
         const acceleratorStrategy = calculateSmithManoeuvre({ ...defaultInputs, taxRefundAllocation: 'mortgage' });
 
         // Find first month mortgage is 0 for accelerator
-        const accFinishMonth = acceleratorStrategy.findIndex(r => r.standardMortgageBalance <= 1);
-        const portFinishMonth = portfolioStrategy.findIndex(r => r.standardMortgageBalance <= 1);
+        const accFinishMonth = acceleratorStrategy.findIndex(r => r.smithMortgageBalance <= 1);
+        const portFinishMonth = portfolioStrategy.findIndex(r => r.smithMortgageBalance <= 1);
 
         // Accelerator should finish significantly earlier
         expect(accFinishMonth).toBeLessThan(portFinishMonth);

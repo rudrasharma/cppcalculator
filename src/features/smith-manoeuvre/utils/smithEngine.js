@@ -56,12 +56,12 @@ export const calculateSmithManoeuvre = ({
     const MAX_TOTAL_LTV = 0.80; // Total Borrowing (Mortgage + HELOC)
     const MAX_HELOC_LTV = 0.65; // Pure HELOC cap
 
-    let currentMortgageBalance = mortgageBalance;
+    let standardMortgageBalance = mortgageBalance;
+    let smithMortgageBalance = mortgageBalance;
 
-    // Month 0 initialization - Subject to Caps
-    const initialTotalRoom = (homeValue * MAX_TOTAL_LTV) - currentMortgageBalance;
-    const initialHelocRoom = (homeValue * MAX_HELOC_LTV);
-    const safeInitialLumpSum = Math.max(0, Math.min(initialHelocLumpSum, initialTotalRoom, initialHelocRoom));
+    // Month 0 initialization - Subject to OSFI 65% cap
+    const initialMaxHelocAllowed = Math.max(0, (homeValue * MAX_HELOC_LTV) - smithMortgageBalance);
+    const safeInitialLumpSum = Math.max(0, Math.min(initialHelocLumpSum, initialMaxHelocAllowed));
 
     let currentHelocBalance = safeInitialLumpSum;
     let currentInvestmentBalance = safeInitialLumpSum;
@@ -93,40 +93,52 @@ export const calculateSmithManoeuvre = ({
     for (let month = 1; month <= totalMonths; month++) {
         let currentMonthTaxRefund = 0;
 
-        // 1. Mortgage Step: Base Payment
-        const interestComponent = currentMortgageBalance * monthlyMortgageRate;
-        let principalComponent = Math.min(currentMortgageBalance, monthlyPayment - interestComponent);
+        // 1. Standard Mortgage Step
+        const standardInterest = standardMortgageBalance * monthlyMortgageRate;
+        const standardPrincipal = Math.min(standardMortgageBalance, monthlyPayment - standardInterest);
+        standardMortgageBalance -= standardPrincipal;
+
+        // 2. Smith Mortgage Step: Base Payment
+        const interestComponent = smithMortgageBalance * monthlyMortgageRate;
+        let principalComponent = Math.min(smithMortgageBalance, monthlyPayment - interestComponent);
         
-        // 1a. Dividend Accelerator: Apply net dividends to mortgage if target is 'mortgage'
+        // If the SM mortgage is paid off early, pocket the unused base payment to remain cash-flow neutral
+        const unusedBasePayment = monthlyPayment - (principalComponent + interestComponent);
+        if (unusedBasePayment > 0) {
+            cumulativePocketedCash += unusedBasePayment;
+        }
+        
+        // 2a. Dividend Accelerator: Apply net dividends to mortgage if target is 'mortgage'
         const monthlyDividend = currentInvestmentBalance * (dividendYield / 12);
         const netMonthlyDividend = monthlyDividend * (1 - dividendTaxRate);
         yearlyNetDividends += netMonthlyDividend;
 
         if (dividendAllocation === 'mortgage') {
-            const extraPayment = Math.min(currentMortgageBalance - principalComponent, netMonthlyDividend);
+            const extraPayment = Math.min(smithMortgageBalance - principalComponent, netMonthlyDividend);
             principalComponent += extraPayment;
         }
 
-        // 1b. Tax Refund Accelerator: Apply refund to mortgage if target is 'mortgage'
+        // 2b. Tax Refund Accelerator: Apply refund to mortgage if target is 'mortgage'
         // Refund logic happens annually (Month 12)
         let appliedRefundToMortgage = 0;
         if (month % 12 === 0) {
             currentMonthTaxRefund = yearlyHelocInterestPaid * marginalTaxRate;
             if (taxRefundAllocation === 'mortgage') {
-                appliedRefundToMortgage = Math.min(currentMortgageBalance - principalComponent, currentMonthTaxRefund);
+                appliedRefundToMortgage = Math.min(smithMortgageBalance - principalComponent, currentMonthTaxRefund);
                 principalComponent += appliedRefundToMortgage;
             }
         }
 
-        currentMortgageBalance -= principalComponent;
+        smithMortgageBalance -= principalComponent;
 
-        // 2. Smith Step: Interest Capitalization with LTV Caps
+        // 3. Smith Step: Interest Capitalization with OSFI LTV Caps
         const monthlyHelocInterest = currentHelocBalance * monthlyHelocRate;
-        const totalDebt = currentMortgageBalance + currentHelocBalance;
+        const totalDebt = smithMortgageBalance + currentHelocBalance;
         
         // Can we capitalize this month's interest?
         const hasTotalRoom = (totalDebt + monthlyHelocInterest) <= (homeValue * MAX_TOTAL_LTV);
-        const hasHelocRoom = (currentHelocBalance + monthlyHelocInterest) <= (homeValue * MAX_HELOC_LTV);
+        const currentMaxHelocAllowed = Math.max(0, (homeValue * MAX_HELOC_LTV) - smithMortgageBalance);
+        const hasHelocRoom = (currentHelocBalance + monthlyHelocInterest) <= currentMaxHelocAllowed;
 
         if (capitalizeInterest && hasTotalRoom && hasHelocRoom) {
             currentHelocBalance += monthlyHelocInterest;
@@ -161,24 +173,26 @@ export const calculateSmithManoeuvre = ({
             yearlyHelocInterestPaid = 0;
         }
 
-        // 5. Smith Step: Re-advance the principal based on tolerance & Caps
+        // 6. Smith Step: Re-advance the principal based on tolerance & OSFI Caps
         const theoreticalReadvance = principalComponent * readvanceTolerance;
-        const roomTotal = (homeValue * MAX_TOTAL_LTV) - (currentMortgageBalance + currentHelocBalance);
-        const roomHeloc = (homeValue * MAX_HELOC_LTV) - currentHelocBalance;
-        const actualReadvance = Math.max(0, Math.min(theoreticalReadvance, roomTotal, roomHeloc));
+        
+        const finalMaxHelocAllowed = Math.max(0, (homeValue * MAX_HELOC_LTV) - smithMortgageBalance);
+        const roomHeloc = finalMaxHelocAllowed - currentHelocBalance;
+        
+        const actualReadvance = Math.max(0, Math.min(theoreticalReadvance, roomHeloc));
 
         currentHelocBalance += actualReadvance;
         currentInvestmentBalance += actualReadvance;
 
         // 7. Net Worth Calculations
         // Note: smithNetWorth is penalized by cumulativeOutOfPocketInterest if capitalization is OFF
-        const standardNetWorth = homeValue - currentMortgageBalance;
-        const smithNetWorth = homeValue - currentMortgageBalance - currentHelocBalance + currentInvestmentBalance + cumulativePocketedCash - cumulativeOutOfPocketInterest;
+        const standardNetWorth = homeValue - standardMortgageBalance;
+        const smithNetWorth = homeValue - smithMortgageBalance - currentHelocBalance + currentInvestmentBalance + cumulativePocketedCash - cumulativeOutOfPocketInterest;
 
         data.push({
             month,
-            standardMortgageBalance: Math.max(0, currentMortgageBalance),
-            smithMortgageBalance: Math.max(0, currentMortgageBalance),
+            standardMortgageBalance: Math.max(0, standardMortgageBalance),
+            smithMortgageBalance: Math.max(0, smithMortgageBalance),
             smithHelocBalance: currentHelocBalance,
             smithInvestmentBalance: currentInvestmentBalance,
             taxRefundAccumulated: lastYearlyRefund,
