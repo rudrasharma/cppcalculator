@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useMortgageMath } from '../hooks/useMortgageMath';
 import { MortgageForm } from './MortgageForm';
 import { MortgageResults } from './MortgageResults';
 import { CalculatorIcon, InfoIcon, RotateCcwIcon, AICommandBar, StrategyCard, AICopilot } from '../../../components/shared';
 import { useFinancialMemory } from '../../../hooks/useFinancialMemory';
+import { useBankOfCanadaRates } from '../../../hooks/useBankOfCanadaRates';
 
 const MORTGAGE_SUGGESTIONS = [
     { label: 'Starter Home', value: 'I am buying a $500k house with 5% down in Alberta' },
@@ -15,6 +16,17 @@ export default function MortgageCalculator({ isVisible = true, isEmbedded = fals
     const { state, dispatch, results } = useMortgageMath(initialStateOverride);
     const { memory } = useFinancialMemory();
     const [aiInsight, setAiInsight] = useState('');
+    const { bondYield5Yr, isLoading: ratesLoading } = useBankOfCanadaRates();
+    const [rateSet, setRateSet] = useState(false);
+
+    useEffect(() => {
+        if (!ratesLoading && !rateSet && !initialStateOverride?.annualRate) {
+            // Formula: Bond Yield + 1.5% for fixed rate approximation
+            const suggestedRate = Number((bondYield5Yr + 1.5).toFixed(2));
+            dispatch({ type: 'SET_RATE', payload: suggestedRate });
+            setRateSet(true);
+        }
+    }, [ratesLoading, rateSet, bondYield5Yr, dispatch, initialStateOverride]);
 
     if (!isVisible) return null;
 

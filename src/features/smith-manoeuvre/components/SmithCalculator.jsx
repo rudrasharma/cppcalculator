@@ -7,6 +7,7 @@ import { SmithAuditTable } from './SmithAuditTable';
 import { SmithNarrative } from './SmithNarrative';
 import { ScaleIcon, RotateCcwIcon, AICommandBar, StrategyCard, AICopilot, Accordion, ExternalLinkIcon, DollarSignIcon } from '../../../components/shared';
 import { useFinancialMemory } from '../../../hooks/useFinancialMemory';
+import { useBankOfCanadaRates } from '../../../hooks/useBankOfCanadaRates';
 
 const SMITH_SUGGESTIONS = [
     { label: 'Basic Strategy', value: 'I have a $400k mortgage at 4% and a $600k home. My tax rate is 35%.' },
@@ -46,6 +47,23 @@ export default function SmithCalculator({ isVisible = true, initialStateOverride
         if (memory.homeValue !== undefined && memory.homeValue !== null) setHValueState(prev => prev !== memory.homeValue ? memory.homeValue : prev);
         if (memory.mortgageBalance !== undefined && memory.mortgageBalance !== null) setMBalanceState(prev => prev !== memory.mortgageBalance ? memory.mortgageBalance : prev);
     }, [memory]);
+
+    const { bondYield5Yr, overnightRate, isLoading: ratesLoading } = useBankOfCanadaRates();
+    const [ratesSet, setRatesSet] = useState(false);
+
+    React.useEffect(() => {
+        if (!ratesLoading && !ratesSet) {
+            if (!initialStateOverride.mortgageRate) {
+                // Formula: Bond Yield + 1.5% for fixed rate approximation (converted to decimal)
+                setMRate(Number(((bondYield5Yr + 1.5) / 100).toFixed(4)));
+            }
+            if (!initialStateOverride.helocRate) {
+                // Formula: Policy Rate + 2.7% (Prime + 0.5%) for HELOC approximation (converted to decimal)
+                setHRate(Number(((overnightRate + 2.7) / 100).toFixed(4)));
+            }
+            setRatesSet(true);
+        }
+    }, [ratesLoading, ratesSet, bondYield5Yr, overnightRate, initialStateOverride]);
 
     // 2. Computed Input Object
     const inputsForEngine = useMemo(() => ({

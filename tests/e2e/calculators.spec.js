@@ -2,6 +2,20 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Phase 2: Critical Path E2E Testing', () => {
 
+    test.beforeEach(async ({ page }) => {
+        await page.route('https://www.bankofcanada.ca/valet/**', async route => {
+            await route.fulfill({
+                status: 200,
+                contentType: 'application/json',
+                body: JSON.stringify({
+                    observations: [
+                        { "BD.CDN.5YR.DQ.YLD": { "v": "3.5" }, "V39079": { "v": "4.5" } }
+                    ]
+                })
+            });
+        });
+    });
+
     test('Tax Calculator User Journey', async ({ page }) => {
         await page.goto('/income-tax-calculator/');
         await page.waitForLoadState('networkidle');
