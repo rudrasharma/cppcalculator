@@ -3,10 +3,30 @@ import { useState, useEffect } from 'react';
 const CACHE_KEY = 'boc_rates';
 const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
 
+const BOC_SCHEDULE_DATES = [
+    '2026-01-28', '2026-03-18', '2026-04-29', '2026-06-10',
+    '2026-07-15', '2026-09-02', '2026-10-28', '2026-12-09',
+    '2027-01-27', '2027-03-03'
+];
+
+function getNextAnnouncementDate() {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    for (const dateStr of BOC_SCHEDULE_DATES) {
+        const parts = dateStr.split('-');
+        const d = new Date(parts[0], parts[1] - 1, parts[2]);
+        if (d >= today) {
+            return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+    }
+    return "TBD";
+}
+
 export function useBankOfCanadaRates() {
     const [rates, setRates] = useState({
         bondYield5Yr: 3.5, // Fallback
         overnightRate: 4.5, // Fallback
+        nextAnnouncementDate: getNextAnnouncementDate(),
         isLoading: true,
         error: null,
     });
@@ -22,6 +42,7 @@ export function useBankOfCanadaRates() {
                         setRates({
                             bondYield5Yr: parsed.bondYield5Yr,
                             overnightRate: parsed.overnightRate,
+                            nextAnnouncementDate: getNextAnnouncementDate(),
                             isLoading: false,
                             error: null,
                         });
@@ -58,6 +79,7 @@ export function useBankOfCanadaRates() {
                 
                 setRates({
                     ...newRates,
+                    nextAnnouncementDate: getNextAnnouncementDate(),
                     isLoading: false,
                     error: null,
                 });

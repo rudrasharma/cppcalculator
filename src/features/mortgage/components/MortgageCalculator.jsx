@@ -16,7 +16,7 @@ export default function MortgageCalculator({ isVisible = true, isEmbedded = fals
     const { state, dispatch, results } = useMortgageMath(initialStateOverride);
     const { memory } = useFinancialMemory();
     const [aiInsight, setAiInsight] = useState('');
-    const { bondYield5Yr, isLoading: ratesLoading } = useBankOfCanadaRates();
+    const { bondYield5Yr, overnightRate, nextAnnouncementDate, isLoading: ratesLoading } = useBankOfCanadaRates();
     const [rateSet, setRateSet] = useState(false);
 
     useEffect(() => {
@@ -72,6 +72,18 @@ export default function MortgageCalculator({ isVisible = true, isEmbedded = fals
                         <div>
                             <h1 className="text-2xl font-black text-slate-900 tracking-tight uppercase italic">Canadian Mortgage Paydown</h1>
                             <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Accelerate Your Financial Freedom</p>
+                            {!ratesLoading && (
+                                <span className="flex flex-col sm:flex-row gap-2 sm:items-center mt-2 text-[9px] text-indigo-700 font-bold bg-indigo-50 px-2 py-1 rounded border border-indigo-100 w-fit">
+                                    <span className="flex items-center">
+                                        <span className="inline-block w-1.5 h-1.5 rounded-full bg-green-500 mr-1.5 animate-pulse"></span>
+                                        BoC Overnight Rate: {overnightRate.toFixed(2)}% | Bond Yield: {bondYield5Yr.toFixed(2)}%
+                                    </span>
+                                    <span className="hidden sm:inline text-indigo-300">|</span>
+                                    <span className="flex items-center">
+                                        Next Rate Announcement: {nextAnnouncementDate}
+                                    </span>
+                                </span>
+                            )}
                         </div>
                     </div>
 
