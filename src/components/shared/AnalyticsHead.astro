@@ -12,4 +12,12 @@
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
   gtag('config', 'G-DS4P8VC6WQ');
+
+  // Fix for Astro View Transitions (SPA Routing)
+  document.addEventListener('astro:page-load', () => {
+    gtag('event', 'page_view', {
+      page_location: window.location.href,
+      page_path: window.location.pathname
+    });
+  });
 </script>
