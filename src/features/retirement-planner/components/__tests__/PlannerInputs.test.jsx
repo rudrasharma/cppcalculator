@@ -30,10 +30,26 @@ describe('PlannerInputs Component', () => {
         const selects = screen.getAllByRole('combobox');
         const select = selects.find(s => s.value.includes('tfsa')); // Find the one that has the drawdown options
         expect(select).toBeInTheDocument();
-        expect(select).toBeInTheDocument();
         expect(select.value).toBe('nonReg,rrsp,lira,tfsa');
         
         fireEvent.change(select, { target: { value: 'tfsa,nonReg,rrsp,lira' } });
         expect(updateFieldMock).toHaveBeenCalledWith('drawdownOrder', ['tfsa', 'nonReg', 'rrsp', 'lira']);
+    });
+
+    it('renders Expected Return (Nominal) input with effective real return net indicator', () => {
+        const updateFieldMock = jest.fn();
+        render(<PlannerInputs state={mockState} updateField={updateFieldMock} />);
+
+        expect(screen.getByText(/Expected Return \(Nominal\) \(%\)/i)).toBeInTheDocument();
+        expect(screen.getByText(/Inflation Rate \(%\)/i)).toBeInTheDocument();
+        
+        // (1.05 / 1.02 - 1) * 100 = 2.941... -> +2.94% / yr net
+        expect(screen.getByText(/\+2\.94% \/ yr net/i)).toBeInTheDocument();
+
+        const returnInput = screen.getByDisplayValue('5.0');
+        expect(returnInput).toBeInTheDocument();
+
+        fireEvent.change(returnInput, { target: { value: '6.0' } });
+        expect(updateFieldMock).toHaveBeenCalledWith('returnRate', 0.06);
     });
 });

@@ -39,6 +39,12 @@ export const PlannerInputs = ({ state, updateField, isMonteCarlo, setIsMonteCarl
     const showIndividual = !state.hasSpouse || activeTab === 'applicant' || activeTab === 'spouse';
     const showJoint = !state.hasSpouse || activeTab === 'joint';
 
+    const inflationVal = Number.isFinite(parseFloat(state.inflation)) ? parseFloat(state.inflation) : 0.021;
+    const returnVal = Number.isFinite(parseFloat(state.returnRate)) ? parseFloat(state.returnRate) : 0.05;
+    const effectiveRealReturn = (1 + inflationVal) !== 0 
+        ? (((1 + returnVal) / (1 + inflationVal)) - 1) * 100 
+        : 0;
+
     return (
         <div className="space-y-6">
             <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 md:p-6">
@@ -325,7 +331,15 @@ export const PlannerInputs = ({ state, updateField, isMonteCarlo, setIsMonteCarl
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-1">Inflation Rate (%)</label>
+                            <label className="flex items-center text-sm font-medium text-slate-700 mb-1 gap-1.5">
+                                Inflation Rate (%)
+                                <div className="group relative flex items-center">
+                                    <InfoIcon className="w-3.5 h-3.5 text-slate-400 cursor-help" />
+                                    <div className="absolute bottom-full mb-2 left-0 w-64 p-2 bg-slate-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 shadow-xl font-normal text-left">
+                                        Expected annual CPI inflation. Spending, tax brackets, and pensions (CPP/OAS) escalate at this rate. Bank of Canada target is 2.0%.
+                                    </div>
+                                </div>
+                            </label>
                             <input 
                                 type="number" 
                                 step="0.1" 
@@ -335,7 +349,15 @@ export const PlannerInputs = ({ state, updateField, isMonteCarlo, setIsMonteCarl
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-1">Est. Real Return (%)</label>
+                            <label className="flex items-center text-sm font-medium text-slate-700 mb-1 gap-1.5">
+                                Expected Return (Nominal) (%)
+                                <div className="group relative flex items-center">
+                                    <InfoIcon className="w-3.5 h-3.5 text-slate-400 cursor-help" />
+                                    <div className="absolute bottom-full mb-2 right-0 sm:left-0 w-64 p-2 bg-slate-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 shadow-xl font-normal text-left">
+                                        Pre-inflation annual investment return (e.g. 5–7% for a balanced portfolio). Balances grow at this nominal rate.
+                                    </div>
+                                </div>
+                            </label>
                             <input 
                                 type="number" 
                                 step="0.1" 
@@ -343,6 +365,12 @@ export const PlannerInputs = ({ state, updateField, isMonteCarlo, setIsMonteCarl
                                 onChange={(e) => updateField('returnRate', (parseFloat(e.target.value) || 0) / 100)}
                                 className="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl focus:ring-indigo-500 focus:border-indigo-500 block p-3"
                             />
+                            <div className="flex items-center justify-between mt-1.5 px-0.5 text-xs">
+                                <span className="text-slate-500">Effective real return:</span>
+                                <span className={`font-semibold ${effectiveRealReturn >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                                    {effectiveRealReturn >= 0 ? '+' : ''}{effectiveRealReturn.toFixed(2)}% / yr net
+                                </span>
+                            </div>
                         </div>
                         
                         <div className="md:col-span-2">
