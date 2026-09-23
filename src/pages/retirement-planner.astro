@@ -6,9 +6,11 @@ import { TAX_YEAR_CONFIG } from '../config/taxYears.js';
 
 const { CURRENT_APP_YEAR } = TAX_YEAR_CONFIG;
 
+export const prerender = true;
+
 const title = `[${CURRENT_APP_YEAR}] Retirement Planner & Drawdown Calculator | LoonieFi`;
 const description = `Plan your Canadian retirement with our free drawdown calculator. Estimate how long your RRSP, TFSA, CPP, OAS, and pensions will last based on your target income in ${CURRENT_APP_YEAR}.`;
-const canonicalURL = new URL('/retirement-planner', Astro.site || Astro.url.origin);
+const canonicalURL = new URL('/retirement-planner/', Astro.site || Astro.url.origin);
 
 const softwareSchema = {
   "@context": "https://schema.org",
@@ -49,7 +51,7 @@ const faqSchema = {
 };
 ---
 
-<BaseLayout title={title} description={description}>
+<BaseLayout canonicalURL={canonicalURL} title={title} description={description}>
     <script type="application/ld+json" set:html={JSON.stringify(softwareSchema)} />
     <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
     

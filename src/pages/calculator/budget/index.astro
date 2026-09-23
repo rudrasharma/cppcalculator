@@ -3,15 +3,20 @@ import BaseLayout from '../../../layouts/BaseLayout.astro';
 import BudgetCalculator from '../../../features/budget/components/BudgetCalculator.jsx';
 import Breadcrumbs from '../../../components/shared/Breadcrumbs.astro';
 
+export const prerender = true;
+
+const canonicalURL = new URL('/calculator/budget/', Astro.site || Astro.url.origin);
+
 const breadcrumbPath = [
-  { label: 'Calculators', href: '/calculator/' },
-  { label: 'Budget Analyzer', href: Astro.url.pathname }
+  { label: 'Calculators', href: '/' },
+  { label: 'Budget Analyzer', href: '/calculator/budget/' }
 ];
 ---
 
 <BaseLayout 
   title="Free AI Budget Calculator & Bank Statement Analyzer" 
   description="Automatically categorize your expenses and find hidden savings with our free AI Budget Calculator. Simply paste a screenshot of your bank statement for instant, private cash flow analysis."
+  canonicalURL={canonicalURL}
 >
   <main class="py-12 px-6 w-full flex flex-col min-h-screen">
     <div class="max-w-6xl mx-auto w-full mb-8">

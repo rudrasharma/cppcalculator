@@ -9,7 +9,7 @@ export const prerender = true;
 
 const title = `[${CURRENT_APP_YEAR}] Browse RESP Grants by Province | LoonieFi`;
 const description = `Compare Registered Education Savings Plan (RESP) matching grants across all Canadian provinces for various annual contribution amounts in ${CURRENT_APP_YEAR}.`;
-const canonicalURL = new URL('/calculator/resp/browse', Astro.site || Astro.url.origin);
+const canonicalURL = new URL('/calculator/resp/browse/', Astro.site || Astro.url.origin);
 
 const formatter = new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD', maximumFractionDigits: 0 });
 ---

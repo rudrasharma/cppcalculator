@@ -30,7 +30,9 @@ const TOOL_MAPPING: Record<string, { url: string; label: string }> = {
 };
 
 const targetTool = TOOL_MAPPING[frontmatter.category || ''] || { url: '/', label: 'Start a Calculation' };
-const canonicalURL = new URL(Astro.url.pathname, Astro.site || Astro.url.origin);
+const siteOrigin = Astro.site ? Astro.site.toString().replace(/\/$/, '') : Astro.url.origin;
+const rawPath = Astro.url.pathname.endsWith('/') ? Astro.url.pathname : `${Astro.url.pathname}/`;
+const canonicalURL = new URL(rawPath, siteOrigin);
 
 // Schema.org Article structured data
 const articleSchema = {
@@ -68,7 +70,7 @@ const articleSchema = {
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     
     {/* SEO Meta Tags */}
     <title>{frontmatter.title} | LoonieFi Guides</title>

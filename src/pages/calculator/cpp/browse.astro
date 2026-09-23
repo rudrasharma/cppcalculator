@@ -9,7 +9,7 @@ export const prerender = true;
 
 const title = `[${CURRENT_APP_YEAR}] Browse CPP Benefits by Age and Salary | LoonieFi`;
 const description = `Compare Canada Pension Plan (CPP) retirement benefits across different retirement ages and income levels for ${CURRENT_APP_YEAR}.`;
-const canonicalURL = new URL('/calculator/cpp/browse', Astro.site || Astro.url.origin);
+const canonicalURL = new URL('/calculator/cpp/browse/', Astro.site || Astro.url.origin);
 
 const AGES = [60, 65, 70];
 const formatter = new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD', maximumFractionDigits: 0 });

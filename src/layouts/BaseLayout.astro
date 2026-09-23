@@ -22,7 +22,10 @@ interface Props {
 
 const { title, description, canonicalURL: providedCanonical } = Astro.props;
 const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
-const canonicalURL = providedCanonical || new URL(Astro.url.pathname, Astro.site || Astro.url.origin);
+const siteOrigin = Astro.site ? Astro.site.toString().replace(/\/$/, '') : Astro.url.origin;
+const rawPath = Astro.url.pathname.endsWith('/') ? Astro.url.pathname : `${Astro.url.pathname}/`;
+const canonicalURL = providedCanonical || new URL(rawPath, siteOrigin);
+const ogImageURL = new URL('/android-chrome-192x192.png', siteOrigin).toString();
 
 const activeTool = ALL_TOOLS.find(t => t.href.replace(/\/$/, '') === currentPath);
 
@@ -56,11 +59,12 @@ const schema = {
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonicalURL} />
-    <meta property="og:image" content="/android-chrome-192x192.png" />
+    <meta property="og:image" content={ogImageURL} />
     
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageURL} />
 
     <script type="application/ld+json" set:html={JSON.stringify(schema)} />
 

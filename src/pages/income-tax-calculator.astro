@@ -7,9 +7,11 @@ import { TAX_YEAR_CONFIG } from '../config/taxYears.js';
 
 const { CURRENT_APP_YEAR } = TAX_YEAR_CONFIG;
 
+export const prerender = true;
+
 const title = `[${CURRENT_APP_YEAR}] Canadian Income Tax & Take-Home Pay Calculator | LoonieFi`;
 const description = `Calculate your ${CURRENT_APP_YEAR} Canadian federal and provincial income tax, CPP, and EI deductions. See your monthly and bi-weekly take-home pay with our privacy-first tool.`;
-const canonicalURL = new URL('/income-tax-calculator', Astro.site || Astro.url.origin);
+const canonicalURL = new URL('/income-tax-calculator/', Astro.site || Astro.url.origin);
 
 const breadcrumbPath = [
   { label: 'Income Tax', href: Astro.url.pathname }

@@ -27,11 +27,14 @@ const DATA_SOURCES = [
     text: `Food inflation data is sourced from the 'Canada's Food Price Report ${CURRENT_APP_YEAR}' (Dalhousie University/University of Guelph), adjusted for provincial CPI variations.`
   }
 ];
+export const prerender = true;
+const canonicalURL = new URL('/about/', Astro.site || Astro.url.origin);
 ---
 
 <BaseLayout 
   title="About LoonieFi" 
   description="LoonieFi provides privacy-first, open-source financial calculators for Canadians."
+  canonicalURL={canonicalURL}
 >
   
   <main class="max-w-4xl mx-auto px-6 py-12 md:py-20 animate-fade-in">

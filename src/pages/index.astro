@@ -2,6 +2,8 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { ALL_TOOLS, TOOL_CATEGORIES } from '../config/navigation';
 
+export const prerender = true;
+
 interface Props {}
 
 const title = "Canadian Financial & Family Calculators | LoonieFi";
@@ -32,7 +34,7 @@ const softwareSchema = {
 };
 ---
 
-<BaseLayout title={title} description={description}>
+<BaseLayout canonicalURL={canonicalURL} title={title} description={description}>
   <script type="application/ld+json" set:html={JSON.stringify(homepageSchema)} />
   <script type="application/ld+json" set:html={JSON.stringify(softwareSchema)} />
   

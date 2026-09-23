@@ -9,27 +9,27 @@ import { PostHogProviderWrapper } from '../components/PostHogProviderWrapper.jsx
 
 interface Props {}
 
+Astro.response.status = 404;
+Astro.response.statusText = 'Not Found';
+
 const SITE_TITLE = "Page Not Found | LoonieFi";
 const SITE_DESCRIPTION = "The page you're looking for doesn't exist. Return to LoonieFi calculators.";
-const canonicalURL = new URL('/404', Astro.site || Astro.url.origin);
 ---
 
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    {/* FIXED: Allowed zooming */}
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, follow" />
     <title>{SITE_TITLE}</title>
     <meta name="description" content={SITE_DESCRIPTION} />
-    <link rel="canonical" href={canonicalURL} />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     
     {/* Open Graph Tags */}
     <meta property="og:type" content="website" />
     <meta property="og:title" content={SITE_TITLE} />
     <meta property="og:description" content={SITE_DESCRIPTION} />
-    <meta property="og:url" content={canonicalURL} />
     
     {/* Twitter Card Tags */}
     <meta name="twitter:card" content="summary" />

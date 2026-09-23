@@ -6,14 +6,14 @@ export const prerender = true;
 
 const title = "Browse Mortgage Payments by Province and Home Price | LoonieFi";
 const description = "Compare mortgage payments, total interest, and Land Transfer Taxes across all Canadian provinces for various home prices.";
-const canonicalURL = new URL('/calculator/mortgage/browse', Astro.site || Astro.url.origin);
+const canonicalURL = new URL('/calculator/mortgage/browse/', Astro.site || Astro.url.origin);
 
 // Representative home prices to show in the browse grid
 const samplePrices = [400000, 600000, 800000, 1000000, 1250000, 1500000];
 const formatter = new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD', maximumFractionDigits: 0 });
 ---
 
-<BaseLayout title={title} description={description}>
+<BaseLayout canonicalURL={canonicalURL} title={title} description={description}>
   <main class="bg-slate-50 min-h-screen">
     <section class="max-w-6xl mx-auto px-6 py-16 md:py-24">
       <header class="mb-16 text-center">

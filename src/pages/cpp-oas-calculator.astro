@@ -12,9 +12,11 @@ const { CURRENT_APP_YEAR, CPP, OAS } = TAX_YEAR_CONFIG;
 
 interface Props {}
 
+export const prerender = true;
+
 const title = `Canada Pension Plan (CPP) Calculator [${CURRENT_APP_YEAR}] | LoonieFi`;
 const description = `Estimate your monthly CPP retirement payments. Free Canadian pension calculator adjusted for ${CURRENT_APP_YEAR} maximums and child rearing provisions.`;
-const canonicalURL = new URL('/cpp-oas-calculator', Astro.site || Astro.url.origin);
+const canonicalURL = new URL('/cpp-oas-calculator/', Astro.site || Astro.url.origin);
 
 const softwareSchema = {
   "@context": "https://schema.org",

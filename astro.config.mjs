@@ -22,7 +22,29 @@ export default defineConfig({
       remarkPlugins: [],
       rehypePlugins: [],
     }),
-    sitemap(),
+    sitemap({
+      filter: (page) => {
+        // Exclude redirect routes, embed widgets, and 404
+        if (
+          page === 'https://looniefi.ca/calculator/' ||
+          page === 'https://looniefi.ca/blog/grocery-inflation/' ||
+          page.includes('/calculator/grocery-inflation/') ||
+          page.includes('/embed/') ||
+          page.includes('/404')
+        ) {
+          return false;
+        }
+        // Exclude programmatic child scenarios that canonicalize to root calculators
+        // Keep browse hubs (/calculator/*/browse/) and budget tool (/calculator/budget/)
+        if (page.includes('/calculator/')) {
+          if (page.includes('/browse/') || page === 'https://looniefi.ca/calculator/budget/') {
+            return true;
+          }
+          return false;
+        }
+        return true;
+      },
+    }),
   ],
 
   output: 'server',

@@ -9,7 +9,7 @@ export const prerender = true;
 
 const title = `[${CURRENT_APP_YEAR}] Browse Smith Manoeuvre Scenarios by Province | LoonieFi`;
 const description = `Compare Smith Manoeuvre tax deductions, investment loan growth, and mortgage paydown acceleration across all Canadian provinces for various home prices in ${CURRENT_APP_YEAR}.`;
-const canonicalURL = new URL('/calculator/smith-manoeuvre/browse', Astro.site || Astro.url.origin);
+const canonicalURL = new URL('/calculator/smith-manoeuvre/browse/', Astro.site || Astro.url.origin);
 
 // Representative home prices to show in the browse grid
 const samplePrices = [400000, 600000, 800000, 1000000, 1250000, 1500000];

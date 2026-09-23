@@ -7,13 +7,17 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import WidgetConfigurator from '../components/widgets/WidgetConfigurator.jsx';
 import { ArrowRightIcon, SparklesIcon, FileTextIcon, TrendingUpIcon } from '../components/shared/Icons.jsx';
 
+export const prerender = true;
+
 const title = "Free Mortgage Calculator Widget & Embed Code for Websites";
 const description = "Embed a beautiful, responsive, and free Canadian mortgage calculator or income tax calculator on your website. Get the HTML embed code for WordPress, Webflow, or Squarespace.";
+const canonicalURL = new URL('/widgets/', Astro.site || Astro.url.origin);
 ---
 
 <BaseLayout 
   title={title} 
   description={description}
+  canonicalURL={canonicalURL}
 >
   <div class="relative overflow-hidden bg-slate-900 text-white py-20 pb-32">
     {/* Decorative background elements */}

@@ -10,13 +10,17 @@ import { TAX_YEAR_CONFIG } from '../config/taxYears.js';
 
 const { CURRENT_APP_YEAR } = TAX_YEAR_CONFIG;
 
+export const prerender = true;
+
 const title = `[${CURRENT_APP_YEAR}] Canadian Mortgage Calculator | Accelerated Paydown Tool`;
 const description = `Calculate your ${CURRENT_APP_YEAR} Canadian mortgage payments with semi-annual compounding. Explore how lump sum payments and increased monthly contributions can save you thousands in interest and years off your mortgage.`;
+const canonicalURL = new URL('/mortgage-calculator/', Astro.site || Astro.url.origin);
 ---
 
 <BaseLayout 
   title={title} 
   description={description}
+  canonicalURL={canonicalURL}
 >
   <script type="application/ld+json" set:html={JSON.stringify({
     "@context": "https://schema.org",

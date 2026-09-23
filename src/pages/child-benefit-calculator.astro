@@ -1,4 +1,6 @@
 ---
+export const prerender = true;
+
 /**
  * Child Benefit Calculator Page
  * Main page for the Canada Child Benefit calculator
@@ -14,7 +16,7 @@ interface Props {}
 
 const title = `Canada Child Benefit (CCB) Calculator [${CURRENT_APP_YEAR}] | LoonieFi`;
 const description = `Estimate your exact ${CURRENT_APP_YEAR} Canada Child Benefit payments instantly. Free, fast calculator for Canadian parents to check monthly CCB based on family net income.`;
-const canonicalURL = new URL('/child-benefit-calculator', Astro.site || Astro.url.origin);
+const canonicalURL = new URL('/child-benefit-calculator/', Astro.site || Astro.url.origin);
 
 const softwareSchema = {
   "@context": "https://schema.org",

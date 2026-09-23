@@ -6,11 +6,14 @@ import { TAX_YEAR_CONFIG } from '../config/taxYears.js';
 
 const { CURRENT_APP_YEAR } = TAX_YEAR_CONFIG;
 
+export const prerender = true;
+
 const title = `[${CURRENT_APP_YEAR}] RESP Calculator: Maximize Your Education Savings | LoonieFi`;
 const description = `Calculate your projected ${CURRENT_APP_YEAR} Registered Education Savings Plan (RESP) balance. Plan for CESG grants, CLB eligibility, and provincial incentives in Canada.`;
+const canonicalURL = new URL('/resp-calculator/', Astro.site || Astro.url.origin);
 ---
 
-<BaseLayout title={title} description={description}>
+<BaseLayout canonicalURL={canonicalURL} title={title} description={description}>
     <script type="application/ld+json" set:html={JSON.stringify({
       "@context": "https://schema.org",
       "@type": "FAQPage",
