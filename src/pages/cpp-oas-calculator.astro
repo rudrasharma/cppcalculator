@@ -39,10 +39,18 @@ const faqSchema = {
   "mainEntity": [
     {
       "@type": "Question",
-      "name": `What is the maximum CPP benefit for ${CURRENT_APP_YEAR}?`,
+      "name": `What is the maximum CPP benefit at age 65 for ${CURRENT_APP_YEAR}?`,
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": `For ${CURRENT_APP_YEAR}, the maximum monthly CPP benefit at age 65 is approximately $${CPP.MAX_MONTHLY_BENEFIT.toLocaleString()}. This depends on your contributions throughout your working life and the Year's Maximum Pensionable Earnings (YMPE).`
+        "text": `For ${CURRENT_APP_YEAR}, the maximum Canada Pension Plan (CPP) retirement pension at age 65 is $${CPP.MAX_MONTHLY_BENEFIT.toLocaleString()} per month ($${(CPP.MAX_MONTHLY_BENEFIT * 12).toLocaleString()} annually). However, the average monthly payment received by new retirees is approximately $831.92, depending on individual lifetime contributions and Year's Maximum Pensionable Earnings (YMPE).`
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does your age affect your CPP payment amount?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "If you take CPP early at age 60, your payment is permanently reduced by 36% (0.6% per month before 65). If you delay until age 70, your payment permanently increases by 42% (0.7% per month after 65)."
       }
     }
   ]
@@ -75,6 +83,56 @@ const faqSchema = {
       </header>
 
       <Calculator client:load isVisible={true} />
+
+      {/* SEO & FEATURED SNIPPET CONTENT SECTION */}
+      <section class="max-w-4xl mx-auto px-4 py-16 text-slate-700 leading-relaxed text-sm">
+        <div class="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm space-y-8">
+          <div>
+            <h2 class="text-2xl font-black text-slate-900 tracking-tight mb-4">
+              What is the Maximum CPP Benefit at Age 65 in {CURRENT_APP_YEAR}?
+            </h2>
+            <p class="text-base text-slate-600 leading-relaxed mb-6">
+              For {CURRENT_APP_YEAR}, the maximum Canada Pension Plan (CPP) retirement pension at age 65 is <strong>${CPP.MAX_MONTHLY_BENEFIT.toLocaleString()} per month</strong> (${(CPP.MAX_MONTHLY_BENEFIT * 12).toLocaleString()} annually). However, the average monthly payment received by new Canadian retirees is approximately <strong>$831.92</strong>, depending on individual lifetime contributions, contributory years, and Year's Maximum Pensionable Earnings (YMPE).
+            </p>
+
+            <div class="overflow-x-auto rounded-2xl border border-slate-100 bg-slate-50">
+              <table class="w-full text-left text-xs text-slate-600">
+                <thead class="bg-slate-100 text-slate-700 font-bold uppercase tracking-wider text-[11px]">
+                  <tr>
+                    <th class="p-3">Retirement Age</th>
+                    <th class="p-3">Benefit Adjustment</th>
+                    <th class="p-3">Est. {CURRENT_APP_YEAR} Max Monthly</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                  <tr>
+                    <td class="p-3 font-bold text-slate-900">Age 60 (Earliest)</td>
+                    <td class="p-3 text-rose-600 font-medium">-36% (0.6% / month before 65)</td>
+                    <td class="p-3 font-semibold">${(CPP.MAX_MONTHLY_BENEFIT * 0.64).toFixed(2)}</td>
+                  </tr>
+                  <tr>
+                    <td class="p-3 font-bold text-slate-900">Age 65 (Standard)</td>
+                    <td class="p-3 text-slate-600 font-medium">100% (Baseline standard)</td>
+                    <td class="p-3 font-semibold">${CPP.MAX_MONTHLY_BENEFIT.toLocaleString()}</td>
+                  </tr>
+                  <tr>
+                    <td class="p-3 font-bold text-slate-900">Age 70 (Maximum)</td>
+                    <td class="p-3 text-emerald-600 font-medium">+42% (0.7% / month after 65)</td>
+                    <td class="p-3 font-semibold">${(CPP.MAX_MONTHLY_BENEFIT * 1.42).toFixed(2)}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="border-t border-slate-100 pt-6 space-y-4">
+            <h3 class="text-lg font-bold text-slate-900">How Your CPP Benefit is Calculated</h3>
+            <p class="text-slate-600">
+              Your actual CPP payment depends on how much you contributed to the plan between age 18 and the time you start your pension. Service Canada automatically drops your lowest 17% of earning years (up to 8 years) from the calculation under the General Dropout provision, as well as years with lower earnings while raising young children under the Child Rearing Provision.
+            </p>
+          </div>
+        </div>
+      </section>
     </section>
   </main>
 </BaseLayout>

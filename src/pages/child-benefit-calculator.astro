@@ -107,14 +107,57 @@ const faqSchema = {
   </section>
 
   {/* SEO CONTENT SECTION */}
-  <section class="max-w-3xl mx-auto px-6 py-12 text-slate-600 leading-relaxed text-sm">
-    <h2 class="text-lg font-bold text-slate-900 mb-4">When do CCB payments change?</h2>
-    <p class="mb-4">
-      The Canada Child Benefit (CCB) is recalculated every July based on your "Adjusted Family Net Income" (AFNI) from the previous year's tax return. For example, payments starting in <strong>July {CURRENT_APP_YEAR}</strong> are based on your <strong>{parseInt(CURRENT_APP_YEAR) - 1} Tax Return</strong>.
-    </p>
-    <p>
-      This calculator uses the latest indexation rates (announced late {parseInt(CURRENT_APP_YEAR) - 1}) to forecast exactly how much your family will receive in the upcoming benefit year.
-    </p>
+  <section class="max-w-4xl mx-auto px-6 py-12 text-slate-700 leading-relaxed text-sm">
+    <div class="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm space-y-8">
+      <div>
+        <h2 class="text-2xl font-black text-slate-900 tracking-tight mb-4">
+          How Much is the Canada Child Benefit (CCB) in {CURRENT_APP_YEAR}?
+        </h2>
+        <p class="text-base text-slate-600 leading-relaxed mb-6">
+          For the {CURRENT_APP_YEAR} benefit year, the maximum Canada Child Benefit (CCB) is <strong>${CCB.MAX_UNDER_6.toLocaleString()} per year (${(CCB.MAX_UNDER_6 / 12).toFixed(2)}/month)</strong> for each eligible child under age 6, and <strong>${CCB.MAX_6_TO_17.toLocaleString()} per year (${(CCB.MAX_6_TO_17 / 12).toFixed(2)}/month)</strong> for each child aged 6 to 17. Benefit amounts begin phasing out when your Adjusted Family Net Income (AFNI) exceeds ${CCB.THRESHOLD_1.toLocaleString()}.
+        </p>
+
+        <div class="overflow-x-auto rounded-2xl border border-slate-100 bg-slate-50 mb-8">
+          <table class="w-full text-left text-xs text-slate-600">
+            <thead class="bg-slate-100 text-slate-700 font-bold uppercase tracking-wider text-[11px]">
+              <tr>
+                <th class="p-3">Child Age Bracket</th>
+                <th class="p-3">Max Annual Benefit</th>
+                <th class="p-3">Max Monthly Cheque</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              <tr>
+                <td class="p-3 font-bold text-slate-900">Under 6 Years Old</td>
+                <td class="p-3 font-semibold text-emerald-600">${CCB.MAX_UNDER_6.toLocaleString()}</td>
+                <td class="p-3 font-semibold">${(CCB.MAX_UNDER_6 / 12).toFixed(2)}</td>
+              </tr>
+              <tr>
+                <td class="p-3 font-bold text-slate-900">Ages 6 to 17 Years Old</td>
+                <td class="p-3 font-semibold text-slate-700">${CCB.MAX_6_TO_17.toLocaleString()}</td>
+                <td class="p-3 font-semibold">${(CCB.MAX_6_TO_17 / 12).toFixed(2)}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-slate-100">
+        <div class="space-y-2">
+          <h3 class="text-base font-bold text-slate-900">When Do CCB Payments Recalculate?</h3>
+          <p class="text-slate-600 text-xs leading-relaxed">
+            The CCB is recalculated every July based on your family's prior-year tax return. For example, payments starting in <strong>July {CURRENT_APP_YEAR}</strong> are calculated using your <strong>{parseInt(CURRENT_APP_YEAR) - 1} Tax Return</strong> filed with the CRA.
+          </p>
+        </div>
+
+        <div class="space-y-2">
+          <h3 class="text-base font-bold text-slate-900">What is the Phase-Out Threshold?</h3>
+          <p class="text-slate-600 text-xs leading-relaxed">
+            Families with an Adjusted Family Net Income (AFNI) below <strong>${CCB.THRESHOLD_1.toLocaleString()}</strong> receive the maximum payment. Above this threshold, benefits are gradually reduced based on family income and the number of qualifying children.
+          </p>
+        </div>
+      </div>
+    </div>
   </section>
 
 </BaseLayout>
