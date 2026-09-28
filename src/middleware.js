@@ -8,18 +8,12 @@ export const onRequest = defineMiddleware(async ({ request }, next) => {
     const posthogPath = url.pathname.replace(/^\/ingest/, '');
     const posthogUrl = new URL(posthogPath + url.search, 'https://us.i.posthog.com');
     
-    // Copy the original headers
-    const headers = new Headers(request.headers);
-    headers.set('Host', 'us.i.posthog.com');
-    
     // Proxy the request
     try {
-      const response = await fetch(posthogUrl.toString(), {
-        method: request.method,
-        headers: headers,
-        body: request.method !== 'GET' && request.method !== 'HEAD' ? request.body : undefined,
-        duplex: 'half', // Needed for proxying bodies in some environments
-      });
+      const newRequest = new Request(posthogUrl.toString(), request);
+      newRequest.headers.set('X-Forwarded-For', request.headers.get('CF-Connecting-IP') || '');
+      
+      const response = await fetch(newRequest);
       
       return response;
     } catch (error) {
