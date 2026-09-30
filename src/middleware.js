@@ -5,7 +5,10 @@ export const onRequest = defineMiddleware(async ({ request }, next) => {
   console.log('[MIDDLEWARE] Incoming request:', request.method, url.pathname);
   
   if (url.pathname.startsWith('/ingest/')) {
-    const posthogPath = url.pathname.replace(/^\/ingest/, '');
+    let posthogPath = url.pathname.replace(/^\/ingest/, '');
+    if (posthogPath.endsWith('/')) {
+      posthogPath = posthogPath.slice(0, -1);
+    }
     const posthogUrl = new URL(posthogPath + url.search, 'https://us.i.posthog.com');
     console.log('[MIDDLEWARE] PostHog URL:', posthogUrl.toString());
     
