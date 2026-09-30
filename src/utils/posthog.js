@@ -4,7 +4,8 @@ const POSTHOG_KEY = import.meta.env.PUBLIC_POSTHOG_KEY;
 
 if (typeof window !== 'undefined' && POSTHOG_KEY) {
   posthog.init(POSTHOG_KEY, {
-    api_host: '/ingest',
+    api_host: 'https://us.i.posthog.com',
+    ui_host: 'https://us.posthog.com',
     autocapture: true,
     capture_pageview: false, // Handle manually to support Astro View Transitions
   });
