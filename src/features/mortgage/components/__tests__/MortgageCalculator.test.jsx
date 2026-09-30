@@ -35,6 +35,18 @@ jest.mock('recharts', () => {
 });
 
 describe('MortgageCalculator Component State', () => {
+    beforeEach(() => {
+        global.fetch = jest.fn(() => 
+            Promise.resolve({
+                ok: true,
+                json: () => Promise.resolve({ observations: [] })
+            })
+        );
+    });
+
+    afterEach(() => {
+        jest.restoreAllMocks();
+    });
     
     it('restricts amortization options to max 25 years when down payment is < 20%', () => {
         render(<MortgageCalculator />);

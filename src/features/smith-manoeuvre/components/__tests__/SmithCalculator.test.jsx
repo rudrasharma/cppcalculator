@@ -35,9 +35,9 @@ jest.mock('recharts', () => {
         Legend: () => <div />,
         ReferenceLine: () => <div />,
         Label: () => <div />,
-        linearGradient: 'linearGradient',
-        defs: 'defs',
-        stop: 'stop'
+        linearGradient: () => <div />,
+        defs: () => <div />,
+        stop: () => <div />
     };
 });
 
@@ -54,9 +54,19 @@ describe('SmithCalculator Component State', () => {
     beforeEach(() => {
         delete window.location;
         window.location = new URL('http://localhost');
+        global.fetch = jest.fn(() => 
+            Promise.resolve({
+                ok: true,
+                json: () => Promise.resolve({ observations: [] })
+            })
+        );
     });
 
-    it.skip('renders inputs and recalculates on change', async () => {
+    afterEach(() => {
+        jest.restoreAllMocks();
+    });
+
+    it('renders inputs and recalculates on change', async () => {
         render(<SmithCalculator />);
         
         // Let's assume there is an input for Home Value. 
@@ -86,7 +96,7 @@ describe('SmithCalculator Component State', () => {
         });
     });
 
-    it.skip('toggles strategy presets', async () => {
+    it('toggles strategy presets', async () => {
         render(<SmithCalculator />);
         
         // The preset buttons
