@@ -9,8 +9,7 @@ import { PostHogProviderWrapper } from '../components/PostHogProviderWrapper.jsx
 
 interface Props {}
 
-Astro.response.status = 404;
-Astro.response.statusText = 'Not Found';
+export const prerender = true;
 
 const SITE_TITLE = "Page Not Found | LoonieFi";
 const SITE_DESCRIPTION = "The page you're looking for doesn't exist. Return to LoonieFi calculators.";
