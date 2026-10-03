@@ -46,7 +46,7 @@ export default function WaitlistBanner() {
           <>
             <div className="flex items-center gap-2 font-medium text-center sm:text-left">
               <span className="hidden sm:inline">🚀</span>
-              <span>Want to save your data across devices? Join the LoonieFi Plus waitlist.</span>
+              <span>Don't lose your work when you close this tab. Get early access to save your scenarios with LoonieFi Plus.</span>
             </div>
 
             <form onSubmit={handleSubmit} className="flex w-full sm:w-auto items-center gap-2">
