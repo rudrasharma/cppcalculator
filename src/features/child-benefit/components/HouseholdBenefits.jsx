@@ -40,16 +40,16 @@ export default function HouseholdBenefits({
             try {
                 return urlC.split('_').map((str, idx) => {
                     const [age, dis] = str.split('-');
-                    return { id: Date.now() + idx, age: parseInt(age) || 0, disability: dis === '1' };
+                    return { id: idx + 1, age: parseInt(age) || 0, disability: dis === '1' };
                 });
             } catch(e) { return [{ id: 1, age: 3, disability: false }]; }
         }
         if (memory.children?.length > 0) {
-            return memory.children.map((c, i) => ({ id: Date.now() + i, age: c.age, disability: c.disability || false }));
+            return memory.children.map((c, i) => ({ id: i + 1, age: c.age, disability: c.disability || false }));
         }
         const kids = [];
         for(let i=0; i < initialChildCount; i++) {
-            kids.push({ id: Date.now() + i, age: i * 2 + 1, disability: false });
+            kids.push({ id: i + 1, age: i * 2 + 1, disability: false });
         }
         return kids;
     });

@@ -87,6 +87,27 @@ test.describe('Phase 2: Critical Path E2E Testing', () => {
         await expect(page.locator('text=/\\$\\d+,\\d{3}/').first()).toBeVisible();
     });
 
+    test('Child Benefit page maintains minimal Cumulative Layout Shift (CLS < 0.1)', async ({ page }) => {
+        await page.addInitScript(() => {
+            window.__cls = 0;
+            const observer = new PerformanceObserver((list) => {
+                for (const entry of list.getEntries()) {
+                    if (!entry.hadRecentInput) {
+                        window.__cls += entry.value;
+                    }
+                }
+            });
+            observer.observe({ type: 'layout-shift', buffered: true });
+        });
+
+        await page.goto('/child-benefit-calculator/');
+        await page.waitForLoadState('networkidle');
+        await page.waitForTimeout(500);
+
+        const cls = await page.evaluate(() => window.__cls);
+        expect(cls).toBeLessThan(0.1);
+    });
+
     test('Parental Leave Journey', async ({ page }) => {
         await page.goto('/parental-leave-calculator/');
         await page.waitForLoadState('networkidle');

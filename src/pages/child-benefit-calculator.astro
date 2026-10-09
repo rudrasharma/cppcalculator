@@ -84,8 +84,8 @@ const faqSchema = {
   </header>
 
   {/* REACT COMPONENT */}
-  <main class="flex-grow flex flex-col justify-center w-full animate-fade-in">
-    <HouseholdBenefits client:only="react" isVisible={true} />
+  <main class="flex-grow flex flex-col justify-center w-full animate-fade-in min-h-[600px]">
+    <HouseholdBenefits client:load isVisible={true} />
   </main>
 
   {/* pSEO LINK SECTION */}
