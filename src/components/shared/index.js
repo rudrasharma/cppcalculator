@@ -6,6 +6,7 @@ export { Tooltip } from './Tooltip';
 export { Accordion } from './Accordion';
 export { Button } from './Button';
 export { MoneyInput } from './MoneyInput';
+export { NumberStepper } from './NumberStepper';
 export { NativeSelect } from './NativeSelect';
 export { RangeSlider } from './RangeSlider';
 export { AICommandBar } from './ui/AICommandBar';

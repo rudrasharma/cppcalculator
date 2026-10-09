@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MoneyInput, InfoIcon } from '../../../components/shared';
+import { MoneyInput, NumberStepper, InfoIcon } from '../../../components/shared';
 
 export const PlannerInputs = ({ state, updateField, isMonteCarlo, setIsMonteCarlo, monteCarloProfile, setMonteCarloProfile }) => {
     const [activeTab, setActiveTab] = useState('applicant');
@@ -106,10 +106,15 @@ export const PlannerInputs = ({ state, updateField, isMonteCarlo, setIsMonteCarl
                                 <label className="block text-sm font-medium text-slate-700 mb-1">Target Annual Income (After-Tax)</label>
                                 <MoneyInput value={state.targetIncome} onChange={(val) => updateField('targetIncome', val)} placeholder="e.g. 60000" />
                             </div>
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">End Planning Age</label>
-                                <input type="number" min="60" max="110" value={state.endAge} onChange={(e) => updateField('endAge', parseInt(e.target.value) || 90)} className="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl focus:ring-indigo-500 focus:border-indigo-500 block p-3" />
-                            </div>
+                            <NumberStepper
+                                label="End Planning Age"
+                                value={state.endAge}
+                                onChange={(val) => updateField('endAge', val)}
+                                min={60}
+                                max={110}
+                                step={1}
+                                presets={[85, 90, 95, 100]}
+                            />
                         </>
                     )}
 
@@ -159,30 +164,36 @@ export const PlannerInputs = ({ state, updateField, isMonteCarlo, setIsMonteCarl
 
                     {showIndividual && (
                         <>
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">Current Age</label>
-                                <input type="number" min="18" max="80" value={pState.currentAge || 40} onChange={(e) => updatePField('currentAge', parseInt(e.target.value) || 40)} className="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl focus:ring-indigo-500 focus:border-indigo-500 block p-3" />
-                            </div>
+                            <NumberStepper
+                                label="Current Age"
+                                value={pState.currentAge || 40}
+                                onChange={(val) => updatePField('currentAge', val)}
+                                min={18}
+                                max={80}
+                                step={1}
+                            />
                             <div>
                                 <label className="block text-sm font-medium text-slate-700 mb-1">Current Working Income (Net)</label>
                                 <MoneyInput value={pState.workingIncome} onChange={(val) => updatePField('workingIncome', val)} placeholder="e.g. 60000" />
                             </div>
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">Start Retirement Age</label>
-                                <input type="number" min="30" max="80" value={pState.startAge} onChange={(e) => updatePField('startAge', parseInt(e.target.value) || 65)} className="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl focus:ring-indigo-500 focus:border-indigo-500 block p-3" />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1 flex items-center gap-1.5">
-                                    Years in Canada (at 65)
-                                    <div className="group relative flex items-center">
-                                        <InfoIcon className="w-3.5 h-3.5 text-slate-400 cursor-help" />
-                                        <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-64 p-2 bg-slate-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 shadow-xl font-normal text-center">
-                                            Number of years lived in Canada between age 18 and 65. Used to calculate eligible OAS amount.
-                                        </div>
-                                    </div>
-                                </label>
-                                <input type="number" min="0" max="47" value={pState.yearsInCanada ?? 40} onChange={(e) => updatePField('yearsInCanada', parseInt(e.target.value) || 0)} className="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl focus:ring-indigo-500 focus:border-indigo-500 block p-3" />
-                            </div>
+                            <NumberStepper
+                                label="Start Retirement Age"
+                                value={pState.startAge}
+                                onChange={(val) => updatePField('startAge', val)}
+                                min={30}
+                                max={80}
+                                step={1}
+                                presets={[55, 60, 65, 70]}
+                            />
+                            <NumberStepper
+                                label="Years in Canada (at 65)"
+                                value={pState.yearsInCanada ?? 40}
+                                onChange={(val) => updatePField('yearsInCanada', val)}
+                                min={0}
+                                max={47}
+                                step={1}
+                                tooltip="Number of years lived in Canada between age 18 and 65. Used to calculate eligible OAS amount (40 years = full OAS)."
+                            />
                         </>
                     )}
                 </div>
@@ -283,10 +294,15 @@ export const PlannerInputs = ({ state, updateField, isMonteCarlo, setIsMonteCarl
                                 <label className="block text-sm font-medium text-slate-700 mb-1">DB Pension (Annual)</label>
                                 <MoneyInput value={pState.pension.amount} onChange={(val) => updatePPension('pension', 'amount', val)} />
                             </div>
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">DB Pension Start Age</label>
-                                <input type="number" min="50" max="75" value={pState.pension.startAge} onChange={(e) => updatePPension('pension', 'startAge', parseInt(e.target.value) || 65)} className="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl focus:ring-indigo-500 focus:border-indigo-500 block p-3" />
-                            </div>
+                            <NumberStepper
+                                label="DB Pension Start Age"
+                                value={pState.pension.startAge}
+                                onChange={(val) => updatePPension('pension', 'startAge', val)}
+                                min={50}
+                                max={75}
+                                step={1}
+                                presets={[55, 60, 65]}
+                            />
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-slate-100 pt-6">
@@ -294,25 +310,28 @@ export const PlannerInputs = ({ state, updateField, isMonteCarlo, setIsMonteCarl
                                 <label className="block text-sm font-medium text-slate-700 mb-1">Expected CPP (Annual)</label>
                                 <MoneyInput value={pState.cpp.amount} onChange={(val) => updatePPension('cpp', 'amount', val)} />
                             </div>
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">CPP Start Age</label>
-                                <input type="number" min="60" max="70" value={pState.cpp.startAge} onChange={(e) => updatePPension('cpp', 'startAge', parseInt(e.target.value) || 65)} className="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl focus:ring-indigo-500 focus:border-indigo-500 block p-3" />
-                            </div>
+                            <NumberStepper
+                                label="CPP Start Age"
+                                value={pState.cpp.startAge}
+                                onChange={(val) => updatePPension('cpp', 'startAge', val)}
+                                min={60}
+                                max={70}
+                                step={1}
+                                presets={[60, 65, 70]}
+                            />
                         </div>
 
                         <div className="grid grid-cols-1 gap-4 border-t border-slate-100 pt-6">
-                            <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1 flex items-center gap-1.5">
-                                    OAS Start Age
-                                    <div className="group relative flex items-center">
-                                        <InfoIcon className="w-3.5 h-3.5 text-slate-400 cursor-help" />
-                                        <div className="absolute bottom-full mb-2 right-0 w-64 p-2 bg-slate-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 shadow-xl font-normal text-left">
-                                            Delaying OAS beyond 65 increases your benefit by 0.6% per month (7.2% per year), up to age 70.
-                                        </div>
-                                    </div>
-                                </label>
-                                <input type="number" min="65" max="70" value={pState.oas.startAge} onChange={(e) => updatePPension('oas', 'startAge', parseInt(e.target.value) || 65)} className="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl focus:ring-indigo-500 focus:border-indigo-500 block p-3" />
-                            </div>
+                            <NumberStepper
+                                label="OAS Start Age"
+                                value={pState.oas.startAge}
+                                onChange={(val) => updatePPension('oas', 'startAge', val)}
+                                min={65}
+                                max={70}
+                                step={1}
+                                presets={[65, 70]}
+                                tooltip="Delaying OAS beyond 65 increases your benefit by 0.6% per month (7.2% per year), up to age 70."
+                            />
                         </div>
                     </div>
                 </div>
@@ -330,40 +349,30 @@ export const PlannerInputs = ({ state, updateField, isMonteCarlo, setIsMonteCarl
                     </h3>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <NumberStepper
+                            label="Inflation Rate (%)"
+                            value={(state.inflation * 100).toFixed(1)}
+                            onChange={(val) => updateField('inflation', val / 100)}
+                            min={0}
+                            max={15}
+                            step={0.1}
+                            unit="%"
+                            inputMode="decimal"
+                            presets={[2.0, 2.5, 3.0]}
+                            tooltip="Expected annual CPI inflation. Spending, tax brackets, and pensions (CPP/OAS) escalate at this rate. Bank of Canada target is 2.0%."
+                        />
                         <div>
-                            <label className="flex items-center text-sm font-medium text-slate-700 mb-1 gap-1.5">
-                                Inflation Rate (%)
-                                <div className="group relative flex items-center">
-                                    <InfoIcon className="w-3.5 h-3.5 text-slate-400 cursor-help" />
-                                    <div className="absolute bottom-full mb-2 left-0 w-64 p-2 bg-slate-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 shadow-xl font-normal text-left">
-                                        Expected annual CPI inflation. Spending, tax brackets, and pensions (CPP/OAS) escalate at this rate. Bank of Canada target is 2.0%.
-                                    </div>
-                                </div>
-                            </label>
-                            <input 
-                                type="number" 
-                                step="0.1" 
-                                value={(state.inflation * 100).toFixed(1)} 
-                                onChange={(e) => updateField('inflation', (parseFloat(e.target.value) || 0) / 100)}
-                                className="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl focus:ring-indigo-500 focus:border-indigo-500 block p-3"
-                            />
-                        </div>
-                        <div>
-                            <label className="flex items-center text-sm font-medium text-slate-700 mb-1 gap-1.5">
-                                Expected Return (Nominal) (%)
-                                <div className="group relative flex items-center">
-                                    <InfoIcon className="w-3.5 h-3.5 text-slate-400 cursor-help" />
-                                    <div className="absolute bottom-full mb-2 right-0 sm:left-0 w-64 p-2 bg-slate-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 shadow-xl font-normal text-left">
-                                        Pre-inflation annual investment return (e.g. 5–7% for a balanced portfolio). Balances grow at this nominal rate.
-                                    </div>
-                                </div>
-                            </label>
-                            <input 
-                                type="number" 
-                                step="0.1" 
-                                value={(state.returnRate * 100).toFixed(1)} 
-                                onChange={(e) => updateField('returnRate', (parseFloat(e.target.value) || 0) / 100)}
-                                className="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl focus:ring-indigo-500 focus:border-indigo-500 block p-3"
+                            <NumberStepper
+                                label="Expected Return (Nominal) (%)"
+                                value={(state.returnRate * 100).toFixed(1)}
+                                onChange={(val) => updateField('returnRate', val / 100)}
+                                min={0}
+                                max={20}
+                                step={0.5}
+                                unit="%"
+                                inputMode="decimal"
+                                presets={[4.0, 5.0, 6.0, 7.0]}
+                                tooltip="Pre-inflation annual investment return (e.g. 5–7% for a balanced portfolio). Balances grow at this nominal rate."
                             />
                             <div className="flex items-center justify-between mt-1.5 px-0.5 text-xs">
                                 <span className="text-slate-500">Effective real return:</span>

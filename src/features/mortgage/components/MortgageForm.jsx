@@ -99,32 +99,32 @@ export const MortgageForm = ({ state, dispatch }) => {
                                     options={PROVINCE_OPTIONS}
                                 />
                             </div>
-                            <div className="flex flex-col justify-end gap-2">
+                            <div className="flex flex-col justify-end gap-1">
                                 {province === 'ON' && (
-                                    <label className="flex items-center gap-2 cursor-pointer group">
-                                        <div className="relative">
+                                    <label className="flex items-center gap-2.5 cursor-pointer group py-1.5 min-h-[44px]">
+                                        <div className="relative shrink-0">
                                             <input 
                                                 type="checkbox" 
                                                 className="sr-only peer" 
                                                 checked={isToronto}
                                                 onChange={(e) => dispatch({ type: 'SET_IS_TORONTO', payload: e.target.checked })}
                                             />
-                                            <div className="w-8 h-4 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-indigo-600"></div>
+                                            <div className="w-10 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-4 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all after:shadow-sm peer-checked:bg-indigo-600 transition-colors"></div>
                                         </div>
-                                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tight group-hover:text-slate-700 transition-colors">Inside Toronto</span>
+                                        <span className="text-xs font-bold text-slate-600 uppercase tracking-tight group-hover:text-slate-900 transition-colors">Inside Toronto</span>
                                     </label>
                                 )}
-                                <label className="flex items-center gap-2 cursor-pointer group">
-                                    <div className="relative">
+                                <label className="flex items-center gap-2.5 cursor-pointer group py-1.5 min-h-[44px]">
+                                    <div className="relative shrink-0">
                                         <input 
                                             type="checkbox" 
                                             className="sr-only peer" 
                                             checked={isFirstTimeBuyer}
                                             onChange={(e) => dispatch({ type: 'SET_IS_FIRST_TIME_BUYER', payload: e.target.checked })}
                                         />
-                                        <div className="w-8 h-4 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-indigo-600"></div>
+                                        <div className="w-10 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-4 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all after:shadow-sm peer-checked:bg-indigo-600 transition-colors"></div>
                                     </div>
-                                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tight group-hover:text-slate-700 transition-colors">First-Time Buyer</span>
+                                    <span className="text-xs font-bold text-slate-600 uppercase tracking-tight group-hover:text-slate-900 transition-colors">First-Time Buyer</span>
                                 </label>
                             </div>
                         </div>
@@ -247,17 +247,17 @@ export const MortgageForm = ({ state, dispatch }) => {
                                 <label className="text-xs font-black text-slate-700 block uppercase tracking-tighter">
                                     Interest Rate
                                 </label>
-                                <label className="flex items-center gap-1.5 cursor-pointer group">
-                                    <div className="relative">
+                                <label className="flex items-center gap-2 cursor-pointer group py-0.5">
+                                    <div className="relative shrink-0">
                                         <input 
                                             type="checkbox" 
                                             className="sr-only peer" 
                                             checked={showStressTest}
                                             onChange={(e) => dispatch({ type: 'SET_SHOW_STRESS_TEST', payload: e.target.checked })}
                                         />
-                                        <div className="w-6 h-3 bg-slate-200 rounded-full peer peer-checked:after:translate-x-[12px] after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-2 after:w-2 after:transition-all peer-checked:bg-rose-500"></div>
+                                        <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-4 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all after:shadow-xs peer-checked:bg-rose-500 transition-colors"></div>
                                     </div>
-                                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tight group-hover:text-slate-600 transition-colors">Stress Test</span>
+                                    <span className="text-[11px] font-bold text-slate-500 uppercase tracking-tight group-hover:text-slate-700 transition-colors">Stress Test</span>
                                 </label>
                             </div>
                             <div className="relative group">
@@ -265,6 +265,7 @@ export const MortgageForm = ({ state, dispatch }) => {
                                     type="text"
                                     inputMode="decimal"
                                     value={annualRate}
+                                    onFocus={(e) => e.target.select()}
                                     onChange={(e) => {
                                         const val = e.target.value;
                                         if (val === '' || /^\d*\.?\d*$/.test(val)) {

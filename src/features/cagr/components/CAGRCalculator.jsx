@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
 import { calculateRate, calculateFutureValue, calculatePresentValue, calculateDuration, generateGrowthSeries } from '../utils/cagrEngine';
-import { MoneyInput, TrendingUpIcon, RotateCcwIcon, InfoIcon, CalculatorIcon, ArrowRightIcon, ScaleIcon, TrendingDownIcon, NativeSelect, AICommandBar, StrategyCard, AICopilot, Accordion, ExternalLinkIcon, DollarSignIcon } from '../../../components/shared';
+import { MoneyInput, NumberStepper, TrendingUpIcon, RotateCcwIcon, InfoIcon, CalculatorIcon, ArrowRightIcon, ScaleIcon, TrendingDownIcon, NativeSelect, AICommandBar, StrategyCard, AICopilot, Accordion, ExternalLinkIcon, DollarSignIcon } from '../../../components/shared';
 import { useFinancialMemory } from '../../../hooks/useFinancialMemory';
 
 const MODES = {
@@ -110,12 +110,65 @@ export default function CAGRCalculator({ isVisible = true, initialStateOverride 
                             <div className="relative z-10 space-y-5">
                                 {mode !== 'START' && <MoneyInput label="Initial Investment" value={startValue} onChange={(val) => updateStartValue(parseFloat(val) || 0)} />}
                                 <div className={`relative z-10 pt-4 border-t border-slate-100 transition-all ${hasContribution ? 'bg-indigo-50/50 -mx-6 px-6 pb-6 -mb-6 border-t-indigo-100' : ''}`}>
-                                    <label className="flex items-center gap-3 cursor-pointer"><div className={`w-10 h-6 rounded-full p-1 transition-colors ${hasContribution ? 'bg-indigo-500' : 'bg-slate-300'}`}><div className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform ${hasContribution ? 'translate-x-4' : ''}`}></div></div><span className={`text-sm font-bold ${hasContribution ? 'text-indigo-700' : 'text-slate-500'}`}>Add Contributions</span><input type="checkbox" className="sr-only" checked={hasContribution} onChange={(e) => setHasContribution(e.target.checked)} /></label>
-                                    {hasContribution && <div className="animate-fade-in mt-4 space-y-4"><div className="grid grid-cols-2 gap-3"><div><label className="text-[10px] font-black text-indigo-700 block uppercase mb-1.5">Frequency</label><NativeSelect value={frequency} onChange={(e) => setFrequency(e.target.value)} options={FREQUENCIES} /></div><div><label className="text-[10px] font-black text-indigo-700 block uppercase mb-1.5">Amount</label><div className="relative"><span className="absolute left-3 top-1/2 -translate-y-1/2 text-indigo-400 text-xs font-bold">$</span><input type="number" value={contribution} onChange={(e) => setContribution(parseFloat(e.target.value) || 0)} className="w-full pl-6 pr-3 py-2.5 bg-white border-2 border-indigo-200 rounded-xl font-mono text-base font-black text-indigo-900" /></div></div></div></div>}
+                                    <label className="flex items-center gap-3 cursor-pointer py-1">
+                                        <div className="relative">
+                                            <input type="checkbox" className="sr-only peer" checked={hasContribution} onChange={(e) => setHasContribution(e.target.checked)} />
+                                            <div className={`w-11 h-6 rounded-full p-1 transition-colors ${hasContribution ? 'bg-indigo-600' : 'bg-slate-300'}`}>
+                                                <div className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform ${hasContribution ? 'translate-x-5' : ''}`}></div>
+                                            </div>
+                                        </div>
+                                        <span className={`text-sm font-bold ${hasContribution ? 'text-indigo-700' : 'text-slate-600'}`}>Add Contributions</span>
+                                    </label>
+                                    {hasContribution && (
+                                        <div className="animate-fade-in mt-4 space-y-4">
+                                            <div className="grid grid-cols-2 gap-3">
+                                                <div>
+                                                    <label className="text-[10px] font-black text-indigo-700 block uppercase mb-1.5">Frequency</label>
+                                                    <NativeSelect value={frequency} onChange={(e) => setFrequency(e.target.value)} options={FREQUENCIES} />
+                                                </div>
+                                                <div>
+                                                    <label className="text-[10px] font-black text-indigo-700 block uppercase mb-1.5">Amount</label>
+                                                    <div className="relative">
+                                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-indigo-400 text-xs font-bold">$</span>
+                                                        <input 
+                                                            type="number" 
+                                                            value={contribution} 
+                                                            onFocus={(e) => e.target.select()}
+                                                            onChange={(e) => setContribution(parseFloat(e.target.value) || 0)} 
+                                                            className="w-full pl-6 pr-3 py-2.5 bg-white border-2 border-indigo-200 rounded-xl font-mono text-base font-black text-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500" 
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                                 {mode !== 'FUTURE' && <MoneyInput label="Target Goal" value={endValue} onChange={(val) => setEndValue(parseFloat(val) || 0)} />}
-                                {mode !== 'RATE' && <div><label className="text-xs font-black text-slate-700 block uppercase mb-1.5">Annual Return (%)</label><div className="relative"><input type="number" step="0.1" value={rate} onChange={(e) => setRate(parseFloat(e.target.value) || 0)} className="w-full pl-4 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-2xl font-mono text-lg font-black text-slate-900" /><span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">%</span></div></div>}
-                                {mode !== 'TIME' && <div><label className="text-xs font-black text-slate-700 block uppercase mb-1.5">Time Period</label><div className="relative"><input type="number" min="0.1" step="0.5" value={years} onChange={(e) => setYears(parseFloat(e.target.value) || 0)} className="w-full pl-4 pr-16 py-3 bg-slate-50 border border-slate-200 rounded-2xl font-mono text-lg font-black text-slate-900" /><span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs uppercase">Years</span></div></div>}
+                                {mode !== 'RATE' && (
+                                    <NumberStepper
+                                        label="Annual Return (%)"
+                                        value={rate}
+                                        onChange={(val) => setRate(val)}
+                                        min={0}
+                                        max={100}
+                                        step={0.5}
+                                        unit="%"
+                                        inputMode="decimal"
+                                        presets={[5, 7, 8, 10]}
+                                    />
+                                )}
+                                {mode !== 'TIME' && (
+                                    <NumberStepper
+                                        label="Time Period"
+                                        value={years}
+                                        onChange={(val) => setYears(val)}
+                                        min={1}
+                                        max={60}
+                                        step={1}
+                                        unit="Years"
+                                        presets={[5, 10, 15, 20, 25, 30]}
+                                    />
+                                )}
                             </div>
                         </div>
                     </div>

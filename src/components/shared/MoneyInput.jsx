@@ -42,6 +42,7 @@ export const MoneyInput = React.memo(({
                     thousandSeparator={true}
                     decimalScale={2}
                     allowNegative={false}
+                    onFocus={(e) => e.target.select()}
                     className="w-full pl-8 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl font-mono text-lg font-black focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all shadow-sm hover:border-slate-300 text-slate-900"
                     {...rest}
                 />
