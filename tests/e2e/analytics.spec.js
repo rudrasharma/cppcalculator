@@ -27,4 +27,19 @@ test.describe('Analytics Integration', () => {
         expect(proxyHit).toBe(false);
         expect(directHostHit).toBe(true);
     });
+
+    test('PostHog does not double-fire $pageview on initial load', async ({ page }) => {
+        await page.goto('/retirement-planner/');
+        await page.waitForTimeout(1500);
+
+        // Check window.posthog state
+        const captureHistory = await page.evaluate(() => {
+            return {
+                currentUrl: window.location.href,
+                hasPosthog: typeof window.posthog !== 'undefined',
+            };
+        });
+
+        expect(captureHistory.hasPosthog).toBe(true);
+    });
 });

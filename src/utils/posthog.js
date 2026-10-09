@@ -10,21 +10,25 @@ if (typeof window !== 'undefined' && POSTHOG_KEY) {
     capture_pageview: false, // Handle manually to support Astro View Transitions
   });
 
-  let initialLoadFired = false;
+  window.posthog = posthog;
 
-  // Track page views on Astro View Transitions
-  document.addEventListener('astro:page-load', () => {
+  let lastTrackedUrl = null;
+  const capturePageviewOnce = () => {
+    const currentUrl = window.location.href;
+    if (lastTrackedUrl === currentUrl) return;
+    lastTrackedUrl = currentUrl;
     posthog.capture('$pageview');
-    initialLoadFired = true;
-  });
+  };
 
-  // If astro:page-load already fired before this script was evaluated (due to React lazy hydration),
-  // capture the initial pageview now.
-  setTimeout(() => {
-    if (!initialLoadFired) {
-      posthog.capture('$pageview');
-    }
-  }, 100);
+  // Track page views on Astro View Transitions navigation
+  document.addEventListener('astro:page-load', capturePageviewOnce);
+
+  // If astro:page-load has already fired before React hydration or DOM is already ready
+  if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    capturePageviewOnce();
+  } else {
+    window.addEventListener('DOMContentLoaded', capturePageviewOnce, { once: true });
+  }
 }
 
 export default posthog;
